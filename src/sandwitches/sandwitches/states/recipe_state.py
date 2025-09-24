@@ -1,5 +1,5 @@
 import reflex as rx
-from typing import TypedDict
+from typing import TypedDict, Optional
 
 
 class Recipe(TypedDict):
@@ -18,7 +18,48 @@ class RecipeState(rx.State):
 
     @rx.event
     def load_recipes(self):
-        pass
+        if not self.recipes:
+            self.recipes = [
+                {
+                    "title": "Classic Club Sandwich",
+                    "description": "A timeless multi-layered sandwich, perfect for a hearty lunch.",
+                    "ingredients": "Toasted bread, Chicken or Turkey, Bacon, Lettuce, Tomato, Mayonnaise",
+                    "instructions": "1. Toast the bread. 2. Spread mayonnaise on one side of each slice. 3. Layer chicken/turkey, bacon, lettuce, and tomato. 4. Cut into quarters and serve.",
+                    "image_url": "https://www.lekkerensimpel.com/wp-content/uploads/2023/04/588A5318.jpg",
+                    "tags": ["classic", "chicken", "lunch"],
+                },
+                {
+                    "title": "Ultimate BLT Sandwich",
+                    "description": "The perfect combination of bacon, lettuce, and tomato.",
+                    "ingredients": "Bacon, Lettuce, Tomato, Bread, Mayonnaise",
+                    "instructions": "1. Cook bacon until crispy. 2. Toast bread and spread with mayonnaise. 3. Layer with bacon, lettuce, and tomato slices. 4. Slice in half and enjoy.",
+                    "image_url": "https://www.lekkerensimpel.com/wp-content/uploads/2023/04/588A5318.jpg",
+                    "tags": ["classic", "bacon", "simple"],
+                },
+                {
+                    "title": "Fresh Caprese Sandwich",
+                    "description": "A simple yet delicious vegetarian sandwich with the flavors of Italy.",
+                    "ingredients": "Ciabatta or Focaccia bread, Fresh Mozzarella, Tomatoes, Fresh Basil, Balsamic glaze, Olive oil",
+                    "instructions": "1. Slice the bread. 2. Layer mozzarella, tomato slices, and basil leaves. 3. Drizzle with olive oil and balsamic glaze. 4. Serve immediately.",
+                    "image_url": "https://www.lekkerensimpel.com/wp-content/uploads/2023/04/588A5318.jpg",
+                    "tags": ["vegetarian", "italian", "fresh"],
+                },
+            ]
+
+    @rx.var
+    def selected_recipe(self) -> Optional[Recipe]:
+        """Get the selected recipe from the page params."""
+        recipe_title = self.router.page.params.get("title", "no-recipe").replace(
+            "-", " "
+        )
+        return next(
+            (
+                recipe
+                for recipe in self.recipes
+                if recipe["title"].lower() == recipe_title.lower()
+            ),
+            None,
+        )
 
     @rx.var
     def all_tags(self) -> list[str]:

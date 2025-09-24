@@ -2,12 +2,17 @@ import reflex as rx
 from sandwitches.pages.index_page import index_page
 from sandwitches.pages.login_page import login_page
 from sandwitches.pages.admin_page import admin_page
+from sandwitches.pages.recipe_page import recipe_page
 from sandwitches.states.auth_state import AuthState
 from sandwitches.states.recipe_state import RecipeState
 
 
 def index() -> rx.Component:
     return index_page()
+
+
+def recipe() -> rx.Component:
+    return recipe_page()
 
 
 def login() -> rx.Component:
@@ -30,5 +35,6 @@ app = rx.App(
     ],
 )
 app.add_page(index, route="/", on_load=RecipeState.load_recipes)
+app.add_page(recipe, route="/recipe/[title]", on_load=RecipeState.load_recipes)
 app.add_page(login, route="/login")
 app.add_page(admin, route="/admin", on_load=AuthState.check_session)
