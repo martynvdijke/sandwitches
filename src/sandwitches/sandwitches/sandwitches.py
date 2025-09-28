@@ -35,6 +35,6 @@ app = rx.App(
     ],
 )
 app.add_page(index, route="/", on_load=RecipeState.load_recipes)
-app.add_page(recipe, route="/recipe/[title]", on_load=RecipeState.load_recipes)
+# app.add_page(recipe, route="/recipe/[title]", on_load=RecipeState.load_recipes)
 app.add_page(login, route="/login")
 app.add_page(admin, route="/admin", on_load=AuthState.check_session)

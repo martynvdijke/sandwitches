@@ -13,13 +13,13 @@ def get_image_src(image_url: str) -> rx.Var[str]:
 def recipe_card(recipe: Recipe) -> rx.Component:
     return rx.el.div(
         rx.image(
-            src=get_image_src(recipe["image_url"]),
+            src=get_image_src(recipe.image_url),
             class_name="w-full h-48 object-cover",
         ),
         rx.el.div(
             rx.el.div(
                 rx.foreach(
-                    recipe["tags"],
+                    recipe.tags,
                     lambda tag: rx.el.span(
                         tag,
                         class_name="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800",
@@ -27,11 +27,7 @@ def recipe_card(recipe: Recipe) -> rx.Component:
                 ),
                 class_name="flex flex-wrap mb-2",
             ),
-            rx.el.h3(recipe["title"], class_name="text-lg font-semibold text-gray-800"),
-            rx.el.p(
-                recipe["description"],
-                class_name="text-sm text-gray-600 mt-2 line-clamp-3",
-            ),
+            rx.el.h3(recipe.title, class_name="text-lg font-semibold text-gray-800"),
             class_name="p-4",
         ),
         class_name="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-300",

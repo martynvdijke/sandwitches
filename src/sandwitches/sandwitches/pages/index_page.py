@@ -48,7 +48,7 @@ def index_page() -> rx.Component:
                         class_name="flex items-center mb-8 flex-wrap",
                     ),
                     rx.el.div(
-                        rx.foreach(RecipeState.filtered_recipes, recipe_card),
+                        rx.foreach(RecipeState.recipes, recipe_card),
                         class_name="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8",
                     ),
                     class_name="container mx-auto",
