@@ -1,0 +1,62 @@
+{% extends "base_material.html" %}
+
+{% block title %}{{ recipe.title }} — Sandwitch{% endblock %}
+
+{% block content %}
+  <div class="section">
+    <div class="row">
+      <div class="col s12">
+        <a href="{% url 'index' %}" class="btn-flat blue-text text-darken-2">&larr; Back to all</a>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col s12 m8">
+        <div class="card">
+          <div class="card-image">
+            {% if recipe.image %}
+              <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+            {% else %}
+              <img src="https://picsum.photos/seed/{{ recipe.pk }}/900/400" alt="{{ recipe.title }}">
+            {% endif %}
+          </div>
+
+          <div class="card-content">
+            <span class="card-title">{{ recipe.title }}</span>
+            <p class="grey-text text-darken-1">{{ recipe.description|default:"No description" }}</p>
+
+            <h6 class="mt-4">Ingredients</h6>
+            <pre style="white-space:pre-wrap;">{{ recipe.ingredients|default:"No ingredients listed." }}</pre>
+
+            <h6 class="mt-3">Instructions</h6>
+            <pre style="white-space:pre-wrap;">{{ recipe.instructions|default:"No instructions yet." }}</pre>
+
+            <div style="margin-top:12px;">
+              {% for tag in recipe.tags.all %}
+                <div class="chip">{{ tag.name }}</div>
+              {% empty %}
+                <span class="grey-text">No tags</span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="card-action">
+            <a href="{% url 'recipes:recipe_detail' recipe.pk %}" class="blue-text">Permalink</a>
+            {% if user.is_authenticated and user.is_staff %}
+              <a href="{% url 'admin:app_list' 'sandwitches' %}" class="orange-text">Admin</a>
+              <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/" class="orange-text">Edit</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <aside class="col s12 m4">
+        <div class="card-panel">
+          <h6 class="mb-2">Meta</h6>
+          <p><strong>Created:</strong> {{ recipe.created_at|date:"SHORT_DATETIME_FORMAT" }}</p>
+          <p><strong>Updated:</strong> {{ recipe.updated_at|date:"SHORT_DATETIME_FORMAT" }}</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+{% endblock %}

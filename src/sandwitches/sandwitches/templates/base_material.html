@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+  <!-- Materialize CSS (CDN) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+  <style>
+    .card-image img { height: 180px; object-fit: cover; }
+    .chip { margin-right: 6px; margin-bottom: 6px; }
+    .search-row { margin-top: 18px; margin-bottom: 18px; }
+    .truncate-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  </style>
+{% endblock %}
+
+{% block navbar %}
+<nav class="blue-grey darken-3" role="navigation">
+  <div class="nav-wrapper container">
+    <a href="{% url 'index' %}" class="brand-logo">Sandwitches</a>
+    <ul id="nav-mobile" class="right hide-on-med-and-down">
+      {% if user.is_authenticated %}
+        <li><a href="{% url 'admin:index' %}">Admin</a></li>
+        <li><a href="{% url 'admin:logout' %}">Logout</a></li>
+      {% else %}
+        <li><a href="{% url 'admin:login' %}">Login</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>
+{% endblock %}
+
+{% block extra_scripts %}
+  <!-- Materialize JS (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      M.AutoInit();
+    });
+  </script>
+  {% block page_scripts %}{% endblock %}
+{% endblock %}
