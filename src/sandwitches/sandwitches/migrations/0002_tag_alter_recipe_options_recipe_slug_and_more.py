@@ -4,41 +4,54 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('sandwitches', '0001_initial'),
+        ("sandwitches", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Tag',
+            name="Tag",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, unique=True)),
-                ('slug', models.SlugField(blank=True, max_length=60, unique=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50, unique=True)),
+                ("slug", models.SlugField(blank=True, max_length=60, unique=True)),
             ],
             options={
-                'verbose_name': 'Tag',
-                'verbose_name_plural': 'Tags',
-                'ordering': ('name',),
+                "verbose_name": "Tag",
+                "verbose_name_plural": "Tags",
+                "ordering": ("name",),
             },
         ),
         migrations.AlterModelOptions(
-            name='recipe',
-            options={'ordering': ('-created_at',), 'verbose_name': 'Recipe', 'verbose_name_plural': 'Recipes'},
+            name="recipe",
+            options={
+                "ordering": ("-created_at",),
+                "verbose_name": "Recipe",
+                "verbose_name_plural": "Recipes",
+            },
         ),
         migrations.AddField(
-            model_name='recipe',
-            name='slug',
+            model_name="recipe",
+            name="slug",
             field=models.SlugField(blank=True, max_length=255, unique=True),
         ),
         migrations.RemoveField(
-            model_name='recipe',
-            name='tags',
+            model_name="recipe",
+            name="tags",
         ),
         migrations.AddField(
-            model_name='recipe',
-            name='tags',
-            field=models.ManyToManyField(blank=True, related_name='recipes', to='sandwitches.tag'),
+            model_name="recipe",
+            name="tags",
+            field=models.ManyToManyField(
+                blank=True, related_name="recipes", to="sandwitches.tag"
+            ),
         ),
     ]

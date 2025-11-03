@@ -4,25 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Recipe',
+            name="Recipe",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=255, unique=True)),
-                ('description', models.TextField(blank=True)),
-                ('ingredients', models.TextField(blank=True)),
-                ('instructions', models.TextField(blank=True)),
-                ('image', models.ImageField(blank=True, null=True, upload_to='recipes/')),
-                ('tags', models.CharField(blank=True, help_text='Comma separated tags', max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=255, unique=True)),
+                ("description", models.TextField(blank=True)),
+                ("ingredients", models.TextField(blank=True)),
+                ("instructions", models.TextField(blank=True)),
+                (
+                    "image",
+                    models.ImageField(blank=True, null=True, upload_to="recipes/"),
+                ),
+                (
+                    "tags",
+                    models.CharField(
+                        blank=True, help_text="Comma separated tags", max_length=255
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
         ),
     ]

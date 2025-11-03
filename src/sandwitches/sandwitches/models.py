@@ -1,6 +1,10 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
+from .storage import HashedFilenameStorage
+
+hashed_storage = HashedFilenameStorage()
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -32,7 +36,12 @@ class Recipe(models.Model):
     description = models.TextField(blank=True)
     ingredients = models.TextField(blank=True)
     instructions = models.TextField(blank=True)
-    image = models.ImageField(upload_to="recipes/", blank=True, null=True)
+    image = models.ImageField(
+        upload_to="recipes/",  # storage will replace with hashed path
+        storage=hashed_storage,
+        blank=True,
+        null=True,
+    )
 
     # ManyToMany: tags are reusable and shared between recipes
     tags = models.ManyToManyField(Tag, blank=True, related_name="recipes")

@@ -4,3 +4,6 @@ __pycache__/
 .web
 assets/external/
 *.db
+*.png
+*.sqlite3
+.venv/*

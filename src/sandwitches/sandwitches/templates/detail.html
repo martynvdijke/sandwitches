@@ -1,62 +1,54 @@
-{% extends "base_material.html" %}
+{% extends "base_pico.html" %}
 
 {% block title %}{{ recipe.title }} — Sandwitch{% endblock %}
 
 {% block content %}
-  <div class="section">
-    <div class="row">
-      <div class="col s12">
-        <a href="{% url 'index' %}" class="btn-flat blue-text text-darken-2">&larr; Back to all</a>
-      </div>
-    </div>
+  <nav aria-label="breadcrumb" class="container">
+    <a href="{% url 'index' %}">&larr; Back to all</a>
+  </nav>
 
-    <div class="row">
-      <div class="col s12 m8">
-        <div class="card">
-          <div class="card-image">
-            {% if recipe.image %}
-              <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
-            {% else %}
-              <img src="https://picsum.photos/seed/{{ recipe.pk }}/900/400" alt="{{ recipe.title }}">
-            {% endif %}
-          </div>
+  <div class="grid">
+    <article class="card">
+      <figure class="recipe-figure">
+        {% if recipe.image %}
+          <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+        {% else %}
+          <img src="https://picsum.photos/seed/{{ recipe.pk }}/900/400" alt="{{ recipe.title }}">
+        {% endif %}
+      </figure>
+      <div class="card-body">
+        <h2>{{ recipe.title }}</h2>
+        <p class="muted">{{ recipe.description|default:"No description" }}</p>
 
-          <div class="card-content">
-            <span class="card-title">{{ recipe.title }}</span>
-            <p class="grey-text text-darken-1">{{ recipe.description|default:"No description" }}</p>
+        <h4>Ingredients</h4>
+        <pre style="white-space:pre-wrap;">{{ recipe.ingredients|default:"No ingredients listed." }}</pre>
 
-            <h6 class="mt-4">Ingredients</h6>
-            <pre style="white-space:pre-wrap;">{{ recipe.ingredients|default:"No ingredients listed." }}</pre>
+        <h4>Instructions</h4>
+        <pre style="white-space:pre-wrap;">{{ recipe.instructions|default:"No instructions yet." }}</pre>
 
-            <h6 class="mt-3">Instructions</h6>
-            <pre style="white-space:pre-wrap;">{{ recipe.instructions|default:"No instructions yet." }}</pre>
-
-            <div style="margin-top:12px;">
-              {% for tag in recipe.tags.all %}
-                <div class="chip">{{ tag.name }}</div>
-              {% empty %}
-                <span class="grey-text">No tags</span>
-              {% endfor %}
-            </div>
-          </div>
-
-          <div class="card-action">
-            <a href="{% url 'recipes:recipe_detail' recipe.pk %}" class="blue-text">Permalink</a>
-            {% if user.is_authenticated and user.is_staff %}
-              <a href="{% url 'admin:app_list' 'sandwitches' %}" class="orange-text">Admin</a>
-              <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/" class="orange-text">Edit</a>
-            {% endif %}
-          </div>
+        <div style="margin-top:12px;">
+          {% for tag in recipe.tags.all %}
+            <span class="tag">{{ tag.name }}</span>
+          {% empty %}
+            <span class="muted">No tags</span>
+          {% endfor %}
         </div>
       </div>
+      <footer>
+        <a href="{% url 'recipe_detail' recipe.pk %}">Permalink</a>
+        {% if user.is_authenticated and user.is_staff %}
+          <a href="{% url 'admin:app_list' 'sandwitches' %}">Admin</a>
+          <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/">Edit</a>
+        {% endif %}
+      </footer>
+    </article>
 
-      <aside class="col s12 m4">
-        <div class="card-panel">
-          <h6 class="mb-2">Meta</h6>
-          <p><strong>Created:</strong> {{ recipe.created_at|date:"SHORT_DATETIME_FORMAT" }}</p>
-          <p><strong>Updated:</strong> {{ recipe.updated_at|date:"SHORT_DATETIME_FORMAT" }}</p>
-        </div>
-      </aside>
-    </div>
+    <aside>
+      <div class="card">
+        <h4>Meta</h4>
+        <p><strong>Created:</strong> {{ recipe.created_at|date:"SHORT_DATETIME_FORMAT" }}</p>
+        <p><strong>Updated:</strong> {{ recipe.updated_at|date:"SHORT_DATETIME_FORMAT" }}</p>
+      </div>
+    </aside>
   </div>
 {% endblock %}
