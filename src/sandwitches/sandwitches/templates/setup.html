@@ -1,0 +1,53 @@
+{% extends "base_pico.html" %}
+{% load static %}
+{% block title %}Initial setup — Create admin{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:720px; margin:2rem auto;">
+  <article class="card">
+    <div class="card-body">
+      <h2>Create initial administrator</h2>
+      <p>
+        This page is only available when there are no admin users in the database.
+        After creating the account you will be logged in and redirected to the admin.
+      </p>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="card-panel" role="alert">
+            <ul>
+              {% for err in form.non_field_errors %}
+                <li>{{ err }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
+        <label for="{{ form.username.id_for_label }}">Username</label>
+        {{ form.username }}
+
+        <label for="{{ form.email.id_for_label }}">Email (optional)</label>
+        {{ form.email }}
+
+        <label for="{{ form.first_name.id_for_label }}">First name</label>
+        {{ form.first_name }}
+
+        <label for="{{ form.last_name.id_for_label }}">Last name</label>
+        {{ form.last_name }}
+
+        <label for="{{ form.password1.id_for_label }}">Password</label>
+        {{ form.password1 }}
+
+        <label for="{{ form.password2.id_for_label }}">Confirm password</label>
+        {{ form.password2 }}
+
+        <p style="margin-top:1rem;">
+          <button type="submit">Create admin</button>
+          <a class="contrast" href="{% url 'index' %}">Cancel</a>
+        </p>
+      </form>
+    </div>
+  </article>
+</div>
+{% endblock %}

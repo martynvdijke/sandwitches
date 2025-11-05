@@ -9,6 +9,8 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "django>=5.2.7",
+    "django-filter>=25.2",
+    "markdown>=3.10",
     "pillow>=12.0.0",
 ]
 

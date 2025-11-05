@@ -5,5 +5,9 @@ __pycache__/
 assets/external/
 *.db
 *.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
 *.sqlite3
 .venv/*

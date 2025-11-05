@@ -1,52 +1,53 @@
 {% extends "base_pico.html" %}
+
 {% block title %}Sandwitches{% endblock %}
 
 {% block content %}
-  <div class="grid search-row">
-    <div>
-      <h4>Sandwitches: sandwiches so good, they haunt you!</h4>
-    </div>
-    <div>
-      <form role="search" onsubmit="return false;">
-        <input id="search" type="search" placeholder="Search by title or tag" aria-label="Search">
-      </form>
-    </div>
+<div class="grid search-row">
+  <div>
+    <h4>Sandwitches: sandwiches so good, they haunt you!</h4>
   </div>
+  <div>
+    <form role="search" onsubmit="return false;">
+      <input id="search" type="search" placeholder="Search by title or tag" aria-label="Search">
+    </form>
+  </div>
+</div>
 
-  <section class="grid">
-    {% for recipe in recipes %}
-      <article class="card" onclick="location.href='{% url 'recipe_detail' recipe.pk %}';" style="cursor:pointer;">
-        {% if recipe.image %}
-        <figure class="recipe-figure">
-            <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
-        </figure>
-        {% endif %}
+<section class="grid">
+  {% for recipe in recipes %}
+    <article class="card" onclick="location.href='{% url 'recipe_detail' recipe.pk %}';" style="cursor:pointer;">
+      {% if recipe.image %}
+      <figure class="recipe-figure">
+          <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+      </figure>
+      {% endif %}
 
-        <div class="card-body">
-          <header class="card-title">{{ recipe.title }}</header>
+      <div class="card-body">
+        <header class="card-title">{{ recipe.title }}</header>
 
-          <div class="tags-row" aria-hidden="false">
-            {% for tag in recipe.tags.all %}
-              <span class="chip{% if tag|length < 8 %} chip--accent{% endif %}">{{ tag.name }}</span>
-            {% endfor %}
-          </div>
+        <div class="tags-row" aria-hidden="false">
+          {% for tag in recipe.tags.all %}
+            <span class="chip{% if tag|length < 8 %} chip--accent{% endif %}">{{ tag.name }}</span>
+          {% endfor %}
         </div>
+      </div>
 
-        {% if user.is_authenticated and user.is_staff %}
-        <footer>            
-            <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/" rel="noopener">Edit</a>
-        </footer>
-        {% endif %}
-      </article>
+      {% if user.is_authenticated and user.is_staff %}
+      <footer>            
+          <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/" rel="noopener">Edit</a>
+      </footer>
+      {% endif %}
+    </article>
 
-    {% empty %}
-      <article class="card">
-        <div class="card-body">
-          <p>No sandwitches yet, please stay tuned.</p>
-        </div>
-      </article>
-    {% endfor %}
-  </section>
+  {% empty %}
+    <article class="card">
+      <div class="card-body">
+        <p>No sandwitches yet, please stay tuned.</p>
+      </div>
+    </article>
+  {% endfor %}
+</section>
 
 {% endblock %}
 
