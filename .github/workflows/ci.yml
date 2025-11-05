@@ -22,12 +22,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Install hugo
-        run: wget https://github.com/gohugoio/hugo/releases/download/v0.147.5/hugo_0.147.5_linux-amd64.deb && sudo dpkg -i hugo_0.147.5_linux-amd64.deb
-      - name: Hugo build
-        run: hugo
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag martynvandijke/broodjes.vandijke.xyz:latest
+        run: docker build . --file Dockerfile --tag martynvandijke/sandwitches:latest
       - name: Push Docker image
-        run: docker push martynvandijke/broodjes.vandijke.xyz:latest
+        run: docker push martynvandijke/sandwitches:latest
 

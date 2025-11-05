@@ -22,8 +22,8 @@ def recipe_edit(request, pk):
     return render(request, "recipe_form.html", {"form": form, "recipe": recipe})
 
 
-def recipe_detail(request, pk):
-    recipe = get_object_or_404(Recipe, pk=pk)
+def recipe_detail(request, slug):
+    recipe = get_object_or_404(Recipe, slug=slug)
     return render(request, "detail.html", {"recipe": recipe})
 
 

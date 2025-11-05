@@ -16,7 +16,7 @@
 
 <section class="grid">
   {% for recipe in recipes %}
-    <article class="card" onclick="location.href='{% url 'recipe_detail' recipe.pk %}';" style="cursor:pointer;">
+    <article class="card" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';" style="cursor:pointer;">
       {% if recipe.image %}
       <figure class="recipe-figure">
           <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">

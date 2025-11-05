@@ -10,5 +10,6 @@ assets/external/
 *.gif
 *.svg
 *.sqlite3
+*.pyc
 .venv/*
 .ruff_cache/*

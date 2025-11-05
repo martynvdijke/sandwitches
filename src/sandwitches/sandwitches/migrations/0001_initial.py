@@ -5,44 +5,71 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Tag',
+            name="Tag",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, unique=True)),
-                ('slug', models.SlugField(blank=True, max_length=60, unique=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50, unique=True)),
+                ("slug", models.SlugField(blank=True, max_length=60, unique=True)),
             ],
             options={
-                'verbose_name': 'Tag',
-                'verbose_name_plural': 'Tags',
-                'ordering': ('name',),
+                "verbose_name": "Tag",
+                "verbose_name_plural": "Tags",
+                "ordering": ("name",),
             },
         ),
         migrations.CreateModel(
-            name='Recipe',
+            name="Recipe",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=255, unique=True)),
-                ('slug', models.SlugField(blank=True, max_length=255, unique=True)),
-                ('description', models.TextField(blank=True)),
-                ('ingredients', models.TextField(blank=True)),
-                ('instructions', models.TextField(blank=True)),
-                ('image', models.ImageField(blank=True, null=True, storage=sandwitches.storage.HashedFilenameStorage(), upload_to='recipes/')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('tags', models.ManyToManyField(blank=True, related_name='recipes', to='sandwitches.tag')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=255, unique=True)),
+                ("slug", models.SlugField(blank=True, max_length=255, unique=True)),
+                ("description", models.TextField(blank=True)),
+                ("ingredients", models.TextField(blank=True)),
+                ("instructions", models.TextField(blank=True)),
+                (
+                    "image",
+                    models.ImageField(
+                        blank=True,
+                        null=True,
+                        storage=sandwitches.storage.HashedFilenameStorage(),
+                        upload_to="recipes/",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "tags",
+                    models.ManyToManyField(
+                        blank=True, related_name="recipes", to="sandwitches.tag"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Recipe',
-                'verbose_name_plural': 'Recipes',
-                'ordering': ('-created_at',),
+                "verbose_name": "Recipe",
+                "verbose_name_plural": "Recipes",
+                "ordering": ("-created_at",),
             },
         ),
     ]

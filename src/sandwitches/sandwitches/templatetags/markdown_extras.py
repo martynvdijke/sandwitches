@@ -11,8 +11,7 @@ register = template.Library()
 def convert_markdown(value):
     md = markdown.markdown(
         value,
-        extensions=["markdown.extensions.fenced_code", 
-                    "markdown.extensions.tables"],
+        extensions=["markdown.extensions.fenced_code", "markdown.extensions.tables"],
     )
 
     return md
