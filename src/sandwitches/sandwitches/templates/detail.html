@@ -19,7 +19,7 @@
       {{ recipe.title }}
     </header>
       <h4>Ingredients</h4>
-      {{ recipe.ingredients|convert_markdown|safe |default:"No ingredients listed." }}
+      {{ recipe.ingredients|convert_markdown|safe|default:"No ingredients listed." }}
 
       <h4>Instructions</h4>
       {{ recipe.instructions|convert_markdown|safe|default:"No instructions yet." }}

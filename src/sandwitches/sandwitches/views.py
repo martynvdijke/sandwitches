@@ -28,6 +28,8 @@ def recipe_detail(request, pk):
 
 
 def index(request):
+    if not User.objects.filter(is_superuser=True).exists():
+        return redirect("setup")
     recipes = Recipe.objects.order_by("-created_at")
     return render(request, "index.html", {"recipes": recipes})
 
