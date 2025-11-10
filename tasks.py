@@ -1,5 +1,5 @@
 from invoke import task
-
+import os
 
 @task
 def linting(c):
@@ -23,6 +23,10 @@ def formatting(c):
 def tests(c):
     """Run tests with pytest."""
     print("Running tests with pytest...")
+    os.environ["SECRET_KEY"] = "tests"
+    os.environ["DEBUG"] = "1"
+    os.environ["ALLOWED_HOSTS"] = "127.0.0.1"
+    os.environ["CSRF_TRUSTED_ORIGINS"] = "http://127.0.0.1"
     c.run("pytest tests")
 
 @task
