@@ -18,6 +18,9 @@
     <header>
       {{ recipe.title }}
     </header>
+      <h4>Description</h4>
+      {{ recipe.description|convert_markdown|safe|default:"No description yet." }}
+
       <h4>Ingredients</h4>
       {{ recipe.ingredients|convert_markdown|safe|default:"No ingredients listed." }}
 

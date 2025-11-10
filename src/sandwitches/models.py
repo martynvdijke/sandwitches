@@ -2,6 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
 from .storage import HashedFilenameStorage
+from simple_history.models import HistoricalRecords
 
 hashed_storage = HashedFilenameStorage()
 
@@ -48,6 +49,7 @@ class Recipe(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    history = HistoricalRecords()
 
     class Meta:
         ordering = ("-created_at",)

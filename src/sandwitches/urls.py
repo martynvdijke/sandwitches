@@ -21,6 +21,10 @@ from . import views
 
 from django.conf import settings
 from django.conf.urls.static import static
+from debug_toolbar.toolbar import debug_toolbar_urls
+import os
+import sys
+
 
 urlpatterns = [
     path("", views.index, name="index"),
@@ -28,6 +32,14 @@ urlpatterns = [
     path("recipes/<slug:slug>/", views.recipe_detail, name="recipe_detail"),
     path("setup/", views.setup, name="setup"),
 ]
+
+if "test" not in sys.argv or "PYTEST_VERSION" in os.environ:
+    from debug_toolbar.toolbar import debug_toolbar_urls
+
+    urlpatterns = [
+        *urlpatterns,
+    ] + debug_toolbar_urls()
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
