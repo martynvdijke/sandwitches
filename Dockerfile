@@ -31,4 +31,4 @@ EXPOSE 6270
 
 USER app
 
-CMD ["/bin/sh", "-c", "python src/sandwitches/manage.py makemigrations sandwitches && python src/sandwitches/manage.py migrate && python src/sandwitches/manage.py runserver 0.0.0.0:6270"]
+CMD ["/bin/sh", "-c", "python src/manage.py makemigrations sandwitches && python src/manage.py migrate && python src/manage.py runserver 0.0.0.0:6270"]
