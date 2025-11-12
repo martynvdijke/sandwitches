@@ -1,3 +1,15 @@
+## [1.0.1](https://github.com/martynvdijke/sandwitches/compare/v1.0.0...v1.0.1) (2025-11-12)
+
+
+### Bug Fixes
+
+* add uv lock for release ([b30ffcc](https://github.com/martynvdijke/sandwitches/commit/b30ffcc587dda35c9c2b753d31842e763cc42e1e))
+* awk quotes ([1eef1b6](https://github.com/martynvdijke/sandwitches/commit/1eef1b67eafbe3382366adb29c9febaf1b950813))
+* fix final push of docker container ([659d7c1](https://github.com/martynvdijke/sandwitches/commit/659d7c18d0bb9b0371c6e1c62f3b94ff544c92ed))
+* not escaping quotes ([6ee2bd9](https://github.com/martynvdijke/sandwitches/commit/6ee2bd9363168fe333e9478cf3062960ccf0f8d2))
+* quotes charachters ([93ca515](https://github.com/martynvdijke/sandwitches/commit/93ca515234570cb638f168a6282e66ffbfb84064))
+* rerun uv lock ([1728c7e](https://github.com/martynvdijke/sandwitches/commit/1728c7e58bb0317356ae62bd97c2dc16968c753a))
+
 ## [1.0.3](https://github.com/martynvdijke/sandwitches/compare/v1.0.2...v1.0.3) (2025-11-12)
 
 
