@@ -1,3 +1,11 @@
+## [1.0.1](https://github.com/martynvdijke/sandwitches/compare/v1.0.0...v1.0.1) (2025-11-12)
+
+
+### Bug Fixes
+
+* fix final push of docker container ([659d7c1](https://github.com/martynvdijke/sandwitches/commit/659d7c18d0bb9b0371c6e1c62f3b94ff544c92ed))
+* rerun uv lock ([1728c7e](https://github.com/martynvdijke/sandwitches/commit/1728c7e58bb0317356ae62bd97c2dc16968c753a))
+
 # 1.0.0 (2025-11-12)
 
 
