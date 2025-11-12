@@ -1,0 +1,44 @@
+{% extends "base_pico.html" %}
+{% block title %}{{ recipe.title }} — Sandwitch{% endblock %}
+
+{% block content %}
+
+{% load markdown_extras %}
+<nav aria-label="breadcrumb" class="container">
+  <a href="{% url 'index' %}">&larr; Back to all</a>
+</nav>
+
+<div class="grid">
+  <article class="card">
+    <figure>
+      {% if recipe.image %}
+        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+      {% endif %}
+    </figure>
+    <header>
+      {{ recipe.title }}
+    </header>
+      <h4>Description</h4>
+      {{ recipe.description|convert_markdown|safe|default:"No description yet." }}
+
+      <h4>Ingredients</h4>
+      {{ recipe.ingredients|convert_markdown|safe|default:"No ingredients listed." }}
+
+      <h4>Instructions</h4>
+      {{ recipe.instructions|convert_markdown|safe|default:"No instructions yet." }}
+    
+    <div class="tags-row">
+      <div style="margin-top:12px;">
+        {% for tag in recipe.tags.all %}
+          <span class="tag">{{ tag.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+      {% if user.is_authenticated and user.is_staff %}
+    <footer>
+        <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/">Edit</a>
+    </footer>
+    {% endif %}
+  </article>
+</div>
+{% endblock %}

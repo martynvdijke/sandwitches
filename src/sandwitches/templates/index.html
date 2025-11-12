@@ -1,0 +1,71 @@
+{% extends "base_pico.html" %}
+
+{% block title %}Sandwitches{% endblock %}
+
+{% block content %}
+<div class="grid search-row">
+  <div>
+    <h4>Sandwitches: sandwiches so good, they haunt you!</h4>
+  </div>
+  <div>
+    <form role="search" onsubmit="return false;">
+      <input id="search" type="search" placeholder="Search by title or tag" aria-label="Search">
+    </form>
+  </div>
+</div>
+
+<section class="grid">
+  {% for recipe in recipes %}
+    <article class="card" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';" style="cursor:pointer;">
+      {% if recipe.image %}
+      <figure class="recipe-figure">
+          <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+      </figure>
+      {% endif %}
+
+      <div class="card-body">
+        <header class="card-title">{{ recipe.title }}</header>
+
+        <div class="tags-row" aria-hidden="false">
+          {% for tag in recipe.tags.all %}
+            <span class="chip{% if tag|length < 8 %} chip--accent{% endif %}">{{ tag.name }}</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      {% if user.is_authenticated and user.is_staff %}
+      <footer>            
+          <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/" rel="noopener">Edit</a>
+      </footer>
+      {% endif %}
+    </article>
+
+  {% empty %}
+    <article class="card">
+      <div class="card-body">
+        <p>No sandwitches yet, please stay tuned.</p>
+      </div>
+    </article>
+  {% endfor %}
+</section>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const search = document.getElementById('search');
+  if (!search) return;
+  search.addEventListener('input', function() {
+    const q = this.value.toLowerCase().trim();
+    document.querySelectorAll('section.grid article.card').forEach(card => {
+      const title = (card.querySelector('.card-title')?.textContent || '').toLowerCase();
+      const tags = Array.from(card.querySelectorAll('.tag, .chip')).map(t => t.textContent.toLowerCase());
+      const descr = (card.querySelector('.card-body p')?.textContent || '').toLowerCase();
+      const match = !q || title.includes(q) || descr.includes(q) || tags.some(t => t.includes(q));
+      card.style.display = match ? '' : 'none';
+    });
+  });
+});
+</script>
+{% endblock %}

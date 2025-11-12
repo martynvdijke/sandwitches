@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Edit</title>
+  </head>
+  <body>
+    <h1>Edit Recipe: {{ recipe.title }}</h1>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %} {{ form.as_p }}
+      <button type="submit">Save</button>
+      <a href="{% url 'recipes:admin_list' %}">Cancel</a>
+    </form>
+  </body>
+</html>
