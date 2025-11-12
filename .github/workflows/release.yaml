@@ -69,8 +69,7 @@ jobs:
         run: docker build . --file Dockerfile --tag martynvandijke/sandwitches:latest
 
       - name: Push Docker image
-        run:
-          |
+        run: |
            docker push martynvandijke/sandwitches:latest
            docker tag martynvandijke/sandwitches:latest martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}
            docker push martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}
