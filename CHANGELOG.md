@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/martynvdijke/sandwitches/compare/v1.0.2...v1.0.3) (2025-11-12)
+
+
+### Bug Fixes
+
+* awk quotes ([1eef1b6](https://github.com/martynvdijke/sandwitches/commit/1eef1b67eafbe3382366adb29c9febaf1b950813))
+
 ## [1.0.2](https://github.com/martynvdijke/sandwitches/compare/v1.0.1...v1.0.2) (2025-11-12)
 
 
