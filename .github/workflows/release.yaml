@@ -54,7 +54,7 @@ jobs:
 
       - name: uv version
         id: uv_version
-        run: echo "version=$(uv version | awk '{print $2 }') >> $GITHUB_OUTPUT"
+        run: echo "version=$(uv version | awk '{print $2 }')" >> $GITHUB_OUTPUT
 
       - name: Build distributions
         run: uv build
