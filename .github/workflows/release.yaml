@@ -71,5 +71,6 @@ jobs:
       - name: Push Docker image
         run: |
            docker push martynvandijke/sandwitches:latest
+           echo "Pushing versioned tag: ${{ steps.uv_version.outputs.version }}"
            docker tag martynvandijke/sandwitches:latest martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}
            docker push martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}
