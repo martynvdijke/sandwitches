@@ -2,14 +2,11 @@ name: Run linting, formatting checks tests and Build Docker Image
 
 on:
   push:
-    branches: ["master", "dev"]
-  pull_request:
-    branches: ["master"]
-  schedule:
-    - cron: "0 0 1 * *"
+    branches:
+      - "**"
 
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,15 +32,6 @@ jobs:
 
       - name: Run invoke.ci
         run: uv run invoke ci
-
-      - name: Build distributions
-        run: uv build
-
-      - name: Publish package
-        run: uv publish
-        env:
-          UV_PUBLISH_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          UV_PUBLISH_PASSWORD: ${{ secrets.PYPI_TOKEN }}
 
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag martynvandijke/sandwitches:latest
