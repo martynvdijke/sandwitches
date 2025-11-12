@@ -1,4 +1,4 @@
-name: Run linting, formatting checks tests and Build Docker Image
+name: Release
 
 on:
   push:
@@ -51,7 +51,7 @@ jobs:
 
       - name: uv version
         id: uv_version
-        run: uv version | awk '{print $2 }'
+        run: echo "version=$(uv version | awk '{print $2 })' >> $GITHUB_OUTPUT"
 
       - name: Build distributions
         run: uv build
