@@ -38,6 +38,9 @@ jobs:
       - name: Run invoke.ci
         run: uv run invoke ci
 
+      - name: Run invoke.ci
+        run: uv lock
+
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v5
         with:
