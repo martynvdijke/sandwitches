@@ -1,3 +1,12 @@
+## [1.0.2](https://github.com/martynvdijke/sandwitches/compare/v1.0.1...v1.0.2) (2025-11-12)
+
+
+### Bug Fixes
+
+* add uv lock for release ([b30ffcc](https://github.com/martynvdijke/sandwitches/commit/b30ffcc587dda35c9c2b753d31842e763cc42e1e))
+* not escaping quotes ([6ee2bd9](https://github.com/martynvdijke/sandwitches/commit/6ee2bd9363168fe333e9478cf3062960ccf0f8d2))
+* quotes charachters ([93ca515](https://github.com/martynvdijke/sandwitches/commit/93ca515234570cb638f168a6282e66ffbfb84064))
+
 ## [1.0.1](https://github.com/martynvdijke/sandwitches/compare/v1.0.0...v1.0.1) (2025-11-12)
 
 
