@@ -5,7 +5,7 @@ from django.contrib.auth import login
 from django.contrib.auth import get_user_model
 
 from .models import Recipe
-from .forms import RecipeForm, AdminSetupForm
+from .forms import RecipeForm, AdminSetupForm, UserSignupForm
 
 User = get_user_model()
 
@@ -56,3 +56,22 @@ def setup(request):
         form = AdminSetupForm()
 
     return render(request, "setup.html", {"form": form})
+
+
+def signup(request):
+    """
+    User signup page: create new regular user accounts.
+    """
+    if request.method == "POST":
+        form = UserSignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # log in the newly created user
+            user.backend = "django.contrib.auth.backends.ModelBackend"
+            login(request, user)
+            messages.success(request, "Account created and signed in.")
+            return redirect("index")
+    else:
+        form = UserSignupForm()
+
+    return render(request, "signup.html", {"form": form})
