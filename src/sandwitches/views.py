@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg
 
 from .models import Recipe, Rating
 from .forms import RecipeForm, AdminSetupForm, UserSignupForm, RatingForm

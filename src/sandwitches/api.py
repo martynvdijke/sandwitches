@@ -3,7 +3,6 @@ from .models import Recipe
 
 from ninja import ModelSchema
 from ninja import Schema
-from ninja.security import django_auth
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from datetime import date
