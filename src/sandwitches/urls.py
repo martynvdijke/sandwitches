@@ -18,6 +18,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from . import views
+from .api import api
+
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -31,6 +33,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("recipes/<slug:slug>/", views.recipe_detail, name="recipe_detail"),
     path("setup/", views.setup, name="setup"),
+    path("api/", api.urls),
 ]
 
 if "test" not in sys.argv or "PYTEST_VERSION" in os.environ:
