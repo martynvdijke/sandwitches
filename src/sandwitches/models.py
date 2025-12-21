@@ -3,8 +3,12 @@ from django.urls import reverse
 from django.utils.text import slugify
 from .storage import HashedFilenameStorage
 from simple_history.models import HistoricalRecords
+from django.contrib.auth import get_user_model
+from django.db.models import Avg
 
 hashed_storage = HashedFilenameStorage()
+
+User = get_user_model()
 
 
 class Tag(models.Model):
@@ -87,8 +91,31 @@ class Recipe(models.Model):
         self.tags.set(tags)
         return self.tags.all()
 
+    # add helper methods for ratings
+    def average_rating(self):
+        agg = self.ratings.aggregate(avg=Avg("score"))
+        return agg["avg"] or 0
+
+    def rating_count(self):
+        return self.ratings.count()
+
     def get_absolute_url(self):
         return reverse("recipe_detail", kwargs={"pk": self.pk, "slug": self.slug})
 
     def __str__(self):
         return self.title
+
+
+class Rating(models.Model):
+    recipe = models.ForeignKey(Recipe, related_name="ratings", on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name="ratings", on_delete=models.CASCADE)
+    score = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("recipe", "user")
+        ordering = ("-updated_at",)
+
+    def __str__(self):
+        return f"{self.recipe} — {self.score} by {self.user}"

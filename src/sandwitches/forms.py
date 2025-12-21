@@ -53,13 +53,10 @@ class UserSignupForm(UserCreationForm, BaseUserFormMixin):
         fields = ("username", "first_name", "last_name", "email")
 
     def clean(self):
-        # UserCreationForm already handles password mismatch, 
-        # but we keep this for custom cross-field logic if needed.
         return super().clean()
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        # UserCreationForm's save() handles password hashing automatically
         user.is_superuser = False
         user.is_staff = False
         if commit:
@@ -74,3 +71,12 @@ class RecipeForm(forms.ModelForm):
         widgets = {
             "tags": forms.TextInput(attrs={"placeholder": "tag1,tag2"}),
         }
+
+
+class RatingForm(forms.Form):
+    """Simple form for rating recipes (1-5)."""
+    score = forms.ChoiceField(
+        choices=[(str(i), str(i)) for i in range(1, 6)],
+        widget=forms.RadioSelect,
+        label="Your rating",
+    )

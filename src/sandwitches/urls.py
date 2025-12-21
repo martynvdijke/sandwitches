@@ -35,6 +35,7 @@ urlpatterns = [
     path("setup/", views.setup, name="setup"),
     path("api/", api.urls),
     path("signup/", views.signup, name="signup"),
+    path("recipes/<int:pk>/rate/", views.recipe_rate, name="recipe_rate"),
 ]
 
 if "test" not in sys.argv or "PYTEST_VERSION" in os.environ:
