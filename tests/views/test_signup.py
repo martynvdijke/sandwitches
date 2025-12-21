@@ -1,7 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from unittest.mock import patch
 
 User = get_user_model()
 
@@ -22,23 +21,23 @@ class SignupViewTests(TestCase):
             "password2": "complex-password-123",
         }
         resp = self.client.post(reverse("signup"), data, follow=True)
-        # should redirect and end up with an authenticated user in context
         self.assertEqual(resp.status_code, 200)
-        self.assertTrue(resp.context["user"].is_authenticated)
+        # user created and logged in
         user = User.objects.get(username="testuser")
+        self.assertIsNotNone(user)
+        self.assertTrue(resp.context["user"].is_authenticated)
         self.assertFalse(user.is_staff)
         self.assertFalse(user.is_superuser)
 
     def test_duplicate_username_shows_error(self):
-        User.objects.create_user(username="duptestuseruser", password="x")
+        User.objects.create_user(username="dup", password="x")
         data = {
-            "username": "testuser",
-            "email": "testuser@example.com",
-            "first_name": "Duplicate",
+            "username": "dup",
+            "email": "dup@example.com",
+            "first_name": "Dup",
             "last_name": "User",
             "password1": "another-pass-123",
             "password2": "another-pass-123",
         }
         resp = self.client.post(reverse("signup"), data)
-        # form re-rendered with error and no new user created
-        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 200)
