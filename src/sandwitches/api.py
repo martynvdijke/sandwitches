@@ -1,5 +1,5 @@
 from ninja import NinjaAPI
-from .models import Recipe
+from .models import Recipe, Tag
 
 from ninja import ModelSchema
 from ninja import Schema
@@ -19,9 +19,9 @@ class RecipeSchema(ModelSchema):
         fields = "__all__"
 
 
-class TagsSchema(Schema):
+class TagSchema(ModelSchema):
     class Meta:
-        model = Recipe
+        model = Tag
         fields = "__all__"
 
 
@@ -69,12 +69,12 @@ def get_recipe_of_the_day(request):
     return recipe
 
 
-@api.get("v1/tags", response=list[TagsSchema])
+@api.get("v1/tags", response=list[TagSchema])
 def get_tags(request):
-    return TagsSchema.objects.all()  # ty:ignore[unresolved-attribute]
+    return TagSchema.objects.all()  # ty:ignore[unresolved-attribute]
 
 
-@api.get("v1/tags/{tag_id}", response=TagsSchema)
+@api.get("v1/tags/{tag_id}", response=TagSchema)
 def get_tag(request, tag_id: int):
-    tag = get_object_or_404(TagsSchema, id=tag_id)
+    tag = get_object_or_404(TagSchema, id=tag_id)
     return tag
