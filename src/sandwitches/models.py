@@ -25,7 +25,7 @@ class Tag(models.Model):
             base = slugify(self.name)[:55]
             slug = base
             n = 1
-            while Tag.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            while Tag.objects.filter(slug=slug).exclude(pk=self.pk).exists():  # ty:ignore[unresolved-attribute]
                 slug = f"{base}-{n}"
                 n += 1
             self.slug = slug
@@ -65,7 +65,7 @@ class Recipe(models.Model):
             base = slugify(self.title)[:240]
             slug = base
             n = 1
-            while Recipe.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            while Recipe.objects.filter(slug=slug).exclude(pk=self.pk).exists():  # ty:ignore[unresolved-attribute]
                 slug = f"{base}-{n}"
                 n += 1
             self.slug = slug
@@ -73,7 +73,7 @@ class Recipe(models.Model):
 
     def tag_list(self):
         # returns list of tag names
-        return list(self.tags.values_list("name", flat=True))
+        return list(self.tags.values_list("name", flat=True))  # ty:ignore[possibly-missing-attribute]
 
     def set_tags_from_string(self, tag_string):
         """
@@ -83,21 +83,20 @@ class Recipe(models.Model):
         names = [t.strip() for t in (tag_string or "").split(",") if t.strip()]
         tags = []
         for name in names:
-            tag = Tag.objects.filter(name__iexact=name).first()
+            tag = Tag.objects.filter(name__iexact=name).first()  # ty:ignore[unresolved-attribute]
             if not tag:
-                tag = Tag.objects.create(name=name)
+                tag = Tag.objects.create(name=name)  # ty:ignore[unresolved-attribute]
             tags.append(tag)
-        # replace existing tags with these
-        self.tags.set(tags)
-        return self.tags.all()
+        self.tags.set(tags)  # ty:ignore[possibly-missing-attribute]
+        return self.tags.all()  # ty:ignore[possibly-missing-attribute]
 
     # add helper methods for ratings
     def average_rating(self):
-        agg = self.ratings.aggregate(avg=Avg("score"))
+        agg = self.ratings.aggregate(avg=Avg("score"))  # ty:ignore[unresolved-attribute]
         return agg["avg"] or 0
 
     def rating_count(self):
-        return self.ratings.count()
+        return self.ratings.count()  # ty:ignore[unresolved-attribute]
 
     def get_absolute_url(self):
         return reverse("recipe_detail", kwargs={"pk": self.pk, "slug": self.slug})

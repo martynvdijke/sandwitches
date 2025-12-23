@@ -31,8 +31,8 @@ def recipe_detail(request, slug):
     rating_form = None
     if request.user.is_authenticated:
         try:
-            user_rating = Rating.objects.get(recipe=recipe, user=request.user)
-        except Rating.DoesNotExist:
+            user_rating = Rating.objects.get(recipe=recipe, user=request.user)  # ty:ignore[unresolved-attribute]
+        except Rating.DoesNotExist:  # ty:ignore[unresolved-attribute]
             user_rating = None
         # show form prefilled when possible
         initial = {"score": str(user_rating.score)} if user_rating else None
@@ -62,7 +62,7 @@ def recipe_rate(request, pk):
     form = RatingForm(request.POST)
     if form.is_valid():
         score = int(form.cleaned_data["score"])
-        Rating.objects.update_or_create(
+        Rating.objects.update_or_create(  # ty:ignore[unresolved-attribute]
             recipe=recipe, user=request.user, defaults={"score": score}
         )
         messages.success(request, "Your rating has been saved.")
@@ -74,7 +74,7 @@ def recipe_rate(request, pk):
 def index(request):
     if not User.objects.filter(is_superuser=True).exists():
         return redirect("setup")
-    recipes = Recipe.objects.order_by("-created_at")
+    recipes = Recipe.objects.order_by("-created_at")  # ty:ignore[unresolved-attribute]
     return render(request, "index.html", {"recipes": recipes})
 
 
