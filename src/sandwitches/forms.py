@@ -1,46 +1,65 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm
 from .models import Recipe
 
 User = get_user_model()
 
 
-class AdminSetupForm(forms.Form):
-    username = forms.CharField(max_length=150, label="Username")
-    email = forms.EmailField(required=False, label="Email (optional)")
-    password1 = forms.CharField(label="Password", widget=forms.PasswordInput)
-    password2 = forms.CharField(label="Confirm password", widget=forms.PasswordInput)
-    first_name = forms.CharField(max_length=30, required=False, label="First name")
-    last_name = forms.CharField(max_length=150, required=False, label="Last name")
+class BaseUserFormMixin:
+    """Mixin to handle common password validation and user field processing."""
 
-    def clean_username(self):
-        username = self.cleaned_data.get("username")
-        if User.objects.filter(username=username).exists():
-            raise forms.ValidationError("A user with that username already exists.")
-        return username
-
-    def clean(self):
-        cleaned = super().clean()
-        p1 = cleaned.get("password1")
-        p2 = cleaned.get("password2")
+    def clean_passwords(self, cleaned_data):
+        p1 = cleaned_data.get("password1")
+        p2 = cleaned_data.get("password2")
         if p1 and p2 and p1 != p2:
             raise forms.ValidationError("Passwords do not match.")
-        return cleaned
+        return cleaned_data
 
-    def save(self):
+    def _set_user_attributes(self, user, data):
+        """Helper to apply optional name fields."""
+        user.first_name = data.get("first_name", "")
+        user.last_name = data.get("last_name", "")
+        user.save()
+        return user
+
+
+class AdminSetupForm(forms.ModelForm, BaseUserFormMixin):
+    password1 = forms.CharField(widget=forms.PasswordInput, label="Password")
+    password2 = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
+
+    class Meta:
+        model = User
+        fields = ("username", "first_name", "last_name", "email")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return self.clean_passwords(cleaned_data)
+
+    def save(self, commit=True):
         data = self.cleaned_data
         user = User.objects.create_superuser(
-            username=data["username"],
-            email=data.get("email") or "",
-            password=data["password1"],
+            username=data["username"], email=data["email"], password=data["password1"]
         )
-        # set optional names
-        if data.get("first_name"):
-            user.first_name = data["first_name"]
-        if data.get("last_name"):
-            user.last_name = data["last_name"]
-        user.is_staff = True
-        user.save()
+        return self._set_user_attributes(user, data)
+
+
+class UserSignupForm(UserCreationForm, BaseUserFormMixin):
+    """Refactored Regular User Form inheriting from Django's UserCreationForm"""
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ("username", "first_name", "last_name", "email")
+
+    def clean(self):
+        return super().clean()
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.is_superuser = False
+        user.is_staff = False
+        if commit:
+            user.save()
         return user
 
 
@@ -58,3 +77,13 @@ class RecipeForm(forms.ModelForm):
         widgets = {
             "tags": forms.TextInput(attrs={"placeholder": "tag1,tag2"}),
         }
+
+
+class RatingForm(forms.Form):
+    """Simple form for rating recipes (1-5)."""
+
+    score = forms.ChoiceField(
+        choices=[(str(i), str(i)) for i in range(1, 6)],
+        widget=forms.RadioSelect,
+        label="Your rating",
+    )
