@@ -1,6 +1,7 @@
 from invoke import task
 import os
 
+
 @task
 def linting(c):
     """Run ruff lint checks."""
@@ -10,6 +11,13 @@ def linting(c):
     c.run("ruff format --check src")
     c.run("ruff format --check tests")
 
+
+@task
+def typecheck(c):
+    """Run ty type checks."""
+    c.run("ty check src")
+
+
 @task
 def formatting(c):
     """Run ruff formatter."""
@@ -18,6 +26,7 @@ def formatting(c):
     c.run("ruff format tests")
     c.run("ruff check --fix src")
     c.run("ruff check --fix tests")
+
 
 @task
 def tests(c):
@@ -29,8 +38,10 @@ def tests(c):
     os.environ["CSRF_TRUSTED_ORIGINS"] = "http://127.0.0.1"
     c.run("pytest tests")
 
+
 @task
 def ci(c):
     """Run ci checks linting and pytest."""
     linting(c)
+    typecheck(c)
     tests(c)
