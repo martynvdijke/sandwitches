@@ -1,3 +1,12 @@
+# [1.1.0](https://github.com/martynvdijke/sandwitches/compare/v1.0.1...v1.1.0) (2025-12-23)
+
+
+### Features
+
+* add in basic api ([3eb0772](https://github.com/martynvdijke/sandwitches/commit/3eb07720310d6d3fa23bef566cc29e197e94646e))
+* add in recipe rating ([2a62edd](https://github.com/martynvdijke/sandwitches/commit/2a62eddcaa277224cf4a06a942d58a38bdeb6d73))
+* add in user signup ([6ddae0e](https://github.com/martynvdijke/sandwitches/commit/6ddae0e236b0288ddf731d0d0f085af8e14cd7ee))
+
 ## [1.0.1](https://github.com/martynvdijke/sandwitches/compare/v1.0.0...v1.0.1) (2025-11-12)
 
 
