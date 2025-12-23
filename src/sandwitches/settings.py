@@ -14,14 +14,45 @@ from pathlib import Path
 import os
 
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
-DEBUG = bool(os.environ.get("DEBUG", default=0))
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1").split(",")
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
+# Environment helpers
+def _env_bool(key, default=False):
+    """Return True for 1/true/yes/on (case-insensitive), False otherwise.
+    If the variable is not set, returns bool(default)."""
+    val = os.environ.get(key)
+    if val is None:
+        return bool(default)
+    return str(val).strip().lower() in ("1", "true", "yes", "on")
 
-# RECAPTCHA_PROXY = {'http': 'http://127.0.0.1:8000', 'https': 'https://127.0.0.1:8000'}
-# RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
-# RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
+
+def _env_list(key, default=None, sep=","):
+    """Return a list from a comma-separated env var, trimming whitespace and
+    dropping empty values. If not set, returns a copy of default or []."""
+    raw = os.environ.get(key, None)
+    if raw is None:
+        return list(default or [])
+    items = [s.strip() for s in raw.split(sep)]
+    return [s for s in items if s]
+
+
+# Read DEBUG first so we can decide how to handle missing SECRET_KEY.
+DEBUG = _env_bool("DEBUG", False)
+
+# SECRET_KEY must be present in production. In DEBUG use a clear dev fallback.
+SECRET_KEY = os.environ.get("SECRET_KEY")
+if not SECRET_KEY:
+    if DEBUG:
+        # Local development fallback (explicitly insecure)
+        SECRET_KEY = "dev-insecure-secret"
+    else:
+        # Import inside the branch to avoid importing Django just for settings parse.
+        from django.core.exceptions import ImproperlyConfigured
+
+        raise ImproperlyConfigured(
+            "The SECRET_KEY environment variable must be set in production."
+        )
+
+ALLOWED_HOSTS = _env_list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
+CSRF_TRUSTED_ORIGINS = _env_list("CSRF_TRUSTED_ORIGINS", default=[])
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
