@@ -18,7 +18,6 @@ dependencies = [
     "gunicorn>=23.0.0",
     "markdown>=3.10",
     "pillow>=12.0.0",
-    "uwsgi>=2.0.31",
 ]
 
 
