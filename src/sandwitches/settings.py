@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from django.core.exceptions import ImproperlyConfigured
+from . import storage
 
 DEBUG = bool(os.environ.get("DEBUG", default=0))  # ty:ignore[no-matching-overload]
 
@@ -25,6 +26,10 @@ if not SECRET_KEY:
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1, localhost").split(",")
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
 DATABASE_FILE = Path(os.environ.get("DATABASE_FILE", default="/db/db.sqlite3"))  # ty:ignore[no-matching-overload]
+
+storage.is_database_readable(DATABASE_FILE)
+storage.is_database_writable(DATABASE_FILE)
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -82,6 +87,27 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": DATABASE_FILE,
     }
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+    },
 }
 
 
