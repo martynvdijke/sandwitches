@@ -71,10 +71,10 @@ def get_recipe_of_the_day(request):
 
 @api.get("v1/tags", response=list[TagSchema])
 def get_tags(request):
-    return TagSchema.objects.all()  # ty:ignore[unresolved-attribute]
+    return Tag.objects.all()  # ty:ignore[unresolved-attribute]
 
 
 @api.get("v1/tags/{tag_id}", response=TagSchema)
 def get_tag(request, tag_id: int):
-    tag = get_object_or_404(TagSchema, id=tag_id)
+    tag = get_object_or_404(Tag, id=tag_id)
     return tag
