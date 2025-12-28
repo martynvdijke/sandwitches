@@ -23,21 +23,21 @@
     </header>
       <h4>{% trans "Description" %}</h4>
       {% if recipe.description %}
-        {{ recipe.description }}
+        {{ recipe.description|convert_markdown|safe }}
       {% else %}
         <p>{% trans "No description yet." %}</p>
       {% endif %}
 
       <h4>{% trans "Ingredients" %}</h4>
       {% if recipe.ingredients %}
-        {{ recipe.ingredients }}
+        {{ recipe.ingredients|convert_markdown|safe }}
       {% else %}
         <p>{% trans "No ingredients listed." %}</p>
       {% endif %}
 
       <h4>{% trans "Instructions" %}</h4>
       {% if recipe.instructions %}
-        {{ recipe.instructions }}
+        {{ recipe.instructions|convert_markdown|safe }}
       {% else %}
         <p>{% trans "No instructions yet." %}</p>
       {% endif %}

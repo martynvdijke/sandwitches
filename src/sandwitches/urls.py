@@ -22,9 +22,6 @@ from .api import api
 from django.conf.urls.i18n import i18n_patterns
 
 
-from django.conf import settings
-from django.conf.urls.static import static
-from debug_toolbar.toolbar import debug_toolbar_urls
 import os
 import sys
 
@@ -34,6 +31,7 @@ urlpatterns = [
     path("signup/", views.signup, name="signup"),
     path("admin/", admin.site.urls),
     path("api/", api.urls),
+    path("media/<path:file_path>", views.media, name="media"),
     path("", views.index, name="index"),
 ]
 
@@ -50,7 +48,3 @@ if "test" not in sys.argv or "PYTEST_VERSION" in os.environ:
     urlpatterns = [
         *urlpatterns,
     ] + debug_toolbar_urls()
-
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

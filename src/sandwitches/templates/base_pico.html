@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% load i18n %} {% block extra_head %}
+{% extends "base.html" %} {% load i18n static %} {% block extra_head %}
 <!-- Pico.css (CDN) -->
 <link
   rel="stylesheet"
@@ -128,6 +128,7 @@
     }
   }
 </style>
+<link rel="icon" type="image/svg+xml" href="{% static "icons/favicon.svg" %}">
 {% endblock %} {% block navbar %}
 <header class="container">
   <nav>

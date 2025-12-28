@@ -52,6 +52,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -138,7 +139,10 @@ MEDIA_ROOT = Path("/config/media")
 
 # Static (for CSS etc)
 STATIC_URL = "/static/"
-STATIC_ROOT = Path("/config/staticfiles")
+STATIC_ROOT = Path("/tmp/staticfiles")
+STATIC_URL = "static/"
+
+STATICFILES_DIRS = [BASE_DIR / "static", MEDIA_ROOT]
 
 LANGUAGE_CODE = "en"
 TIME_ZONE = "UTC"
@@ -156,11 +160,12 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

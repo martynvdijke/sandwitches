@@ -10,7 +10,9 @@ import random
 
 from ninja.security import django_auth
 
-api = NinjaAPI()
+from __init__ import __version__
+
+api = NinjaAPI(version=__version__)
 
 
 class RecipeSchema(ModelSchema):

@@ -7,6 +7,10 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
 from .models import Recipe, Rating
 from .forms import RecipeForm, AdminSetupForm, UserSignupForm, RatingForm
+from django.http import HttpResponseBadRequest
+from django.conf import settings
+from django.http import FileResponse, Http404
+from pathlib import Path
 
 User = get_user_model()
 
@@ -119,3 +123,22 @@ def signup(request):
         form = UserSignupForm()
 
     return render(request, "signup.html", {"form": form})
+
+
+def media(request, file_path=None):
+    media_root = getattr(settings, "MEDIA_ROOT", None)
+    if not media_root:
+        return HttpResponseBadRequest("Invalid Media Root Configuration")
+    if not file_path:
+        return HttpResponseBadRequest("Invalid File Path")
+
+    base_path = Path(media_root).resolve()
+    full_path = base_path.joinpath(file_path).resolve()
+    if base_path not in full_path.parents:
+        return HttpResponseBadRequest("Access Denied")
+
+    if not full_path.exists() or not full_path.is_file():
+        raise Http404("File not found")
+
+    response = FileResponse(open(full_path, "rb"), as_attachment=True)
+    return response
