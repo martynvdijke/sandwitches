@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-
+from django.utils.translation import gettext as _
 from .models import Recipe, Rating
 from .forms import RecipeForm, AdminSetupForm, UserSignupForm, RatingForm
 
@@ -65,9 +65,9 @@ def recipe_rate(request, pk):
         Rating.objects.update_or_create(  # ty:ignore[unresolved-attribute]
             recipe=recipe, user=request.user, defaults={"score": score}
         )
-        messages.success(request, "Your rating has been saved.")
+        messages.success(request, _("Your rating has been saved."))
     else:
-        messages.error(request, "Could not save rating.")
+        messages.error(request, _("Could not save rating."))
     return redirect("recipe_detail", slug=recipe.slug)
 
 
@@ -94,7 +94,7 @@ def setup(request):
             # log in the newly created admin
             user.backend = "django.contrib.auth.backends.ModelBackend"
             login(request, user)
-            messages.success(request, "Admin account created and signed in.")
+            messages.success(request, _("Admin account created and signed in."))
             return redirect(reverse("admin:index"))
     else:
         form = AdminSetupForm()
@@ -113,7 +113,7 @@ def signup(request):
             # log in the newly created user
             user.backend = "django.contrib.auth.backends.ModelBackend"
             login(request, user)
-            messages.success(request, "Account created and signed in.")
+            messages.success(request, _("Account created and signed in."))
             return redirect("index")
     else:
         form = UserSignupForm()

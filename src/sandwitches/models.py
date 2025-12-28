@@ -41,14 +41,19 @@ class Recipe(models.Model):
     description = models.TextField(blank=True)
     ingredients = models.TextField(blank=True)
     instructions = models.TextField(blank=True)
+    uploaded_by = models.ForeignKey(
+        User,
+        related_name="recipes",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     image = models.ImageField(
-        upload_to="recipes/",  # storage will replace with hashed path
+        upload_to="recipes/",
         storage=hashed_storage,
         blank=True,
         null=True,
     )
-
-    # ManyToMany: tags are reusable and shared between recipes
     tags = models.ManyToManyField(Tag, blank=True, related_name="recipes")
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -72,7 +77,6 @@ class Recipe(models.Model):
         super().save(*args, **kwargs)
 
     def tag_list(self):
-        # returns list of tag names
         return list(self.tags.values_list("name", flat=True))  # ty:ignore[possibly-missing-attribute]
 
     def set_tags_from_string(self, tag_string):
@@ -90,7 +94,6 @@ class Recipe(models.Model):
         self.tags.set(tags)  # ty:ignore[possibly-missing-attribute]
         return self.tags.all()  # ty:ignore[possibly-missing-attribute]
 
-    # add helper methods for ratings
     def average_rating(self):
         agg = self.ratings.aggregate(avg=Avg("score"))  # ty:ignore[unresolved-attribute]
         return agg["avg"] or 0

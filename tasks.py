@@ -40,6 +40,13 @@ def tests(c):
 
 
 @task
+def compile_i8n(c):
+    """Compile i18n message files."""
+    print("Compile i18n message files...")
+    c.run("src/manage.py compilemessages")
+
+
+@task
 def ci(c):
     """Run ci checks linting and pytest."""
     linting(c)
