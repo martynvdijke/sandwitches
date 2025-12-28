@@ -34,7 +34,23 @@ storage.is_database_writable(DATABASE_FILE)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-TASKS = {"default": {"BACKEND": "django.tasks.backends.immediate.ImmediateBackend"}}
+
+TASKS = {
+    "default": {
+        "BACKEND": "django_tasks.backends.database.DatabaseBackend",
+        "QUEUES": ["default", "emails"],
+        "OPTIONS": {
+            "queues": {
+                "low_priority": {
+                    "max_attempts": 5,
+                }
+            },
+            "max_attempts": 10,
+            "backoff_factor": 3,
+            "purge": {"finished": "10 days", "unfinished": "20 days"},
+        },
+    }
+}
 
 # Application definition
 INSTALLED_APPS = [
@@ -45,6 +61,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "sandwitches",
+    "django_tasks",
+    "django_tasks.backends.database",
     "debug_toolbar",
     # "django_recaptcha",
     "simple_history",

@@ -1,10 +1,10 @@
 from django.db import models
-from django.urls import reverse
 from django.utils.text import slugify
 from .storage import HashedFilenameStorage
 from simple_history.models import HistoricalRecords
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
+from .tasks import email_users
 
 hashed_storage = HashedFilenameStorage()
 
@@ -74,6 +74,10 @@ class Recipe(models.Model):
                 slug = f"{base}-{n}"
                 n += 1
             self.slug = slug
+
+        message = f"New recipe added: {self.title}, go check it out at {self.slug}"
+        subject = f"Sandwitches - New Recipe: {self.title} by {self.uploaded_by}"
+        email_users.enqueue(subject=subject, message=message)
         super().save(*args, **kwargs)
 
     def tag_list(self):
@@ -101,8 +105,8 @@ class Recipe(models.Model):
     def rating_count(self):
         return self.ratings.count()  # ty:ignore[unresolved-attribute]
 
-    def get_absolute_url(self):
-        return reverse("recipe_detail", kwargs={"pk": self.pk, "slug": self.slug})
+    # def get_absolute_url(self):
+    #     return reverse("recipe_detail", kwargs={"pk": self.pk, "slug": self.slug})
 
     def __str__(self):
         return self.title
