@@ -69,6 +69,8 @@ class Recipe(models.Model):
         verbose_name_plural = "Recipes"
 
     def save(self, *args, **kwargs):
+        is_new = self._state.adding
+
         if not self.slug:
             base = slugify(self.title)[:240]
             slug = base
@@ -77,16 +79,24 @@ class Recipe(models.Model):
                 slug = f"{base}-{n}"
                 n += 1
             self.slug = slug
+
         super().save(*args, **kwargs)
+
         send_email = getattr(settings, "SEND_EMAIL")
         logging.debug(f"SEND_EMAIL is set to {send_email}")
-        if send_email:
-            email_users.enqueue(recipe_id=self.pk)
+
+        # Only send email notifications when a recipe is created (not on updates)
+        if is_new or settings.DEBUG:
+            if send_email:
+                email_users.enqueue(recipe_id=self.pk)
+            else:
+                logging.warning(
+                    "Email sending is disabled; not sending email notification, make sure SEND_EMAIL is set to True in settings."
+                )
         else:
-            logging.warning(
-                f"Email sending is disabled; not sending email notification, make sure {send_email} is set to True in settings."
+            logging.debug(
+                "Existing recipe saved (update); skipping email notification."
             )
-        
 
     def get_absolute_url(self):
         return reverse("recipe_detail", kwargs={"slug": self.slug})

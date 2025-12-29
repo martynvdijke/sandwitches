@@ -34,13 +34,20 @@ def email_users(context, recipe_id):
 
     return True
 
+
 def send_email(recipe_id, email):
     from .models import Recipe
+
     logging.debug(f"Preparing to send email to: {email}")
     recipe = Recipe.objects.get(pk=recipe_id)  # ty:ignore[unresolved-attribute]
     from_email = getattr(settings, "EMAIL_FROM_ADDRESS")
 
-    full_url = f"https://localhost:8000/{recipe.get_absolute_url()}"
+    recipe_slug = recipe.get_absolute_url()
+    base_url = (
+        settings.CSRF_TRUSTED_ORIGINS[0]
+        if settings.CSRF_TRUSTED_ORIGINS
+        else "http://localhost"
+    ).rstrip("/")
 
     raw_message = f"""
     Hungry? We just added <strong>{recipe.title}</strong> to our collection.
@@ -49,7 +56,7 @@ def send_email(recipe_id, email):
     {recipe.description}
 
     Check out the full recipe, ingredients, and steps here:
-    {full_url}
+    {base_url}{recipe_slug}
 
     Happy Cooking!
 
@@ -61,22 +68,24 @@ def send_email(recipe_id, email):
     <div style="font-family: 'Helvetica', sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px;">
         <h2 style="color: #d35400; text-align: center;">New Recipe: {recipe.title} by {recipe.uploaded_by}</h2>
         <div style="text-align: center; margin: 20px 0;">
-            <img src="{recipe.image.url}" alt="{recipe.title}" style="width: 100%; border-radius: 8px;">
+            <img src="{base_url}{recipe.image.url}" alt="{recipe.title}" style="width: 100%; border-radius: 8px;">
         </div>
         <p style="font-size: 16px; line-height: 1.5; color: #333;">
             Hungry? We just added <strong>{recipe.title}</strong> to our collection.
-            
+            <br>
             It's a delicious recipe that you won't want to miss!
+            <br>
             {recipe.description}
-
+            <br>
+            Check out the full recipe, ingredients, and steps here:
             Click the button below to see how to make it!
-
+            <br>
             Happy Cooking!
-
+            <br>
             The Sandwitches Team
         </p>
         <div style="text-align: center; margin-top: 30px;">
-            <a href="{full_url}" style="background-color: #e67e22; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">VIEW RECIPE</a>
+            <a href="{base_url}{recipe_slug}" style="background-color: #e67e22; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">VIEW RECIPE</a>
         </div>
     </div>
     """

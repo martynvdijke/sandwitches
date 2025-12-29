@@ -10,13 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-from curses.ascii import EM
-
 from pathlib import Path
 import os
 from django.core.exceptions import ImproperlyConfigured
 from . import storage
-import logging
 
 DEBUG = bool(os.environ.get("DEBUG", default=0))  # ty:ignore[no-matching-overload]
 
@@ -68,7 +65,6 @@ INSTALLED_APPS = [
     "django_tasks.backends.database",
     "debug_toolbar",
     "imagekit",
-    # "django_recaptcha",
     "simple_history",
 ]
 
