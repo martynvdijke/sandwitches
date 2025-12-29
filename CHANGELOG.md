@@ -1,3 +1,27 @@
+# [1.2.0](https://github.com/martynvdijke/sandwitches/compare/v1.1.0...v1.2.0) (2025-12-29)
+
+
+### Bug Fixes
+
+* **ci:** setup ci settings ([4c11a82](https://github.com/martynvdijke/sandwitches/commit/4c11a823c6213dd13e6a9fd5a1e9182f2eeac829))
+* collect static for docker image ([3a94c16](https://github.com/martynvdijke/sandwitches/commit/3a94c16c525165cb9cf74af47fbf6dbf35d2202e))
+* **deps:** add in svg icons and banners ([ac2d7db](https://github.com/martynvdijke/sandwitches/commit/ac2d7dbfc842a25984319b80ff35c607da4fd1f2))
+* fix correct model for tags schema ([217b4b4](https://github.com/martynvdijke/sandwitches/commit/217b4b453b38ab3ff41e39c7279827ee98ed92d9))
+* tags api use ([87c7c16](https://github.com/martynvdijke/sandwitches/commit/87c7c164583f19d85f9bed4ae8f40163d386729e))
+* Update tasks.py with collect static ([898370b](https://github.com/martynvdijke/sandwitches/commit/898370bac71b3ec917f087fd4b5d2090bde98a02))
+
+
+### Features
+
+* add image resizing and profile model ([09adec9](https://github.com/martynvdijke/sandwitches/commit/09adec93191ab40db082386892b151021f56a051))
+* add in tags and users to api ([d9e35de](https://github.com/martynvdijke/sandwitches/commit/d9e35deaa6097680012e9fbe28dfeb22021af0b5))
+* add initial internalization support ([c7d2b9e](https://github.com/martynvdijke/sandwitches/commit/c7d2b9e2c718ce2829e24ca3c6613f8427a9d163))
+* initial email support ([acbe6b8](https://github.com/martynvdijke/sandwitches/commit/acbe6b80262c50326fb4e4477973914e9cd9e765))
+* move to uvicorn & gunicorn for http serving ([55dbc4a](https://github.com/martynvdijke/sandwitches/commit/55dbc4a19f2e9d9d78d15fd1193eb0821655aeb5))
+* serve files staticlly ([e93b19f](https://github.com/martynvdijke/sandwitches/commit/e93b19ff7aabedc3d30de7c71e84a639a86ea6eb))
+* try to implement django task backend for email notifications ([d7f107f](https://github.com/martynvdijke/sandwitches/commit/d7f107f2aebf3808cc8498dacaea7b707bacfeb9))
+* update ty checks and make code ty compatible ([325a7ec](https://github.com/martynvdijke/sandwitches/commit/325a7ec69f6c14ba14f72661bb49ab92dd61baf2))
+
 # [1.1.0](https://github.com/martynvdijke/sandwitches/compare/v1.0.1...v1.1.0) (2025-12-23)
 
 
