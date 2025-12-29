@@ -8,7 +8,6 @@ assets/external/
 *.jpg
 *.jpeg
 *.gif
-*.svg
 *.sqlite3
 .venv/*
 .ruff_cache/*
