@@ -29,16 +29,15 @@ def email_users(context, recipe_id):
         logging.warning("No users with valid emails found.")
         return 0
 
-    for email in emails:
-        send_email(recipe_id, email)
+    send_emails(recipe_id, emails)
 
     return True
 
 
-def send_email(recipe_id, email):
+def send_emails(recipe_id, emails):
     from .models import Recipe
 
-    logging.debug(f"Preparing to send email to: {email}")
+    logging.debug(f"Preparing to send email to: {emails}")
     recipe = Recipe.objects.get(pk=recipe_id)  # ty:ignore[unresolved-attribute]
     from_email = getattr(settings, "EMAIL_FROM_ADDRESS")
 
@@ -94,7 +93,7 @@ def send_email(recipe_id, email):
         subject=f"Sandwitches - New Recipe: {recipe.title} by {recipe.uploaded_by}",
         body=wrapped_message,
         from_email=from_email,
-        to=[email],
+        bbc=emails,
     )
     msg.attach_alternative(html_content, "text/html")
     msg.send()

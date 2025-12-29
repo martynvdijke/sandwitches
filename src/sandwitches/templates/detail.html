@@ -11,7 +11,11 @@
   <article class="card">
     <figure>
       {% if recipe.image %}
-        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+        <img src="{{ recipe.image_large.url }}" 
+             srcset="{{ recipe.image_medium.url }} 700w, {{ recipe.image_large.url }} 1200w" 
+             sizes="(max-width: 768px) 95vw, 900px"
+             alt="{{ recipe.title }}" 
+             loading="lazy">
       {% endif %}
     </figure>
 {% trans "Description" %}

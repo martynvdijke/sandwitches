@@ -9,9 +9,33 @@ from django.conf import settings
 import logging
 from django.urls import reverse
 
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill
+
 hashed_storage = HashedFilenameStorage()
 
 User = get_user_model()
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    avatar = models.ImageField(upload_to="avatars", blank=True, null=True)
+    avatar_thumbnail = ImageSpecField(
+        source="avatar",
+        processors=[ResizeToFill(100, 50)],
+        format="JPEG",
+        options={"quality": 60},
+    )
+    bio = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Profile"
+        verbose_name_plural = "Profiles"
+
+    def __str__(self):
+        return f"{self.user.username}'s Profile"  # ty:ignore[possibly-missing-attribute]
 
 
 class Tag(models.Model):
@@ -57,8 +81,31 @@ class Recipe(models.Model):
         blank=True,
         null=True,
     )
+    image_thumbnail = ImageSpecField(
+        source="image",
+        processors=[ResizeToFill(150, 150)],
+        format="JPEG",
+        options={"quality": 70},
+    )
+    image_small = ImageSpecField(
+        source="image",
+        processors=[ResizeToFill(400, 300)],
+        format="JPEG",
+        options={"quality": 75},
+    )
+    image_medium = ImageSpecField(
+        source="image",
+        processors=[ResizeToFill(700, 500)],
+        format="JPEG",
+        options={"quality": 85},
+    )
+    image_large = ImageSpecField(
+        source="image",
+        processors=[ResizeToFill(1200, 800)],
+        format="JPEG",
+        options={"quality": 95},
+    )
     tags = models.ManyToManyField(Tag, blank=True, related_name="recipes")
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
@@ -85,7 +132,6 @@ class Recipe(models.Model):
         send_email = getattr(settings, "SEND_EMAIL")
         logging.debug(f"SEND_EMAIL is set to {send_email}")
 
-        # Only send email notifications when a recipe is created (not on updates)
         if is_new or settings.DEBUG:
             if send_email:
                 email_users.enqueue(recipe_id=self.pk)

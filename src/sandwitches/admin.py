@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Recipe, Tag, Rating
+from .models import Recipe, Tag, Rating, Profile
 from django.utils.html import format_html
 
 
@@ -23,3 +23,4 @@ class RecipeAdmin(admin.ModelAdmin):
 
 admin.site.register(Tag)
 admin.site.register(Rating)
+admin.site.register(Profile)
