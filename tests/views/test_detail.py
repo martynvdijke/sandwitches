@@ -112,7 +112,7 @@ def test_invalid_rating_rejected(client):
     client.login(username="rater2", password="pw222")
     resp = client.post(  # noqa: F841
         reverse("recipe_rate", kwargs={"pk": recipe.pk}),
-        {"score": "10"},
+        {"score": "11"},
         follow=True,
     )
     assert Rating.objects.filter(recipe=recipe, user=user).count() == 0

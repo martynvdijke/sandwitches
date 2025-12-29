@@ -17,30 +17,30 @@ def test_rate_recipe_authenticated(client, user_factory, recipe):
     client.force_login(user)
 
     url = reverse("recipe_rate", kwargs={"pk": recipe.pk})
-    data = {"score": "5"}
+    data = {"score": "8.5"}
 
     response = client.post(url, data, follow=True)
 
     assert response.status_code == 200
-    assert Rating.objects.filter(recipe=recipe, user=user, score=5).exists()
-    assert recipe.average_rating() == 5.0
+    assert Rating.objects.filter(recipe=recipe, user=user, score=8.5).exists()
+    assert recipe.average_rating() == 8.5
 
 
 @pytest.mark.django_db
 def test_rate_recipe_update_existing(client, user_factory, recipe):
     user = user_factory()
     client.force_login(user)
-    Rating.objects.create(recipe=recipe, user=user, score=3)
+    Rating.objects.create(recipe=recipe, user=user, score=3.5)
 
     url = reverse("recipe_rate", kwargs={"pk": recipe.pk})
-    data = {"score": "1"}
+    data = {"score": "9.2"}
 
     response = client.post(url, data, follow=True)
 
     assert response.status_code == 200
     r_obj = Rating.objects.get(recipe=recipe, user=user)
-    assert r_obj.score == 1
-    assert recipe.average_rating() == 1.0
+    assert r_obj.score == 9.2
+    assert recipe.average_rating() == 9.2
 
 
 @pytest.mark.django_db

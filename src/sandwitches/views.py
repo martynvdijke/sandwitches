@@ -66,7 +66,7 @@ def recipe_rate(request, pk):
 
     form = RatingForm(request.POST)
     if form.is_valid():
-        score = int(form.cleaned_data["score"])
+        score = float(form.cleaned_data["score"])
         Rating.objects.update_or_create(  # ty:ignore[unresolved-attribute]
             recipe=recipe, user=request.user, defaults={"score": score}
         )
