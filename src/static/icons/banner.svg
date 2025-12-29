@@ -1,0 +1,33 @@
+<svg width="800" height="200" viewBox="0 0 800 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="bannerBg" x1="0" y1="0" x2="800" y2="200" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#2E1437" />
+            <stop offset="1" stop-color="#4A235A" />
+        </linearGradient>
+        <pattern id="magicPattern" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
+            <circle cx="25" cy="25" r="2" fill="#9B59B6" opacity="0.3"/>
+            <path d="M10 10 L13 13 L10 16 L7 13 Z" fill="#7DCE13" opacity="0.3"/>
+        </pattern>
+    </defs>
+    
+    <rect width="800" height="200" fill="url(#bannerBg)"/>
+    <rect width="800" height="200" fill="url(#magicPattern)"/>
+
+    <g transform="translate(30, 10) scale(0.35)">
+        <circle cx="256" cy="256" r="240" fill="url(#magicGlow)" opacity="0.5"/>
+        <g id="sandwichBanner" transform="translate(0, 60)">
+            <path d="M150 380 C150 380 160 420 256 420 C352 420 362 380 362 380 L350 340 H162 L150 380Z" fill="#D38E43" stroke="#A06235" stroke-width="6"/>
+            <path d="M140 345 C160 325 180 355 200 335 C220 315 240 345 260 325 C280 305 300 335 320 315 C340 295 360 325 372 345 L360 355 H152 L140 345Z" fill="#7DCE13" stroke="#519607" stroke-width="4"/>
+            <rect x="160" y="305" width="192" height="25" rx="5" fill="#E74C3C" stroke="#C0392B" stroke-width="4"/>
+            <path d="M165 285 L347 285 L355 310 L157 310 Z" fill="#F7DC6F" stroke="#D4AC0D" stroke-width="4"/>
+            <rect x="160" y="250" width="192" height="40" rx="8" fill="#8B4513" stroke="#5D2E0C" stroke-width="4"/>
+            <path d="M150 255 C150 255 160 200 256 200 C352 200 362 255 362 255 L350 270 H162 L150 255Z" fill="#D38E43" stroke="#A06235" stroke-width="6"/>
+        </g>
+        <g id="witchHatBanner">
+            <ellipse cx="256" cy="265" rx="130" ry="35" fill="#4A235A" stroke="#2E1437" stroke-width="6"/>
+            <path d="M170 250 C180 200 200 100 240 50 C250 35 270 35 280 50 C320 110 330 200 342 250" fill="url(#hatGradient)" stroke="#2E1437" stroke-width="6" stroke-linejoin="round"/>
+            <path d="M185 240 C185 240 256 220 327 240" stroke="#F1C40F" stroke-width="12" fill="none"/>
+            <rect x="241" y="222" width="30" height="25" rx="2" fill="#F1C40F" stroke="#B7950B" stroke-width="3"/>
+        </g>
+    </g>
+</svg>

@@ -13,7 +13,7 @@ def test_index_view_with_recipes(client, db):
         ingredients="Ingredient 1, Ingredient 2",
         instructions="Step 1, Step 2",
     )
-    response = client.get("/recipes/test-recipe/")
+    response = client.get("/recipes/test-recipe/", follow=True)
     assert response.status_code == 200
     assert b"Test Recipe" in response.content
     assert b"This is a test recipe." in response.content

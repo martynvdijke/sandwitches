@@ -1,14 +1,41 @@
 from django.db import models
-from django.urls import reverse
 from django.utils.text import slugify
 from .storage import HashedFilenameStorage
 from simple_history.models import HistoricalRecords
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
+from .tasks import email_users
+from django.conf import settings
+import logging
+from django.urls import reverse
+
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill
 
 hashed_storage = HashedFilenameStorage()
 
 User = get_user_model()
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    avatar = models.ImageField(upload_to="avatars", blank=True, null=True)
+    avatar_thumbnail = ImageSpecField(
+        source="avatar",
+        processors=[ResizeToFill(100, 50)],
+        format="JPEG",
+        options={"quality": 60},
+    )
+    bio = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Profile"
+        verbose_name_plural = "Profiles"
+
+    def __str__(self):
+        return f"{self.user.username}'s Profile"  # ty:ignore[possibly-missing-attribute]
 
 
 class Tag(models.Model):
@@ -25,7 +52,7 @@ class Tag(models.Model):
             base = slugify(self.name)[:55]
             slug = base
             n = 1
-            while Tag.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            while Tag.objects.filter(slug=slug).exclude(pk=self.pk).exists():  # ty:ignore[unresolved-attribute]
                 slug = f"{base}-{n}"
                 n += 1
             self.slug = slug
@@ -41,16 +68,44 @@ class Recipe(models.Model):
     description = models.TextField(blank=True)
     ingredients = models.TextField(blank=True)
     instructions = models.TextField(blank=True)
+    uploaded_by = models.ForeignKey(
+        User,
+        related_name="recipes",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     image = models.ImageField(
-        upload_to="recipes/",  # storage will replace with hashed path
+        upload_to="recipes/",
         storage=hashed_storage,
         blank=True,
         null=True,
     )
-
-    # ManyToMany: tags are reusable and shared between recipes
+    image_thumbnail = ImageSpecField(
+        source="image",
+        processors=[ResizeToFill(150, 150)],
+        format="JPEG",
+        options={"quality": 70},
+    )
+    image_small = ImageSpecField(
+        source="image",
+        processors=[ResizeToFill(400, 300)],
+        format="JPEG",
+        options={"quality": 75},
+    )
+    image_medium = ImageSpecField(
+        source="image",
+        processors=[ResizeToFill(700, 500)],
+        format="JPEG",
+        options={"quality": 85},
+    )
+    image_large = ImageSpecField(
+        source="image",
+        processors=[ResizeToFill(1200, 800)],
+        format="JPEG",
+        options={"quality": 95},
+    )
     tags = models.ManyToManyField(Tag, blank=True, related_name="recipes")
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
@@ -61,19 +116,39 @@ class Recipe(models.Model):
         verbose_name_plural = "Recipes"
 
     def save(self, *args, **kwargs):
+        is_new = self._state.adding
+
         if not self.slug:
             base = slugify(self.title)[:240]
             slug = base
             n = 1
-            while Recipe.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            while Recipe.objects.filter(slug=slug).exclude(pk=self.pk).exists():  # ty:ignore[unresolved-attribute]
                 slug = f"{base}-{n}"
                 n += 1
             self.slug = slug
+
         super().save(*args, **kwargs)
 
+        send_email = getattr(settings, "SEND_EMAIL")
+        logging.debug(f"SEND_EMAIL is set to {send_email}")
+
+        if is_new or settings.DEBUG:
+            if send_email:
+                email_users.enqueue(recipe_id=self.pk)
+            else:
+                logging.warning(
+                    "Email sending is disabled; not sending email notification, make sure SEND_EMAIL is set to True in settings."
+                )
+        else:
+            logging.debug(
+                "Existing recipe saved (update); skipping email notification."
+            )
+
+    def get_absolute_url(self):
+        return reverse("recipe_detail", kwargs={"slug": self.slug})
+
     def tag_list(self):
-        # returns list of tag names
-        return list(self.tags.values_list("name", flat=True))
+        return list(self.tags.values_list("name", flat=True))  # ty:ignore[possibly-missing-attribute]
 
     def set_tags_from_string(self, tag_string):
         """
@@ -83,24 +158,19 @@ class Recipe(models.Model):
         names = [t.strip() for t in (tag_string or "").split(",") if t.strip()]
         tags = []
         for name in names:
-            tag = Tag.objects.filter(name__iexact=name).first()
+            tag = Tag.objects.filter(name__iexact=name).first()  # ty:ignore[unresolved-attribute]
             if not tag:
-                tag = Tag.objects.create(name=name)
+                tag = Tag.objects.create(name=name)  # ty:ignore[unresolved-attribute]
             tags.append(tag)
-        # replace existing tags with these
-        self.tags.set(tags)
-        return self.tags.all()
+        self.tags.set(tags)  # ty:ignore[possibly-missing-attribute]
+        return self.tags.all()  # ty:ignore[possibly-missing-attribute]
 
-    # add helper methods for ratings
     def average_rating(self):
-        agg = self.ratings.aggregate(avg=Avg("score"))
+        agg = self.ratings.aggregate(avg=Avg("score"))  # ty:ignore[unresolved-attribute]
         return agg["avg"] or 0
 
     def rating_count(self):
-        return self.ratings.count()
-
-    def get_absolute_url(self):
-        return reverse("recipe_detail", kwargs={"pk": self.pk, "slug": self.slug})
+        return self.ratings.count()  # ty:ignore[unresolved-attribute]
 
     def __str__(self):
         return self.title

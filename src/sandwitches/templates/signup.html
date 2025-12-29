@@ -1,12 +1,12 @@
 {% extends "base_pico.html" %}
-{% load static %}
-{% block title %}Sign Up{% endblock %}
+{% load static i18n %}
+{% block title %}{% trans "Sign Up" %}{% endblock %}
 
 {% block content %}
 <div class="container" style="max-width:720px; margin:2rem auto;">
   <article class="card">
     <div class="card-body">
-      <h2>Sign up</h2>
+      <h2>{% trans "Sign up" %}</h2> 
 
       <form method="post" novalidate>
         {% csrf_token %}
@@ -20,27 +20,27 @@
           </div>
         {% endif %}
 
-        <label for="{{ form.username.id_for_label }}">Username</label>
+        <label for="{{ form.username.id_for_label }}">{% trans "Username" %}</label>
         {{ form.username }}
 
-        <label for="{{ form.email.id_for_label }}">Email (optional)</label>
+        <label for="{{ form.email.id_for_label }}">{% trans "Email (optional)" %}</label>
         {{ form.email }}
 
-        <label for="{{ form.first_name.id_for_label }}">First name</label>
+        <label for="{{ form.first_name.id_for_label }}">{% trans "First name" %}</label>
         {{ form.first_name }}
 
-        <label for="{{ form.last_name.id_for_label }}">Last name</label>
+        <label for="{{ form.last_name.id_for_label }}">{% trans "Last name" %}</label>
         {{ form.last_name }}
 
-        <label for="{{ form.password1.id_for_label }}">Password</label>
+        <label for="{{ form.password1.id_for_label }}">{% trans "Password" %}</label>
         {{ form.password1 }}
 
-        <label for="{{ form.password2.id_for_label }}">Confirm password</label>
+        <label for="{{ form.password2.id_for_label }}">{% trans "Confirm password" %}</label>
         {{ form.password2 }}
 
         <p style="margin-top:1rem;">
-          <button type="submit">Sign Up</button>
-          <a class="contrast" href="{% url 'index' %}">Cancel</a>
+          <button type="submit">{% trans "Sign Up" %}</button>
+          <a class="contrast" href="{% url 'index' %}">{% trans "Cancel" %}</a>
         </p>
       </form>
     </div>

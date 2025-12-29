@@ -16,27 +16,31 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from . import views
 from .api import api
+from django.conf.urls.i18n import i18n_patterns
 
 
-from django.conf import settings
-from django.conf.urls.static import static
-from debug_toolbar.toolbar import debug_toolbar_urls
 import os
 import sys
 
 
 urlpatterns = [
-    path("", views.index, name="index"),
+    path("i18n/", include("django.conf.urls.i18n")),
+    path("signup/", views.signup, name="signup"),
     path("admin/", admin.site.urls),
+    path("api/", api.urls),
+    path("media/<path:file_path>", views.media, name="media"),
+    path("", views.index, name="index"),
+]
+
+urlpatterns += i18n_patterns(
     path("recipes/<slug:slug>/", views.recipe_detail, name="recipe_detail"),
     path("setup/", views.setup, name="setup"),
-    path("api/", api.urls),
-    path("signup/", views.signup, name="signup"),
     path("recipes/<int:pk>/rate/", views.recipe_rate, name="recipe_rate"),
-]
+    prefix_default_language=True,
+)
 
 if "test" not in sys.argv or "PYTEST_VERSION" in os.environ:
     from debug_toolbar.toolbar import debug_toolbar_urls
@@ -44,7 +48,3 @@ if "test" not in sys.argv or "PYTEST_VERSION" in os.environ:
     urlpatterns = [
         *urlpatterns,
     ] + debug_toolbar_urls()
-
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

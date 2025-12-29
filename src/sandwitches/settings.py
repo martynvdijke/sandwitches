@@ -12,21 +12,45 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from django.core.exceptions import ImproperlyConfigured
+from . import storage
 
+DEBUG = bool(os.environ.get("DEBUG", default=0))  # ty:ignore[no-matching-overload]
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
-DEBUG = bool(os.environ.get("DEBUG", default=0))
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1").split(",")
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
+if not SECRET_KEY:
+    raise ImproperlyConfigured(
+        "The SECRET_KEY environment variable must be set in production."
+    )
 
-# RECAPTCHA_PROXY = {'http': 'http://127.0.0.1:8000', 'https': 'https://127.0.0.1:8000'}
-# RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
-# RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1, localhost").split(",")
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
+DATABASE_FILE = Path(os.environ.get("DATABASE_FILE", default="/db/db.sqlite3"))  # ty:ignore[no-matching-overload]
+
+storage.is_database_readable(DATABASE_FILE)
+storage.is_database_writable(DATABASE_FILE)
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-TASKS = {"default": {"BACKEND": "django.tasks.backends.immediate.ImmediateBackend"}}
+
+TASKS = {
+    "default": {
+        "BACKEND": "django_tasks.backends.database.DatabaseBackend",
+        "QUEUES": ["default", "emails"],
+        "OPTIONS": {
+            "queues": {
+                "low_priority": {
+                    "max_attempts": 5,
+                }
+            },
+            "max_attempts": 10,
+            "backoff_factor": 3,
+            "purge": {"finished": "10 days", "unfinished": "20 days"},
+        },
+    }
+}
 
 # Application definition
 INSTALLED_APPS = [
@@ -37,14 +61,18 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "sandwitches",
+    "django_tasks",
+    "django_tasks.backends.database",
     "debug_toolbar",
-    # "django_recaptcha",
+    "imagekit",
     "simple_history",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -67,6 +95,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.csrf",
+                "django.template.context_processors.i18n",
             ],
         },
     },
@@ -74,15 +103,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "sandwitches.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": Path("/config/db.sqlite3"),
+        "NAME": DATABASE_FILE,
     }
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": os.getenv("LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+    },
 }
 
 
@@ -111,16 +153,20 @@ MEDIA_ROOT = Path("/config/media")
 
 # Static (for CSS etc)
 STATIC_URL = "/static/"
-STATIC_ROOT = Path("/config/staticfiles")
+STATIC_ROOT = Path("/tmp/staticfiles")
+STATIC_URL = "static/"
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
+STATICFILES_DIRS = [BASE_DIR / "static", MEDIA_ROOT]
 
-LANGUAGE_CODE = "en-us"
-
+LANGUAGE_CODE = "en"
 TIME_ZONE = "UTC"
-
 USE_I18N = True
+LANGUAGES = [
+    ("en", "English"),
+    ("nl", "Nederlands"),
+]
+
+LOCALE_PATHS = [BASE_DIR / "locale"]
 
 USE_TZ = True
 
@@ -128,11 +174,32 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = "static/"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_USE_TLS = os.environ.get("SMTP_USE_TLS")
+EMAIL_HOST = os.environ.get("SMTP_HOST")
+EMAIL_HOST_USER = os.environ.get("SMTP_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("SMTP_PASSWORD")
+EMAIL_PORT = os.environ.get("SMTP_PORT")
+EMAIL_FROM_ADDRESS = os.environ.get("SMTP_FROM_EMAIL")
+SEND_EMAIL = all(
+    v is not None
+    for v in [
+        EMAIL_HOST,
+        EMAIL_HOST_USER,
+        EMAIL_HOST_PASSWORD,
+        EMAIL_PORT,
+        EMAIL_FROM_ADDRESS,
+    ]
+)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

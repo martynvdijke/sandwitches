@@ -1,5 +1,5 @@
 from ninja import NinjaAPI
-from .models import Recipe
+from .models import Recipe, Tag
 
 from ninja import ModelSchema
 from ninja import Schema
@@ -8,13 +8,22 @@ from django.shortcuts import get_object_or_404
 from datetime import date
 import random
 
+from ninja.security import django_auth
 
-api = NinjaAPI()
+from __init__ import __version__
+
+api = NinjaAPI(version=__version__)
 
 
 class RecipeSchema(ModelSchema):
     class Meta:
         model = Recipe
+        fields = "__all__"
+
+
+class TagSchema(ModelSchema):
+    class Meta:
+        model = Tag
         fields = "__all__"
 
 
@@ -35,17 +44,14 @@ def me(request):
     return request.user
 
 
-# TODO: enable recipe creation via API
-# @api.post("v1/recipe", auth=django_auth, response=RecipeSchema)
-# def create_recipe(request, payload: RecipeSchema):
-#     recipe = Recipe.objects.create(**payload.dict())
-#     return recipe
+@api.get("v1/users", auth=django_auth, response=list[UserSchema])
+def users(request):
+    return User.objects.all()
 
 
 @api.get("v1/recipes", response=list[RecipeSchema])
 def get_recipes(request):
-    recipes = Recipe.objects.all()
-    return recipes
+    return Recipe.objects.all()  # ty:ignore[unresolved-attribute]
 
 
 @api.get("v1/recipes/{recipe_id}", response=RecipeSchema)
@@ -56,10 +62,21 @@ def get_recipe(request, recipe_id: int):
 
 @api.get("v1/recipe-of-the-day", response=RecipeSchema)
 def get_recipe_of_the_day(request):
-    recipes = list(Recipe.objects.all())
+    recipes = list(Recipe.objects.all())  # ty:ignore[unresolved-attribute]
     if not recipes:
         return None
     today = date.today()
     random.seed(today.toordinal())
     recipe = random.choice(recipes)
     return recipe
+
+
+@api.get("v1/tags", response=list[TagSchema])
+def get_tags(request):
+    return Tag.objects.all()  # ty:ignore[unresolved-attribute]
+
+
+@api.get("v1/tags/{tag_id}", response=TagSchema)
+def get_tag(request, tag_id: int):
+    tag = get_object_or_404(Tag, id=tag_id)
+    return tag

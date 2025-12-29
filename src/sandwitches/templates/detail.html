@@ -1,31 +1,50 @@
 {% extends "base_pico.html" %}
 {% block title %}{{ recipe.title }} — Sandwitch{% endblock %}
-
 {% block content %}
 
-{% load markdown_extras %}
+{% load i18n markdown_extras %}
 <nav aria-label="breadcrumb" class="container">
-  <a href="{% url 'index' %}">&larr; Back to all</a>
+  <a href="{% url 'index' %}">&larr; {% trans "Back to all" %}</a>
 </nav>
 
 <div class="grid">
   <article class="card">
     <figure>
       {% if recipe.image %}
-        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+        <img src="{{ recipe.image_large.url }}" 
+             srcset="{{ recipe.image_medium.url }} 700w, {{ recipe.image_large.url }} 1200w" 
+             sizes="(max-width: 768px) 95vw, 900px"
+             alt="{{ recipe.title }}" 
+             loading="lazy">
       {% endif %}
     </figure>
+{% trans "Description" %}
     <header>
       {{ recipe.title }}
+      {% if recipe.uploaded_by %}
+        <small>{% trans "Uploaded by" %}: {{ recipe.uploaded_by.get_full_name|default:recipe.uploaded_by.username }}</small>
+      {% endif %}
     </header>
-      <h4>Description</h4>
-      {{ recipe.description|convert_markdown|safe|default:"No description yet." }}
+      <h4>{% trans "Description" %}</h4>
+      {% if recipe.description %}
+        {{ recipe.description|convert_markdown|safe }}
+      {% else %}
+        <p>{% trans "No description yet." %}</p>
+      {% endif %}
 
-      <h4>Ingredients</h4>
-      {{ recipe.ingredients|convert_markdown|safe|default:"No ingredients listed." }}
+      <h4>{% trans "Ingredients" %}</h4>
+      {% if recipe.ingredients %}
+        {{ recipe.ingredients|convert_markdown|safe }}
+      {% else %}
+        <p>{% trans "No ingredients listed." %}</p>
+      {% endif %}
 
-      <h4>Instructions</h4>
-      {{ recipe.instructions|convert_markdown|safe|default:"No instructions yet." }}
+      <h4>{% trans "Instructions" %}</h4>
+      {% if recipe.instructions %}
+        {{ recipe.instructions|convert_markdown|safe }}
+      {% else %}
+        <p>{% trans "No instructions yet." %}</p>
+      {% endif %}
     
     <div class="tags-row">
       <div style="margin-top:12px;">
@@ -36,22 +55,22 @@
     </div>
 
     <div style="margin-top:1rem;">
-      <h4>Rating</h4>
+      <h4>{% trans "Rating" %}</h4>
       {% if rating_count %}
-        <p>Average: {{ avg_rating|floatformat:1 }} ({{ rating_count }} vote{% if rating_count %}s{% endif %})</p>
+        <p>{% trans "Average:" %} {{ avg_rating|floatformat:1 }} ({{ rating_count }} {% trans "vote" %}{% if rating_count %}s{% endif %})</p>
       {% else %}
-        <p>No ratings yet.</p>
+        <p>{% trans "No ratings yet." %}</p>
       {% endif %}
 
       {% if user.is_authenticated %}
           {% if user_rating %}
-            <p>Your rating: {{ user_rating.score }}</p>
+            <p>{% trans "Your rating:" %} {{ user_rating.score }}</p>
           {% else %}
             <form method="post" action="{% url 'recipe_rate' pk=recipe.pk %}">
                       {% csrf_token %}
 
                       <fieldset>
-                        <legend>What would you rate this sandwich?</legend>
+                        <legend>{% trans "What would you rate this sandwich?" %}</legend>
 
                         {% if rating_form.score.errors %}
                           <div class="card-panel" role="alert">
@@ -85,12 +104,12 @@
                         </div>
                       </fieldset>
                       <p style="margin-top:0.5rem;">
-                        <button type="submit">{% if user_rating %}Update{% else %}Rate{% endif %}</button>
+                        <button type="submit">{% if user_rating %}{% trans "Update" %}{% else %}{% trans "Rate" %}{% endif %}</button>
                       </p>
                     </form>
           {% endif %}        
       {% else %}
-        <p><a href="{% url 'admin:login' %}">Log in</a> to rate this recipe.</p>
+        <p><a href="{% url 'admin:login' %}">{% trans "Log in" %}</a> {% trans "to rate this recipe." %}</p>
       {% endif %}
     </div>
 

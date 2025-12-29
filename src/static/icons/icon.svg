@@ -1,0 +1,40 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="hatGradient" x1="256" y1="50" x2="256" y2="200" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#4A235A" />
+            <stop offset="1" stop-color="#6C3483" />
+        </linearGradient>
+        <radialGradient id="magicGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(256 256) rotate(90) scale(250)">
+            <stop stop-color="#9B59B6" stop-opacity="0.2"/>
+            <stop offset="1" stop-color="#9B59B6" stop-opacity="0"/>
+        </radialGradient>
+    </defs>
+    
+    <circle cx="256" cy="256" r="240" fill="url(#magicGlow)"/>
+
+    <g id="sandwich" transform="translate(0, 60)">
+        <path d="M150 380 C150 380 160 420 256 420 C352 420 362 380 362 380 L350 340 H162 L150 380Z" fill="#D38E43" stroke="#A06235" stroke-width="6"/>
+        <path d="M140 345 C160 325 180 355 200 335 C220 315 240 345 260 325 C280 305 300 335 320 315 C340 295 360 325 372 345 L360 355 H152 L140 345Z" fill="#7DCE13" stroke="#519607" stroke-width="4"/>
+        <rect x="160" y="305" width="192" height="25" rx="5" fill="#E74C3C" stroke="#C0392B" stroke-width="4"/>
+        <path d="M165 285 L347 285 L355 310 L157 310 Z" fill="#F7DC6F" stroke="#D4AC0D" stroke-width="4"/>
+        <rect x="160" y="250" width="192" height="40" rx="8" fill="#8B4513" stroke="#5D2E0C" stroke-width="4"/>
+        <path d="M150 255 C150 255 160 200 256 200 C352 200 362 255 362 255 L350 270 H162 L150 255Z" fill="#D38E43" stroke="#A06235" stroke-width="6"/>
+    </g>
+
+    <g id="witchHat">
+        <ellipse cx="256" cy="265" rx="130" ry="35" fill="#4A235A" stroke="#2E1437" stroke-width="6"/>
+        <path d="M170 250 C180 200 200 100 240 50 C250 35 270 35 280 50 C320 110 330 200 342 250" fill="url(#hatGradient)" stroke="#2E1437" stroke-width="6" stroke-linejoin="round"/>
+        <path d="M185 240 C185 240 256 220 327 240" stroke="#F1C40F" stroke-width="12" fill="none"/>
+        <rect x="241" y="222" width="30" height="25" rx="2" fill="#F1C40F" stroke="#B7950B" stroke-width="3"/>
+        <rect x="248" y="228" width="16" height="13" rx="1" fill="#4A235A"/>
+    </g>
+
+    <g id="magic" fill="#7DCE13">
+        <path d="M100 150 L110 160 L100 170 L90 160 Z" />
+        <path d="M400 180 L415 195 L400 210 L385 195 Z" />
+        <circle cx="120" cy="220" r="8" fill="#9B59B6"/>
+        <circle cx="380" cy="120" r="10" fill="#F1C40F"/>
+        <path d="M50 300 L58 308 L50 316 L42 308 Z" fill="#9B59B6"/>
+        <path d="M450 350 L460 360 L450 370 L440 360 Z" fill="#7DCE13"/>
+    </g>
+</svg>
