@@ -37,6 +37,16 @@ class Error(Schema):
     message: str
 
 
+class RatingResponseSchema(Schema):
+    average: float
+    count: int
+
+
+@api.get("ping")
+def ping(request):
+    return {"status": "ok", "message": "pong"}
+
+
 @api.get("v1/me", response={200: UserSchema, 403: Error})
 def me(request):
     if not request.user.is_authenticated:
@@ -69,6 +79,15 @@ def get_recipe_of_the_day(request):
     random.seed(today.toordinal())
     recipe = random.choice(recipes)
     return recipe
+
+
+@api.get("v1/recipes/{recipe_id}/rating", response=RatingResponseSchema)
+def get_recipe_rating(request, recipe_id: int):
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+    return {
+        "average": recipe.average_rating(),
+        "count": recipe.rating_count(),
+    }
 
 
 @api.get("v1/tags", response=list[TagSchema])

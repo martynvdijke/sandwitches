@@ -83,24 +83,22 @@
                         {% endif %}
 
                         <div class="row">
-                          {% for i in "12345"|make_list %}
-                            <div class="col-sm-2">
-                              <label class="form-check">
-                                <input
-                                  type="radio"
-                                  name="{{ rating_form.score.name }}"
-                                  id="rating-{{ i }}"
-                                  value="{{ i }}"
-                                  {% if user_rating and user_rating.score|stringformat:"s" == i %}
-                                    checked
-                                  {% elif rating_form.score.value == i %}
-                                    checked
-                                  {% endif %}
-                                />
-                                <span>{{ i }}</span>
-                              </label>
-                            </div>
-                          {% endfor %}
+                          <div class="col-sm-12">
+                            <label for="{{ rating_form.score.id_for_label }}">
+                                Score (0-10): <span id="score-output">{{ rating_form.score.value|default:"5.0" }}</span>
+                            </label>
+                            <input 
+                                type="range" 
+                                name="{{ rating_form.score.name }}" 
+                                id="{{ rating_form.score.id_for_label }}" 
+                                min="0" 
+                                max="10" 
+                                step="0.1" 
+                                value="{{ rating_form.score.value|default:'5.0' }}"
+                                oninput="document.getElementById('score-output').innerText = parseFloat(this.value).toFixed(1)"
+                                style="width: 100%;"
+                            >
+                          </div>
                         </div>
                       </fieldset>
                       <p style="margin-top:0.5rem;">

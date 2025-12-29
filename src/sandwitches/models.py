@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from .tasks import email_users
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 import logging
 from django.urls import reverse
 
@@ -179,7 +180,9 @@ class Recipe(models.Model):
 class Rating(models.Model):
     recipe = models.ForeignKey(Recipe, related_name="ratings", on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name="ratings", on_delete=models.CASCADE)
-    score = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
+    score = models.FloatField(
+        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)]
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

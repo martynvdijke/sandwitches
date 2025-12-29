@@ -12,8 +12,8 @@ def test_recipe_rating_helpers():
     )
     u1 = User.objects.create_user("u1", "u1@example.com", "p1")
     u2 = User.objects.create_user("u2", "u2@example.com", "p2")
-    Rating.objects.create(recipe=r, user=u1, score=5)
-    Rating.objects.create(recipe=r, user=u2, score=3)
+    Rating.objects.create(recipe=r, user=u1, score=5.5)
+    Rating.objects.create(recipe=r, user=u2, score=2.5)
     # average should be 4.0 and count 2
     avg = r.average_rating()
     assert round(float(avg), 1) == 4.0

@@ -80,10 +80,13 @@ class RecipeForm(forms.ModelForm):
 
 
 class RatingForm(forms.Form):
-    """Simple form for rating recipes (1-5)."""
+    """Form for rating recipes (0-10)."""
 
-    score = forms.ChoiceField(
-        choices=[(str(i), str(i)) for i in range(1, 6)],
-        widget=forms.RadioSelect,
+    score = forms.FloatField(
+        min_value=0.0,
+        max_value=10.0,
+        widget=forms.NumberInput(
+            attrs={"step": "0.1", "min": "0", "max": "10", "class": "slider"}
+        ),
         label="Your rating",
     )
