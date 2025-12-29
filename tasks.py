@@ -59,7 +59,7 @@ def compile_i8n(c):
 def collect_static(c):
     """Collect static files."""
     print("Collecting static files...")
-    c.run("src/manage.py collectstatic")
+    c.run("src/manage.py collectstatic --noinput --clear")
 
 
 @task
