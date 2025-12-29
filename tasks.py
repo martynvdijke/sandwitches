@@ -46,7 +46,7 @@ def compile_i8n(c):
     c.run("src/manage.py compilemessages")
 
 @task
-def collect_static(c)
+def collect_static(c):
    c.run("src/manage.py collectstatic")
 
 @task
