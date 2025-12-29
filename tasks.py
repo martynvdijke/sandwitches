@@ -45,10 +45,14 @@ def compile_i8n(c):
     print("Compile i18n message files...")
     c.run("src/manage.py compilemessages")
 
+@task
+def collect_static(c)
+   c.run("src/manage.py collectstatic")
 
 @task
 def ci(c):
     """Run ci checks linting and pytest."""
     linting(c)
     typecheck(c)
+    collet_static(c)
     tests(c)
