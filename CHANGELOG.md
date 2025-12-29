@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/martynvdijke/sandwitches/compare/v1.2.0...v1.3.0) (2025-12-29)
+
+
+### Bug Fixes
+
+* collect static using no input and clear always ([d74acca](https://github.com/martynvdijke/sandwitches/commit/d74accac8013320608bad3ce4f930f89ff385098))
+
+
+### Features
+
+* app recipe rating to the api ([20d70e4](https://github.com/martynvdijke/sandwitches/commit/20d70e4d9a983f034ad03b6d4e9e25e9f1c1d166))
+
 # [1.2.0](https://github.com/martynvdijke/sandwitches/compare/v1.1.0...v1.2.0) (2025-12-29)
 
 
