@@ -5,6 +5,9 @@ from simple_history.models import HistoricalRecords
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from .tasks import email_users
+from django.conf import settings
+import logging
+from django.urls import reverse
 
 hashed_storage = HashedFilenameStorage()
 
@@ -74,11 +77,19 @@ class Recipe(models.Model):
                 slug = f"{base}-{n}"
                 n += 1
             self.slug = slug
-
-        message = f"New recipe added: {self.title}, go check it out at {self.slug}"
-        subject = f"Sandwitches - New Recipe: {self.title} by {self.uploaded_by}"
-        email_users.enqueue(subject=subject, message=message)
         super().save(*args, **kwargs)
+        send_email = getattr(settings, "SEND_EMAIL")
+        logging.debug(f"SEND_EMAIL is set to {send_email}")
+        if send_email:
+            email_users.enqueue(recipe_id=self.pk)
+        else:
+            logging.warning(
+                f"Email sending is disabled; not sending email notification, make sure {send_email} is set to True in settings."
+            )
+        
+
+    def get_absolute_url(self):
+        return reverse("recipe_detail", kwargs={"slug": self.slug})
 
     def tag_list(self):
         return list(self.tags.values_list("name", flat=True))  # ty:ignore[possibly-missing-attribute]
@@ -104,9 +115,6 @@ class Recipe(models.Model):
 
     def rating_count(self):
         return self.ratings.count()  # ty:ignore[unresolved-attribute]
-
-    # def get_absolute_url(self):
-    #     return reverse("recipe_detail", kwargs={"pk": self.pk, "slug": self.slug})
 
     def __str__(self):
         return self.title

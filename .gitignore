@@ -11,3 +11,5 @@ assets/external/
 *.sqlite3
 .venv/*
 .ruff_cache/*
+
+setup.sh

@@ -11,6 +11,7 @@ from django.http import HttpResponseBadRequest
 from django.conf import settings
 from django.http import FileResponse, Http404
 from pathlib import Path
+import mimetypes
 
 User = get_user_model()
 
@@ -95,7 +96,6 @@ def setup(request):
         form = AdminSetupForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # log in the newly created admin
             user.backend = "django.contrib.auth.backends.ModelBackend"
             login(request, user)
             messages.success(request, _("Admin account created and signed in."))
@@ -140,5 +140,9 @@ def media(request, file_path=None):
     if not full_path.exists() or not full_path.is_file():
         raise Http404("File not found")
 
+    content_type, _ = mimetypes.guess_type(full_path)
+    if not content_type or not content_type.startswith('image/'):
+            return HttpResponseBadRequest("Access Denied: Only image files are allowed.")
+    
     response = FileResponse(open(full_path, "rb"), as_attachment=True)
     return response

@@ -94,6 +94,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-appconf"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d1/a2/e58bec8d7941b914af52a67c35b5709eceed2caa2848f28437f1666ed668/django_appconf-1.2.0.tar.gz", hash = "sha256:15a88d60dd942d6059f467412fe4581db632ef03018a3c183fb415d6fc9e5cec", size = 16127, upload-time = "2025-11-08T15:46:27.304Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e8/e6/4c34d94dfb74bbcbc489606e61f1924933de30d22c593dd1f429f35fbd7f/django_appconf-1.2.0-py3-none-any.whl", hash = "sha256:b81bce5ef0ceb9d84df48dfb623a32235d941c78cc5e45dbb6947f154ea277f4", size = 6500, upload-time = "2025-11-08T15:46:25.957Z" },
+]
+
+[[package]]
 name = "django-debug-toolbar"
 version = "6.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -116,6 +128,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/2c/e4/465d2699cd388c0005fb8d6ae6709f239917c6d8790ac35719676fffdcf3/django_filter-25.2.tar.gz", hash = "sha256:760e984a931f4468d096f5541787efb8998c61217b73006163bf2f9523fe8f23", size = 143818, upload-time = "2025-10-05T09:51:31.521Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c1/40/6a02495c5658beb1f31eb09952d8aa12ef3c2a66342331ce3a35f7132439/django_filter-25.2-py3-none-any.whl", hash = "sha256:9c0f8609057309bba611062fe1b720b4a873652541192d232dd28970383633e3", size = 94145, upload-time = "2025-10-05T09:51:29.728Z" },
+]
+
+[[package]]
+name = "django-imagekit"
+version = "6.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django-appconf" },
+    { name = "pilkit" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/77/41/e0892f6924f48e6b3ea81da066697c558c287d70ef2e5de8c4a092da092b/django_imagekit-6.0.0.tar.gz", hash = "sha256:66a28fa87b52d2bec382cf3405aa94535dae25b2cadaceab9e8ec3f253b7410c", size = 61488, upload-time = "2025-10-12T20:52:42.044Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a8/ed/fbd7dc7529c7d51ec6f07d970ed3f82c28c3ea92f4a5a602f302182c0dd5/django_imagekit-6.0.0-py3-none-any.whl", hash = "sha256:dd75c7eec22684a085652033d4f5b869d80c8e7295aa737edbaa04a680e564b6", size = 39746, upload-time = "2025-10-12T20:52:40.318Z" },
 ]
 
 [[package]]
@@ -225,6 +250,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a1/d4/1fc4078c65507b51b96ca8f8c3ba19e6a61c8253c72794544580a7b6c24d/packaging-25.0.tar.gz", hash = "sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f", size = 165727, upload-time = "2025-04-19T11:48:59.673Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/20/12/38679034af332785aac8774540895e234f4d07f7545804097de4b666afd8/packaging-25.0-py3-none-any.whl", hash = "sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484", size = 66469, upload-time = "2025-04-19T11:48:57.875Z" },
+]
+
+[[package]]
+name = "pilkit"
+version = "3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pillow" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b9/a5/bbe12d2c9dc06e29224c45a2cd7aa0ce923648588b6a15aadfee150bbd0c/pilkit-3.0.tar.gz", hash = "sha256:f6719e8cc0482e5447f5cb94f18b949d8e604ea9673a9b019c74d41b779e4eab", size = 402342, upload-time = "2023-09-27T22:47:18.638Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/de/ec/877b84b82cbcba6203e39d068cecfdbcfb61de69260cb851ea11be9b67f3/pilkit-3.0-py3-none-any.whl", hash = "sha256:fe1707b0411a1d0cbf9ad3986779fa5a346cec4582a188740924aa39f504d117", size = 20073, upload-time = "2023-09-27T22:47:16.285Z" },
 ]
 
 [[package]]
@@ -462,6 +499,7 @@ dependencies = [
     { name = "django" },
     { name = "django-debug-toolbar" },
     { name = "django-filter" },
+    { name = "django-imagekit" },
     { name = "django-ninja" },
     { name = "django-simple-history" },
     { name = "django-tasks" },
@@ -486,6 +524,7 @@ requires-dist = [
     { name = "django", specifier = ">=6.0.0" },
     { name = "django-debug-toolbar", specifier = ">=6.1.0" },
     { name = "django-filter", specifier = ">=25.2" },
+    { name = "django-imagekit", specifier = ">=6.0.0" },
     { name = "django-ninja", specifier = ">=1.5.1" },
     { name = "django-simple-history", specifier = ">=3.10.1" },
     { name = "django-tasks", specifier = ">=0.10.0" },

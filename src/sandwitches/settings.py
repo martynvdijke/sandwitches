@@ -10,10 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from curses.ascii import EM
+
 from pathlib import Path
 import os
 from django.core.exceptions import ImproperlyConfigured
 from . import storage
+import logging
 
 DEBUG = bool(os.environ.get("DEBUG", default=0))  # ty:ignore[no-matching-overload]
 
@@ -64,6 +67,7 @@ INSTALLED_APPS = [
     "django_tasks",
     "django_tasks.backends.database",
     "debug_toolbar",
+    "imagekit",
     # "django_recaptcha",
     "simple_history",
 ]
@@ -118,14 +122,10 @@ LOGGING = {
             "class": "logging.StreamHandler",
         },
     },
-    "root": {
-        "handlers": ["console"],
-        "level": "WARNING",
-    },
     "loggers": {
         "django": {
             "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "level": os.getenv("LOG_LEVEL", "INFO"),
             "propagate": False,
         },
     },
@@ -184,6 +184,23 @@ STORAGES = {
     },
 }
 
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_USE_TLS = os.environ.get("SMTP_USE_TLS")
+EMAIL_HOST = os.environ.get("SMTP_HOST")
+EMAIL_HOST_USER = os.environ.get("SMTP_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("SMTP_PASSWORD")
+EMAIL_PORT = os.environ.get("SMTP_PORT")
+EMAIL_FROM_ADDRESS = os.environ.get("SMTP_FROM_EMAIL")
+SEND_EMAIL = all(
+    v is not None
+    for v in [
+        EMAIL_HOST,
+        EMAIL_HOST_USER,
+        EMAIL_HOST_PASSWORD,
+        EMAIL_PORT,
+        EMAIL_FROM_ADDRESS,
+    ]
+)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

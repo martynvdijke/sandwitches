@@ -12,6 +12,7 @@ requires-python = ">=3.12"
 dependencies = [
     "django-debug-toolbar>=6.1.0",
     "django-filter>=25.2",
+    "django-imagekit>=6.0.0",
     "django-ninja>=1.5.1",
     "django-simple-history>=3.10.1",
     "django-tasks>=0.10.0",
