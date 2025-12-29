@@ -54,5 +54,5 @@ def ci(c):
     """Run ci checks linting and pytest."""
     linting(c)
     typecheck(c)
-    collet_static(c)
+    collect_static(c)
     tests(c)
