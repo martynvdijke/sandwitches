@@ -19,6 +19,7 @@ class SignupViewTests(TestCase):
             "last_name": "User",
             "password1": "complex-password-123",
             "password2": "complex-password-123",
+            "language": "en",
         }
         resp = self.client.post(reverse("signup"), data, follow=True)
         self.assertEqual(resp.status_code, 200)

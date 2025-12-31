@@ -3,31 +3,35 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sandwitches 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-31 13:39+0000\n"
+"POT-Creation-Date: 2025-12-31 15:00+0000\n"
 "PO-Revision-Date: 2025-01-01 00:00+0000\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/sandwitches/forms.py:17
+#: src/sandwitches/forms.py:18
 msgid "Passwords do not match."
 msgstr "Wachtwoorden komen niet overeen."
 
-#: src/sandwitches/forms.py:29 src/sandwitches/templates/setup.html:41
+#: src/sandwitches/forms.py:30 src/sandwitches/templates/setup.html:41
 #: src/sandwitches/templates/signup.html:35
 msgid "Password"
 msgstr "Wachtwoord"
 
-#: src/sandwitches/forms.py:30
+#: src/sandwitches/forms.py:31
 msgid "Confirm Password"
 msgstr "Bevestig wachtwoord"
 
-#: src/sandwitches/forms.py:92
+#: src/sandwitches/forms.py:54
+msgid "Preferred language"
+msgstr "Voorkeurstaal"
+
+#: src/sandwitches/forms.py:99
 msgid "Your rating"
 msgstr "Jouw beoordeling"
 
-#: src/sandwitches/tasks.py:52
+#: src/sandwitches/tasks.py:57
 #, python-format
 msgid ""
 "\n"
@@ -45,7 +49,8 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"    Trek? We hebben zojuist <strong>%(title)s</strong> toegevoegd aan onze collectie.\n"
+"    Trek? We hebben zojuist <strong>%(title)s</strong> toegevoegd aan onze "
+"collectie.\n"
 "    \n"
 "    Het is een heerlijk recept dat je niet wilt missen!\n"
 "    %(description)s\n"
@@ -58,7 +63,7 @@ msgstr ""
 "    Het Sandwitches Team\n"
 "    "
 
-#: src/sandwitches/tasks.py:76
+#: src/sandwitches/tasks.py:85
 #, python-format
 msgid ""
 "\n"
@@ -103,8 +108,8 @@ msgstr ""
 "100%%; border-radius: 8px;\">\n"
 "        </div>\n"
 "        <p style=\"font-size: 16px; line-height: 1.5; color: #333;\">\n"
-"            Trek? We hebben zojuist <strong>%(title)s</strong> toegevoegd aan onze "
-"collectie.\n"
+"            Trek? We hebben zojuist <strong>%(title)s</strong> toegevoegd "
+"aan onze collectie.\n"
 "            <br>\n"
 "            Het is een heerlijk recept dat je niet wilt missen!\n"
 "            <br>\n"
@@ -125,7 +130,7 @@ msgstr ""
 "    </div>\n"
 "    "
 
-#: src/sandwitches/tasks.py:104
+#: src/sandwitches/tasks.py:114
 #, python-format
 msgid "Sandwitches - New Recipe: %(title)s by %(uploaded_by)s"
 msgstr "Sandwitches - Nieuw recept: %(title)s door %(uploaded_by)s"
@@ -286,8 +291,7 @@ msgstr ""
 #: src/sandwitches/templates/setup.html:14
 msgid ""
 "After creating the account you will be logged in and redirected to the admin."
-msgstr ""
-"Na aanmaken wordt u ingelogd en doorgestuurd naar het beheerpaneel."
+msgstr "Na aanmaken wordt u ingelogd en doorgestuurd naar het beheerpaneel."
 
 #: src/sandwitches/templates/setup.html:29
 #: src/sandwitches/templates/signup.html:23
@@ -335,26 +339,26 @@ msgstr "Kon de beoordeling niet opslaan."
 msgid "Admin account created and signed in."
 msgstr "Beheerderaccount aangemaakt en ingelogd."
 
-#: src/sandwitches/views.py:120
+#: src/sandwitches/views.py:124
 msgid "Account created and signed in."
 msgstr "Account aangemaakt en ingelogd."
 
-#: src/sandwitches/views.py:131
+#: src/sandwitches/views.py:135
 msgid "Invalid Media Root Configuration"
 msgstr "Ongeldige Media Root Configuratie"
 
-#: src/sandwitches/views.py:133
+#: src/sandwitches/views.py:137
 msgid "Invalid File Path"
 msgstr "Ongeldig bestandspad"
 
-#: src/sandwitches/views.py:138
+#: src/sandwitches/views.py:142
 msgid "Access Denied"
 msgstr "Toegang geweigerd"
 
-#: src/sandwitches/views.py:141
+#: src/sandwitches/views.py:145
 msgid "File not found"
 msgstr "Bestand niet gevonden"
 
-#: src/sandwitches/views.py:145
+#: src/sandwitches/views.py:149
 msgid "Access Denied: Only image files are allowed."
 msgstr "Toegang geweigerd: Alleen afbeeldingsbestanden zijn toegestaan."

@@ -140,7 +140,7 @@ def media(request, file_path=None):
     if not full_path.exists() or not full_path.is_file():
         raise Http404("File not found")
 
-    content_type, _ = mimetypes.guess_type(full_path)
+    content_type, encoding = mimetypes.guess_type(full_path)
     if not content_type or not content_type.startswith("image/"):
         return HttpResponseBadRequest("Access Denied: Only image files are allowed.")
 

@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import gettext_lazy as _
@@ -46,11 +47,15 @@ class AdminSetupForm(forms.ModelForm, BaseUserFormMixin):
 
 
 class UserSignupForm(UserCreationForm, BaseUserFormMixin):
-    """Refactored Regular User Form inheriting from Django's UserCreationForm"""
+    language = forms.ChoiceField(
+        choices=settings.LANGUAGES,
+        label=_("Preferred language"),
+        initial=settings.LANGUAGE_CODE,
+    )
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ("username", "first_name", "last_name", "email")
+        fields = ("username", "first_name", "last_name", "email", "language")
 
     def clean(self):
         return super().clean()

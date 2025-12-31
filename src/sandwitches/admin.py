@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin
 from .models import Recipe, Tag, Rating
 from django.utils.html import format_html
 from import_export import resources
@@ -18,6 +20,16 @@ class TagResource(resources.ModelResource):
 class RatingResource(resources.ModelResource):
     class Meta:
         model = Rating
+
+
+User = get_user_model()
+
+
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    fieldsets = UserAdmin.fieldsets + (
+        (None, {"fields": ("avatar", "bio", "language", "favorites")}),
+    )
 
 
 @admin.register(Recipe)
