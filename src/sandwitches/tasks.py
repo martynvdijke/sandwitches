@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
+from django.utils.translation import gettext as _
 
 
 import textwrap
@@ -48,33 +49,42 @@ def send_emails(recipe_id, emails):
         else "http://localhost"
     ).rstrip("/")
 
-    raw_message = f"""
-    Hungry? We just added <strong>{recipe.title}</strong> to our collection.
+    raw_message_fmt = _("""
+    Hungry? We just added <strong>%(title)s</strong> to our collection.
     
     It's a delicious recipe that you won't want to miss!
-    {recipe.description}
+    %(description)s
 
     Check out the full recipe, ingredients, and steps here:
-    {base_url}{recipe_slug}
+    %(url)s
 
     Happy Cooking!
 
     The Sandwitches Team
-    """
-    wrapped_message = textwrap.fill(textwrap.dedent(raw_message), width=70)
+    """)
+    
+    context_data = {
+        "title": recipe.title,
+        "uploaded_by": recipe.uploaded_by,
+        "description": recipe.description,
+        "url": f"{base_url}{recipe_slug}",
+        "image_url": f"{base_url}{recipe.image.url}" if recipe.image else "",
+    }
 
-    html_content = f"""
+    wrapped_message = textwrap.fill(textwrap.dedent(raw_message_fmt) % context_data, width=70)
+
+    html_content_fmt = _("""
     <div style="font-family: 'Helvetica', sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px;">
-        <h2 style="color: #d35400; text-align: center;">New Recipe: {recipe.title} by {recipe.uploaded_by}</h2>
+        <h2 style="color: #d35400; text-align: center;">New Recipe: %(title)s by %(uploaded_by)s</h2>
         <div style="text-align: center; margin: 20px 0;">
-            <img src="{base_url}{recipe.image.url}" alt="{recipe.title}" style="width: 100%; border-radius: 8px;">
+            <img src="%(image_url)s" alt="%(title)s" style="width: 100%%; border-radius: 8px;">
         </div>
         <p style="font-size: 16px; line-height: 1.5; color: #333;">
-            Hungry? We just added <strong>{recipe.title}</strong> to our collection.
+            Hungry? We just added <strong>%(title)s</strong> to our collection.
             <br>
             It's a delicious recipe that you won't want to miss!
             <br>
-            {recipe.description}
+            %(description)s
             <br>
             Check out the full recipe, ingredients, and steps here:
             Click the button below to see how to make it!
@@ -84,13 +94,17 @@ def send_emails(recipe_id, emails):
             The Sandwitches Team
         </p>
         <div style="text-align: center; margin-top: 30px;">
-            <a href="{base_url}{recipe_slug}" style="background-color: #e67e22; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">VIEW RECIPE</a>
+            <a href="%(url)s" style="background-color: #e67e22; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">VIEW RECIPE</a>
         </div>
     </div>
-    """
+    """)
+    
+    html_content = html_content_fmt % context_data
+
+    subject = _("Sandwitches - New Recipe: %(title)s by %(uploaded_by)s") % context_data
 
     msg = EmailMultiAlternatives(
-        subject=f"Sandwitches - New Recipe: {recipe.title} by {recipe.uploaded_by}",
+        subject=subject,
         body=wrapped_message,
         from_email=from_email,
         bbc=emails,
