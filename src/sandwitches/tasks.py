@@ -62,7 +62,7 @@ def send_emails(recipe_id, emails):
 
     The Sandwitches Team
     """)
-    
+
     context_data = {
         "title": recipe.title,
         "uploaded_by": recipe.uploaded_by,
@@ -71,7 +71,9 @@ def send_emails(recipe_id, emails):
         "image_url": f"{base_url}{recipe.image.url}" if recipe.image else "",
     }
 
-    wrapped_message = textwrap.fill(textwrap.dedent(raw_message_fmt) % context_data, width=70)
+    wrapped_message = textwrap.fill(
+        textwrap.dedent(raw_message_fmt) % context_data, width=70
+    )
 
     html_content_fmt = _("""
     <div style="font-family: 'Helvetica', sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px;">
@@ -98,7 +100,7 @@ def send_emails(recipe_id, emails):
         </div>
     </div>
     """)
-    
+
     html_content = html_content_fmt % context_data
 
     subject = _("Sandwitches - New Recipe: %(title)s by %(uploaded_by)s") % context_data

@@ -128,21 +128,21 @@ def signup(request):
 def media(request, file_path=None):
     media_root = getattr(settings, "MEDIA_ROOT", None)
     if not media_root:
-        return HttpResponseBadRequest(_("Invalid Media Root Configuration"))
+        return HttpResponseBadRequest("Invalid Media Root Configuration")
     if not file_path:
-        return HttpResponseBadRequest(_("Invalid File Path"))
+        return HttpResponseBadRequest("Invalid File Path")
 
     base_path = Path(media_root).resolve()
     full_path = base_path.joinpath(file_path).resolve()
     if base_path not in full_path.parents:
-        return HttpResponseBadRequest(_("Access Denied"))
+        return HttpResponseBadRequest("Access Denied")
 
     if not full_path.exists() or not full_path.is_file():
-        raise Http404(_("File not found"))
+        raise Http404("File not found")
 
     content_type, _ = mimetypes.guess_type(full_path)
     if not content_type or not content_type.startswith("image/"):
-        return HttpResponseBadRequest(_("Access Denied: Only image files are allowed."))
+        return HttpResponseBadRequest("Access Denied: Only image files are allowed.")
 
     response = FileResponse(open(full_path, "rb"), as_attachment=True)
     return response
