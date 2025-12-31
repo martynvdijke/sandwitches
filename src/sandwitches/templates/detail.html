@@ -85,7 +85,7 @@
                         <div class="row">
                           <div class="col-sm-12">
                             <label for="{{ rating_form.score.id_for_label }}">
-                                Score (0-10): <span id="score-output">{{ rating_form.score.value|default:"5.0" }}</span>
+                                {% trans "Score (0-10):" %} <span id="score-output">{{ rating_form.score.value|default:"5.0" }}</span>
                             </label>
                             <input 
                                 type="range" 
@@ -113,7 +113,7 @@
 
       {% if user.is_authenticated and user.is_staff %}
     <footer>
-        <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/">Edit</a>
+        <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/">{% trans "Edit" %}</a>
     </footer>
     {% endif %}
   </article>

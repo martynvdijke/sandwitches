@@ -2,138 +2,359 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: sandwitches 1.0\n"
-"POT-Creation-Date: 2025-01-01 00:00+0000\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-31 13:39+0000\n"
 "PO-Revision-Date: 2025-01-01 00:00+0000\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "Sign up"
-msgstr "Aanmelden"
+#: src/sandwitches/forms.py:17
+msgid "Passwords do not match."
+msgstr "Wachtwoorden komen niet overeen."
 
-msgid "Sign Up"
-msgstr "Aanmelden"
-
-msgid "Cancel"
-msgstr "Annuleren"
-
-msgid "Username"
-msgstr "Gebruikersnaam"
-
-msgid "Email (optional)"
-msgstr "E-mail (optioneel)"
-
-msgid "First name"
-msgstr "Voornaam"
-
-msgid "Last name"
-msgstr "Achternaam"
-
+#: src/sandwitches/forms.py:29 src/sandwitches/templates/setup.html:41
+#: src/sandwitches/templates/signup.html:35
 msgid "Password"
 msgstr "Wachtwoord"
 
-msgid "Confirm password"
+#: src/sandwitches/forms.py:30
+msgid "Confirm Password"
 msgstr "Bevestig wachtwoord"
 
-msgid "Back to all"
-msgstr "Terug naar alles"
+#: src/sandwitches/forms.py:92
+msgid "Your rating"
+msgstr "Jouw beoordeling"
 
-msgid "Description"
-msgstr "Beschrijving"
+#: src/sandwitches/tasks.py:52
+#, python-format
+msgid ""
+"\n"
+"    Hungry? We just added <strong>%(title)s</strong> to our collection.\n"
+"    \n"
+"    It's a delicious recipe that you won't want to miss!\n"
+"    %(description)s\n"
+"\n"
+"    Check out the full recipe, ingredients, and steps here:\n"
+"    %(url)s\n"
+"\n"
+"    Happy Cooking!\n"
+"\n"
+"    The Sandwitches Team\n"
+"    "
+msgstr ""
+"\n"
+"    Trek? We hebben zojuist <strong>%(title)s</strong> toegevoegd aan onze collectie.\n"
+"    \n"
+"    Het is een heerlijk recept dat je niet wilt missen!\n"
+"    %(description)s\n"
+"\n"
+"    Bekijk het volledige recept, ingrediënten en stappen hier:\n"
+"    %(url)s\n"
+"\n"
+"    Veel kookplezier!\n"
+"\n"
+"    Het Sandwitches Team\n"
+"    "
 
-msgid "Ingredients"
-msgstr "Ingrediënten"
+#: src/sandwitches/tasks.py:76
+#, python-format
+msgid ""
+"\n"
+"    <div style=\"font-family: 'Helvetica', sans-serif; max-width: 600px; "
+"margin: auto; border: 1px solid #eee; padding: 20px;\">\n"
+"        <h2 style=\"color: #d35400; text-align: center;\">New Recipe: "
+"%(title)s by %(uploaded_by)s</h2>\n"
+"        <div style=\"text-align: center; margin: 20px 0;\">\n"
+"            <img src=\"%(image_url)s\" alt=\"%(title)s\" style=\"width: "
+"100%%; border-radius: 8px;\">\n"
+"        </div>\n"
+"        <p style=\"font-size: 16px; line-height: 1.5; color: #333;\">\n"
+"            Hungry? We just added <strong>%(title)s</strong> to our "
+"collection.\n"
+"            <br>\n"
+"            It's a delicious recipe that you won't want to miss!\n"
+"            <br>\n"
+"            %(description)s\n"
+"            <br>\n"
+"            Check out the full recipe, ingredients, and steps here:\n"
+"            Click the button below to see how to make it!\n"
+"            <br>\n"
+"            Happy Cooking!\n"
+"            <br>\n"
+"            The Sandwitches Team\n"
+"        </p>\n"
+"        <div style=\"text-align: center; margin-top: 30px;\">\n"
+"            <a href=\"%(url)s\" style=\"background-color: #e67e22; color: "
+"white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-"
+"weight: bold;\">VIEW RECIPE</a>\n"
+"        </div>\n"
+"    </div>\n"
+"    "
+msgstr ""
+"\n"
+"    <div style=\"font-family: 'Helvetica', sans-serif; max-width: 600px; "
+"margin: auto; border: 1px solid #eee; padding: 20px;\">\n"
+"        <h2 style=\"color: #d35400; text-align: center;\">Nieuw recept: "
+"%(title)s door %(uploaded_by)s</h2>\n"
+"        <div style=\"text-align: center; margin: 20px 0;\">\n"
+"            <img src=\"%(image_url)s\" alt=\"%(title)s\" style=\"width: "
+"100%%; border-radius: 8px;\">\n"
+"        </div>\n"
+"        <p style=\"font-size: 16px; line-height: 1.5; color: #333;\">\n"
+"            Trek? We hebben zojuist <strong>%(title)s</strong> toegevoegd aan onze "
+"collectie.\n"
+"            <br>\n"
+"            Het is een heerlijk recept dat je niet wilt missen!\n"
+"            <br>\n"
+"            %(description)s\n"
+"            <br>\n"
+"            Bekijk het volledige recept, ingrediënten en stappen hier:\n"
+"            Klik op de knop hieronder om te zien hoe je het maakt!\n"
+"            <br>\n"
+"            Veel kookplezier!\n"
+"            <br>\n"
+"            Het Sandwitches Team\n"
+"        </p>\n"
+"        <div style=\"text-align: center; margin-top: 30px;\">\n"
+"            <a href=\"%(url)s\" style=\"background-color: #e67e22; color: "
+"white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-"
+"weight: bold;\">BEKIJK RECEPT</a>\n"
+"        </div>\n"
+"    </div>\n"
+"    "
 
-msgid "Instructions"
-msgstr "Instructies"
+#: src/sandwitches/tasks.py:104
+#, python-format
+msgid "Sandwitches - New Recipe: %(title)s by %(uploaded_by)s"
+msgstr "Sandwitches - Nieuw recept: %(title)s door %(uploaded_by)s"
 
-msgid "No description yet."
-msgstr "Nog geen beschrijving."
+#: src/sandwitches/templates/base_pico.html:175
+msgid "Language"
+msgstr "Taal"
 
-msgid "No ingredients listed."
-msgstr "Geen ingrediënten vermeld."
-
-msgid "No instructions yet."
-msgstr "Nog geen instructies."
-
-msgid "Rating"
-msgstr "Beoordeling"
-
-msgid "Average:"
-msgstr "Gemiddelde:"
-
-msgid "No ratings yet."
-msgstr "Nog geen beoordelingen."
-
-msgid "Your rating:" 
-msgstr "Jouw beoordeling:"
-
-msgid "What would you rate this sandwich?"
-msgstr "Wat zou je dit broodje geven?"
-
-msgid "Update"
-msgstr "Bijwerken"
-
-msgid "Rate"
-msgstr "Beoordeel"
-
-msgid "Login"
-msgstr "Inloggen"
-
-msgid "to rate this recipe."
-msgstr "om dit recept te beoordelen."
-
+#: src/sandwitches/templates/base_pico.html:185
 msgid "Docs"
-msgstr "Docs"
+msgstr "Documentatie"
 
+#: src/sandwitches/templates/base_pico.html:187
 msgid "Admin"
 msgstr "Beheer"
 
+#: src/sandwitches/templates/base_pico.html:188
 msgid "Logout"
 msgstr "Uitloggen"
 
-msgid "Initial setup — Create admin"
-msgstr "Eerste installatie — Beheerder aanmaken"
+#: src/sandwitches/templates/base_pico.html:190
+msgid "Login"
+msgstr "Inloggen"
 
-msgid "Create initial administrator"
-msgstr "Maak de eerste beheerder"
+#: src/sandwitches/templates/base_pico.html:191
+#: src/sandwitches/templates/signup.html:9
+msgid "Sign up"
+msgstr "Aanmelden"
 
-msgid "This page is only available when there are no admin users in the database."
-msgstr "Deze pagina is alleen beschikbaar als er nog geen beheerders in de database zijn."
+#: src/sandwitches/templates/detail.html:7
+msgid "Back to all"
+msgstr "Terug naar alles"
 
-msgid "After creating the account you will be logged in and redirected to the admin."
-msgstr "Na aanmaken wordt u ingelogd en doorgestuurd naar het beheerpaneel."
+#: src/sandwitches/templates/detail.html:21
+#: src/sandwitches/templates/detail.html:28
+msgid "Description"
+msgstr "Beschrijving"
 
-msgid "Create admin"
-msgstr "Maak beheerder"
-
-msgid "Account created and signed in."
-msgstr "Account aangemaakt en ingelogd."
-
-msgid "Admin account created and signed in."
-msgstr "Beheerderaccount aangemaakt en ingelogd."
-
-msgid "Your rating has been saved."
-msgstr "Je beoordeling is opgeslagen."
-
-msgid "Could not save rating."
-msgstr "Kon de beoordeling niet opslaan."
-
+#: src/sandwitches/templates/detail.html:25
 msgid "Uploaded by"
 msgstr "Geüpload door"
 
-msgid "Search by title or tag"
-msgstr "Zoek op titel of tag"
+#: src/sandwitches/templates/detail.html:32
+msgid "No description yet."
+msgstr "Nog geen beschrijving."
 
-msgid "Search"
-msgstr "Zoeken"
+#: src/sandwitches/templates/detail.html:35
+msgid "Ingredients"
+msgstr "Ingrediënten"
 
-msgid "No sandwitches yet, please stay tuned."
-msgstr "Nog geen broodjes, kom later terug."
+#: src/sandwitches/templates/detail.html:39
+msgid "No ingredients listed."
+msgstr "Geen ingrediënten vermeld."
 
+#: src/sandwitches/templates/detail.html:42
+msgid "Instructions"
+msgstr "Instructies"
+
+#: src/sandwitches/templates/detail.html:46
+msgid "No instructions yet."
+msgstr "Nog geen instructies."
+
+#: src/sandwitches/templates/detail.html:58
+msgid "Rating"
+msgstr "Beoordeling"
+
+#: src/sandwitches/templates/detail.html:60
+msgid "Average:"
+msgstr "Gemiddelde:"
+
+#: src/sandwitches/templates/detail.html:60
+msgid "vote"
+msgstr "stem"
+
+#: src/sandwitches/templates/detail.html:62
+msgid "No ratings yet."
+msgstr "Nog geen beoordelingen."
+
+#: src/sandwitches/templates/detail.html:67
+msgid "Your rating:"
+msgstr "Jouw beoordeling:"
+
+#: src/sandwitches/templates/detail.html:73
+msgid "What would you rate this sandwich?"
+msgstr "Wat zou je dit broodje geven?"
+
+#: src/sandwitches/templates/detail.html:88
+msgid "Score (0-10):"
+msgstr "Score (0-10):"
+
+#: src/sandwitches/templates/detail.html:105
+msgid "Update"
+msgstr "Bijwerken"
+
+#: src/sandwitches/templates/detail.html:105
+msgid "Rate"
+msgstr "Beoordeel"
+
+#: src/sandwitches/templates/detail.html:110
+msgid "Log in"
+msgstr "Inloggen"
+
+#: src/sandwitches/templates/detail.html:110
+msgid "to rate this recipe."
+msgstr "om dit recept te beoordelen."
+
+#: src/sandwitches/templates/detail.html:116
+#: src/sandwitches/templates/form.html:5
+#: src/sandwitches/templates/index.html:42
 msgid "Edit"
 msgstr "Bewerk"
 
+#: src/sandwitches/templates/form.html:9
+msgid "Edit Recipe:"
+msgstr "Recept bewerken:"
+
+#: src/sandwitches/templates/form.html:12
+msgid "Save"
+msgstr "Opslaan"
+
+#: src/sandwitches/templates/form.html:13
+#: src/sandwitches/templates/setup.html:49
+#: src/sandwitches/templates/signup.html:43
+msgid "Cancel"
+msgstr "Annuleren"
+
+#: src/sandwitches/templates/index.html:8
 msgid "Sandwitches: sandwiches so good, they haunt you!"
 msgstr "Sandwitches: broodjes zo lekker, dat ze je achtervolgen!"
+
+#: src/sandwitches/templates/index.html:12
+msgid "Search by title or tag"
+msgstr "Zoek op titel of tag"
+
+#: src/sandwitches/templates/index.html:12
+msgid "Search"
+msgstr "Zoeken"
+
+#: src/sandwitches/templates/index.html:50
+msgid "No sandwitches yet, please stay tuned."
+msgstr "Nog geen broodjes, kom later terug."
+
+#: src/sandwitches/templates/setup.html:3
+msgid "Initial setup — Create admin"
+msgstr "Eerste installatie — Beheerder aanmaken"
+
+#: src/sandwitches/templates/setup.html:9
+msgid "Create initial administrator"
+msgstr "Maak de eerste beheerder"
+
+#: src/sandwitches/templates/setup.html:11
+msgid ""
+"This page is only available when there are no admin users in the database."
+msgstr ""
+"Deze pagina is alleen beschikbaar als er nog geen beheerders in de database "
+"zijn."
+
+#: src/sandwitches/templates/setup.html:14
+msgid ""
+"After creating the account you will be logged in and redirected to the admin."
+msgstr ""
+"Na aanmaken wordt u ingelogd en doorgestuurd naar het beheerpaneel."
+
+#: src/sandwitches/templates/setup.html:29
+#: src/sandwitches/templates/signup.html:23
+msgid "Username"
+msgstr "Gebruikersnaam"
+
+#: src/sandwitches/templates/setup.html:32
+#: src/sandwitches/templates/signup.html:26
+msgid "Email (optional)"
+msgstr "E-mail (optioneel)"
+
+#: src/sandwitches/templates/setup.html:35
+#: src/sandwitches/templates/signup.html:29
+msgid "First name"
+msgstr "Voornaam"
+
+#: src/sandwitches/templates/setup.html:38
+#: src/sandwitches/templates/signup.html:32
+msgid "Last name"
+msgstr "Achternaam"
+
+#: src/sandwitches/templates/setup.html:44
+#: src/sandwitches/templates/signup.html:38
+msgid "Confirm password"
+msgstr "Bevestig wachtwoord"
+
+#: src/sandwitches/templates/setup.html:48
+msgid "Create admin"
+msgstr "Maak beheerder"
+
+#: src/sandwitches/templates/signup.html:3
+#: src/sandwitches/templates/signup.html:42
+msgid "Sign Up"
+msgstr "Aanmelden"
+
+#: src/sandwitches/views.py:73
+msgid "Your rating has been saved."
+msgstr "Je beoordeling is opgeslagen."
+
+#: src/sandwitches/views.py:75
+msgid "Could not save rating."
+msgstr "Kon de beoordeling niet opslaan."
+
+#: src/sandwitches/views.py:101
+msgid "Admin account created and signed in."
+msgstr "Beheerderaccount aangemaakt en ingelogd."
+
+#: src/sandwitches/views.py:120
+msgid "Account created and signed in."
+msgstr "Account aangemaakt en ingelogd."
+
+#: src/sandwitches/views.py:131
+msgid "Invalid Media Root Configuration"
+msgstr "Ongeldige Media Root Configuratie"
+
+#: src/sandwitches/views.py:133
+msgid "Invalid File Path"
+msgstr "Ongeldig bestandspad"
+
+#: src/sandwitches/views.py:138
+msgid "Access Denied"
+msgstr "Toegang geweigerd"
+
+#: src/sandwitches/views.py:141
+msgid "File not found"
+msgstr "Bestand niet gevonden"
+
+#: src/sandwitches/views.py:145
+msgid "Access Denied: Only image files are allowed."
+msgstr "Toegang geweigerd: Alleen afbeeldingsbestanden zijn toegestaan."

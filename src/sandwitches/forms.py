@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
+from django.utils.translation import gettext_lazy as _
 from .models import Recipe
 
 User = get_user_model()
@@ -13,7 +14,7 @@ class BaseUserFormMixin:
         p1 = cleaned_data.get("password1")
         p2 = cleaned_data.get("password2")
         if p1 and p2 and p1 != p2:
-            raise forms.ValidationError("Passwords do not match.")
+            raise forms.ValidationError(_("Passwords do not match."))
         return cleaned_data
 
     def _set_user_attributes(self, user, data):
@@ -25,8 +26,8 @@ class BaseUserFormMixin:
 
 
 class AdminSetupForm(forms.ModelForm, BaseUserFormMixin):
-    password1 = forms.CharField(widget=forms.PasswordInput, label="Password")
-    password2 = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
+    password1 = forms.CharField(widget=forms.PasswordInput, label=_("Password"))
+    password2 = forms.CharField(widget=forms.PasswordInput, label=_("Confirm Password"))
 
     class Meta:
         model = User
@@ -88,5 +89,5 @@ class RatingForm(forms.Form):
         widget=forms.NumberInput(
             attrs={"step": "0.1", "min": "0", "max": "10", "class": "slider"}
         ),
-        label="Your rating",
+        label=_("Your rating"),
     )
