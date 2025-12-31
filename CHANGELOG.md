@@ -1,3 +1,12 @@
+## [1.3.1](https://github.com/martynvdijke/sandwitches/compare/v1.3.0...v1.3.1) (2025-12-31)
+
+
+### Bug Fixes
+
+* **ci:** remove old poetry.lock file and old vscode settings ([b580a2a](https://github.com/martynvdijke/sandwitches/commit/b580a2ac795dff6ce1c8968f81f7e52228c761c0))
+* formatting of translations ([b1a96dc](https://github.com/martynvdijke/sandwitches/commit/b1a96dc313ff5e91e118a503dc523bd421c71a92))
+* translations also translate email ([7f21c27](https://github.com/martynvdijke/sandwitches/commit/7f21c272f32d47da399c954d091c7cb35530e370))
+
 # [1.3.0](https://github.com/martynvdijke/sandwitches/compare/v1.2.0...v1.3.0) (2025-12-29)
 
 
