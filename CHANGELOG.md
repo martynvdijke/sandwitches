@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/martynvdijke/sandwitches/compare/v1.3.1...v1.4.0) (2026-01-01)
+
+
+### Features
+
+* add django import export ([954e66a](https://github.com/martynvdijke/sandwitches/commit/954e66ab0eccefd1c31896e18a5155b12882c690))
+
 ## [1.3.1](https://github.com/martynvdijke/sandwitches/compare/v1.3.0...v1.3.1) (2025-12-31)
 
 
