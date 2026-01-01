@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     "django_tasks.backends.database",
     "debug_toolbar",
     "imagekit",
+    "import_export",
     "simple_history",
 ]
 

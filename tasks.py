@@ -23,7 +23,7 @@ def typecheck(c):
 @task
 def formatting(c):
     """Run ruff formatter."""
-    print("Running Black formatter...")
+    print("Running ruff formatter and checker...")
     c.run("ruff format src")
     c.run("ruff format tests")
     c.run("ruff format tasks.py")
