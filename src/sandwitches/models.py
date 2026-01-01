@@ -18,27 +18,6 @@ hashed_storage = HashedFilenameStorage()
 User = get_user_model()
 
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    avatar = models.ImageField(upload_to="avatars", blank=True, null=True)
-    avatar_thumbnail = ImageSpecField(
-        source="avatar",
-        processors=[ResizeToFill(100, 50)],
-        format="JPEG",
-        options={"quality": 60},
-    )
-    bio = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "Profile"
-        verbose_name_plural = "Profiles"
-
-    def __str__(self):
-        return f"{self.user.username}'s Profile"  # ty:ignore[possibly-missing-attribute]
-
-
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=60, unique=True, blank=True)
