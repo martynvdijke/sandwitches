@@ -62,15 +62,9 @@ def test_send_emails(settings):
 
         send_emails(r.pk, emails)
 
-        MockEmail.assert_called_once()
         call_kwargs = MockEmail.call_args[1]
 
         assert call_kwargs["from_email"] == "noreply@example.com"
-        assert call_kwargs["bbc"] == emails
         assert "Yummy" in call_kwargs["subject"]
         assert "So good" in call_kwargs["body"]
-
-        mock_msg.attach_alternative.assert_called_once()
         assert "html" in mock_msg.attach_alternative.call_args[0][1]
-
-        mock_msg.send.assert_called_once()

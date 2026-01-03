@@ -104,12 +104,12 @@ def send_emails(recipe_id, emails):
     html_content = html_content_fmt % context_data
 
     subject = _("Sandwitches - New Recipe: %(title)s by %(uploaded_by)s") % context_data
-
-    msg = EmailMultiAlternatives(
-        subject=subject,
-        body=wrapped_message,
-        from_email=from_email,
-        bbc=emails,
-    )
-    msg.attach_alternative(html_content, "text/html")
-    msg.send()
+    for email in emails:
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=wrapped_message,
+            from_email=from_email,
+            to=[email],
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
