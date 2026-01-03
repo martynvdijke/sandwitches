@@ -18,7 +18,7 @@ def test_index(client, db):
     User.objects.create_superuser("admin", "admin@example.com", "strongpassword123")
     response = client.get("/")
     assert response.status_code == 200
-    assert b"No sandwitches yet, please stay tuned." in response.content
+    assert b"No sandwitches found." in response.content
 
 
 @pytest.mark.django_db
