@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/martynvdijke/sandwitches/compare/v1.4.0...v1.4.1) (2026-01-03)
+
+
+### Bug Fixes
+
+* **image:** fix starup procedure for worker node ([1c59e58](https://github.com/martynvdijke/sandwitches/commit/1c59e5840a70db237ea76e8ac635b079019cceec))
+
 # [1.4.0](https://github.com/martynvdijke/sandwitches/compare/v1.3.1...v1.4.0) (2026-01-01)
 
 
