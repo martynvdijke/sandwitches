@@ -1,121 +1,170 @@
-{% extends "base_pico.html" %}
+{% extends "base_beer.html" %}
 {% block title %}{{ recipe.title }} — Sandwitch{% endblock %}
 {% block content %}
 
 {% load i18n markdown_extras %}
-<nav aria-label="breadcrumb" class="container">
-  <a href="{% url 'index' %}">&larr; {% trans "Back to all" %}</a>
+
+<div class="space"></div>
+
+<nav>
+  <a href="{% url 'index' %}" class="button transparent circle">
+      <i>arrow_back</i>
+  </a>
+  <h5 class="max ml-2">{% trans "Back to all" %}</h5>
 </nav>
 
+<div class="large-space"></div>
+
 <div class="grid">
-  <article class="card">
-    <figure>
-      {% if recipe.image %}
+  <!-- Left Column: Image and Main Info -->
+  <div class="s12 m12 l5">
+     <article class="round no-padding elevate">
+        {% if recipe.image %}
         <img src="{{ recipe.image_large.url }}" 
              srcset="{{ recipe.image_medium.url }} 700w, {{ recipe.image_large.url }} 1200w" 
-             sizes="(max-width: 768px) 95vw, 900px"
+             sizes="(max-width: 768px) 95vw, 600px"
              alt="{{ recipe.title }}" 
-             loading="lazy">
-      {% endif %}
-    </figure>
-{% trans "Description" %}
-    <header>
-      {{ recipe.title }}
-      {% if recipe.uploaded_by %}
-        <small>{% trans "Uploaded by" %}: {{ recipe.uploaded_by.get_full_name|default:recipe.uploaded_by.username }}</small>
-      {% endif %}
-    </header>
-      <h4>{% trans "Description" %}</h4>
-      {% if recipe.description %}
-        {{ recipe.description|convert_markdown|safe }}
-      {% else %}
-        <p>{% trans "No description yet." %}</p>
-      {% endif %}
+             loading="lazy"
+             class="responsive top-round">
+        {% else %}
+        <div class="primary medium-height top-round middle-align center-align" style="height:300px;">
+           <i class="extra">lunch_dining</i>
+        </div>
+        {% endif %}
+        
+        <div class="padding">
+            <div class="row align-center">
+                <h4 class="bold max">{{ recipe.title }}</h4>
+                {% if user.is_authenticated %}
+                <a href="{% url 'toggle_favorite' recipe.pk %}" class="button circle transparent" title="{% trans 'Toggle Favorite' %}">
+                    <i class="{% if recipe in user.favorites.all %}error-text{% else %}black-text{% endif %}">
+                        {% if recipe in user.favorites.all %}favorite{% else %}favorite_border{% endif %}
+                    </i>
+                </a>
+                {% endif %}
+            </div>
+            
+            <div class="row align-center">
+                 {% if recipe.uploaded_by %}
+                    {% if recipe.uploaded_by.avatar %}
+                    <img src="{{ recipe.uploaded_by.avatar.url }}" class="circle small" alt="{{ recipe.uploaded_by.username }}">
+                    {% else %}
+                    <i class="small circle surface">person</i>
+                    {% endif %}
+                    <div class="ml-2">
+                        <span class="small-text">{% trans "Uploaded by" %}</span>
+                        <div class="bold">{{ recipe.uploaded_by.get_full_name|default:recipe.uploaded_by.username }}</div>
+                    </div>
+                {% else %}
+                    <i class="small circle surface">person_off</i>
+                    <div class="ml-2">
+                        <span class="small-text">{% trans "Unknown uploader" %}</span>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="space"></div>
+            <div class="divider"></div>
+            <div class="space"></div>
 
-      <h4>{% trans "Ingredients" %}</h4>
-      {% if recipe.ingredients %}
-        {{ recipe.ingredients|convert_markdown|safe }}
-      {% else %}
-        <p>{% trans "No ingredients listed." %}</p>
-      {% endif %}
+            <h6 class="bold">{% trans "Tags" %}</h6>
+            <div class="row wrap">
+              {% for tag in recipe.tags.all %}
+                <span class="chip round surface">{{ tag.name }}</span>
+              {% endfor %}
+            </div>
 
-      <h4>{% trans "Instructions" %}</h4>
-      {% if recipe.instructions %}
-        {{ recipe.instructions|convert_markdown|safe }}
-      {% else %}
-        <p>{% trans "No instructions yet." %}</p>
-      {% endif %}
-    
-    <div class="tags-row">
-      <div style="margin-top:12px;">
-        {% for tag in recipe.tags.all %}
-          <span class="tag">{{ tag.name }}</span>
-        {% endfor %}
-      </div>
-    </div>
-
-    <div style="margin-top:1rem;">
-      <h4>{% trans "Rating" %}</h4>
-      {% if rating_count %}
-        <p>{% trans "Average:" %} {{ avg_rating|floatformat:1 }} ({{ rating_count }} {% trans "vote" %}{% if rating_count %}s{% endif %})</p>
-      {% else %}
-        <p>{% trans "No ratings yet." %}</p>
-      {% endif %}
-
-      {% if user.is_authenticated %}
-          {% if user_rating %}
-            <p>{% trans "Your rating:" %} {{ user_rating.score }}</p>
-          {% else %}
-            <form method="post" action="{% url 'recipe_rate' pk=recipe.pk %}">
-                      {% csrf_token %}
-
-                      <fieldset>
-                        <legend>{% trans "What would you rate this sandwich?" %}</legend>
-
-                        {% if rating_form.score.errors %}
-                          <div class="card-panel" role="alert">
-                            <ul>
-                              {% for err in rating_form.score.errors %}
-                                <li>{{ err }}</li>
-                              {% endfor %}
-                            </ul>
-                          </div>
-                        {% endif %}
-
-                        <div class="row">
-                          <div class="col-sm-12">
-                            <label for="{{ rating_form.score.id_for_label }}">
-                                {% trans "Score (0-10):" %} <span id="score-output">{{ rating_form.score.value|default:"5.0" }}</span>
-                            </label>
-                            <input 
-                                type="range" 
-                                name="{{ rating_form.score.name }}" 
-                                id="{{ rating_form.score.id_for_label }}" 
-                                min="0" 
-                                max="10" 
-                                step="0.1" 
-                                value="{{ rating_form.score.value|default:'5.0' }}"
-                                oninput="document.getElementById('score-output').innerText = parseFloat(this.value).toFixed(1)"
-                                style="width: 100%;"
-                            >
-                          </div>
+            <div class="space"></div>
+            <div class="divider"></div>
+            <div class="space"></div>
+            
+            <h6 class="bold">{% trans "Rating" %}</h6>
+            <div class="row align-center">
+                <i class="primary-text">star</i>
+                <span class="h5 ml-1">{{ avg_rating|floatformat:1 }}</span>
+                <span class="small-text ml-1">({{ rating_count }} {% trans "vote" %}{% if rating_count != 1 %}s{% endif %})</span>
+            </div>
+            
+             <div class="space"></div>
+            
+            {% if user.is_authenticated %}
+              <article class="border round no-elevate secondary-container">
+                  {% if user_rating %}
+                    <div class="row align-center">
+                        <i class="primary-text">check_circle</i>
+                        <span class="ml-2">{% trans "Your rating:" %} <b>{{ user_rating.score }}</b></span>
+                    </div>
+                  {% else %}
+                    <form method="post" action="{% url 'recipe_rate' pk=recipe.pk %}">
+                        {% csrf_token %}
+                        <label class="bold">{% trans "Rate this sandwich" %}</label>
+                        <div class="field middle-align">
+                             <label class="slider">
+                                <input type="range" 
+                                    name="{{ rating_form.score.name }}" 
+                                    min="0" 
+                                    max="10" 
+                                    step="0.1" 
+                                    value="{{ rating_form.score.value|default:'5.0' }}"
+                                    oninput="document.getElementById('score-output').innerText = parseFloat(this.value).toFixed(1)">
+                                <span></span>
+                             </label>
+                             <span id="score-output" class="bold ml-2">{{ rating_form.score.value|default:"5.0" }}</span>
                         </div>
-                      </fieldset>
-                      <p style="margin-top:0.5rem;">
-                        <button type="submit">{% if user_rating %}{% trans "Update" %}{% else %}{% trans "Rate" %}{% endif %}</button>
-                      </p>
+                        <button type="submit" class="button primary round">{% trans "Submit Rating" %}</button>
                     </form>
-          {% endif %}        
-      {% else %}
-        <p><a href="{% url 'admin:login' %}">{% trans "Log in" %}</a> {% trans "to rate this recipe." %}</p>
-      {% endif %}
-    </div>
+                  {% endif %}
+              </article>
+            {% else %}
+               <p><a href="{% url 'admin:login' %}" class="link">{% trans "Log in" %}</a> {% trans "to rate this recipe." %}</p>
+            {% endif %}
 
-      {% if user.is_authenticated and user.is_staff %}
-    <footer>
-        <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/">{% trans "Edit" %}</a>
-    </footer>
-    {% endif %}
-  </article>
+            {% if user.is_authenticated and user.is_staff %}
+            <div class="space"></div>
+            <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/" class="button transparent border round width-100 center-align">
+                <i>edit</i>
+                <span>{% trans "Edit Recipe" %}</span>
+            </a>
+            {% endif %}
+        </div>
+     </article>
+  </div>
+
+  <!-- Right Column: Details -->
+  <div class="s12 m12 l7">
+      <div class="padding">
+          
+          <h5 class="primary-text">{% trans "Description" %}</h5>
+          <div class="large-text">
+            {% if recipe.description %}
+                {{ recipe.description|convert_markdown|safe }}
+            {% else %}
+                <p class="italic">{% trans "No description yet." %}</p>
+            {% endif %}
+          </div>
+          
+          <div class="large-space"></div>
+          
+          <h5 class="primary-text">{% trans "Ingredients" %}</h5>
+           <div class="card padding flat gray1">
+            {% if recipe.ingredients %}
+                {{ recipe.ingredients|convert_markdown|safe }}
+            {% else %}
+                <p class="italic">{% trans "No ingredients listed." %}</p>
+            {% endif %}
+           </div>
+
+          <div class="large-space"></div>
+
+          <h5 class="primary-text">{% trans "Instructions" %}</h5>
+          <div>
+            {% if recipe.instructions %}
+                {{ recipe.instructions|convert_markdown|safe }}
+            {% else %}
+                <p class="italic">{% trans "No instructions yet." %}</p>
+            {% endif %}
+          </div>
+      </div>
+  </div>
 </div>
 {% endblock %}

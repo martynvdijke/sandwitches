@@ -21,7 +21,7 @@
 
 <div class="large-space"></div>
 
-<div class="grid">
+<div class="grid justify-center">
   {% for recipe in recipes %}
   <div class="s12 m6 l4 xl3 recipe-card">
     <article class="round no-padding elevate">
@@ -33,12 +33,16 @@
            <i class="extra">lunch_dining</i>
          </div>
          {% endif %}
-         <div class="absolute bottom right padding">
-            <span class="chip circle surface small-text">
-                <i class="tiny primary-text">star</i>
-                {{ recipe.average_rating|floatformat:1 }}
-            </span>
+         
+         {% if user.is_authenticated %}
+         <div class="absolute top left padding">
+             <a href="{% url 'toggle_favorite' recipe.pk %}" class="button circle surface white-text">
+                <i class="{% if recipe in user.favorites.all %}error-text{% else %}black-text{% endif %}">
+                    {% if recipe in user.favorites.all %}favorite{% else %}favorite_border{% endif %}
+                </i>
+             </a>
          </div>
+         {% endif %}
        </div>
        
        <div class="padding">
@@ -60,19 +64,19 @@
          
          <div class="space"></div>
          
-         <nav class="wrap">
+         <div class="row wrap">
            {% for tag in recipe.tags.all %}
-           <a class="chip small round surface">{{ tag.name }}</a>
+           <span class="chip small round surface margin-bottom">{{ tag.name }}</span>
            {% endfor %}
-         </nav>
+         </div>
        </div>
        
-       <nav class="padding">
+       <div class="padding pt-0">
          <a href="{% url 'recipe_detail' recipe.slug %}" class="button fill round responsive">
            <span>{% trans 'View Recipe' %}</span>
            <i class="suffix">arrow_forward</i>
          </a>
-       </nav>
+       </div>
     </article>
   </div>
   {% empty %}

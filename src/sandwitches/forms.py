@@ -52,10 +52,12 @@ class UserSignupForm(UserCreationForm, BaseUserFormMixin):
         label=_("Preferred language"),
         initial=settings.LANGUAGE_CODE,
     )
+    avatar = forms.ImageField(label=_("Profile Image"), required=False)
+    bio = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}), label=_("Bio"), required=False)
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ("username", "first_name", "last_name", "email", "language")
+        fields = ("username", "first_name", "last_name", "email", "language", "avatar", "bio")
 
     def clean(self):
         return super().clean()
@@ -64,6 +66,10 @@ class UserSignupForm(UserCreationForm, BaseUserFormMixin):
         user = super().save(commit=False)
         user.is_superuser = False
         user.is_staff = False
+        # Explicitly save the extra fields if they aren't automatically handled by ModelForm save (they should be if in Meta.fields)
+        user.language = self.cleaned_data["language"]
+        user.avatar = self.cleaned_data["avatar"]
+        user.bio = self.cleaned_data["bio"]
         if commit:
             user.save()
         return user

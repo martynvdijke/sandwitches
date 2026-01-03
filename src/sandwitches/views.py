@@ -13,6 +13,8 @@ from django.http import FileResponse, Http404
 from pathlib import Path
 import mimetypes
 
+from sandwitches import __version__ as sandwitches_version
+
 User = get_user_model()
 
 
@@ -25,7 +27,7 @@ def recipe_edit(request, pk):
             return redirect("recipes:admin_list")
     else:
         form = RecipeForm(instance=recipe)
-    return render(request, "recipe_form.html", {"form": form, "recipe": recipe})
+    return render(request, "recipe_form.html", {"form": form, "recipe": recipe, "version": sandwitches_version })
 
 
 def recipe_detail(request, slug):
@@ -51,6 +53,7 @@ def recipe_detail(request, slug):
             "rating_count": count,
             "user_rating": user_rating,
             "rating_form": rating_form,
+            "version": sandwitches_version,
         },
     )
 
@@ -76,11 +79,28 @@ def recipe_rate(request, pk):
     return redirect("recipe_detail", slug=recipe.slug)
 
 
+@login_required
+def toggle_favorite(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    if recipe in request.user.favorites.all():
+        request.user.favorites.remove(recipe)
+        messages.success(request, _("Recipe removed from favorites."))
+    else:
+        request.user.favorites.add(recipe)
+        messages.success(request, _("Recipe added to favorites."))
+    
+    # Redirect to the page where the request came from, or default to recipe detail
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return redirect(referer)
+    return redirect('recipe_detail', slug=recipe.slug)
+
+
 def index(request):
     if not User.objects.filter(is_superuser=True).exists():
         return redirect("setup")
     recipes = Recipe.objects.order_by("-created_at")  # ty:ignore[unresolved-attribute]
-    return render(request, "index.html", {"recipes": recipes})
+    return render(request, "index.html", {"recipes": recipes, "version": sandwitches_version })
 
 
 def setup(request):
@@ -103,7 +123,7 @@ def setup(request):
     else:
         form = AdminSetupForm()
 
-    return render(request, "setup.html", {"form": form})
+    return render(request, "setup.html", {"form": form, "version": sandwitches_version })
 
 
 def signup(request):
@@ -111,7 +131,7 @@ def signup(request):
     User signup page: create new regular user accounts.
     """
     if request.method == "POST":
-        form = UserSignupForm(request.POST)
+        form = UserSignupForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
             # log in the newly created user
@@ -122,7 +142,7 @@ def signup(request):
     else:
         form = UserSignupForm()
 
-    return render(request, "signup.html", {"form": form})
+    return render(request, "signup.html", {"form": form, "version": sandwitches_version })
 
 
 def media(request, file_path=None):

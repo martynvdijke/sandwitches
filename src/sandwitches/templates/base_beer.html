@@ -53,22 +53,27 @@
 </nav>
 
 <dialog id="language-menu">
-    <h5>{% trans "Language" %}</h5>
     <form method="post" action="{% url 'set_language' %}">
         {% csrf_token %}
-        <div class="field label border">
-            <select name="language" onchange="this.form.submit()">
-                {% get_current_language as LANGUAGE_CODE %}
-                {% get_available_languages as LANGUAGES %}
-                {% for code,name in LANGUAGES %}
-                  <option value="{{ code }}"{% if code == LANGUAGE_CODE %} selected{% endif %}>{{ name }}</option>
-                {% endfor %}
-            </select>
-            <label>{% trans "Select Language" %}</label>
+        <h5 class="center-align">{% trans "Select Language" %}</h5>
+        <div class="grid center-align">
+            {% get_current_language as LANGUAGE_CODE %}
+            {% get_available_languages as LANGUAGES %}
+            {% for code, name in LANGUAGES %}
+            <div class="s6">
+                <button type="submit" name="language" value="{{ code }}" class="circle large {% if code == LANGUAGE_CODE %}primary{% else %}surface{% endif %}">
+                    <span style="font-size: 2rem;">
+                        {% if code == 'en' %}🇬🇧{% elif code == 'nl' %}🇳🇱{% else %}🌐{% endif %}
+                    </span>
+                </button>
+                <div class="small-text">{{ name }}</div>
+            </div>
+            {% endfor %}
         </div>
         <input type="hidden" name="next" value="{{ request.get_full_path }}" />
     </form>
-    <nav class="right">
+    <div class="space"></div>
+    <nav class="center-align">
         <button class="transparent link" data-ui="#language-menu">{% trans "Close" %}</button>
     </nav>
 </dialog>
@@ -109,6 +114,7 @@
             <div class="small-text">© {% now "Y" %} Sandwitches Inc.</div>
         </div>
         <nav>
+            version {{ version }}
             <a href="https://github.com/martynvdijke/sandwitches" target="_blank" class="circle transparent">
                 <i>code</i>
             </a>

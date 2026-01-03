@@ -1,50 +1,133 @@
-{% extends "base_pico.html" %}
+{% extends "base_beer.html" %}
 {% load static i18n %}
 {% block title %}{% trans "Sign Up" %}{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width:720px; margin:2rem auto;">
-  <article class="card">
-    <div class="card-body">
-      <h2>{% trans "Sign up" %}</h2> 
+<div class="large-space"></div>
 
-      <form method="post" novalidate>
+<div class="grid">
+  <div class="s12 m10 l8 xl6 middle-align center-align" style="margin: 0 auto;">
+    <article class="round elevate">
+      <div class="padding">
+          <h4 class="center-align primary-text">{% trans "Create your account" %}</h4>
+          <p class="center-align">{% trans "Join the Sandwitches community today!" %}</p>
+      </div>
+      
+      <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
+        
         {% if form.non_field_errors %}
-          <div class="card-panel" role="alert">
-            <ul>
-              {% for err in form.non_field_errors %}
-                <li>{{ err }}</li>
-              {% endfor %}
-            </ul>
+          <div class="padding error surface round mb">
+             {% for err in form.non_field_errors %}
+                <div class="row align-center">
+                    <i class="error-text">warning</i>
+                    <span class="error-text">{{ err }}</span>
+                </div>
+             {% endfor %}
           </div>
         {% endif %}
 
-        <label for="{{ form.username.id_for_label }}">{% trans "Username" %}</label>
-        {{ form.username }}
+        <div class="grid">
+            <div class="s12 m6">
+                <div class="field label border round {% if form.first_name.errors %}error{% endif %}">
+                    <input type="text" name="{{ form.first_name.name }}" id="{{ form.first_name.id_for_label }}" value="{{ form.first_name.value|default:'' }}">
+                    <label>{% trans "First name" %}</label>
+                    {% if form.first_name.errors %}
+                        <span class="helper error-text">{{ form.first_name.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+             <div class="s12 m6">
+                <div class="field label border round {% if form.last_name.errors %}error{% endif %}">
+                    <input type="text" name="{{ form.last_name.name }}" id="{{ form.last_name.id_for_label }}" value="{{ form.last_name.value|default:'' }}">
+                    <label>{% trans "Last name" %}</label>
+                     {% if form.last_name.errors %}
+                        <span class="helper error-text">{{ form.last_name.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
-        <label for="{{ form.email.id_for_label }}">{% trans "Email (optional)" %}</label>
-        {{ form.email }}
+        <div class="field label border round {% if form.username.errors %}error{% endif %}">
+            <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" value="{{ form.username.value|default:'' }}">
+            <label>{% trans "Username" %}</label>
+            {% if form.username.errors %}
+                <span class="helper error-text">{{ form.username.errors.0 }}</span>
+            {% endif %}
+        </div>
 
-        <label for="{{ form.first_name.id_for_label }}">{% trans "First name" %}</label>
-        {{ form.first_name }}
+        <div class="field label border round {% if form.email.errors %}error{% endif %}">
+            <input type="email" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" value="{{ form.email.value|default:'' }}">
+            <label>{% trans "Email (optional)" %}</label>
+            {% if form.email.errors %}
+                <span class="helper error-text">{{ form.email.errors.0 }}</span>
+            {% endif %}
+        </div>
+        
+        <div class="field label border round {% if form.language.errors %}error{% endif %}">
+            <select name="{{ form.language.name }}" id="{{ form.language.id_for_label }}">
+                {% for value, label in form.language.field.choices %}
+                    <option value="{{ value }}" {% if form.language.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <label>{% trans "Preferred Language" %}</label>
+            {% if form.language.errors %}
+                 <span class="helper error-text">{{ form.language.errors.0 }}</span>
+            {% endif %}
+        </div>
 
-        <label for="{{ form.last_name.id_for_label }}">{% trans "Last name" %}</label>
-        {{ form.last_name }}
+        <div class="field label border round textarea {% if form.bio.errors %}error{% endif %}">
+            <textarea name="{{ form.bio.name }}" id="{{ form.bio.id_for_label }}" rows="3">{{ form.bio.value|default:'' }}</textarea>
+            <label>{% trans "Bio" %}</label>
+            {% if form.bio.errors %}
+                 <span class="helper error-text">{{ form.bio.errors.0 }}</span>
+            {% endif %}
+        </div>
+        
+        <div class="field middle-align {% if form.avatar.errors %}error{% endif %}">
+             <nav>
+                <div class="max">
+                    <label class="button border transparent round">
+                        <input type="file" name="{{ form.avatar.name }}" id="{{ form.avatar.id_for_label }}" accept="image/*">
+                        <i>upload</i>
+                        <span>{% trans "Upload Profile Picture" %}</span>
+                    </label>
+                </div>
+            </nav>
+            {% if form.avatar.errors %}
+                 <span class="helper error-text">{{ form.avatar.errors.0 }}</span>
+            {% endif %}
+        </div>
 
-        <label for="{{ form.password1.id_for_label }}">{% trans "Password" %}</label>
-        {{ form.password1 }}
+        <div class="space"></div>
+        <div class="divider"></div>
+        <div class="space"></div>
 
-        <label for="{{ form.password2.id_for_label }}">{% trans "Confirm password" %}</label>
-        {{ form.password2 }}
+        <div class="field label border round {% if form.password1.errors %}error{% endif %}">
+            <input type="password" name="{{ form.password1.name }}" id="{{ form.password1.id_for_label }}">
+            <label>{% trans "Password" %}</label>
+            {% if form.password1.errors %}
+                <span class="helper error-text">{{ form.password1.errors.0 }}</span>
+            {% endif %}
+        </div>
 
-        <p style="margin-top:1rem;">
-          <button type="submit">{% trans "Sign Up" %}</button>
-          <a class="contrast" href="{% url 'index' %}">{% trans "Cancel" %}</a>
-        </p>
+        <div class="field label border round {% if form.password2.errors %}error{% endif %}">
+             <input type="password" name="{{ form.password2.name }}" id="{{ form.password2.id_for_label }}">
+            <label>{% trans "Confirm password" %}</label>
+             {% if form.password2.errors %}
+                <span class="helper error-text">{{ form.password2.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <div class="large-space"></div>
+        
+        <nav class="right-align">
+            <a class="button transparent border round" href="{% url 'index' %}">{% trans "Cancel" %}</a>
+            <button type="submit" class="button primary round">{% trans "Sign Up" %}</button>
+        </nav>
+
       </form>
-    </div>
-  </article>
+    </article>
+  </div>
 </div>
-
 {% endblock %}

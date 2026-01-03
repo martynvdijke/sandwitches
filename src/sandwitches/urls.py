@@ -39,6 +39,7 @@ urlpatterns += i18n_patterns(
     path("recipes/<slug:slug>/", views.recipe_detail, name="recipe_detail"),
     path("setup/", views.setup, name="setup"),
     path("recipes/<int:pk>/rate/", views.recipe_rate, name="recipe_rate"),
+    path("recipes/<int:pk>/favorite/", views.toggle_favorite, name="toggle_favorite"),
     prefix_default_language=True,
 )
 
