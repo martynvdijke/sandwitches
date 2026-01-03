@@ -1,3 +1,14 @@
+## [1.4.2](https://github.com/martynvdijke/sandwitches/compare/v1.4.1...v1.4.2) (2026-01-03)
+
+
+### Bug Fixes
+
+* add supervised ini ([1044d2a](https://github.com/martynvdijke/sandwitches/commit/1044d2abd7bc03fb04ca3822653b1586d02d2724))
+* correct user ([6350e52](https://github.com/martynvdijke/sandwitches/commit/6350e528f4a8ea1fd9a7b5494bd10846b1f688c0))
+* **email:** correct email handling instead of incorrect bcc ([36b4b4c](https://github.com/martynvdijke/sandwitches/commit/36b4b4cc4c123e8338151570dd4d4bd32aa902ba))
+* **formatting:** profile delete ([c88cd88](https://github.com/martynvdijke/sandwitches/commit/c88cd886247797844b373bca6d47fcc90539387a))
+* make profile delition migration ([16ded4e](https://github.com/martynvdijke/sandwitches/commit/16ded4e8354eb8fa76835b70745cee8436e05a1e))
+
 ## [1.4.1](https://github.com/martynvdijke/sandwitches/compare/v1.4.0...v1.4.1) (2026-01-03)
 
 
