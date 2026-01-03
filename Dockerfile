@@ -6,9 +6,9 @@ ARG USERNAME=app
 ARG GROUPNAME=app
 
 RUN groupadd -g ${GID} ${USERNAME} && \
-    useradd -m -u ${UID} -g ${GID} ${GROUPNAME} -s /bin/bash 
-
-RUN mkdir /app
+    useradd -m -u ${UID} -g ${GID} ${GROUPNAME} -s /bin/bash && \
+    apt-get update && apt-get install -y supervisor && \
+    mkdir /app
 WORKDIR /app
 
 # Set environment variables 
@@ -26,7 +26,7 @@ COPY uv.lock  /app/
 COPY pyproject.toml  /app/
 COPY . /app/
 COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh 
+RUN chmod +x /app/entrypoint.sh
 RUN uv sync --locked --no-dev
 
 RUN chown -R root:app /app
@@ -36,4 +36,4 @@ EXPOSE 6270
 
 USER app
 
-CMD ["/bin/sh", "-c", "python src/manage.py collectstatic --noinput && python src/manage.py makemigrations sandwitches && python src/manage.py migrate && python src/manage.py collectstatic --noinput --clear && python src/manage.py db_worker --queue-name='*' & cd src && exec gunicorn sandwitches.asgi:application -k uvicorn.workers.UvicornWorker --workers $GUNICORN_WORKERS --threads $GUNICORN_THREADS --bind 0.0.0.0:6270"]
+CMD ["/bin/sh", "-c", "python src/manage.py collectstatic --noinput && python src/manage.py makemigrations sandwitches && python src/manage.py migrate && python src/manage.py collectstatic --noinput --clear && supervisord "]
