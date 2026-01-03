@@ -1,56 +1,90 @@
-{% extends "base_beer.html" %} {% load i18n static %}
+{% extends "base_beer.html" %}
+{% load i18n static %}
 
 {% block title %}Sandwitches{% endblock %}
 
 {% block content %}
-<div class="grid">
-  <div class="s12 m6">
-    <h5>{% trans 'Sandwitches: sandwiches so good, they haunt you!' %}</h5>
-  </div>
-  <div class="s12 m6">
-    <div class="field prefix round fill">
+<div class="large-space"></div>
+
+<article class="round primary s12 m12 l12">
+  <div class="row align-center">
+    <div class="max">
+      <h4 class="upper">{% trans 'Sandwitches' %}</h4>
+      <p class="large-text">{% trans 'Sandwiches so good, they haunt you!' %}</p>
+    </div>
+    <div class="field prefix round fill white-text border s12 m5 l4">
       <i class="front">search</i>
-      <input id="search" type="search" placeholder="{% trans "Search by title or tag" %}" aria-label="{% trans "Search" %}">
+      <input id="search" type="text" class="white-text" placeholder="{% trans 'Search recipes...' %}" aria-label="{% trans 'Search' %}">
     </div>
   </div>
-</div>
+</article>
+
+<div class="large-space"></div>
 
 <div class="grid">
   {% for recipe in recipes %}
-    <div class="s12 m6 l4 xl3 recipe-card">
-        <article class="no-padding round">
-            {% if recipe.image %}
-            <img src="{{ recipe.image_medium.url }}" 
-                 class="responsive" 
-                 alt="{{ recipe.title }}" 
-                 loading="lazy"
-                 style="height: 200px; object-fit: cover; width: 100%; cursor: pointer; border-radius: var(--radius) var(--radius) 0 0;"
-                 onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">
-            {% endif %}
-            
-            <div class="padding">
-                <h6 class="recipe-title" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';" style="cursor: pointer;">{{ recipe.title }}</h6>
-                
-                <div class="row wrap">
-                  {% for tag in recipe.tags.all %}
-                    <span class="chip small round {% if tag|length < 8 %}primary{% endif %}">{{ tag.name }}</span>
-                  {% endfor %}
-                </div>
-                
-                {% if user.is_authenticated and user.is_staff %}
-                <nav>
-                    <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/" class="button small transparent upper">{% trans "Edit" %}</a>
-                </nav>
+  <div class="s12 m6 l4 xl3 recipe-card">
+    <article class="round no-padding elevate">
+       <div style="position: relative;">
+         {% if recipe.image %}
+         <img src="{{ recipe.image_medium.url }}" class="responsive top-round" style="height:220px; width:100%; object-fit:cover; cursor:pointer;" loading="lazy" alt="{{ recipe.title }}" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">
+         {% else %}
+         <div class="primary medium-height top-round middle-align center-align" style="height:220px; cursor:pointer;" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">
+           <i class="extra">lunch_dining</i>
+         </div>
+         {% endif %}
+         <div class="absolute bottom right padding">
+            <span class="chip circle surface small-text">
+                <i class="tiny primary-text">star</i>
+                {{ recipe.average_rating|floatformat:1 }}
+            </span>
+         </div>
+       </div>
+       
+       <div class="padding">
+         <h5 class="truncate pointer" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">{{ recipe.title }}</h5>
+         
+         <div class="row align-center">
+            {% if recipe.uploaded_by %}
+                {% if recipe.uploaded_by.avatar %}
+                <img src="{{ recipe.uploaded_by.avatar.url }}" class="circle tiny" alt="{{ recipe.uploaded_by.username }}">
+                {% else %}
+                <i class="tiny circle surface">person</i>
                 {% endif %}
-            </div>
-        </article>
-    </div>
+                <span class="tiny-text left-margin">{{ recipe.uploaded_by.username }}</span>
+            {% else %}
+                <i class="tiny circle surface">person_off</i>
+                <span class="tiny-text left-margin">{% trans "Unknown" %}</span>
+            {% endif %}
+         </div>
+         
+         <div class="space"></div>
+         
+         <nav class="wrap">
+           {% for tag in recipe.tags.all %}
+           <a class="chip small round surface">{{ tag.name }}</a>
+           {% endfor %}
+         </nav>
+       </div>
+       
+       <nav class="padding">
+         <a href="{% url 'recipe_detail' recipe.slug %}" class="button fill round responsive">
+           <span>{% trans 'View Recipe' %}</span>
+           <i class="suffix">arrow_forward</i>
+         </a>
+       </nav>
+    </article>
+  </div>
   {% empty %}
-    <div class="s12">
-        <article class="center-align">
-            <h5>{% trans "No sandwitches yet, please stay tuned." %}</h5>
-        </article>
-    </div>
+  <div class="s12 center-align">
+    <div class="large-space"></div>
+    <i class="extra gray-text">no_food</i>
+    <h5 class="gray-text">{% trans "No sandwitches found." %}</h5>
+    <p>{% trans "Be the first to create one!" %}</p>
+    {% if user.is_authenticated %}
+    <a href="{% url 'admin:sandwitches_recipe_add' %}" class="button primary round">{% trans "Add Recipe" %}</a>
+    {% endif %}
+  </div>
   {% endfor %}
 </div>
 
@@ -64,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
   search.addEventListener('input', function() {
     const q = this.value.toLowerCase().trim();
     document.querySelectorAll('.recipe-card').forEach(card => {
-      const title = (card.querySelector('.recipe-title')?.textContent || '').toLowerCase();
+      const title = (card.querySelector('h5')?.textContent || '').toLowerCase();
       const tags = Array.from(card.querySelectorAll('.chip')).map(t => t.textContent.toLowerCase());
       const match = !q || title.includes(q) || tags.some(t => t.includes(q));
       card.style.display = match ? '' : 'none';

@@ -11,11 +11,20 @@
         padding-top: 2rem;
         padding-bottom: 2rem;
     }
+    /* Fix for footer sticking to bottom if content is short */
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    main.container {
+        flex: 1;
+    }
 </style>
 {% endblock %} 
 
 {% block navbar %}
-<nav class="top">
+<nav class="top primary-container">
   <button class="circle transparent" data-ui="#menu">
     <i>menu</i>
   </button>
@@ -32,9 +41,13 @@
   </button>
   
   {% if user.is_authenticated %}
+    {% if user.avatar %}
+    <img src="{{ user.avatar.url }}" class="circle" data-ui="#user-menu">
+    {% else %}
     <img src="https://www.w3schools.com/howto/img_avatar.png" class="circle" data-ui="#user-menu">
+    {% endif %}
   {% else %}
-    <a href="{% url 'admin:login' %}"><button class="chip">{% trans "Login" %}</button></a>
+    <a href="{% url 'admin:login' %}"><button class="chip transparent border white-text">{% trans "Login" %}</button></a>
     <a href="{% url 'signup' %}"><button class="chip primary">{% trans "Sign up" %}</button></a>
   {% endif %}
 </nav>
@@ -84,12 +97,24 @@
             <i>api</i>
             <span>{% trans "API Docs" %}</span>
         </a>
-        <a href="https://github.com/martynvdijke/sandwitches" target="_blank">
-             <i>code</i>
-             <span>GitHub</span>
-        </a>
     </nav>
 </dialog>
+{% endblock %}
+
+{% block footer %}
+<footer class="padding">
+    <div class="row align-center">
+        <div class="max">
+            <h6 class="small">Sandwitches</h6>
+            <div class="small-text">© {% now "Y" %} Sandwitches Inc.</div>
+        </div>
+        <nav>
+            <a href="https://github.com/martynvdijke/sandwitches" target="_blank" class="circle transparent">
+                <i>code</i>
+            </a>
+        </nav>
+    </div>
+</footer>
 {% endblock %}
 
 {% block extra_scripts %} 
