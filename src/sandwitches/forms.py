@@ -53,11 +53,21 @@ class UserSignupForm(UserCreationForm, BaseUserFormMixin):
         initial=settings.LANGUAGE_CODE,
     )
     avatar = forms.ImageField(label=_("Profile Image"), required=False)
-    bio = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}), label=_("Bio"), required=False)
+    bio = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 3}), label=_("Bio"), required=False
+    )
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ("username", "first_name", "last_name", "email", "language", "avatar", "bio")
+        fields = (
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "language",
+            "avatar",
+            "bio",
+        )
 
     def clean(self):
         return super().clean()

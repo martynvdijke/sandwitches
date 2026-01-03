@@ -1,0 +1,119 @@
+{% extends "base_beer.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Edit Recipe" %}{% endblock %}
+
+{% block content %}
+<div class="large-space"></div>
+<article class="round s12 m10 l8 offset-m1 offset-l2 elevate">
+    <div class="padding">
+        <h4 class="center-align">
+            {% if recipe.pk %}
+                {% trans "Edit Recipe:" %} {{ recipe.title }}
+            {% else %}
+                {% trans "New Recipe" %}
+            {% endif %}
+        </h4>
+        <div class="space"></div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="grid">
+                <div class="s12">
+                    <div class="field label border round">
+                        {{ form.title }}
+                        <label>{% trans "Title" %}</label> 
+                    </div>
+                    {% if form.title.errors %}
+                    <p class="error-text tiny-text no-margin">{{ form.title.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="s12">
+                    <div class="field textarea label border round" style="height: auto;">
+                        {{ form.description }}
+                        <label>{% trans "Description" %}</label>
+                    </div>
+                     {% if form.description.errors %}
+                    <p class="error-text tiny-text no-margin">{{ form.description.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="s12 m6">
+                    <div class="field textarea label border round">
+                        {{ form.ingredients }}
+                        <label>{% trans "Ingredients" %}</label>
+                    </div>
+                </div>
+
+                <div class="s12 m6">
+                    <div class="field textarea label border round">
+                        {{ form.instructions }}
+                        <label>{% trans "Instructions" %}</label>
+                    </div>
+                </div>
+
+                <!-- Image Upload with Preview -->
+                <div class="s12 m6">
+                     <div class="field label border round">
+                        {{ form.image }}
+                        <label>{% trans "Image" %}</label>
+                    </div>
+                </div>
+                <div class="s12 m6 center-align relative">
+                    <div class="padding border round dashed surface-variant" style="min-height: 150px; display: flex; align-items: center; justify-content: center;">
+                         <img id="image-preview" src="{% if recipe.image %}{{ recipe.image.url }}{% endif %}" class="responsive round" style="max-height: 200px; {% if not recipe.image %}display:none;{% endif %}">
+                         <span id="image-placeholder" class="gray-text" {% if recipe.image %}style="display:none;"{% endif %}>{% trans "Image Preview" %}</span>
+                    </div>
+                </div>
+
+                <div class="s12">
+                    <div class="field label border round">
+                        {{ form.tags }}
+                        <label>{% trans "Tags (comma separated)" %}</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="large-space"></div>
+            
+            <div class="row right-align">
+                <!-- Fallback to index if referer is missing, or history.back -->
+                <a href="javascript:history.back()" class="button transparent border round">{% trans "Cancel" %}</a>
+                <button type="submit" class="button primary round">
+                    <i class="front">save</i>
+                    <span>{% trans "Save Recipe" %}</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</article>
+<div class="large-space"></div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    // Image Preview Logic
+    var imageInput = document.querySelector('input[type="file"]');
+    if (imageInput) {
+        imageInput.onchange = function (evt) {
+            var tgt = evt.target || window.event.srcElement,
+                files = tgt.files;
+
+            if (FileReader && files && files.length) {
+                var fr = new FileReader();
+                fr.onload = function () {
+                    var preview = document.getElementById('image-preview');
+                    var placeholder = document.getElementById('image-placeholder');
+                    preview.src = fr.result;
+                    preview.style.display = 'block';
+                    if(placeholder) placeholder.style.display = 'none';
+                }
+                fr.readAsDataURL(files[0]);
+            }
+        }
+    }
+</script>
+{% endblock %}

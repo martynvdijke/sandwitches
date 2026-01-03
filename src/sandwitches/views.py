@@ -5,13 +5,14 @@ from django.contrib.auth import login
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
-from .models import Recipe, Rating
+from .models import Recipe, Rating, Tag
 from .forms import RecipeForm, AdminSetupForm, UserSignupForm, RatingForm
 from django.http import HttpResponseBadRequest
 from django.conf import settings
 from django.http import FileResponse, Http404
 from pathlib import Path
 import mimetypes
+from django.db.models import Q, Avg
 
 from sandwitches import __version__ as sandwitches_version
 
@@ -27,7 +28,11 @@ def recipe_edit(request, pk):
             return redirect("recipes:admin_list")
     else:
         form = RecipeForm(instance=recipe)
-    return render(request, "recipe_form.html", {"form": form, "recipe": recipe, "version": sandwitches_version })
+    return render(
+        request,
+        "recipe_form.html",
+        {"form": form, "recipe": recipe, "version": sandwitches_version},
+    )
 
 
 def recipe_detail(request, slug):
@@ -88,19 +93,74 @@ def toggle_favorite(request, pk):
     else:
         request.user.favorites.add(recipe)
         messages.success(request, _("Recipe added to favorites."))
-    
+
     # Redirect to the page where the request came from, or default to recipe detail
-    referer = request.META.get('HTTP_REFERER')
+    referer = request.META.get("HTTP_REFERER")
     if referer:
         return redirect(referer)
-    return redirect('recipe_detail', slug=recipe.slug)
+    return redirect("recipe_detail", slug=recipe.slug)
 
 
 def index(request):
     if not User.objects.filter(is_superuser=True).exists():
         return redirect("setup")
-    recipes = Recipe.objects.order_by("-created_at")  # ty:ignore[unresolved-attribute]
-    return render(request, "index.html", {"recipes": recipes, "version": sandwitches_version })
+    recipes = (
+        Recipe.objects.all()  # ty:ignore[unresolved-attribute]
+    )  # Start with all, order later
+
+    # Filtering
+    q = request.GET.get("q")
+    if q:
+        recipes = recipes.filter(
+            Q(title__icontains=q) | Q(tags__name__icontains=q)
+        ).distinct()
+
+    date_start = request.GET.get("date_start")
+    if date_start:
+        recipes = recipes.filter(created_at__gte=date_start)
+
+    date_end = request.GET.get("date_end")
+    if date_end:
+        recipes = recipes.filter(created_at__lte=date_end)
+
+    uploader = request.GET.get("uploader")
+    if uploader:
+        recipes = recipes.filter(uploaded_by__username=uploader)
+
+    tag = request.GET.get("tag")
+    if tag:
+        recipes = recipes.filter(tags__name=tag)
+
+    # Sorting
+    sort = request.GET.get("sort", "date_desc")
+    if sort == "date_asc":
+        recipes = recipes.order_by("created_at")
+    elif sort == "rating":
+        recipes = recipes.annotate(avg_rating=Avg("ratings__score")).order_by(
+            "-avg_rating", "-created_at"
+        )
+    elif sort == "user":
+        recipes = recipes.order_by("uploaded_by__username", "-created_at")
+    else:  # date_desc or default
+        recipes = recipes.order_by("-created_at")
+
+    if request.headers.get("HX-Request"):
+        return render(request, "partials/recipe_list.html", {"recipes": recipes})
+
+    # Context for filters
+    uploaders = User.objects.filter(recipes__isnull=False).distinct()
+    tags = Tag.objects.all()  # ty:ignore[unresolved-attribute]
+
+    return render(
+        request,
+        "index.html",
+        {
+            "recipes": recipes,
+            "version": sandwitches_version,
+            "uploaders": uploaders,
+            "tags": tags,
+        },
+    )
 
 
 def setup(request):
@@ -123,7 +183,7 @@ def setup(request):
     else:
         form = AdminSetupForm()
 
-    return render(request, "setup.html", {"form": form, "version": sandwitches_version })
+    return render(request, "setup.html", {"form": form, "version": sandwitches_version})
 
 
 def signup(request):
@@ -142,7 +202,9 @@ def signup(request):
     else:
         form = UserSignupForm()
 
-    return render(request, "signup.html", {"form": form, "version": sandwitches_version })
+    return render(
+        request, "signup.html", {"form": form, "version": sandwitches_version}
+    )
 
 
 def media(request, file_path=None):

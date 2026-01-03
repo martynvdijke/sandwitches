@@ -12,102 +12,142 @@
       <h4 class="upper">{% trans 'Sandwitches' %}</h4>
       <p class="large-text">{% trans 'Sandwiches so good, they haunt you!' %}</p>
     </div>
-    <div class="field prefix round fill white-text border s12 m5 l4">
-      <i class="front">search</i>
-      <input id="search" type="text" class="white-text" placeholder="{% trans 'Search recipes...' %}" aria-label="{% trans 'Search' %}">
-    </div>
   </div>
 </article>
 
+<div class="space"></div>
+
+<form hx-get="{% url 'index' %}" hx-target="#recipe-grid" hx-push-url="true" hx-trigger="change delay:500ms, keyup delay:500ms from:#search, submit, uploaderChange from:body">
+    <div class="grid">
+        <!-- Main Search Bar -->
+        <div class="s12 relative">
+            <div class="field prefix suffix border round">
+                <i class="front">search</i>
+                <input id="search" type="text" name="q" placeholder="{% trans 'Search by title...' %}" value="{{ request.GET.q|default:'' }}">
+                <a class="circle plain" onclick="toggleAdvanced()" title="{% trans 'Advanced Search' %}">
+                    <i id="advanced-icon">filter_list</i>
+                </a>
+            </div>
+
+            <!-- Collapsible Advanced Search Panel -->
+            <div id="advanced-search" class="absolute padding surface elevate round z-index-10 hidden" style="top: 100%; left: 0; right: 0; margin-top: 0.5rem; display: none;">
+                <div class="grid">
+                    <div class="s12 m6 l3">
+                        <div class="field label border round">
+                            <input type="date" name="date_start" value="{{ request.GET.date_start|default:'' }}">
+                            <label>{% trans "Start Date" %}</label>
+                        </div>
+                    </div>
+                    <div class="s12 m6 l3">
+                        <div class="field label border round">
+                            <input type="date" name="date_end" value="{{ request.GET.date_end|default:'' }}">
+                            <label>{% trans "End Date" %}</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Custom Uploader Dropdown with Avatar -->
+                    <div class="s12 m6 l3">
+                        <div class="field label border round suffix relative" onclick="toggleUploaderMenu(event)">
+                            <input type="text" id="uploader-display" readonly value="{{ request.GET.uploader|default:'' }}" placeholder="{% trans 'All Uploaders' %}" style="cursor: pointer;">
+                            <label>{% trans "Uploader" %}</label>
+                            <i class="chevron-down">arrow_drop_down</i>
+                            
+                            <div id="uploader-menu" class="absolute surface elevate round left top-round bottom-round scroll" style="top: 100%; left: 0; right: 0; max-height: 300px; display: none; z-index: 20;">
+                                <a class="row padding hover pointer" onclick="selectUploader('', '{% trans 'All Uploaders' %}')">
+                                    <span>{% trans "All Uploaders" %}</span>
+                                </a>
+                                {% for u in uploaders %}
+                                <a class="row padding hover pointer align-center" onclick="selectUploader('{{ u.username }}', '{{ u.username }}')">
+                                    {% if u.avatar %}
+                                    <img src="{{ u.avatar.url }}" class="circle tiny margin-right">
+                                    {% else %}
+                                    <i class="tiny circle surface margin-right">person</i>
+                                    {% endif %}
+                                    <span>{{ u.username }}</span>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <input type="hidden" name="uploader" id="uploader-hidden" value="{{ request.GET.uploader|default:'' }}">
+                    </div>
+
+                    <div class="s12 m6 l3">
+                         <div class="field label border round">
+                            <select name="tag">
+                                <option value="">{% trans "All Tags" %}</option>
+                                {% for t in tags %}
+                                <option value="{{ t.name }}" {% if request.GET.tag == t.name %}selected{% endif %}>{{ t.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <label>{% trans "Tag" %}</label>
+                        </div>
+                    </div>
+
+                    <div class="s12 m6 l3">
+                        <div class="field label border round">
+                           <select name="sort">
+                               <option value="date_desc" {% if request.GET.sort == 'date_desc' %}selected{% endif %}>{% trans "Newest" %}</option>
+                               <option value="date_asc" {% if request.GET.sort == 'date_asc' %}selected{% endif %}>{% trans "Oldest" %}</option>
+                               <option value="rating" {% if request.GET.sort == 'rating' %}selected{% endif %}>{% trans "Highest Rated" %}</option>
+                               <option value="user" {% if request.GET.sort == 'user' %}selected{% endif %}>{% trans "Uploader (A-Z)" %}</option>
+                           </select>
+                           <label>{% trans "Sort By" %}</label>
+                       </div>
+                   </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
 <div class="large-space"></div>
 
-<div class="grid justify-center">
-  {% for recipe in recipes %}
-  <div class="s12 m6 l4 xl3 recipe-card">
-    <article class="round no-padding elevate">
-       <div style="position: relative;">
-         {% if recipe.image %}
-         <img src="{{ recipe.image_medium.url }}" class="responsive top-round" style="height:220px; width:100%; object-fit:cover; cursor:pointer;" loading="lazy" alt="{{ recipe.title }}" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">
-         {% else %}
-         <div class="primary medium-height top-round middle-align center-align" style="height:220px; cursor:pointer;" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">
-           <i class="extra">lunch_dining</i>
-         </div>
-         {% endif %}
-         
-         {% if user.is_authenticated %}
-         <div class="absolute top left padding">
-             <a href="{% url 'toggle_favorite' recipe.pk %}" class="button circle surface white-text">
-                <i class="{% if recipe in user.favorites.all %}error-text{% else %}black-text{% endif %}">
-                    {% if recipe in user.favorites.all %}favorite{% else %}favorite_border{% endif %}
-                </i>
-             </a>
-         </div>
-         {% endif %}
-       </div>
-       
-       <div class="padding">
-         <h5 class="truncate pointer" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">{{ recipe.title }}</h5>
-         
-         <div class="row align-center">
-            {% if recipe.uploaded_by %}
-                {% if recipe.uploaded_by.avatar %}
-                <img src="{{ recipe.uploaded_by.avatar.url }}" class="circle tiny" alt="{{ recipe.uploaded_by.username }}">
-                {% else %}
-                <i class="tiny circle surface">person</i>
-                {% endif %}
-                <span class="tiny-text left-margin">{{ recipe.uploaded_by.username }}</span>
-            {% else %}
-                <i class="tiny circle surface">person_off</i>
-                <span class="tiny-text left-margin">{% trans "Unknown" %}</span>
-            {% endif %}
-         </div>
-         
-         <div class="space"></div>
-         
-         <div class="row wrap">
-           {% for tag in recipe.tags.all %}
-           <span class="chip small round surface margin-bottom">{{ tag.name }}</span>
-           {% endfor %}
-         </div>
-       </div>
-       
-       <div class="padding pt-0">
-         <a href="{% url 'recipe_detail' recipe.slug %}" class="button fill round responsive">
-           <span>{% trans 'View Recipe' %}</span>
-           <i class="suffix">arrow_forward</i>
-         </a>
-       </div>
-    </article>
-  </div>
-  {% empty %}
-  <div class="s12 center-align">
-    <div class="large-space"></div>
-    <i class="extra gray-text">no_food</i>
-    <h5 class="gray-text">{% trans "No sandwitches found." %}</h5>
-    <p>{% trans "Be the first to create one!" %}</p>
-    {% if user.is_authenticated %}
-    <a href="{% url 'admin:sandwitches_recipe_add' %}" class="button primary round">{% trans "Add Recipe" %}</a>
-    {% endif %}
-  </div>
-  {% endfor %}
-</div>
+{% include "partials/recipe_list.html" %}
 
 {% endblock %}
 
 {% block page_scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const search = document.getElementById('search');
-  if (!search) return;
-  search.addEventListener('input', function() {
-    const q = this.value.toLowerCase().trim();
-    document.querySelectorAll('.recipe-card').forEach(card => {
-      const title = (card.querySelector('h5')?.textContent || '').toLowerCase();
-      const tags = Array.from(card.querySelectorAll('.chip')).map(t => t.textContent.toLowerCase());
-      const match = !q || title.includes(q) || tags.some(t => t.includes(q));
-      card.style.display = match ? '' : 'none';
+    function toggleAdvanced() {
+        var el = document.getElementById('advanced-search');
+        if (el.style.display === 'none') {
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
+    }
+
+    function toggleUploaderMenu(event) {
+        event.stopPropagation(); // Prevent closing immediately
+        var el = document.getElementById('uploader-menu');
+        if (el.style.display === 'none') {
+            // Close others if needed, but for now just toggle
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
+    }
+
+    function selectUploader(username, displayName) {
+        document.getElementById('uploader-hidden').value = username;
+        document.getElementById('uploader-display').value = username ? username : ''; // Or displayName
+        
+        // Trigger HTMX
+        document.body.dispatchEvent(new Event('uploaderChange'));
+        
+        // Close menu (handled by toggle or outside click)
+        // document.getElementById('uploader-menu').style.display = 'none'; 
+    }
+
+    // Close menus on clicking outside
+    document.addEventListener('click', function(event) {
+        var uploaderMenu = document.getElementById('uploader-menu');
+        var uploaderField = document.getElementById('uploader-display').parentElement;
+        if (uploaderMenu && uploaderMenu.style.display === 'block') {
+             if (!uploaderField.contains(event.target)) {
+                 uploaderMenu.style.display = 'none';
+             }
+        }
     });
-  });
-});
 </script>
 {% endblock %}
