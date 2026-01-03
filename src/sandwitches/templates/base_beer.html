@@ -1,0 +1,97 @@
+{% extends "base.html" %} {% load i18n static %} {% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.css" rel="stylesheet">
+<script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+<link rel="icon" type="image/svg+xml" href="{% static "icons/favicon.svg" %}">
+<style>
+    :root {
+        --primary: #ff7a18;
+    }
+    main.container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+</style>
+{% endblock %} 
+
+{% block navbar %}
+<nav class="top">
+  <button class="circle transparent" data-ui="#menu">
+    <i>menu</i>
+  </button>
+  <a href="{% url 'index' %}" class="row align-center">
+    <img src="{% static 'icons/icon.svg' %}" class="circle small">
+    <h6 class="max">Sandwitches</h6>
+  </a>
+  <div class="max"></div>
+  <button class="circle transparent" onclick="ui('mode', ui('mode') == 'dark' ? 'light' : 'dark')">
+    <i>dark_mode</i>
+  </button>
+  <button class="circle transparent" data-ui="#language-menu">
+      <i>language</i>
+  </button>
+  
+  {% if user.is_authenticated %}
+    <img src="https://www.w3schools.com/howto/img_avatar.png" class="circle" data-ui="#user-menu">
+  {% else %}
+    <a href="{% url 'admin:login' %}"><button class="chip">{% trans "Login" %}</button></a>
+    <a href="{% url 'signup' %}"><button class="chip primary">{% trans "Sign up" %}</button></a>
+  {% endif %}
+</nav>
+
+<dialog id="language-menu">
+    <h5>{% trans "Language" %}</h5>
+    <form method="post" action="{% url 'set_language' %}">
+        {% csrf_token %}
+        <div class="field label border">
+            <select name="language" onchange="this.form.submit()">
+                {% get_current_language as LANGUAGE_CODE %}
+                {% get_available_languages as LANGUAGES %}
+                {% for code,name in LANGUAGES %}
+                  <option value="{{ code }}"{% if code == LANGUAGE_CODE %} selected{% endif %}>{{ name }}</option>
+                {% endfor %}
+            </select>
+            <label>{% trans "Select Language" %}</label>
+        </div>
+        <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+    </form>
+    <nav class="right">
+        <button class="transparent link" data-ui="#language-menu">{% trans "Close" %}</button>
+    </nav>
+</dialog>
+
+{% if user.is_authenticated %}
+<menu id="user-menu" class="no-wrap left">
+  <a href="{% url 'admin:index' %}" class="row"><i>admin_panel_settings</i>{% trans "Admin" %}</a>
+  <div class="divider"></div>
+  <a href="{% url 'admin:logout' %}" class="row"><i>logout</i>{% trans "Logout" %}</a>
+</menu>
+{% endif %}
+
+<dialog id="menu" class="left">
+    <nav class="drawer">
+        <header>
+            <nav>
+                <img src="{% static 'icons/icon.svg' %}" class="circle">
+                <h6>Sandwitches</h6>
+            </nav>
+        </header>
+        <a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+            <i>home</i>
+            <span>{% trans "Home" %}</span>
+        </a>
+        <a href="/api/docs">
+            <i>api</i>
+            <span>{% trans "API Docs" %}</span>
+        </a>
+        <a href="https://github.com/martynvdijke/sandwitches" target="_blank">
+             <i>code</i>
+             <span>GitHub</span>
+        </a>
+    </nav>
+</dialog>
+{% endblock %}
+
+{% block extra_scripts %} 
+{% block page_scripts %}{% endblock %}
+{% endblock %}

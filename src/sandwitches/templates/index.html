@@ -1,57 +1,58 @@
-{% extends "base_pico.html" %} {% load i18n static %}
+{% extends "base_beer.html" %} {% load i18n static %}
 
 {% block title %}Sandwitches{% endblock %}
 
 {% block content %}
-<div class="grid search-row">
-  <div>
-    <h4>{% trans 'Sandwitches: sandwiches so good, they haunt you!' %}</h4>
+<div class="grid">
+  <div class="s12 m6">
+    <h5>{% trans 'Sandwitches: sandwiches so good, they haunt you!' %}</h5>
   </div>
-  <div>
-    <form role="search" onsubmit="return false;">
+  <div class="s12 m6">
+    <div class="field prefix round fill">
+      <i class="front">search</i>
       <input id="search" type="search" placeholder="{% trans "Search by title or tag" %}" aria-label="{% trans "Search" %}">
-    </form>
+    </div>
   </div>
 </div>
 
-<section class="grid">
+<div class="grid">
   {% for recipe in recipes %}
-    <article class="card" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';" style="cursor:pointer;">
-      {% if recipe.image %}
-      <figure class="recipe-figure">
-          <img src="{{ recipe.image_medium.url }}" 
-               srcset="{{ recipe.image_thumbnail.url }} 150w, {{ recipe.image_medium.url }} 700w" 
-               sizes="(max-width: 640px) 90vw, 45vw"
-               alt="{{ recipe.title }}" 
-               loading="lazy">
-      </figure>
-      {% endif %}
-
-      <div class="card-body">
-        <header class="card-title">{{ recipe.title }}</header>
-
-        <div class="tags-row" aria-hidden="false">
-          {% for tag in recipe.tags.all %}
-            <span class="chip{% if tag|length < 8 %} chip--accent{% endif %}">{{ tag.name }}</span>
-          {% endfor %}
-        </div>
-      </div>
-
-      {% if user.is_authenticated and user.is_staff %}
-      <footer>            
-          <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/" rel="noopener">{% trans "Edit" %}</a>
-      </footer>
-      {% endif %}
-    </article>
-
+    <div class="s12 m6 l4 xl3 recipe-card">
+        <article class="no-padding round">
+            {% if recipe.image %}
+            <img src="{{ recipe.image_medium.url }}" 
+                 class="responsive" 
+                 alt="{{ recipe.title }}" 
+                 loading="lazy"
+                 style="height: 200px; object-fit: cover; width: 100%; cursor: pointer; border-radius: var(--radius) var(--radius) 0 0;"
+                 onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">
+            {% endif %}
+            
+            <div class="padding">
+                <h6 class="recipe-title" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';" style="cursor: pointer;">{{ recipe.title }}</h6>
+                
+                <div class="row wrap">
+                  {% for tag in recipe.tags.all %}
+                    <span class="chip small round {% if tag|length < 8 %}primary{% endif %}">{{ tag.name }}</span>
+                  {% endfor %}
+                </div>
+                
+                {% if user.is_authenticated and user.is_staff %}
+                <nav>
+                    <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/" class="button small transparent upper">{% trans "Edit" %}</a>
+                </nav>
+                {% endif %}
+            </div>
+        </article>
+    </div>
   {% empty %}
-    <article class="card">
-      <div class="card-body">
-        <p>{% trans "No sandwitches yet, please stay tuned." %}</p>
-      </div>
-    </article>
+    <div class="s12">
+        <article class="center-align">
+            <h5>{% trans "No sandwitches yet, please stay tuned." %}</h5>
+        </article>
+    </div>
   {% endfor %}
-</section>
+</div>
 
 {% endblock %}
 
@@ -62,11 +63,10 @@ document.addEventListener('DOMContentLoaded', function() {
   if (!search) return;
   search.addEventListener('input', function() {
     const q = this.value.toLowerCase().trim();
-    document.querySelectorAll('section.grid article.card').forEach(card => {
-      const title = (card.querySelector('.card-title')?.textContent || '').toLowerCase();
-      const tags = Array.from(card.querySelectorAll('.tag, .chip')).map(t => t.textContent.toLowerCase());
-      const descr = (card.querySelector('.card-body p')?.textContent || '').toLowerCase();
-      const match = !q || title.includes(q) || descr.includes(q) || tags.some(t => t.includes(q));
+    document.querySelectorAll('.recipe-card').forEach(card => {
+      const title = (card.querySelector('.recipe-title')?.textContent || '').toLowerCase();
+      const tags = Array.from(card.querySelectorAll('.chip')).map(t => t.textContent.toLowerCase());
+      const match = !q || title.includes(q) || tags.some(t => t.includes(q));
       card.style.display = match ? '' : 'none';
     });
   });
