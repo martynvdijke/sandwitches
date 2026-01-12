@@ -99,6 +99,12 @@
             <i>home</i>
             <span>{% trans "Home" %}</span>
         </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'favorites' %}" class="{% if request.resolver_match.url_name == 'favorites' %}active{% endif %}">
+            <i>favorite</i>
+            <span>{% trans "Favorites" %}</span>
+        </a>
+        {% endif %}
         <a href="/api/docs">
             <i>api</i>
             <span>{% trans "API Docs" %}</span>

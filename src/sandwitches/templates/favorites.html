@@ -1,7 +1,7 @@
 {% extends "base_beer.html" %}
 {% load i18n static %}
 
-{% block title %}Sandwitches{% endblock %}
+{% block title %}{% trans 'Favorites' %}{% endblock %}
 
 {% block extra_head %}
 {{ block.super }}
@@ -21,21 +21,21 @@
 <article class="round primary s12 m12 l12">
   <div class="row align-center">
     <div class="max">
-      <h4 class="upper">{% trans 'Sandwitches' %}</h4>
-      <p class="large-text">{% trans 'Sandwiches so good, they haunt you!' %}</p>
+      <h4 class="upper">{% trans 'Your Favorites' %}</h4>
+      <p class="large-text">{% trans 'The recipes you love the most.' %}</p>
     </div>
   </div>
 </article>
 
 <div class="space"></div>
 
-<form hx-get="{% url 'index' %}" hx-target="#recipe-grid" hx-push-url="true" hx-trigger="change delay:500ms, keyup delay:500ms from:#search, submit, uploaderChange from:body">
+<form hx-get="{% url 'favorites' %}" hx-target="#recipe-grid" hx-push-url="true" hx-trigger="change delay:500ms, keyup delay:500ms from:#search, submit, uploaderChange from:body">
     <div class="grid">
         <!-- Main Search Bar -->
         <div class="s12">
             <div class="field prefix suffix border round">
                 <i class="front">search</i>
-                <input id="search" type="text" name="q" placeholder="{% trans 'Search by title...' %}" value="{{ request.GET.q|default:'' }}">
+                <input id="search" type="text" name="q" placeholder="{% trans 'Search favorites...' %}" value="{{ request.GET.q|default:'' }}">
                 <a class="circle plain" onclick="toggleAdvanced()" title="{% trans 'Advanced Search' %}">
                     <i id="advanced-icon">filter_list</i>
                 </a>
@@ -87,25 +87,15 @@
 
                     <div class="s12 m6 l3">
                          <div class="field label border round">
-                            <select name="tag" multiple size="3">
+                            <select name="tag">
+                                <option value="">{% trans "All Tags" %}</option>
                                 {% for t in tags %}
-                                <option value="{{ t.name }}" {% if t.name in selected_tags %}selected{% endif %}>{{ t.name }}</option>
+                                <option value="{{ t.name }}" {% if request.GET.tag == t.name %}selected{% endif %}>{{ t.name }}</option>
                                 {% endfor %}
                             </select>
-                            <label>{% trans "Tags" %}</label>
+                            <label>{% trans "Tag" %}</label>
                         </div>
                     </div>
-
-                    {% if user.is_authenticated %}
-                    <div class="s12 m6 l3">
-                        <div class="field middle-align">
-                            <label class="checkbox">
-                                <input type="checkbox" name="favorites" {% if request.GET.favorites == 'on' %}checked{% endif %}>
-                                <span>{% trans "My Favorites" %}</span>
-                            </label>
-                        </div>
-                    </div>
-                    {% endif %}
 
                     <div class="s12 m6 l3">
                         <div class="field label border round">

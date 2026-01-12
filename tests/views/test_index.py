@@ -65,3 +65,44 @@ def test_setup_creates_superuser_and_logs_in(client):
     assert u.is_superuser and u.is_staff
     # the user should be logged in after setup
     assert resp.context["user"].is_authenticated
+
+
+@pytest.mark.django_db
+def test_index_multi_tag_filter(client):
+    User.objects.create_superuser("admin", "admin@example.com", "pw")
+    r1 = Recipe.objects.create(title="R1", description="D1")
+    r1.set_tags_from_string("tag1, tag2")
+    r2 = Recipe.objects.create(title="R2", description="D2")
+    r2.set_tags_from_string("tag2, tag3")
+    r3 = Recipe.objects.create(title="R3", description="D3")
+    r3.set_tags_from_string("tag3")
+
+    # Filter by tag1 (should get R1)
+    resp = client.get("/", {"tag": ["tag1"]})
+    assert "R1" in resp.content.decode()
+    assert "R2" not in resp.content.decode()
+    assert "R3" not in resp.content.decode()
+
+    # Filter by tag2 and tag3 (should get R1, R2, R3 because R1 has tag2, R2 has tag2/3, R3 has tag3)
+    # Logic is OR for tags__name__in
+    resp = client.get("/", {"tag": ["tag2", "tag3"]})
+    assert "R1" in resp.content.decode()
+    assert "R2" in resp.content.decode()
+    assert "R3" in resp.content.decode()
+
+
+@pytest.mark.django_db
+def test_index_favorites_filter(client):
+    user = User.objects.create_superuser("admin", "admin@example.com", "pw")
+    client.force_login(user)
+    
+    r1 = Recipe.objects.create(title="Fav Recipe", description="D1")
+    r2 = Recipe.objects.create(title="Not Fav", description="D2")
+    
+    user.favorites.add(r1)
+    
+    # Filter by favorites
+    resp = client.get("/", {"favorites": "on"})
+    assert "Fav Recipe" in resp.content.decode()
+    assert "Not Fav" not in resp.content.decode()
+

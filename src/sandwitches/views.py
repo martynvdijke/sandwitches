@@ -101,12 +101,9 @@ def toggle_favorite(request, pk):
     return redirect("recipe_detail", slug=recipe.slug)
 
 
-def index(request):
-    if not User.objects.filter(is_superuser=True).exists():
-        return redirect("setup")
-    recipes = (
-        Recipe.objects.all()  # ty:ignore[unresolved-attribute]
-    )  # Start with all, order later
+@login_required
+def favorites(request):
+    recipes = request.user.favorites.all()
 
     # Filtering
     q = request.GET.get("q")
@@ -147,6 +144,71 @@ def index(request):
     if request.headers.get("HX-Request"):
         return render(request, "partials/recipe_list.html", {"recipes": recipes})
 
+    # Context for filters - only show options relevant to favorited recipes
+    uploaders = User.objects.filter(recipes__in=request.user.favorites.all()).distinct()
+    tags = Tag.objects.filter(recipes__in=request.user.favorites.all()).distinct()  # ty:ignore[unresolved-attribute]
+
+    return render(
+        request,
+        "favorites.html",
+        {
+            "recipes": recipes,
+            "version": sandwitches_version,
+            "uploaders": uploaders,
+            "tags": tags,
+        },
+    )
+
+
+def index(request):
+    if not User.objects.filter(is_superuser=True).exists():
+        return redirect("setup")
+    recipes = (
+        Recipe.objects.all()  # ty:ignore[unresolved-attribute]
+    )  # Start with all, order later
+
+    # Filtering
+    q = request.GET.get("q")
+    if q:
+        recipes = recipes.filter(
+            Q(title__icontains=q) | Q(tags__name__icontains=q)
+        ).distinct()
+
+    date_start = request.GET.get("date_start")
+    if date_start:
+        recipes = recipes.filter(created_at__gte=date_start)
+
+    date_end = request.GET.get("date_end")
+    if date_end:
+        recipes = recipes.filter(created_at__lte=date_end)
+
+    uploader = request.GET.get("uploader")
+    if uploader:
+        recipes = recipes.filter(uploaded_by__username=uploader)
+
+    tags = request.GET.getlist("tag")
+    if tags:
+        recipes = recipes.filter(tags__name__in=tags)
+
+    if request.user.is_authenticated and request.GET.get("favorites") == "on":
+        recipes = recipes.filter(pk__in=request.user.favorites.values("pk"))
+
+    # Sorting
+    sort = request.GET.get("sort", "date_desc")
+    if sort == "date_asc":
+        recipes = recipes.order_by("created_at")
+    elif sort == "rating":
+        recipes = recipes.annotate(avg_rating=Avg("ratings__score")).order_by(
+            "-avg_rating", "-created_at"
+        )
+    elif sort == "user":
+        recipes = recipes.order_by("uploaded_by__username", "-created_at")
+    else:  # date_desc or default
+        recipes = recipes.order_by("-created_at")
+
+    if request.headers.get("HX-Request"):
+        return render(request, "partials/recipe_list.html", {"recipes": recipes})
+
     # Context for filters
     uploaders = User.objects.filter(recipes__isnull=False).distinct()
     tags = Tag.objects.all()  # ty:ignore[unresolved-attribute]
@@ -159,6 +221,7 @@ def index(request):
             "version": sandwitches_version,
             "uploaders": uploaders,
             "tags": tags,
+            "selected_tags": request.GET.getlist("tag"),
         },
     )
 

@@ -32,6 +32,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", api.urls),
     path("media/<path:file_path>", views.media, name="media"),
+    path("favorites/", views.favorites, name="favorites"),
     path("", views.index, name="index"),
 ]
 
