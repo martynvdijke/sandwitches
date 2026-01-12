@@ -29,7 +29,7 @@
 
 <div class="space"></div>
 
-<form hx-get="{% url 'favorites' %}" hx-target="#recipe-grid" hx-push-url="true" hx-trigger="change delay:500ms, keyup delay:500ms from:#search, submit, uploaderChange from:body">
+<form hx-get="{% url 'favorites' %}" hx-target="#recipe-grid" hx-swap="outerHTML" hx-push-url="true" hx-trigger="change delay:500ms, keyup delay:500ms from:#search, submit, uploaderChange from:body">
     <div class="grid">
         <!-- Main Search Bar -->
         <div class="s12">
