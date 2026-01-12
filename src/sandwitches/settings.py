@@ -173,6 +173,12 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 
 USE_TZ = True
 
+# EU Date formats
+DATE_FORMAT = "d/m/Y"
+DATETIME_FORMAT = "d/m/Y H:i:s"
+SHORT_DATE_FORMAT = "d/m/Y"
+SHORT_DATETIME_FORMAT = "d/m/Y H:i"
+
 INTERNAL_IPS = [
     "127.0.0.1",
 ]

@@ -35,6 +35,58 @@ def admin_dashboard(request):
     user_count = User.objects.count()
     tag_count = Tag.objects.count()  # ty:ignore[unresolved-attribute]
     recent_recipes = Recipe.objects.order_by("-created_at")[:5]  # ty:ignore[unresolved-attribute]
+
+    # Data for charts
+    from datetime import timedelta
+    from django.utils import timezone
+    from django.db.models.functions import TruncDate
+    from django.db.models import Count
+
+    # Get date range from request or default to last 30 days
+    end_date_str = request.GET.get("end_date")
+    start_date_str = request.GET.get("start_date")
+
+    today = timezone.now().date()
+    try:
+        end_date = (
+            timezone.datetime.strptime(end_date_str, "%Y-%m-%d").date()
+            if end_date_str
+            else today
+        )
+        start_date = (
+            timezone.datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            if start_date_str
+            else end_date - timedelta(days=30)
+        )
+    except (ValueError, TypeError):
+        end_date = today
+        start_date = today - timedelta(days=30)
+
+    # Recipes over time
+    recipe_data = (
+        Recipe.objects.filter(created_at__date__range=(start_date, end_date))  # ty:ignore[unresolved-attribute]
+        .annotate(date=TruncDate("created_at"))
+        .values("date")
+        .annotate(count=Count("id"))
+        .order_by("date")
+    )
+
+    # Ratings over time
+    rating_data = (
+        Rating.objects.filter(created_at__date__range=(start_date, end_date))  # ty:ignore[unresolved-attribute]
+        .annotate(date=TruncDate("created_at"))
+        .values("date")
+        .annotate(avg=Avg("score"))
+        .order_by("date")
+    )
+
+    # Prepare labels and data for JS
+    recipe_labels = [d["date"].strftime("%d/%m/%Y") for d in recipe_data]
+    recipe_counts = [d["count"] for d in recipe_data]
+
+    rating_labels = [d["date"].strftime("%d/%m/%Y") for d in rating_data]
+    rating_avgs = [float(d["avg"]) for d in rating_data]
+
     return render(
         request,
         "admin/dashboard.html",
@@ -43,6 +95,12 @@ def admin_dashboard(request):
             "user_count": user_count,
             "tag_count": tag_count,
             "recent_recipes": recent_recipes,
+            "recipe_labels": recipe_labels,
+            "recipe_counts": recipe_counts,
+            "rating_labels": rating_labels,
+            "rating_avgs": rating_avgs,
+            "start_date": start_date.strftime("%Y-%m-%d"),
+            "end_date": end_date.strftime("%Y-%m-%d"),
             "version": sandwitches_version,
         },
     )
@@ -51,7 +109,7 @@ def admin_dashboard(request):
 @staff_member_required
 def admin_recipe_list(request):
     recipes = (
-        Recipe.objects.annotate(avg_rating=Avg("ratings__score"))
+        Recipe.objects.annotate(avg_rating=Avg("ratings__score"))  # ty:ignore[unresolved-attribute]
         .prefetch_related("tags")
         .all()
     )  # ty:ignore[unresolved-attribute]
@@ -275,7 +333,9 @@ def admin_task_detail(request, pk):
 @staff_member_required
 def admin_rating_list(request):
     ratings = (
-        Rating.objects.select_related("recipe", "user").all().order_by("-updated_at")
+        Rating.objects.select_related("recipe", "user")  # ty:ignore[unresolved-attribute]
+        .all()
+        .order_by("-updated_at")
     )  # ty:ignore[unresolved-attribute]
     return render(
         request,
