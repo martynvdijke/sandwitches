@@ -16,8 +16,8 @@
             <div class="divider mb-1"></div>
             
             <div class="row mb-1">
-                <div class="max bold">{% trans "Task Class" %}:</div>
-                <div class="max"><code>{{ task.task_class }}</code></div>
+                <div class="max bold">{% trans "Task Path" %}:</div>
+                <div class="max"><code>{{ task.task_path }}</code></div>
             </div>
             <div class="row mb-1">
                 <div class="max bold">{% trans "Status" %}:</div>
@@ -68,17 +68,17 @@
     </div>
 
     <div class="s12 m4">
-        {% if task.result %}
+        {% if task.return_value %}
         <article class="round padding border primary-container">
             <h6 class="bold mb-1">{% trans "Result" %}</h6>
             <div class="divider mb-1"></div>
             <div class="scroll" style="max-height: 300px;">
-                {{ task.result }}
+                {{ task.return_value }}
             </div>
         </article>
         {% endif %}
 
-        {% if task.error %}
+        {% if task.traceback %}
         <article class="round padding border error-container mt-1">
             <h6 class="bold mb-1">{% trans "Error" %}</h6>
             <div class="divider mb-1"></div>
