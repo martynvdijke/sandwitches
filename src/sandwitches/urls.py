@@ -41,6 +41,55 @@ urlpatterns += i18n_patterns(
     path("setup/", views.setup, name="setup"),
     path("recipes/<int:pk>/rate/", views.recipe_rate, name="recipe_rate"),
     path("recipes/<int:pk>/favorite/", views.toggle_favorite, name="toggle_favorite"),
+    path("dashboard/", views.admin_dashboard, name="admin_dashboard"),
+    path("dashboard/recipes/", views.admin_recipe_list, name="admin_recipe_list"),
+    path("dashboard/recipes/add/", views.admin_recipe_add, name="admin_recipe_add"),
+    path(
+        "dashboard/recipes/<int:pk>/edit/",
+        views.admin_recipe_edit,
+        name="admin_recipe_edit",
+    ),
+    path(
+        "dashboard/recipes/<int:pk>/delete/",
+        views.admin_recipe_delete,
+        name="admin_recipe_delete",
+    ),
+    path(
+        "dashboard/recipes/<int:pk>/rotate/",
+        views.admin_recipe_rotate,
+        name="admin_recipe_rotate",
+    ),
+    path("dashboard/users/", views.admin_user_list, name="admin_user_list"),
+    path(
+        "dashboard/users/<int:pk>/edit/", views.admin_user_edit, name="admin_user_edit"
+    ),
+    path(
+        "dashboard/users/<int:pk>/delete/",
+        views.admin_user_delete,
+        name="admin_user_delete",
+    ),
+    path("dashboard/tags/", views.admin_tag_list, name="admin_tag_list"),
+    path("dashboard/tags/add/", views.admin_tag_add, name="admin_tag_add"),
+    path(
+        "dashboard/tags/<int:pk>/edit/",
+        views.admin_tag_edit,
+        name="admin_tag_edit",
+    ),
+    path(
+        "dashboard/tags/<int:pk>/delete/",
+        views.admin_tag_delete,
+        name="admin_tag_delete",
+    ),
+    path("dashboard/tasks/", views.admin_task_list, name="admin_task_list"),
+    path(
+        "dashboard/tasks/<str:pk>/", views.admin_task_detail, name="admin_task_detail"
+    ),
+    path("dashboard/ratings/", views.admin_rating_list, name="admin_rating_list"),
+    path(
+        "dashboard/ratings/<int:pk>/delete/",
+        views.admin_rating_delete,
+        name="admin_rating_delete",
+    ),
     prefix_default_language=True,
 )
 

@@ -1,0 +1,60 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{% trans "Users" %}{% endblock %}
+
+{% block content %}
+<h5 class="bold mb-2">{% trans "User Management" %}</h5>
+
+<table class="border striped no-space">
+    <thead>
+        <tr>
+            <th class="min">{% trans "Avatar" %}</th>
+            <th class="max">{% trans "User" %}</th>
+            <th>{% trans "Email" %}</th>
+            <th class="min center-align">{% trans "Staff" %}</th>
+            <th class="min center-align">{% trans "Active" %}</th>
+            <th class="right-align">{% trans "Actions" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in users %}
+        <tr class="pointer" onclick="location.href='{% url 'admin_user_edit' u.pk %}'">
+            <td class="min">
+                {% if u.avatar %}
+                <img src="{{ u.avatar.url }}" class="admin-thumb round">
+                {% else %}
+                <div class="admin-thumb round gray1 middle-align center-align">
+                    <i class="extra">person</i>
+                </div>
+                {% endif %}
+            </td>
+            <td class="max">
+                <b>{{ u.username }}</b>
+                <div class="small-text">{{ u.get_full_name }}</div>
+            </td>
+            <td>{{ u.email }}</td>
+            <td class="min center-align">
+                {% if u.is_staff %}
+                <i class="primary-text">check_circle</i>
+                {% else %}
+                <i class="grey-text">cancel</i>
+                {% endif %}
+            </td>
+            <td class="min center-align">
+                {% if u.is_active %}
+                <i class="primary-text">check_circle</i>
+                {% else %}
+                <i class="grey-text">cancel</i>
+                {% endif %}
+            </td>
+            <td class="right-align">
+                {% if u != request.user %}
+                <a href="{% url 'admin_user_delete' u.pk %}" class="button circle transparent" onclick="event.stopPropagation();" title="{% trans 'Delete' %}"><i>delete</i></a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

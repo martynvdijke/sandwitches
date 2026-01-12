@@ -1,0 +1,30 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<article class="round padding">
+    <form method="post">
+        {% csrf_token %}
+        <div class="grid">
+            {% for field in form %}
+            <div class="s12">
+                <div class="field label border round">
+                    {{ field }}
+                    <label>{{ field.label }}</label>
+                    {% if field.errors %}
+                    <span class="error">{{ field.errors|striptags }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="space"></div>
+        <nav class="right-align">
+            <a href="{% url 'admin_tag_list' %}" class="button transparent">{% trans "Cancel" %}</a>
+            <button type="submit" class="button primary round">{% trans "Save Tag" %}</button>
+        </nav>
+    </form>
+</article>
+{% endblock %}

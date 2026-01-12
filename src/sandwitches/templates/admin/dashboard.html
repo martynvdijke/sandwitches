@@ -1,0 +1,77 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{% trans "Dashboard" %}{% endblock %}
+
+{% block content %}
+<div class="grid">
+    <div class="s12 m4">
+        <article class="round primary-container padding">
+            <div class="row align-center">
+                <i class="extra">restaurant</i>
+                <div class="max">
+                    <h4 class="bold">{{ recipe_count }}</h4>
+                    <div>{% trans "Recipes" %}</div>
+                </div>
+            </div>
+            <nav class="right-align">
+                <a href="{% url 'admin_recipe_list' %}" class="button transparent">{% trans "View all" %}</a>
+            </nav>
+        </article>
+    </div>
+    <div class="s12 m4">
+        <article class="round secondary-container padding">
+            <div class="row align-center">
+                <i class="extra">people</i>
+                <div class="max">
+                    <h4 class="bold">{{ user_count }}</h4>
+                    <div>{% trans "Users" %}</div>
+                </div>
+            </div>
+            <nav class="right-align">
+                <a href="{% url 'admin_user_list' %}" class="button transparent">{% trans "View all" %}</a>
+            </nav>
+        </article>
+    </div>
+    <div class="s12 m4">
+        <article class="round tertiary-container padding">
+            <div class="row align-center">
+                <i class="extra">label</i>
+                <div class="max">
+                    <h4 class="bold">{{ tag_count }}</h4>
+                    <div>{% trans "Tags" %}</div>
+                </div>
+            </div>
+            <nav class="right-align">
+                <a href="{% url 'admin_tag_list' %}" class="button transparent">{% trans "View all" %}</a>
+            </nav>
+        </article>
+    </div>
+
+    <div class="s12">
+        <h5 class="bold">{% trans "Recent Recipes" %}</h5>
+        <table class="border round">
+            <thead>
+                <tr>
+                    <th>{% trans "Title" %}</th>
+                    <th>{% trans "Uploader" %}</th>
+                    <th>{% trans "Created At" %}</th>
+                    <th class="right-align">{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for recipe in recent_recipes %}
+                <tr>
+                    <td>{{ recipe.title }}</td>
+                    <td>{{ recipe.uploaded_by.username|default:"-" }}</td>
+                    <td>{{ recipe.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+                    <td class="right-align">
+                        <a href="{% url 'admin_recipe_edit' recipe.pk %}" class="button circle transparent"><i>edit</i></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

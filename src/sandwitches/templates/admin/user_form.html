@@ -1,0 +1,37 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{% trans "Edit User" %}: {{ user_obj.username }}{% endblock %}
+
+{% block content %}
+<article class="round padding">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="grid">
+            {% for field in form %}
+            <div class="s12">
+                {% if field.field.widget.input_type == "checkbox" %}
+                <label class="checkbox">
+                    {{ field }}
+                    <span>{{ field.label }}</span>
+                </label>
+                {% else %}
+                <div class="field label border round">
+                    {{ field }}
+                    <label>{{ field.label }}</label>
+                </div>
+                {% endif %}
+                {% if field.errors %}
+                <span class="error">{{ field.errors|striptags }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        <div class="space"></div>
+        <nav class="right-align">
+            <a href="{% url 'admin_user_list' %}" class="button transparent">{% trans "Cancel" %}</a>
+            <button type="submit" class="button primary round">{% trans "Save" %}</button>
+        </nav>
+    </form>
+</article>
+{% endblock %}

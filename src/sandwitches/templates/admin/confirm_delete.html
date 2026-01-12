@@ -1,0 +1,23 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{% trans "Confirm Delete" %}{% endblock %}
+
+{% block content %}
+<article class="round padding center-align">
+    <i class="extra error-text">warning</i>
+    <h5>{% trans "Are you sure?" %}</h5>
+    <p>{% trans "You are about to delete the following" %} {{ type }}: <b>{{ object }}</b></p>
+    <p>{% trans "This action cannot be undone." %}</p>
+    
+    <div class="space"></div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <nav class="center-align">
+            <button type="button" class="button transparent" onclick="history.back()">{% trans "Cancel" %}</button>
+            <button type="submit" class="button error round">{% trans "Yes, Delete" %}</button>
+        </nav>
+    </form>
+</article>
+{% endblock %}

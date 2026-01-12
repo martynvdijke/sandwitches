@@ -1,0 +1,41 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{% trans "Background Tasks" %}{% endblock %}
+
+{% block content %}
+<h5 class="bold mb-2">{% trans "Task Results" %}</h5>
+
+<table class="border striped no-space">
+    <thead>
+        <tr>
+            <th class="min">{% trans "ID" %}</th>
+            <th>{% trans "Task Class" %}</th>
+            <th class="min">{% trans "Status" %}</th>
+            <th>{% trans "Finished" %}</th>
+            <th class="right-align">{% trans "Actions" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for task in tasks %}
+        <tr class="pointer" onclick="location.href='{% url 'admin_task_detail' task.id %}'">
+            <td class="min">{{ task.id|truncatechars:12 }}</td>
+            <td><code>{{ task.task_class }}</code></td>
+            <td class="min">
+                {% if task.status == 'SUCCEEDED' %}
+                <span class="chip tiny primary"><i>done</i> {{ task.status }}</span>
+                {% elif task.status == 'FAILED' %}
+                <span class="chip tiny error"><i>error</i> {{ task.status }}</span>
+                {% else %}
+                <span class="chip tiny surface"><i>schedule</i> {{ task.status }}</span>
+                {% endif %}
+            </td>
+            <td>{{ task.finished_at|date:"SHORT_DATETIME_FORMAT"|default:"-" }}</td>
+            <td class="right-align">
+                <i class="grey-text">chevron_right</i>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

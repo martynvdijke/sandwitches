@@ -4,34 +4,297 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.translation import gettext as _
 from .models import Recipe, Rating, Tag
-from .forms import RecipeForm, AdminSetupForm, UserSignupForm, RatingForm
+from .forms import (
+    RecipeForm,
+    AdminSetupForm,
+    UserSignupForm,
+    RatingForm,
+    UserEditForm,
+    TagForm,
+)
 from django.http import HttpResponseBadRequest
 from django.conf import settings
 from django.http import FileResponse, Http404
 from pathlib import Path
 import mimetypes
+from PIL import Image
 from django.db.models import Q, Avg
+from django_tasks.backends.database.models import DBTaskResult
 
 from sandwitches import __version__ as sandwitches_version
 
 User = get_user_model()
 
 
-def recipe_edit(request, pk):
+@staff_member_required
+def admin_dashboard(request):
+    recipe_count = Recipe.objects.count()  # ty:ignore[unresolved-attribute]
+    user_count = User.objects.count()
+    tag_count = Tag.objects.count()  # ty:ignore[unresolved-attribute]
+    recent_recipes = Recipe.objects.order_by("-created_at")[:5]  # ty:ignore[unresolved-attribute]
+    return render(
+        request,
+        "admin/dashboard.html",
+        {
+            "recipe_count": recipe_count,
+            "user_count": user_count,
+            "tag_count": tag_count,
+            "recent_recipes": recent_recipes,
+            "version": sandwitches_version,
+        },
+    )
+
+
+@staff_member_required
+def admin_recipe_list(request):
+    recipes = (
+        Recipe.objects.annotate(avg_rating=Avg("ratings__score"))
+        .prefetch_related("tags")
+        .all()
+    )  # ty:ignore[unresolved-attribute]
+    return render(
+        request,
+        "admin/recipe_list.html",
+        {"recipes": recipes, "version": sandwitches_version},
+    )
+
+
+@staff_member_required
+def admin_recipe_add(request):
+    if request.method == "POST":
+        form = RecipeForm(request.POST, request.FILES)
+        if form.is_valid():
+            recipe = form.save(commit=False)
+            recipe.uploaded_by = request.user
+            recipe.save()
+            form.save_m2m()
+            messages.success(request, _("Recipe added successfully."))
+            return redirect("admin_recipe_list")
+    else:
+        form = RecipeForm()
+    return render(
+        request,
+        "admin/recipe_form.html",
+        {"form": form, "title": _("Add Recipe"), "version": sandwitches_version},
+    )
+
+
+@staff_member_required
+def admin_recipe_edit(request, pk):
     recipe = get_object_or_404(Recipe, pk=pk)
     if request.method == "POST":
         form = RecipeForm(request.POST, request.FILES, instance=recipe)
         if form.is_valid():
             form.save()
-            return redirect("recipes:admin_list")
+            messages.success(request, _("Recipe updated successfully."))
+            return redirect("admin_recipe_list")
     else:
         form = RecipeForm(instance=recipe)
     return render(
         request,
-        "recipe_form.html",
-        {"form": form, "recipe": recipe, "version": sandwitches_version},
+        "admin/recipe_form.html",
+        {
+            "form": form,
+            "recipe": recipe,
+            "title": _("Edit Recipe"),
+            "version": sandwitches_version,
+        },
+    )
+
+
+@staff_member_required
+def admin_recipe_delete(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    if request.method == "POST":
+        recipe.delete()
+        messages.success(request, _("Recipe deleted."))
+        return redirect("admin_recipe_list")
+    return render(
+        request,
+        "admin/confirm_delete.html",
+        {"object": recipe, "type": _("recipe"), "version": sandwitches_version},
+    )
+
+
+@staff_member_required
+def admin_recipe_rotate(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    direction = request.GET.get("direction", "cw")
+    if not recipe.image:
+        messages.error(request, _("No image to rotate."))
+        return redirect("admin_recipe_edit", pk=pk)
+
+    try:
+        img = Image.open(recipe.image.path)
+        if direction == "ccw":
+            # Rotate 90 degrees counter-clockwise
+            img = img.rotate(90, expand=True)
+        else:
+            # Rotate 90 degrees clockwise (default)
+            img = img.rotate(-90, expand=True)
+        img.save(recipe.image.path)
+        messages.success(request, _("Image rotated successfully."))
+    except Exception as e:
+        messages.error(request, _("Error rotating image: ") + str(e))
+
+    return redirect("admin_recipe_edit", pk=pk)
+
+
+@staff_member_required
+def admin_user_list(request):
+    users = User.objects.all()
+    return render(
+        request,
+        "admin/user_list.html",
+        {"users": users, "version": sandwitches_version},
+    )
+
+
+@staff_member_required
+def admin_user_edit(request, pk):
+    user_obj = get_object_or_404(User, pk=pk)
+    if request.method == "POST":
+        form = UserEditForm(request.POST, request.FILES, instance=user_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _("User updated successfully."))
+            return redirect("admin_user_list")
+    else:
+        form = UserEditForm(instance=user_obj)
+    return render(
+        request,
+        "admin/user_form.html",
+        {"form": form, "user_obj": user_obj, "version": sandwitches_version},
+    )
+
+
+@staff_member_required
+def admin_user_delete(request, pk):
+    user_obj = get_object_or_404(User, pk=pk)
+    if user_obj == request.user:
+        messages.error(request, _("You cannot delete yourself."))
+        return redirect("admin_user_list")
+    if request.method == "POST":
+        user_obj.delete()
+        messages.success(request, _("User deleted."))
+        return redirect("admin_user_list")
+    return render(
+        request,
+        "admin/confirm_delete.html",
+        {"object": user_obj, "type": _("user"), "version": sandwitches_version},
+    )
+
+
+@staff_member_required
+def admin_tag_list(request):
+    tags = Tag.objects.all()  # ty:ignore[unresolved-attribute]
+    return render(
+        request,
+        "admin/tag_list.html",
+        {"tags": tags, "version": sandwitches_version},
+    )
+
+
+@staff_member_required
+def admin_tag_add(request):
+    if request.method == "POST":
+        form = TagForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _("Tag added successfully."))
+            return redirect("admin_tag_list")
+    else:
+        form = TagForm()
+    return render(
+        request,
+        "admin/tag_form.html",
+        {"form": form, "title": _("Add Tag"), "version": sandwitches_version},
+    )
+
+
+@staff_member_required
+def admin_tag_edit(request, pk):
+    tag = get_object_or_404(Tag, pk=pk)
+    if request.method == "POST":
+        form = TagForm(request.POST, instance=tag)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _("Tag updated successfully."))
+            return redirect("admin_tag_list")
+    else:
+        form = TagForm(instance=tag)
+    return render(
+        request,
+        "admin/tag_form.html",
+        {
+            "form": form,
+            "tag": tag,
+            "title": _("Edit Tag"),
+            "version": sandwitches_version,
+        },
+    )
+
+
+@staff_member_required
+def admin_tag_delete(request, pk):
+    tag = get_object_or_404(Tag, pk=pk)
+    if request.method == "POST":
+        tag.delete()
+        messages.success(request, _("Tag deleted."))
+        return redirect("admin_tag_list")
+    return render(
+        request,
+        "admin/confirm_delete.html",
+        {"object": tag, "type": _("tag"), "version": sandwitches_version},
+    )
+
+
+@staff_member_required
+def admin_task_list(request):
+    tasks = DBTaskResult.objects.all().order_by("-enqueued_at")[:50]  # ty:ignore[unresolved-attribute]
+    return render(
+        request,
+        "admin/task_list.html",
+        {"tasks": tasks, "version": sandwitches_version},
+    )
+
+
+@staff_member_required
+def admin_task_detail(request, pk):
+    task = get_object_or_404(DBTaskResult, pk=pk)
+    return render(
+        request,
+        "admin/task_detail.html",
+        {"task": task, "version": sandwitches_version},
+    )
+
+
+@staff_member_required
+def admin_rating_list(request):
+    ratings = (
+        Rating.objects.select_related("recipe", "user").all().order_by("-updated_at")
+    )  # ty:ignore[unresolved-attribute]
+    return render(
+        request,
+        "admin/rating_list.html",
+        {"ratings": ratings, "version": sandwitches_version},
+    )
+
+
+@staff_member_required
+def admin_rating_delete(request, pk):
+    rating = get_object_or_404(Rating, pk=pk)
+    if request.method == "POST":
+        rating.delete()
+        messages.success(request, _("Rating deleted."))
+        return redirect("admin_rating_list")
+    return render(
+        request,
+        "admin/confirm_delete.html",
+        {"object": rating, "type": _("rating"), "version": sandwitches_version},
     )
 
 

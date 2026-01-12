@@ -1,0 +1,64 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{% trans "Recipes" %}{% endblock %}
+
+{% block content %}
+<div class="row align-center mb-2">
+    <h5 class="max bold">{% trans "Recipe Management" %}</h5>
+    <a href="{% url 'admin_recipe_add' %}" class="button primary round">
+        <i>add</i>
+        <span>{% trans "Add Recipe" %}</span>
+    </a>
+</div>
+
+<table class="border striped no-space">
+    <thead>
+        <tr>
+            <th class="min">{% trans "ID" %}</th>
+            <th class="min">{% trans "Image" %}</th>
+            <th class="max">{% trans "Title" %}</th>
+            <th class="min">{% trans "Rating" %}</th>
+            <th class="m l">{% trans "Tags" %}</th>
+            <th>{% trans "Uploader" %}</th>
+            <th>{% trans "Created" %}</th>
+            <th class="right-align">{% trans "Actions" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for recipe in recipes %}
+        <tr class="pointer" onclick="location.href='{% url 'admin_recipe_edit' recipe.pk %}'">
+            <td class="min">{{ recipe.id }}</td>
+            <td class="min">
+                {% if recipe.image %}
+                <img src="{{ recipe.image_thumbnail.url }}" class="admin-thumb round">
+                {% else %}
+                <div class="admin-thumb round gray1 middle-align center-align">
+                    <i class="extra">restaurant</i>
+                </div>
+                {% endif %}
+            </td>
+            <td class="max">
+                <b>{{ recipe.title }}</b>
+            </td>
+            <td class="min center-align">
+                <div class="row align-center">
+                    <i class="primary-text">star</i>
+                    <span>{{ recipe.avg_rating|default:0|floatformat:1 }}</span>
+                </div>
+            </td>
+            <td class="m l">
+                {% for tag in recipe.tags.all %}
+                <span class="chip tiny">{{ tag.name }}</span>
+                {% endfor %}
+            </td>
+            <td>{{ recipe.uploaded_by.username|default:"-" }}</td>
+            <td>{{ recipe.created_at|date:"SHORT_DATE_FORMAT" }}</td>
+            <td class="right-align">
+                <a href="{% url 'admin_recipe_delete' recipe.pk %}" class="button circle transparent" onclick="event.stopPropagation();" title="{% trans 'Delete' %}"><i>delete</i></a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
