@@ -28,12 +28,14 @@
          
          <div class="row align-center">
             {% if recipe.uploaded_by %}
-                {% if recipe.uploaded_by.avatar %}
-                <img src="{{ recipe.uploaded_by.avatar.url }}" class="circle tiny" alt="{{ recipe.uploaded_by.username }}">
-                {% else %}
-                <i class="tiny circle surface">person</i>
-                {% endif %}
-                <span class="tiny-text left-margin">{{ recipe.uploaded_by.username }}</span>
+                <a href="{% url 'index' %}?uploader={{ recipe.uploaded_by.username|urlencode }}" class="row align-center" style="color: inherit; text-decoration: none;">
+                    {% if recipe.uploaded_by.avatar %}
+                    <img src="{{ recipe.uploaded_by.avatar.url }}" class="circle tiny" alt="{{ recipe.uploaded_by.username }}">
+                    {% else %}
+                    <i class="tiny circle surface">person</i>
+                    {% endif %}
+                    <span class="tiny-text left-margin">{{ recipe.uploaded_by.username }}</span>
+                </a>
             {% else %}
                 <i class="tiny circle surface">person_off</i>
                 <span class="tiny-text left-margin">{% trans "Unknown" %}</span>
@@ -44,7 +46,7 @@
          
          <div class="row wrap">
            {% for tag in recipe.tags.all %}
-           <span class="chip small round surface margin-bottom">{{ tag.name }}</span>
+           <a href="{% url 'index' %}?tag={{ tag.name|urlencode }}" class="chip small round surface margin-bottom">{{ tag.name }}</a>
            {% endfor %}
          </div>
        </div>

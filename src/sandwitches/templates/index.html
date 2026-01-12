@@ -86,13 +86,24 @@
                     </div>
 
                     <div class="s12 m6 l3">
-                         <div class="field label border round">
-                            <select name="tag" multiple size="3">
-                                {% for t in tags %}
-                                <option value="{{ t.name }}" {% if t.name in selected_tags %}selected{% endif %}>{{ t.name }}</option>
-                                {% endfor %}
-                            </select>
+                         <div class="field label border round suffix relative" onclick="toggleTagMenu(event)">
+                            <input type="text" id="tag-display" readonly placeholder="{% trans 'All Tags' %}" style="cursor: pointer;">
                             <label>{% trans "Tags" %}</label>
+                            <i class="chevron-down">arrow_drop_down</i>
+
+                            <div id="tag-menu" class="absolute surface elevate round left top-round bottom-round scroll" style="top: 100%; left: 0; right: 0; max-height: 300px; display: none; z-index: 20;" onclick="event.stopPropagation()">
+                                {% for t in tags %}
+                                <label class="row padding hover pointer align-center">
+                                    <input type="checkbox" class="margin-right" onchange="updateSelectedTags()" value="{{ t.name }}" {% if t.name in selected_tags %}checked{% endif %}>
+                                    <span>{{ t.name }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div id="tag-hidden-container">
+                             {% for t in selected_tags %}
+                            <input type="hidden" name="tag" value="{{ t }}">
+                            {% endfor %}
                         </div>
                     </div>
 
@@ -163,6 +174,53 @@
         // document.getElementById('uploader-menu').style.display = 'none'; 
     }
 
+    function toggleTagMenu(event) {
+        event.stopPropagation();
+        var el = document.getElementById('tag-menu');
+        if (el.style.display === 'none') {
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
+    }
+
+    function updateSelectedTags(triggerEvent = true) {
+        var menu = document.getElementById('tag-menu');
+        var checkboxes = menu.querySelectorAll('input[type="checkbox"]');
+        var hiddenContainer = document.getElementById('tag-hidden-container');
+        var displayInput = document.getElementById('tag-display');
+        
+        hiddenContainer.innerHTML = ''; // Clear existing
+        var selectedNames = [];
+        
+        checkboxes.forEach(function(cb) {
+            if (cb.checked) {
+                selectedNames.push(cb.value);
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'tag';
+                input.value = cb.value;
+                hiddenContainer.appendChild(input);
+            }
+        });
+        
+        if (selectedNames.length > 0) {
+            displayInput.value = selectedNames.join(', ');
+        } else {
+            displayInput.value = '';
+        }
+
+        if (triggerEvent) {
+            // Trigger HTMX
+            document.body.dispatchEvent(new Event('uploaderChange'));
+        }
+    }
+
+    // Initialize display value
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSelectedTags(false);
+    });
+
     // Close menus on clicking outside
     document.addEventListener('click', function(event) {
         var uploaderMenu = document.getElementById('uploader-menu');
@@ -170,6 +228,14 @@
         if (uploaderMenu && uploaderMenu.style.display === 'block') {
              if (!uploaderField.contains(event.target)) {
                  uploaderMenu.style.display = 'none';
+             }
+        }
+
+        var tagMenu = document.getElementById('tag-menu');
+        var tagField = document.getElementById('tag-display').parentElement;
+        if (tagMenu && tagMenu.style.display === 'block') {
+             if (!tagField.contains(event.target)) {
+                 tagMenu.style.display = 'none';
              }
         }
     });

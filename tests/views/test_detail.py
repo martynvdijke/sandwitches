@@ -119,3 +119,43 @@ def test_invalid_rating_rejected(client):
         follow=True,
     )
     assert Rating.objects.filter(recipe=recipe, user=user).count() == 0
+
+
+@pytest.mark.django_db
+def test_detail_view_tags_are_linked(client):
+    User.objects.create_superuser("admin", "admin@example.com", "strongpassword123")
+    recipe = Recipe.objects.create(title="Tagged Recipe", description="Desc")
+    recipe.set_tags_from_string("tag1, tag2")
+
+    url = reverse("recipe_detail", kwargs={"slug": recipe.slug})
+    response = client.get(url)
+
+    assert response.status_code == 200
+    content = response.content.decode()
+
+    # Check for link to index with tag filter
+    # Note: tag name is urlencoded, but 'tag1' is safe
+    expected_link_1 = f'href="{reverse("index")}?tag=tag1"'
+    expected_link_2 = f'href="{reverse("index")}?tag=tag2"'
+
+    assert expected_link_1 in content
+    assert expected_link_2 in content
+
+
+@pytest.mark.django_db
+def test_detail_view_uploader_is_linked(client):
+    User.objects.create_superuser("admin", "admin@example.com", "strongpassword123")
+    uploader = User.objects.create_user("chef", "chef@example.com", "pw")
+    recipe = Recipe.objects.create(
+        title="Chef's Special", description="Desc", uploaded_by=uploader
+    )
+
+    url = reverse("recipe_detail", kwargs={"slug": recipe.slug})
+    response = client.get(url)
+
+    assert response.status_code == 200
+    content = response.content.decode()
+
+    # Check for link to index with uploader filter
+    expected_link = f'href="{reverse("index")}?uploader=chef"'
+    assert expected_link in content
