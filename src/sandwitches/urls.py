@@ -20,6 +20,7 @@ from django.urls import path, include
 from . import views
 from .api import api
 from django.conf.urls.i18n import i18n_patterns
+from .feeds import LatestRecipesFeed  # Import the feed class
 
 
 import os
@@ -34,6 +35,10 @@ urlpatterns = [
     path("media/<path:file_path>", views.media, name="media"),
     path("favorites/", views.favorites, name="favorites"),
     path("", views.index, name="index"),
+    path("feeds/latest/", LatestRecipesFeed(), name="latest_recipes_feed"),
+    path(
+        "feeds/latest/", LatestRecipesFeed(), name="latest_recipes_feed"
+    ),  # Add this line
 ]
 
 urlpatterns += i18n_patterns(

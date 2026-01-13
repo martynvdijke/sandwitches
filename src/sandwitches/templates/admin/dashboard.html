@@ -147,56 +147,7 @@
         <a href="{% url 'admin_task_list' %}" class="button primary">{% trans "Go to Tasks" %}</a>
     </div>
 </div>
-{% endblock %}
 
-{% block admin_scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#5d4037';
-        const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim() || '#ff7a18';
-
-        // Recipe Chart
-        new Chart(document.getElementById('recipeChart'), {
-            type: 'line',
-            data: {
-                labels: {{ recipe_labels|safe }},
-                datasets: [{
-                    label: '{% trans "Recipes Created" %}',
-                    data: {{ recipe_counts|safe }},
-                    borderColor: primaryColor,
-                    backgroundColor: primaryColor + '33',
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-            }
-        });
-
-        // Rating Chart
-        new Chart(document.getElementById('ratingChart'), {
-            type: 'bar',
-            data: {
-                labels: {{ rating_labels|safe }},
-                datasets: [{
-                    label: '{% trans "Avg Rating" %}',
-                    data: {{ rating_avgs|safe }},
-                    backgroundColor: secondaryColor,
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: { y: { min: 0, max: 10 } }
-            }
-        });
-    });
-</script>
 {% endblock %}
 
 {% block admin_scripts %}

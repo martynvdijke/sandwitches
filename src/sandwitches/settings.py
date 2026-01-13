@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+
 from django.core.exceptions import ImproperlyConfigured
 from . import storage
 
@@ -157,8 +158,6 @@ MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", default=BASE_DIR / "media"))  # t
 # Static (for CSS etc)
 STATIC_URL = "/static/"
 STATIC_ROOT = Path("/tmp/staticfiles")
-STATIC_URL = "static/"
-
 STATICFILES_DIRS = [BASE_DIR / "static", MEDIA_ROOT]
 
 LANGUAGE_CODE = "en"
@@ -191,6 +190,7 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_USE_TLS = os.environ.get("SMTP_USE_TLS")
