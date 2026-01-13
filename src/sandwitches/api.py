@@ -1,6 +1,10 @@
 from ninja import NinjaAPI
 from .models import Recipe, Tag
-from .utils import parse_ingredient_line, scale_ingredient, format_scaled_ingredient # Import utility functions
+from .utils import (
+    parse_ingredient_line,
+    scale_ingredient,
+    format_scaled_ingredient,
+)  # Import utility functions
 
 from ninja import ModelSchema
 from ninja import Schema
@@ -8,7 +12,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from datetime import date
 import random
-from typing import List, Optional # Import typing hints
+from typing import List, Optional  # Import typing hints
 
 from ninja.security import django_auth
 
@@ -44,7 +48,7 @@ class RatingResponseSchema(Schema):
     count: int
 
 
-class ScaledIngredient(Schema): # New Schema for scaled ingredients
+class ScaledIngredient(Schema):  # New Schema for scaled ingredients
     original_line: str
     scaled_line: str
     quantity: Optional[float]
@@ -80,17 +84,21 @@ def get_recipe(request, recipe_id: int):
     return recipe
 
 
-@api.get("v1/recipes/{recipe_id}/scale-ingredients", response=List[ScaledIngredient]) # New scaling endpoint
+@api.get(
+    "v1/recipes/{recipe_id}/scale-ingredients", response=List[ScaledIngredient]
+)  # New scaling endpoint
 def scale_recipe_ingredients(request, recipe_id: int, target_servings: int):
     recipe = get_object_or_404(Recipe, id=recipe_id)
-    
+
     current_servings = recipe.servings
     if current_servings is None or current_servings <= 0:
         # Fallback if servings is not set or invalid, assume 1
-        current_servings = 1 
+        current_servings = 1
 
     ingredients_text = recipe.ingredients
-    ingredient_lines = [line.strip() for line in ingredients_text.split('\n') if line.strip()]
+    ingredient_lines = [
+        line.strip() for line in ingredients_text.split("\n") if line.strip()
+    ]
 
     scaled_ingredients_output = []
     for line in ingredient_lines:
@@ -98,14 +106,16 @@ def scale_recipe_ingredients(request, recipe_id: int, target_servings: int):
         scaled = scale_ingredient(parsed, current_servings, target_servings)
         formatted_line = format_scaled_ingredient(scaled)
 
-        scaled_ingredients_output.append(ScaledIngredient(
-            original_line=line,
-            scaled_line=formatted_line,
-            quantity=scaled['quantity'],
-            unit=scaled['unit'],
-            name=scaled['name'],
-        ))
-    
+        scaled_ingredients_output.append(
+            ScaledIngredient(
+                original_line=line,
+                scaled_line=formatted_line,
+                quantity=scaled["quantity"],
+                unit=scaled["unit"],
+                name=scaled["name"],
+            )
+        )
+
     return scaled_ingredients_output
 
 

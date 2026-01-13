@@ -11,7 +11,7 @@ class LatestRecipesFeed(Feed):
     description = "Updates on the newest recipes added to Sandwitches."
 
     def items(self):
-        return Recipe.objects.order_by("-created_at")[:5]
+        return Recipe.objects.order_by("-created_at")[:5]  # ty:ignore[unresolved-attribute]
 
     def item_title(self, item):
         return item.title
