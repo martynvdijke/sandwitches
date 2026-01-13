@@ -72,6 +72,7 @@ class Recipe(models.Model):
     description = models.TextField(blank=True)
     ingredients = models.TextField(blank=True)
     instructions = models.TextField(blank=True)
+    servings = models.IntegerField(default=1, validators=[MinValueValidator(1)])
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name="recipes",

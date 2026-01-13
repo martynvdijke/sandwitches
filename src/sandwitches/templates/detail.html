@@ -10,6 +10,16 @@
             padding-right: 10%;
         }
     }
+    .portion-selector {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .portion-selector input[type="number"] {
+        width: 60px;
+        text-align: center;
+    }
 </style>
 {% load custom_filters %} {# Load your custom filters #} 
 <script type="application/ld+json">
@@ -29,14 +39,18 @@
   {% if recipe.tags.all %}
   "recipeCategory": [{% for tag in recipe.tags.all %}"{{ tag.name }}"{% if not forloop.last %},{% endif %}{% endfor %}],
   {% endif %}
-  "recipeIngredient": {{ recipe.ingredients|linebreaksbr|striptags|split:"\n"|json_script:"recipe-ingredients" }},
+  "recipeIngredient": [
+    {% for ingredient in recipe.ingredients|linebreaksbr|striptags|split:"\n" %}
+    "{{ ingredient|escapejs }}"{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ],
   "recipeInstructions": {
     "@type": "ItemList",
     "itemListElement": [
       {% for instruction in recipe.instructions|linebreaksbr|striptags|split:"\n" %}
       {
         "@type": "HowToStep",
-        "text": "{{ instruction }}" {# Removed |strip #}
+        "text": "{{ instruction|escapejs }}"
       }{% if not forloop.last %},{% endif %}
       {% endfor %}
     ]
@@ -97,7 +111,7 @@
             
             <div class="row align-center">
                  {% if recipe.uploaded_by %}
-                    <a href="{% url 'index' %}?uploader={{ recipe.uploaded_by.username|urlencode }}" class="row align-center" style="color: inherit; text-decoration: none;">
+                    <a href="{% url 'index' %}" class="row align-center" style="color: inherit; text-decoration: none;">
                         {% if recipe.uploaded_by.avatar %}
                         <img src="{{ recipe.uploaded_by.avatar.url }}" class="circle small" alt="{{ recipe.uploaded_by.username }}">
                         {% else %}
@@ -199,12 +213,14 @@
           <div class="large-space"></div>
           
           <h5 class="primary-text">{% trans "Ingredients" %}</h5>
-           <div class="card padding flat gray1">
-            {% if recipe.ingredients %}
-                {{ recipe.ingredients|convert_markdown|safe }}
-            {% else %}
-                <p class="italic">{% trans "No ingredients listed." %}</p>
-            {% endif %}
+          <div class="portion-selector" data-recipe-id="{{ recipe.id }}" data-original-servings="{{ recipe.servings }}">
+              <label for="portions">{% trans "Portions" %}:</label>
+              <button class="button circle transparent" onclick="adjustPortions(-1)">-</button>
+              <input type="number" id="portions" value="{{ recipe.servings }}" min="1" onchange="scaleIngredients()">
+              <button class="button circle transparent" onclick="adjustPortions(1)">+</button>
+          </div>
+           <div id="ingredients-display" class="card padding flat gray1">
+            <p class="text-center">{% trans "Loading ingredients..." %}</p>
            </div>
 
           <div class="large-space"></div>
@@ -220,4 +236,77 @@
       </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const recipeId = document.querySelector('.portion-selector').dataset.recipeId;
+    const originalServings = parseInt(document.querySelector('.portion-selector').dataset.originalServings || '1');
+    const portionsInput = document.getElementById('portions');
+    const ingredientsDisplay = document.getElementById('ingredients-display');
+
+    function showLoading() {
+        ingredientsDisplay.innerHTML = '<p class="text-center">Loading ingredients...</p>';
+    }
+
+    async function scaleIngredients() {
+        showLoading();
+        let targetServings = parseInt(portionsInput.value);
+
+        if (isNaN(targetServings) || targetServings < 1) {
+            targetServings = originalServings; // Fallback to original
+            if (isNaN(targetServings) || targetServings < 1) {
+                targetServings = 1; // Final fallback
+            }
+            portionsInput.value = targetServings;
+        }
+
+        try {
+            const response = await fetch(`/api/v1/recipes/${recipeId}/scale-ingredients?target_servings=${targetServings}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const scaledIngredients = await response.json();
+            
+            let html = '';
+            scaledIngredients.forEach(item => {
+                html += `<div>${item.scaled_line}</div>`;
+            });
+            ingredientsDisplay.innerHTML = html;
+
+        } catch (error) {
+            console.error("Error scaling ingredients:", error);
+            ingredientsDisplay.innerHTML = `<p class="error-text">Failed to load scaled ingredients. Please try again. (${error.message})</p>`;
+        }
+    }
+
+    function adjustPortions(delta) {
+        let currentPortions = parseInt(portionsInput.value);
+        if (isNaN(currentPortions)) {
+            currentPortions = originalServings;
+            if (isNaN(currentPortions) || currentPortions < 1) {
+                currentPortions = 1;
+            }
+        }
+        currentPortions += delta;
+        if (currentPortions < 1) {
+            currentPortions = 1;
+        }
+        portionsInput.value = currentPortions;
+        scaleIngredients();
+    }
+
+    // Initial scaling when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        // Set initial value of portions input to original servings from backend if not already set
+        if (isNaN(parseInt(portionsInput.value)) || parseInt(portionsInput.value) < 1) {
+             portionsInput.value = originalServings;
+             if (isNaN(parseInt(portionsInput.value)) || parseInt(portionsInput.value) < 1) {
+                portionsInput.value = 1; // Final fallback
+            }
+        }
+        scaleIngredients();
+    });
+
+</script>
 {% endblock %}
