@@ -11,11 +11,50 @@
         }
     }
 </style>
+{% load custom_filters %} {# Load your custom filters #} 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Recipe",
+  "name": "{{ recipe.title }}",
+  {% if recipe.image %}
+  "image": "{{ request.scheme }}://{{ request.get_host }}{{ recipe.image_medium.url }}",
+  {% endif %}
+  "author": {
+    "@type": "Person",
+    "name": "{% if recipe.uploaded_by %}{{ recipe.uploaded_by.get_full_name|default:recipe.uploaded_by.username }}{% else %}Anonymous{% endif %}"
+  },
+  "datePublished": "{{ recipe.created_at|date:"Y-m-d" }}",
+  "description": "{{ recipe.description|striptags|truncatechars:200 }}",
+  {% if recipe.tags.all %}
+  "recipeCategory": [{% for tag in recipe.tags.all %}"{{ tag.name }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+  {% endif %}
+  "recipeIngredient": {{ recipe.ingredients|linebreaksbr|striptags|split:"\n"|json_script:"recipe-ingredients" }},
+  "recipeInstructions": {
+    "@type": "ItemList",
+    "itemListElement": [
+      {% for instruction in recipe.instructions|linebreaksbr|striptags|split:"\n" %}
+      {
+        "@type": "HowToStep",
+        "text": "{{ instruction }}" {# Removed |strip #}
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  },
+  {% if avg_rating > 0 %}
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{{ avg_rating|floatformat:1 }}",
+    "reviewCount": "{{ rating_count }}"
+  }
+  {% endif %}
+}
+</script>
 {% endblock %}
 
 {% block content %}
 
-{% load i18n markdown_extras %}
+{% load i18n markdown_extras %} {# Keep existing load tags #} 
 
 <div class="space"></div>
 
@@ -43,8 +82,7 @@
         <div class="primary medium-height top-round middle-align center-align" style="height:300px;">
            <i class="extra">lunch_dining</i>
         </div>
-        {% endif %}
-        
+        {% endif %}        
         <div class="padding">
             <div class="row align-center">
                 <h4 class="bold max">{{ recipe.title }}</h4>
