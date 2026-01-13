@@ -14,14 +14,6 @@
         padding-top: 2rem;
         padding-bottom: 2rem;
     }
-    body {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
-    main.container {
-        flex: 1;
-    }
     .admin-thumb {
         width: 80px;
         height: 80px;
@@ -31,60 +23,71 @@
 {% endblock %}
 
 {% block navbar %}
-<nav class="left drawer">
-  <header>
-    <nav>
-      <img src="{% static 'icons/icon.svg' %}" class="circle">
-      <h6>{% trans "Admin" %}</h6>
-    </nav>
-  </header>
-  <a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-    <i>dashboard</i>
-    <span>{% trans "Dashboard" %}</span>
-  </a>
-  <a href="{% url 'admin_recipe_list' %}" class="{% if request.resolver_match.url_name == 'admin_recipe_list' %}active{% endif %}">
-    <i>restaurant</i>
-    <span>{% trans "Recipes" %}</span>
-  </a>
-  <a href="{% url 'admin_user_list' %}" class="{% if request.resolver_match.url_name == 'admin_user_list' %}active{% endif %}">
-    <i>people</i>
-    <span>{% trans "Users" %}</span>
-  </a>
-  <a href="{% url 'admin_tag_list' %}" class="{% if request.resolver_match.url_name == 'admin_tag_list' %}active{% endif %}">
-    <i>label</i>
-    <span>{% trans "Tags" %}</span>
-  </a>
-  <a href="{% url 'admin_rating_list' %}" class="{% if request.resolver_match.url_name == 'admin_rating_list' %}active{% endif %}">
-    <i>star</i>
-    <span>{% trans "Ratings" %}</span>
-  </a>
-  <a href="{% url 'admin_task_list' %}" class="{% if request.resolver_match.url_name == 'admin_task_list' %}active{% endif %}">
-    <i>assignment</i>
-    <span>{% trans "Tasks" %}</span>
-  </a>
-  <div class="divider"></div>
-  <a href="{% url 'index' %}">
-    <i>home</i>
-    <span>{% trans "Public Site" %}</span>
-  </a>
-</nav>
-
 <nav class="top primary-container">
-  <button class="circle transparent" data-ui="#menu">
+  <button class="circle transparent" data-ui="#admin-menu">
     <i>menu</i>
   </button>
-  <h6 class="max">{% block admin_title %}{% trans "Sandwitches Admin" %}{% endblock %}</h6>
-  
+  <a href="{% url 'admin_dashboard' %}" class="row align-center">
+    <img src="{% static 'icons/icon.svg' %}" class="circle small">
+    <h6 class="max">{% block admin_title %}{% trans "Sandwitches Admin" %}{% endblock %}</h6>
+  </a>
+  <div class="max"></div>
   <button class="circle transparent" onclick="ui('mode', ui('mode') == 'dark' ? 'light' : 'dark')">
     <i>dark_mode</i>
   </button>
   
   {% if user.avatar %}
-  <img src="{{ user.avatar.url }}" class="circle">
+  <img src="{{ user.avatar.url }}" class="circle" data-ui="#user-menu">
   {% else %}
-  <i class="circle surface">person</i>
+  <img src="https://www.w3schools.com/howto/img_avatar.png" class="circle" data-ui="#user-menu">
   {% endif %}
 </nav>
+
+<dialog id="admin-menu" class="left">
+    <nav class="drawer">
+        <header>
+            <nav>
+              <img src="{% static 'icons/icon.svg' %}" class="circle">
+              <h6>{% trans "Admin" %}</h6>
+            </nav>
+        </header>
+        <a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+            <i>dashboard</i>
+            <span>{% trans "Dashboard" %}</span>
+        </a>
+        <a href="{% url 'admin_recipe_list' %}" class="{% if request.resolver_match.url_name == 'admin_recipe_list' %}active{% endif %}">
+            <i>restaurant</i>
+            <span>{% trans "Recipes" %}</span>
+        </a>
+        <a href="{% url 'admin_user_list' %}" class="{% if request.resolver_match.url_name == 'admin_user_list' %}active{% endif %}">
+            <i>people</i>
+            <span>{% trans "Users" %}</span>
+        </a>
+        <a href="{% url 'admin_tag_list' %}" class="{% if request.resolver_match.url_name == 'admin_tag_list' %}active{% endif %}">
+            <i>label</i>
+            <span>{% trans "Tags" %}</span>
+        </a>
+        <a href="{% url 'admin_rating_list' %}" class="{% if request.resolver_match.url_name == 'admin_rating_list' %}active{% endif %}">
+            <i>star</i>
+            <span>{% trans "Ratings" %}</span>
+        </a>
+        <a href="{% url 'admin_task_list' %}" class="{% if request.resolver_match.url_name == 'admin_task_list' %}active{% endif %}">
+            <i>assignment</i>
+            <span>{% trans "Tasks" %}</span>
+        </a>
+        <div class="divider"></div>
+        <a href="{% url 'index' %}">
+            <i>home</i>
+            <span>{% trans "Public Site" %}</span>
+        </a>
+    </nav>
+</dialog>
+
+{% if user.is_authenticated %}
+<menu id="user-menu" class="no-wrap left">
+  <a href="{% url 'admin:logout' %}" class="row"><i>logout</i>{% trans "Logout" %}</a>
+</menu>
+{% endif %}
 
 {% if messages %}
 <div class="padding">
