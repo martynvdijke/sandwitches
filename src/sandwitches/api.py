@@ -72,7 +72,7 @@ def get_settings(request):
     return Setting.objects.get()
 
 
-@api.post("v1/settings", auth=django_auth, response=SettingSchema)
+@api.post("v1/settings", auth=django_auth, response={200: SettingSchema, 403: Error})
 def update_settings(request, payload: SettingSchema):
     if not request.user.is_staff:
         return 403, {"message": "You are not authorized to perform this action"}

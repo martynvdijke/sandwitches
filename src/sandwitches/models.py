@@ -19,11 +19,11 @@ hashed_storage = HashedFilenameStorage()
 
 class Setting(SingletonModel):
     site_name = models.CharField(max_length=255, default='Sandwitches')
-    site_description = models.TextField(blank=True)
-    email = models.EmailField(blank=True)
-    ai_connection_point = models.URLField(blank=True)
-    ai_model = models.CharField(max_length=255, blank=True)
-    ai_api_key = models.CharField(max_length=255, blank=True)
+    site_description = models.TextField(blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    ai_connection_point = models.URLField(blank=True, null=True)
+    ai_model = models.CharField(max_length=255, blank=True, null=True)
+    ai_api_key = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return "Site Settings"
