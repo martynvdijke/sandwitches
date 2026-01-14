@@ -7,7 +7,7 @@
     <img src="{% static 'icons/icon.svg' %}" class="circle small">
   </a>
   <div class="max"></div>
-  <button class="circle transparent" onclick="toggleMode()">
+  <button class="circle transparent" onclick="ui('mode', ui('mode') == 'dark' ? 'light' : 'dark')">
     <i>dark_mode</i>
   </button>
   <button class="circle transparent" data-ui="#language-menu">
