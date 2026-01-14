@@ -43,6 +43,20 @@
          </div>
          
          <div class="space"></div>
+
+         <div class="row wrap">
+             {% if recipe.favorited_by.all %}
+                <span class="tiny-text">
+                    {% if recipe.favorited_by.count == 1 %}
+                        {% trans "Liked by" %} {{ recipe.favorited_by.first.username }}
+                    {% else %}
+                        {% trans "Liked by" %} {{ recipe.favorited_by.first.username }} {% trans "and" %} {{ recipe.favorited_by.count|add:"-1" }} {% trans "others" %}
+                    {% endif %}
+                </span>
+             {% endif %}
+         </div>
+
+         <div class="space"></div>
          
          <div class="row wrap">
            {% for tag in recipe.tags.all %}

@@ -163,7 +163,7 @@ class RecipeForm(forms.ModelForm):
 
 
 class RatingForm(forms.Form):
-    """Form for rating recipes (0-10)."""
+    """Form for rating recipes (0-10) with an optional comment."""
 
     score = forms.FloatField(
         min_value=0.0,
@@ -172,6 +172,11 @@ class RatingForm(forms.Form):
             attrs={"step": "0.1", "min": "0", "max": "10", "class": "slider"}
         ),
         label=_("Your rating"),
+    )
+    comment = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 2}),
+        label=_("Comment (optional)"),
+        required=False,
     )
 
 

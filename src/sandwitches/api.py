@@ -1,5 +1,6 @@
 from ninja import NinjaAPI
-from .models import Recipe, Tag, Setting
+from .models import Recipe, Tag, Setting, Rating
+from django.contrib.auth import get_user_model
 from .utils import (
     parse_ingredient_line,
     scale_ingredient,
@@ -8,7 +9,6 @@ from .utils import (
 
 from ninja import ModelSchema
 from ninja import Schema
-from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from datetime import date
 import random
@@ -18,10 +18,19 @@ from ninja.security import django_auth
 
 from __init__ import __version__
 
+# Get the custom User model
+User = get_user_model()
+
 api = NinjaAPI(version=__version__)
 
 
+class UserPublicSchema(ModelSchema):
+    class Meta:
+        model = User
+        fields = ["username", "first_name", "last_name", "avatar"]
+
 class RecipeSchema(ModelSchema):
+    favorited_by: List[UserPublicSchema] = []
     class Meta:
         model = Recipe
         fields = "__all__"
@@ -42,6 +51,12 @@ class UserSchema(ModelSchema):
 class SettingSchema(ModelSchema):
     class Meta:
         model = Setting
+        fields = "__all__"
+
+class RatingSchema(ModelSchema):
+    user: UserPublicSchema
+    class Meta:
+        model = Rating
         fields = "__all__"
 
 
@@ -97,12 +112,12 @@ def users(request):
 
 @api.get("v1/recipes", response=list[RecipeSchema])
 def get_recipes(request):
-    return Recipe.objects.all()  # ty:ignore[unresolved-attribute]
+    return Recipe.objects.all().prefetch_related('favorited_by')  # ty:ignore[unresolved-attribute]
 
 
 @api.get("v1/recipes/{recipe_id}", response=RecipeSchema)
 def get_recipe(request, recipe_id: int):
-    recipe = get_object_or_404(Recipe, id=recipe_id)
+    recipe = get_object_or_404(Recipe.objects.prefetch_related('favorited_by'), id=recipe_id)
     return recipe
 
 
@@ -143,7 +158,7 @@ def scale_recipe_ingredients(request, recipe_id: int, target_servings: int):
 
 @api.get("v1/recipe-of-the-day", response=RecipeSchema)
 def get_recipe_of_the_day(request):
-    recipes = list(Recipe.objects.all())  # ty:ignore[unresolved-attribute]
+    recipes = list(Recipe.objects.all().prefetch_related('favorited_by'))  # ty:ignore[unresolved-attribute]
     if not recipes:
         return None
     today = date.today()

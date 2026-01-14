@@ -205,6 +205,7 @@ class Rating(models.Model):
     score = models.FloatField(
         validators=[MinValueValidator(0.0), MaxValueValidator(10.0)]
     )
+    comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
