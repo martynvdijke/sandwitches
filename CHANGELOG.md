@@ -28,6 +28,41 @@
 * use npm for css and js versioning ([44f816b](https://github.com/martynvdijke/sandwitches/commit/44f816b40b515a03513dac241e9614a9b00c9402))
 * **web:** add in new dashboard overview graph ([146bcd8](https://github.com/martynvdijke/sandwitches/commit/146bcd8a0945dcf36f4b598f0bfdde7f85f582cd))
 
+
+### Performance Improvements
+
+* revamp ui with beercss and move users into new db structure ([32ea240](https://github.com/martynvdijke/sandwitches/commit/32ea240dcd2d08838245833e3cad30a29b78d4bf))
+
+# [1.5.0](https://github.com/martynvdijke/sandwitches/compare/v1.4.2...v1.5.0) (2026-01-14)
+
+
+### Bug Fixes
+
+* add build web to task ([0c56c39](https://github.com/martynvdijke/sandwitches/commit/0c56c39d2074a34270caff13dc6734c29966ec2a))
+* **admin:** css ([472dbdc](https://github.com/martynvdijke/sandwitches/commit/472dbdc85f7ffe658ec6ec3491589d443cab45aa))
+* go abck to time before npm ([a8913d1](https://github.com/martynvdijke/sandwitches/commit/a8913d1afcfff93a0b1f64bc812563cb2563ec22))
+* search ui fix ([e291e67](https://github.com/martynvdijke/sandwitches/commit/e291e67d5142b352d169102444fcc38472323561))
+* **tests:** fix formatting and tests ([6b719cf](https://github.com/martynvdijke/sandwitches/commit/6b719cff93b71766073085f3b21b9743132af441))
+* **ui:** numerous bug fixes ([b2abf2a](https://github.com/martynvdijke/sandwitches/commit/b2abf2a0fa4632fb2a8ebffd79a849ed9ca271b3))
+
+
+### Features
+
+* add favourites panel and fix search dropdown ([de559ac](https://github.com/martynvdijke/sandwitches/commit/de559aca1841d7a99924ca400b00c4a475a8694e))
+* add in click on person and click on tag view ([f90214f](https://github.com/martynvdijke/sandwitches/commit/f90214f1973d2bcd7e77b6fda20be68e2f743174))
+* add in recipe serving options ([a7f2f10](https://github.com/martynvdijke/sandwitches/commit/a7f2f101bf952f1a7d16c9a1ca31cc164365aac5))
+* add in settings as singleton to db ([4a13099](https://github.com/martynvdijke/sandwitches/commit/4a13099205cca0fb13bb3dc618d3135b7138abae))
+* Add singleton settings model and webpack for static assets ([5e00729](https://github.com/martynvdijke/sandwitches/commit/5e007294390e9daf163b0a146e65121a08028ca2))
+* add super user hotkeys in ([a8a6079](https://github.com/martynvdijke/sandwitches/commit/a8a60797e2f541c7cac7b560a5bd3b51944e3025))
+* atom/rss feed ([460dfb3](https://github.com/martynvdijke/sandwitches/commit/460dfb3a3249ba802976037840b9cceec633ef27))
+* Display likers and allow comments on ratings ([e6f5973](https://github.com/martynvdijke/sandwitches/commit/e6f59735445ec8ebb6fadd9e7417c677a61b4fa9))
+* revamp search now with htmx to search more and better in a dynamic fashion ([3971a3f](https://github.com/martynvdijke/sandwitches/commit/3971a3f0d6103c817430fb37d50f239f2d25c50f))
+* **tests:** add in more tests ([300e488](https://github.com/martynvdijke/sandwitches/commit/300e48846e48e4d7db476fa482226f9eeb16b129))
+* **ui:** add in animation loader ([ebe2ae3](https://github.com/martynvdijke/sandwitches/commit/ebe2ae333e772b435f11c93e1bbcb808c0dadce1))
+* **ui:** Improve UI consistency and admin page functionality ([ee521be](https://github.com/martynvdijke/sandwitches/commit/ee521be35fbd3a3a6826a7588cd0bd818654d3fd))
+* use npm for css and js versioning ([44f816b](https://github.com/martynvdijke/sandwitches/commit/44f816b40b515a03513dac241e9614a9b00c9402))
+* **web:** add in new dashboard overview graph ([146bcd8](https://github.com/martynvdijke/sandwitches/commit/146bcd8a0945dcf36f4b598f0bfdde7f85f582cd))
+
 # [1.5.0](https://github.com/martynvdijke/sandwitches/compare/v1.4.2...v1.5.0) (2026-01-14)
 
 
