@@ -76,5 +76,6 @@ def ci(c):
     linting(c)
     typecheck(c)
     setup_ci(c)
+    build_web(c)
     collect_static(c)
     tests(c)
