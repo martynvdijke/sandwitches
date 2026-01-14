@@ -29,8 +29,10 @@ class UserPublicSchema(ModelSchema):
         model = User
         fields = ["username", "first_name", "last_name", "avatar"]
 
+
 class RecipeSchema(ModelSchema):
     favorited_by: List[UserPublicSchema] = []
+
     class Meta:
         model = Recipe
         fields = "__all__"
@@ -53,8 +55,10 @@ class SettingSchema(ModelSchema):
         model = Setting
         fields = "__all__"
 
+
 class RatingSchema(ModelSchema):
     user: UserPublicSchema
+
     class Meta:
         model = Rating
         fields = "__all__"
@@ -84,14 +88,14 @@ def ping(request):
 
 @api.get("v1/settings", response=SettingSchema)
 def get_settings(request):
-    return Setting.objects.get()
+    return Setting.objects.get()  # ty:ignore[unresolved-attribute]
 
 
 @api.post("v1/settings", auth=django_auth, response={200: SettingSchema, 403: Error})
 def update_settings(request, payload: SettingSchema):
     if not request.user.is_staff:
         return 403, {"message": "You are not authorized to perform this action"}
-    settings = Setting.objects.get()
+    settings = Setting.objects.get()  # ty:ignore[unresolved-attribute]
     for attr, value in payload.dict().items():
         setattr(settings, attr, value)
     settings.save()
@@ -112,12 +116,15 @@ def users(request):
 
 @api.get("v1/recipes", response=list[RecipeSchema])
 def get_recipes(request):
-    return Recipe.objects.all().prefetch_related('favorited_by')  # ty:ignore[unresolved-attribute]
+    return Recipe.objects.all().prefetch_related("favorited_by")  # ty:ignore[unresolved-attribute]
 
 
 @api.get("v1/recipes/{recipe_id}", response=RecipeSchema)
 def get_recipe(request, recipe_id: int):
-    recipe = get_object_or_404(Recipe.objects.prefetch_related('favorited_by'), id=recipe_id)
+    recipe = get_object_or_404(
+        Recipe.objects.prefetch_related("favorited_by"),
+        id=recipe_id,  # ty:ignore[unresolved-attribute]
+    )
     return recipe
 
 
@@ -158,7 +165,7 @@ def scale_recipe_ingredients(request, recipe_id: int, target_servings: int):
 
 @api.get("v1/recipe-of-the-day", response=RecipeSchema)
 def get_recipe_of_the_day(request):
-    recipes = list(Recipe.objects.all().prefetch_related('favorited_by'))  # ty:ignore[unresolved-attribute]
+    recipes = list(Recipe.objects.all().prefetch_related("favorited_by"))  # ty:ignore[unresolved-attribute]
     if not recipes:
         return None
     today = date.today()

@@ -4,35 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('sandwitches', '0003_setting'),
+        ("sandwitches", "0003_setting"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='setting',
-            name='ai_api_key',
+            model_name="setting",
+            name="ai_api_key",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AlterField(
-            model_name='setting',
-            name='ai_connection_point',
+            model_name="setting",
+            name="ai_connection_point",
             field=models.URLField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='setting',
-            name='ai_model',
+            model_name="setting",
+            name="ai_model",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AlterField(
-            model_name='setting',
-            name='email',
+            model_name="setting",
+            name="email",
             field=models.EmailField(blank=True, max_length=254, null=True),
         ),
         migrations.AlterField(
-            model_name='setting',
-            name='site_description',
+            model_name="setting",
+            name="site_description",
             field=models.TextField(blank=True, null=True),
         ),
     ]

@@ -370,7 +370,11 @@ def recipe_detail(request, slug):
         except Rating.DoesNotExist:  # ty:ignore[unresolved-attribute]
             user_rating = None
         # show form prefilled when possible
-        initial = {"score": str(user_rating.score), "comment": user_rating.comment} if user_rating else None
+        initial = (
+            {"score": str(user_rating.score), "comment": user_rating.comment}
+            if user_rating
+            else None
+        )
         rating_form = RatingForm(initial=initial)
     return render(
         request,
@@ -382,7 +386,9 @@ def recipe_detail(request, slug):
             "user_rating": user_rating,
             "rating_form": rating_form,
             "version": sandwitches_version,
-            "all_ratings": recipe.ratings.select_related('user').order_by('-created_at') # Add all ratings for display
+            "all_ratings": recipe.ratings.select_related("user").order_by(
+                "-created_at"
+            ),  # Add all ratings for display
         },
     )
 
@@ -401,7 +407,9 @@ def recipe_rate(request, pk):
         score = form.cleaned_data["score"]
         comment = form.cleaned_data["comment"]
         Rating.objects.update_or_create(  # ty:ignore[unresolved-attribute]
-            recipe=recipe, user=request.user, defaults={"score": score, "comment": comment}
+            recipe=recipe,
+            user=request.user,
+            defaults={"score": score, "comment": comment},
         )
         messages.success(request, _("Your rating has been saved."))
     else:
@@ -428,7 +436,7 @@ def toggle_favorite(request, pk):
 
 @login_required
 def favorites(request):
-    recipes = request.user.favorites.all().prefetch_related('favorited_by')
+    recipes = request.user.favorites.all().prefetch_related("favorited_by")
 
     # Filtering
     q = request.GET.get("q")
@@ -467,7 +475,11 @@ def favorites(request):
         recipes = recipes.order_by("-created_at")
 
     if request.headers.get("HX-Request"):
-        return render(request, "partials/recipe_list.html", {"recipes": recipes, "user": request.user})
+        return render(
+            request,
+            "partials/recipe_list.html",
+            {"recipes": recipes, "user": request.user},
+        )
 
     # Context for filters - only show options relevant to favorited recipes
     uploaders = User.objects.filter(recipes__in=request.user.favorites.all()).distinct()
@@ -481,8 +493,8 @@ def favorites(request):
             "version": sandwitches_version,
             "uploaders": uploaders,
             "tags": tags,
-            "selected_tags": request.GET.getlist("tag"), # Add selected_tags
-            "user": request.user
+            "selected_tags": request.GET.getlist("tag"),  # Add selected_tags
+            "user": request.user,
         },
     )
 
@@ -491,7 +503,7 @@ def index(request):
     if not User.objects.filter(is_superuser=True).exists():
         return redirect("setup")
     recipes = (
-        Recipe.objects.all().prefetch_related('favorited_by')  # ty:ignore[unresolved-attribute]
+        Recipe.objects.all().prefetch_related("favorited_by")  # ty:ignore[unresolved-attribute]
     )  # Start with all, order later
 
     # Filtering
@@ -534,7 +546,11 @@ def index(request):
         recipes = recipes.order_by("-created_at")
 
     if request.headers.get("HX-Request"):
-        return render(request, "partials/recipe_list.html", {"recipes": recipes, "user": request.user})
+        return render(
+            request,
+            "partials/recipe_list.html",
+            {"recipes": recipes, "user": request.user},
+        )
 
     # Context for filters
     uploaders = User.objects.filter(recipes__isnull=False).distinct()
@@ -549,7 +565,7 @@ def index(request):
             "uploaders": uploaders,
             "tags": tags,
             "selected_tags": request.GET.getlist("tag"),
-            "user": request.user # Pass user to template
+            "user": request.user,  # Pass user to template
         },
     )
 

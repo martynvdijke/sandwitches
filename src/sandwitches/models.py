@@ -18,7 +18,7 @@ hashed_storage = HashedFilenameStorage()
 
 
 class Setting(SingletonModel):
-    site_name = models.CharField(max_length=255, default='Sandwitches')
+    site_name = models.CharField(max_length=255, default="Sandwitches")
     site_description = models.TextField(blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     ai_connection_point = models.URLField(blank=True, null=True)
