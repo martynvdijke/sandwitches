@@ -1,0 +1,91 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{% trans "Task Details" %}: {{ task.id }}{% endblock %}
+
+{% block content %}
+<nav class="mb-2">
+    <a href="{% url 'admin_task_list' %}" class="button transparent circle"><i>arrow_back</i></a>
+    <h5 class="max bold ml-2">{% trans "Task" %} {{ task.id|truncatechars:12 }}</h5>
+</nav>
+
+<div class="grid">
+    <div class="s12 m8">
+        <article class="round padding border">
+            <h6 class="bold mb-1">{% trans "General Information" %}</h6>
+            <div class="divider mb-1"></div>
+            
+            <div class="row mb-1">
+                <div class="max bold">{% trans "Task Path" %}:</div>
+                <div class="max"><code>{{ task.task_path }}</code></div>
+            </div>
+            <div class="row mb-1">
+                <div class="max bold">{% trans "Status" %}:</div>
+                <div class="max">
+                    {% if task.status == 'SUCCEEDED' %}
+                    <span class="chip tiny primary"><i>done</i> {{ task.status }}</span>
+                    {% elif task.status == 'FAILED' %}
+                    <span class="chip tiny error"><i>error</i> {{ task.status }}</span>
+                    {% else %}
+                    <span class="chip tiny surface"><i>schedule</i> {{ task.status }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row mb-1">
+                <div class="max bold">{% trans "Queue" %}:</div>
+                <div class="max">{{ task.queue_name }}</div>
+            </div>
+            <div class="row mb-1">
+                <div class="max bold">{% trans "Priority" %}:</div>
+                <div class="max">{{ task.priority }}</div>
+            </div>
+            
+            <div class="space"></div>
+            
+            <h6 class="bold mb-1">{% trans "Timeline" %}</h6>
+            <div class="divider mb-1"></div>
+            <div class="row mb-1">
+                <div class="max bold">{% trans "Enqueued At" %}:</div>
+                <div class="max">{{ task.enqueued_at|date:"DATETIME_FORMAT" }}</div>
+            </div>
+            <div class="row mb-1">
+                <div class="max bold">{% trans "Started At" %}:</div>
+                <div class="max">{{ task.started_at|date:"DATETIME_FORMAT"|default:"-" }}</div>
+            </div>
+            <div class="row mb-1">
+                <div class="max bold">{% trans "Finished At" %}:</div>
+                <div class="max">{{ task.finished_at|date:"DATETIME_FORMAT"|default:"-" }}</div>
+            </div>
+        </article>
+
+        <div class="space"></div>
+
+        <article class="round padding border">
+            <h6 class="bold mb-1">{% trans "Arguments" %}</h6>
+            <div class="divider mb-1"></div>
+            <pre class="padding surface-variant round scroll" style="max-height: 200px;"><code>{{ task.args_kwargs }}</code></pre>
+        </article>
+    </div>
+
+    <div class="s12 m4">
+        {% if task.return_value %}
+        <article class="round padding border primary-container">
+            <h6 class="bold mb-1">{% trans "Result" %}</h6>
+            <div class="divider mb-1"></div>
+            <div class="scroll" style="max-height: 300px;">
+                {{ task.return_value }}
+            </div>
+        </article>
+        {% endif %}
+
+        {% if task.traceback %}
+        <article class="round padding border error-container mt-1">
+            <h6 class="bold mb-1">{% trans "Error" %}</h6>
+            <div class="divider mb-1"></div>
+            <div class="bold mb-1">{{ task.exception_class_path }}</div>
+            <pre class="padding surface-variant round scroll small-text" style="max-height: 400px; white-space: pre-wrap;"><code>{{ task.traceback }}</code></pre>
+        </article>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

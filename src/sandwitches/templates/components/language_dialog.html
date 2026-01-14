@@ -1,0 +1,26 @@
+{% load i18n %}
+<dialog id="language-menu">
+    <form method="post" action="{% url 'set_language' %}">
+        {% csrf_token %}
+        <h5 class="center-align">{% trans "Select Language" %}</h5>
+        <div class="grid center-align">
+            {% get_current_language as LANGUAGE_CODE %}
+            {% get_available_languages as LANGUAGES %}
+            {% for code, name in LANGUAGES %}
+            <div class="s6">
+                <button type="submit" name="language" value="{{ code }}" class="circle large {% if code == LANGUAGE_CODE %}primary{% else %}surface{% endif %}">
+                    <span style="font-size: 2rem;">
+                        {% if code == 'en' %}🇬🇧{% elif code == 'nl' %}🇳🇱{% else %}🌐{% endif %}
+                    </span>
+                </button>
+                <div class="small-text">{{ name }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+    </form>
+    <div class="space"></div>
+    <nav class="center-align">
+        <button class="transparent link" data-ui="#language-menu">{% trans "Close" %}</button>
+    </nav>
+</dialog>

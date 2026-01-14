@@ -1,0 +1,184 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{{ title }}{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+<link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<style>
+    /* Ensure EasyMDE fits well with BeerCSS containers */
+    .editor-toolbar {
+        background: var(--surface-variant) !important;
+        color: var(--on-surface-variant) !important;
+        border-color: var(--outline) !important;
+        opacity: 1 !important;
+    }
+    .CodeMirror {
+        background: var(--surface) !important;
+        color: var(--on-surface) !important;
+        border-color: var(--outline) !important;
+    }
+    .editor-toolbar button {
+        color: var(--on-surface-variant) !important;
+    }
+    .editor-toolbar button.active, .editor-toolbar button:hover {
+        background: var(--primary-container) !important;
+        color: var(--on-primary-container) !important;
+    }
+    /* Add spacing between sections */
+    .form-section {
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" id="recipe-form">
+    {% csrf_token %}
+    {{ form.rotation }}
+    <div class="grid">
+        <!-- Top Section: Title, Tags, and Image -->
+        <div class="s12 m8">
+            <article class="round padding border mb-2">
+                <div class="field label border round">
+                    {{ form.title }}
+                    <label>{{ form.title.label }}</label>
+                    {% if form.title.errors %}<span class="error">{{ form.title.errors|striptags }}</span>{% endif %}
+                </div>
+                
+                <div class="field label border round mt-1">
+                    {{ form.tags_string }}
+                    <label>{{ form.tags_string.label }}</label>
+                    {% if form.tags_string.errors %}<span class="error">{{ form.tags_string.errors|striptags }}</span>{% endif %}
+                    <span class="helper">{% trans "Separate tags with commas. New tags will be created automatically." %}</span>
+                </div>
+
+                <div class="field label border round mt-1">
+                    {{ form.uploaded_by }}
+                    <label>{{ form.uploaded_by.label }}</label>
+                    {% if form.uploaded_by.errors %}<span class="error">{{ form.uploaded_by.errors|striptags }}</span>{% endif %}
+                </div>
+            </article>
+
+            <!-- Description -->
+            <div class="form-section">
+                <div class="row align-center mb-1">
+                    <i class="primary-text">description</i>
+                    <h6 class="bold ml-1">{% trans "Description" %}</h6>
+                </div>
+                <div class="card border no-padding">
+                    {{ form.description }}
+                </div>
+                {% if form.description.errors %}<span class="error">{{ form.description.errors|striptags }}</span>{% endif %}
+            </div>
+        </div>
+        
+        <div class="s12 m4">
+            <article class="round padding border center-align">
+                <h6 class="bold mb-1">{% trans "Recipe Image" %}</h6>
+                
+                <div class="relative mb-1" style="overflow: hidden; min-height: 200px; display: flex; align-items: center; justify-content: center;">
+                    {% if recipe.image %}
+                    <img src="{{ recipe.image_medium.url }}" class="responsive round" id="image-preview" style="max-height: 300px; width: 100%; object-fit: contain; transition: transform 0.3s ease;">
+                    {% else %}
+                    <div class="medium-height middle-align center-align gray1 round" id="image-placeholder" style="width: 100%;">
+                        <i class="extra">image</i>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if recipe.image %}
+                <div class="row no-space border round mb-1">
+                    <button type="button" class="button transparent max" onclick="rotatePreview(-90)" title="{% trans 'Rotate 90° CCW' %}">
+                        <i>rotate_left</i>
+                    </button>
+                    <div class="divider vertical"></div>
+                    <button type="button" class="button transparent max" onclick="rotatePreview(90)" title="{% trans 'Rotate 90° CW' %}">
+                        <i>rotate_right</i>
+                    </button>
+                </div>
+                {% endif %}
+                
+                <div class="field file border round">
+                    <input type="text" readonly>
+                    {{ form.image }}
+                    <label>{{ form.image.label }}</label>
+                    <i>publish</i>
+                </div>
+                {% if form.image.errors %}<span class="error">{{ form.image.errors|striptags }}</span>{% endif %}
+            </article>
+        </div>
+
+        <!-- Ingredients and Instructions (Full Width) -->
+        <div class="s12">
+            <div class="divider mb-2"></div>
+            
+            <div class="form-section">
+                <div class="row align-center mb-1">
+                    <i class="primary-text">shopping_cart</i>
+                    <h6 class="bold ml-1">{% trans "Ingredients" %}</h6>
+                </div>
+                <div class="card border no-padding">
+                    {{ form.ingredients }}
+                </div>
+                {% if form.ingredients.errors %}<span class="error">{{ form.ingredients.errors|striptags }}</span>{% endif %}
+            </div>
+
+            <div class="form-section">
+                <div class="row align-center mb-1">
+                    <i class="primary-text">list</i>
+                    <h6 class="bold ml-1">{% trans "Instructions" %}</h6>
+                </div>
+                <div class="card border no-padding">
+                    {{ form.instructions }}
+                </div>
+                {% if form.instructions.errors %}<span class="error">{{ form.instructions.errors|striptags }}</span>{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="large-space"></div>
+    <nav class="right-align padding surface-container border round">
+        <a href="{% url 'admin_recipe_list' %}" class="button transparent">{% trans "Cancel" %}</a>
+        <button type="submit" class="button primary round">
+            <i>save</i>
+            <span>{% trans "Save Recipe" %}</span>
+        </button>
+    </nav>
+</form>
+{% endblock %}
+
+{% block admin_scripts %}
+<script>
+    let currentRotation = 0;
+    
+    function rotatePreview(angle) {
+        currentRotation = (currentRotation + angle) % 360;
+        const img = document.getElementById('image-preview');
+        if (img) {
+            img.style.transform = `rotate(${currentRotation}deg)`;
+            document.getElementsByName('rotation')[0].value = currentRotation;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const fields = ['id_description', 'id_ingredients', 'id_instructions'];
+        fields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                new EasyMDE({ 
+                    element: el,
+                    spellChecker: false,
+                    autosave: {
+                        enabled: false
+                    },
+                    status: false,
+                    minHeight: "200px"
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% load i18n markdown_extras %}
+<h5 class="primary-text">{% trans "Instructions" %}</h5>
+<div>
+  {% if recipe.instructions %}
+      {{ recipe.instructions|convert_markdown|safe }}
+  {% else %}
+      <p class="italic">{% trans "No instructions yet." %}</p>
+  {% endif %}
+</div>

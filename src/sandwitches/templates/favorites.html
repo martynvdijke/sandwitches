@@ -1,0 +1,42 @@
+{% extends "base_beer.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans 'Favorites' %}{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+<style>
+    @media only screen and (min-width: 992px) {
+        main.container {
+            padding-left: 10%;
+            padding-right: 10%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="large-space"></div>
+
+<article class="round primary s12 m12 l12">
+  <div class="row align-center">
+    <div class="max">
+      <h4 class="upper">{% trans 'Your Favorites' %}</h4>
+      <p class="large-text">{% trans 'The recipes you love the most.' %}</p>
+    </div>
+  </div>
+</article>
+
+<div class="space"></div>
+
+{% include "components/favorites_search_form.html" %}
+
+<div class="large-space"></div>
+
+{% include "partials/recipe_list.html" %}
+
+{% endblock %}
+
+{% block page_scripts %}
+{% include "components/search_scripts.html" %}
+{% endblock %}

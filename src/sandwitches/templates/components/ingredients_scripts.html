@@ -1,0 +1,50 @@
+{% load i18n static %}
+
+<script>
+    async function scaleIngredients() {
+        const portionsInput = document.getElementById('portions');
+        const ingredientsDisplay = document.getElementById('ingredients-display');
+        const selector = document.querySelector('.portion-selector');
+        
+        if (!portionsInput || !ingredientsDisplay || !selector) return;
+
+        const recipeId = selector.dataset.recipeId;
+        const targetServings = portionsInput.value;
+
+        ingredientsDisplay.innerHTML = '<div class="center-align padding"><progress class="circle"></progress></div>';
+
+        try {
+            const url = `/api/v1/recipes/${recipeId}/scale-ingredients?target_servings=${targetServings}`;
+            console.log("Fetching:", url);
+            const response = await fetch(url);
+            
+            if (!response.ok) throw new Error(`Status: ${response.status}`);
+            
+            const data = await response.json();
+            
+            let html = '<div class="padding">';
+            data.forEach(item => {
+                html += `<div class="mb-1">${item.scaled_line}</div>`;
+            });
+            html += '</div>';
+            ingredientsDisplay.innerHTML = html;
+        } catch (e) {
+            console.error("Scaling failed:", e);
+            ingredientsDisplay.innerHTML = `<div class="padding error-text">{% trans "Error scaling ingredients:" %} ${e.message}</div>`;
+        }
+    }
+
+    function adjustPortions(delta) {
+        const input = document.getElementById('portions');
+        if (!input) return;
+        let val = parseInt(input.value) || 1;
+        val += delta;
+        if (val < 1) val = 1;
+        input.value = val;
+        scaleIngredients();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        scaleIngredients();
+    });
+</script>

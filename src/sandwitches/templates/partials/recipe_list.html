@@ -1,0 +1,87 @@
+{% load i18n %}
+<div class="grid justify-center" id="recipe-grid">
+  {% for recipe in recipes %}
+  <div class="s12 m6 l4 xl3 recipe-card">
+    <article class="round no-padding elevate">
+       <div style="position: relative;">
+         {% if recipe.image %}
+         <img src="{{ recipe.image_medium.url }}" class="responsive top-round" style="height:220px; width:100%; object-fit:cover; cursor:pointer;" loading="lazy" alt="{{ recipe.title }}" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">
+         {% else %}
+         <div class="primary medium-height top-round middle-align center-align" style="height:220px; cursor:pointer;" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">
+           <i class="extra">lunch_dining</i>
+         </div>
+         {% endif %}
+         
+         {% if user.is_authenticated %}
+         <div class="absolute top left padding">
+             <a href="{% url 'toggle_favorite' recipe.pk %}" class="button circle surface white-text">
+                <i class="{% if recipe in user.favorites.all %}primary-text{% else %}black-text{% endif %}">
+                    {% if recipe in user.favorites.all %}favorite{% else %}favorite_border{% endif %}
+                </i>
+             </a>
+         </div>
+         {% endif %}
+       </div>
+       
+       <div class="padding">
+         <h5 class="truncate pointer" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">{{ recipe.title }}</h5>
+         
+         <div class="row align-center">
+            {% if recipe.uploaded_by %}
+                <a href="{% url 'index' %}?uploader={{ recipe.uploaded_by.username|urlencode }}" class="row align-center" style="color: inherit; text-decoration: none;">
+                    {% if recipe.uploaded_by.avatar %}
+                    <img src="{{ recipe.uploaded_by.avatar.url }}" class="circle tiny" alt="{{ recipe.uploaded_by.username }}">
+                    {% else %}
+                    <i class="tiny circle surface">person</i>
+                    {% endif %}
+                    <span class="tiny-text left-margin">{{ recipe.uploaded_by.username }}</span>
+                </a>
+            {% else %}
+                <i class="tiny circle surface">person_off</i>
+                <span class="tiny-text left-margin">{% trans "Unknown" %}</span>
+            {% endif %}
+         </div>
+         
+         <div class="space"></div>
+
+         <div class="row wrap">
+             {% if recipe.favorited_by.all %}
+                <span class="tiny-text">
+                    {% if recipe.favorited_by.count == 1 %}
+                        {% trans "Liked by" %} {{ recipe.favorited_by.first.username }}
+                    {% else %}
+                        {% trans "Liked by" %} {{ recipe.favorited_by.first.username }} {% trans "and" %} {{ recipe.favorited_by.count|add:"-1" }} {% trans "others" %}
+                    {% endif %}
+                </span>
+             {% endif %}
+         </div>
+
+         <div class="space"></div>
+         
+         <div class="row wrap">
+           {% for tag in recipe.tags.all %}
+           <a href="{% url 'index' %}?tag={{ tag.name|urlencode }}" class="chip small round surface margin-bottom">{{ tag.name }}</a>
+           {% endfor %}
+         </div>
+       </div>
+       
+       <div class="padding pt-0">
+         <a href="{% url 'recipe_detail' recipe.slug %}" class="button fill round responsive">
+           <span>{% trans 'View Recipe' %}</span>
+           <i class="suffix">arrow_forward</i>
+         </a>
+       </div>
+    </article>
+  </div>
+  {% empty %}
+  <div class="s12 center-align">
+    <div class="large-space"></div>
+    <i class="extra gray-text">no_food</i>
+    <h5 class="gray-text">{% trans "No sandwitches found." %}</h5>
+    <p>{% trans "Be the first to create one!" %}</p>
+    {% if user.is_authenticated %}
+    <a href="{% url 'admin:sandwitches_recipe_add' %}" class="button primary round">{% trans "Add Recipe" %}</a>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>

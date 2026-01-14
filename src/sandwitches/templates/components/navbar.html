@@ -1,0 +1,27 @@
+{% load i18n static %}
+<nav class="top primary-container">
+  <button class="circle transparent large" onclick="ui('#menu')">
+    <i>menu</i>
+  </button>
+  <a href="{% url 'index' %}" class="row align-center">
+    <img src="{% static 'icons/icon.svg' %}" class="circle small">
+  </a>
+  <div class="max"></div>
+  <button class="circle transparent" onclick="ui('mode', ui('mode') == 'dark' ? 'light' : 'dark')">
+    <i>dark_mode</i>
+  </button>
+  <button class="circle transparent" data-ui="#language-menu">
+      <i>language</i>
+  </button>
+  
+  {% if user.is_authenticated %}
+    {% if user.avatar %}
+    <img src="{{ user.avatar.url }}" class="circle" data-ui="#user-menu">
+    {% else %}
+    <img src="https://www.w3schools.com/howto/img_avatar.png" class="circle" data-ui="#user-menu">
+    {% endif %}
+  {% else %}
+    <a href="{% url 'admin:login' %}"><button class="chip transparent border white-text">{% trans "Login" %}</button></a>
+    <a href="{% url 'signup' %}"><button class="chip primary">{% trans "Sign up" %}</button></a>
+  {% endif %}
+</nav>

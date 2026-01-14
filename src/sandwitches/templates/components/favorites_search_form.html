@@ -1,0 +1,85 @@
+{% load i18n %}
+<form hx-get="{% url 'favorites' %}" hx-target="#recipe-grid" hx-swap="outerHTML" hx-push-url="true" hx-trigger="change delay:500ms, keyup delay:500ms from:#search, submit, uploaderChange from:body">
+    <div class="grid">
+        <!-- Main Search Bar -->
+        <div class="s12">
+            <div class="field prefix suffix border round">
+                <i class="front">search</i>
+                <input id="search" type="text" name="q" placeholder="{% trans 'Search favorites...' %}" value="{{ request.GET.q|default:'' }}">
+                <a class="circle plain" onclick="toggleAdvanced()" title="{% trans 'Advanced Search' %}">
+                    <i id="advanced-icon">filter_list</i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Collapsible Advanced Search Panel -->
+        <div id="advanced-search" class="s12 hidden" style="display: none;">
+            <div class="padding surface border round">
+                <div class="grid">
+                    <div class="s12 m6 l3">
+                        <div class="field label border round">
+                            <input type="date" name="date_start" value="{{ request.GET.date_start|default:'' }}">
+                            <label>{% trans "Start Date" %}</label>
+                        </div>
+                    </div>
+                    <div class="s12 m6 l3">
+                        <div class="field label border round">
+                            <input type="date" name="date_end" value="{{ request.GET.date_end|default:'' }}">
+                            <label>{% trans "End Date" %}</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Custom Uploader Dropdown with Avatar -->
+                    <div class="s12 m6 l3">
+                        <div class="field label border round suffix relative" onclick="toggleUploaderMenu(event)">
+                            <input type="text" id="uploader-display" readonly value="{{ request.GET.uploader|default:'' }}" placeholder="{% trans 'All Uploaders' %}" style="cursor: pointer;">
+                            <label>{% trans "Uploader" %}</label>
+                            <i class="chevron-down">arrow_drop_down</i>
+                            
+                            <div id="uploader-menu" class="absolute surface elevate round left top-round bottom-round scroll" style="top: 100%; left: 0; right: 0; max-height: 300px; display: none; z-index: 20;">
+                                <a class="row padding hover pointer" onclick="selectUploader('', '{% trans 'All Uploaders' %}')">
+                                    <span>{% trans "All Uploaders" %}</span>
+                                </a>
+                                {% for u in uploaders %}
+                                <a class="row padding hover pointer align-center" onclick="selectUploader('{{ u.username }}', '{{ u.username }}')">
+                                    {% if u.avatar %}
+                                    <img src="{{ u.avatar.url }}" class="circle tiny margin-right">
+                                    {% else %}
+                                    <i class="tiny circle surface margin-right">person</i>
+                                    {% endif %}
+                                    <span>{{ u.username }}</span>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <input type="hidden" name="uploader" id="uploader-hidden" value="{{ request.GET.uploader|default:'' }}">
+                    </div>
+
+                    <div class="s12 m6 l3">
+                         <div class="field label border round">
+                            <select name="tag">
+                                <option value="">{% trans "All Tags" %}</option>
+                                {% for t in tags %}
+                                <option value="{{ t.name }}" {% if request.GET.tag == t.name %}selected{% endif %}>{{ t.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <label>{% trans "Tag" %}</label>
+                        </div>
+                    </div>
+
+                    <div class="s12 m6 l3">
+                        <div class="field label border round">
+                           <select name="sort">
+                               <option value="date_desc" {% if request.GET.sort == 'date_desc' %}selected{% endif %}>{% trans "Newest" %}</option>
+                               <option value="date_asc" {% if request.GET.sort == 'date_asc' %}selected{% endif %}>{% trans "Oldest" %}</option>
+                               <option value="rating" {% if request.GET.sort == 'rating' %}selected{% endif %}>{% trans "Highest Rated" %}</option>
+                               <option value="user" {% if request.GET.sort == 'user' %}selected{% endif %}>{% trans "Uploader (A-Z)" %}</option>
+                           </select>
+                           <label>{% trans "Sort By" %}</label>
+                       </div>
+                   </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

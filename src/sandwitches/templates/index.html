@@ -1,75 +1,42 @@
-{% extends "base_pico.html" %} {% load i18n static %}
+{% extends "base_beer.html" %}
+{% load i18n static %}
 
 {% block title %}Sandwitches{% endblock %}
 
+{% block extra_head %}
+{{ block.super }}
+<style>
+    @media only screen and (min-width: 992px) {
+        main.container {
+            padding-left: 10%;
+            padding-right: 10%;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="grid search-row">
-  <div>
-    <h4>{% trans 'Sandwitches: sandwiches so good, they haunt you!' %}</h4>
+<div class="large-space"></div>
+
+<article class="round secondary s12 m12 l12">
+  <div class="row align-center">
+    <div class="max">
+      <h4 class="upper">{% trans 'Sandwitches' %}</h4>
+      <p class="large-text">{% trans 'Sandwiches so good, they haunt you!' %}</p>
+    </div>
   </div>
-  <div>
-    <form role="search" onsubmit="return false;">
-      <input id="search" type="search" placeholder="{% trans "Search by title or tag" %}" aria-label="{% trans "Search" %}">
-    </form>
-  </div>
-</div>
+</article>
 
-<section class="grid">
-  {% for recipe in recipes %}
-    <article class="card" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';" style="cursor:pointer;">
-      {% if recipe.image %}
-      <figure class="recipe-figure">
-          <img src="{{ recipe.image_medium.url }}" 
-               srcset="{{ recipe.image_thumbnail.url }} 150w, {{ recipe.image_medium.url }} 700w" 
-               sizes="(max-width: 640px) 90vw, 45vw"
-               alt="{{ recipe.title }}" 
-               loading="lazy">
-      </figure>
-      {% endif %}
+<div class="space"></div>
 
-      <div class="card-body">
-        <header class="card-title">{{ recipe.title }}</header>
+{% include "components/search_form.html" %}
 
-        <div class="tags-row" aria-hidden="false">
-          {% for tag in recipe.tags.all %}
-            <span class="chip{% if tag|length < 8 %} chip--accent{% endif %}">{{ tag.name }}</span>
-          {% endfor %}
-        </div>
-      </div>
+<div class="large-space"></div>
 
-      {% if user.is_authenticated and user.is_staff %}
-      <footer>            
-          <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/" rel="noopener">{% trans "Edit" %}</a>
-      </footer>
-      {% endif %}
-    </article>
-
-  {% empty %}
-    <article class="card">
-      <div class="card-body">
-        <p>{% trans "No sandwitches yet, please stay tuned." %}</p>
-      </div>
-    </article>
-  {% endfor %}
-</section>
+{% include "partials/recipe_list.html" %}
 
 {% endblock %}
 
 {% block page_scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const search = document.getElementById('search');
-  if (!search) return;
-  search.addEventListener('input', function() {
-    const q = this.value.toLowerCase().trim();
-    document.querySelectorAll('section.grid article.card').forEach(card => {
-      const title = (card.querySelector('.card-title')?.textContent || '').toLowerCase();
-      const tags = Array.from(card.querySelectorAll('.tag, .chip')).map(t => t.textContent.toLowerCase());
-      const descr = (card.querySelector('.card-body p')?.textContent || '').toLowerCase();
-      const match = !q || title.includes(q) || descr.includes(q) || tags.some(t => t.includes(q));
-      card.style.display = match ? '' : 'none';
-    });
-  });
-});
-</script>
+{% include "components/search_scripts.html" %}
 {% endblock %}

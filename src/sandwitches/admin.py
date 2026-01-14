@@ -1,8 +1,12 @@
 from django.contrib import admin
-from .models import Recipe, Tag, Rating
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin
+from .models import Recipe, Tag, Rating, Setting
 from django.utils.html import format_html
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
+from solo.admin import SingletonModelAdmin
+from .forms import SettingForm
 
 
 class RecipeResource(resources.ModelResource):
@@ -18,6 +22,21 @@ class TagResource(resources.ModelResource):
 class RatingResource(resources.ModelResource):
     class Meta:
         model = Rating
+
+
+User = get_user_model()
+
+
+@admin.register(Setting)
+class SettingAdmin(SingletonModelAdmin):
+    form = SettingForm
+
+
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    fieldsets = UserAdmin.fieldsets + (
+        (None, {"fields": ("avatar", "bio", "language", "favorites")}),
+    )
 
 
 @admin.register(Recipe)
@@ -36,7 +55,7 @@ class RecipeAdmin(ImportExportModelAdmin):
         url = obj.get_absolute_url()
         return format_html("<a href='{url}'>{url}</a>", url=url)
 
-    show_url.short_description = "Recipe Link"  # ty:ignore[unresolved-attribute, inconsistent-mro]
+    show_url.short_description = "Recipe Link"  # ty:ignore[unresolved-attribute]
 
 
 @admin.register(Tag)

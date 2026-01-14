@@ -5,11 +5,90 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>{% block title %}Sandwitches{% endblock %}</title>
+    <style>
+      body {
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+      }
+      main.container {
+          flex: 1;
+          padding-bottom: 80px;
+      }
+      /* Loading Sandwich CSS */
+      .loading-sandwich-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white overlay */
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 9999;
+          visibility: hidden; /* Hidden by default */
+          opacity: 0;
+          transition: visibility 0s, opacity 0.3s linear;
+      }
+      .loading-sandwich-container.show {
+          visibility: visible;
+          opacity: 1;
+      }
+      .loading-sandwich-svg {
+          width: 80px;
+          height: 80px;
+          animation: spin 1.5s linear infinite;
+      }
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+      }
+    </style>
     {% block extra_head %}{% endblock %}
   </head>
   <body class="{% block body_class %}{% endblock %}">
+    <div id="loading-sandwich" class="loading-sandwich-container">
+        <svg class="loading-sandwich-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+            <path d="M12 9v6" />
+            <path d="M10 12h4" />
+        </svg>
+    </div>
     {% block navbar %}{% endblock %}
     <main class="container" role="main">{% block content %}{% endblock %}</main>
+    {% block footer %}{% endblock %}
     {% block extra_scripts %}{% endblock %}
+
+    <script>
+        // JavaScript to show/hide the loading animation
+        const loadingSandwich = document.getElementById('loading-sandwich');
+
+        function showLoading() {
+            loadingSandwich.classList.add('show');
+        }
+
+        function hideLoading() {
+            loadingSandwich.classList.remove('show');
+        }
+
+        // Example usage: You would call showLoading() before an async operation
+        // and hideLoading() after it completes.
+        // For demonstration, let's show it on page load for a brief moment.
+        document.addEventListener('DOMContentLoaded', () => {
+            // Can uncomment below for debugging purposes
+            // showLoading();
+            // setTimeout(hideLoading, 1000);
+        });
+
+        // Intercept form submissions to show loading animation
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', showLoading);
+        });
+        
+        // Hide loading animation on page load completion (after initial DOMContentLoaded)
+        window.addEventListener('load', hideLoading);
+
+    </script>
   </body>
 </html>

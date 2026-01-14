@@ -1,0 +1,37 @@
+{
+  "name": "sandwitches",
+  "version": "1.0.0",
+  "description": "<p align=\"center\">   <img src=\"src/static/icons/banner.svg\" alt=\"Sandwitches Banner\" width=\"600px\"> </p>",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/martynvdijke/sandwitches.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/martynvdijke/sandwitches/issues"
+  },
+  "homepage": "https://github.com/martynvdijke/sandwitches#readme",
+  "dependencies": {
+    "@babel/preset-env": "^7.28.6",
+    "babel-loader": "^10.0.0",
+    "beercss": "^3.13.3",
+    "css-loader": "^7.1.2",
+    "htmx.org": "^2.0.8",
+    "material-dynamic-colors": "^1.1.2",
+    "mini-css-extract-plugin": "^2.9.4",
+    "webpack": "^5.104.1"
+  },
+  "devDependencies": {
+    "webpack-cli": "^6.0.1"
+  }
+}

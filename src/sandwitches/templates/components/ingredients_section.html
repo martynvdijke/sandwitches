@@ -1,0 +1,11 @@
+{% load i18n %}
+<h5 class="primary-text">{% trans "Ingredients" %}</h5>
+<div class="portion-selector" data-recipe-id="{{ recipe.id }}" data-original-servings="{{ recipe.servings }}">
+    <label for="portions">{% trans "Portions" %}:</label>
+    <button class="button circle transparent" onclick="adjustPortions(-1)">-</button>
+    <input type="number" id="portions" value="{{ recipe.servings }}" min="1" onchange="scaleIngredients()">
+    <button class="button circle transparent" onclick="adjustPortions(1)">+</button>
+</div>
+ <div id="ingredients-display" class="card padding flat gray1">
+  <p class="text-center">{% trans "Loading ingredients..." %}</p>
+ </div>

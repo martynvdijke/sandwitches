@@ -1,0 +1,31 @@
+{% load i18n static %}
+<dialog id="menu" class="left">
+    <nav class="drawer vertical">
+        <header>
+            <img src="{% static 'icons/icon.svg' %}" class="circle large">
+            <h5 class="max">Sandwitches</h5>
+        </header>
+        <div class="space"></div>
+        <a href="{% url 'index' %}" class="padding {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+            <i class="extra padding">home</i>
+            <span class="large-text">{% trans "Home" %}</span>
+        </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'favorites' %}" class="padding {% if request.resolver_match.url_name == 'favorites' %}active{% endif %}">
+            <i class="extra padding">favorite</i>
+            <span class="large-text">{% trans "Favorites" %}</span>
+        </a>
+        {% endif %}
+        <a href="/api/docs" class="padding">
+            <i class="extra padding">api</i>
+            <span class="large-text">{% trans "API Docs" %}</span>
+        </a>
+        {% if user.is_staff %}
+        <div class="divider"></div>
+        <a href="{% url 'admin_dashboard' %}" class="padding">
+            <i class="extra padding">admin_panel_settings</i>
+            <span class="large-text">{% trans "Admin Dashboard" %}</span>
+        </a>
+        {% endif %}
+    </nav>
+</dialog>

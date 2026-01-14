@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.css" rel="stylesheet">
+<script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+<script src="https://unpkg.com/htmx.org@2.0.8/dist/htmx.min.js"></script>
+<link rel="icon" type="image/svg+xml" href="{% static "icons/favicon.svg" %}">
+<style>
+    main.container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+    .admin-thumb {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}
+
+{% block navbar %}
+<nav class="top primary-container">
+  <button class="circle transparent" data-ui="#admin-menu">
+    <i>menu</i>
+  </button>
+  <a href="{% url 'admin_dashboard' %}" class="row align-center">
+    <img src="{% static 'icons/icon.svg' %}" class="circle small">
+    <h6 class="max">{% block admin_title %}{% trans "Sandwitches Admin" %}{% endblock %}</h6>
+  </a>
+  <div class="max"></div>
+  <button class="circle transparent" onclick="toggleMode()">
+    <i>dark_mode</i>
+  </button>
+  
+  {% if user.avatar %}
+  <img src="{{ user.avatar.url }}" class="circle" data-ui="#user-menu">
+  {% else %}
+  <img src="https://www.w3schools.com/howto/img_avatar.png" class="circle" data-ui="#user-menu">
+  {% endif %}
+</nav>
+
+<dialog id="admin-menu" class="left">
+    <nav class="drawer vertical">
+        <header>
+            <img src="{% static 'icons/icon.svg' %}" class="circle large">
+            <h5 class="max">{% trans "Admin" %}</h5>
+        </header>
+        <div class="space"></div>
+        <a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+            <i>dashboard</i>
+            <span>{% trans "Dashboard" %}</span>
+        </a>
+        <a href="{% url 'admin_recipe_list' %}" class="{% if request.resolver_match.url_name == 'admin_recipe_list' %}active{% endif %}">
+            <i>restaurant</i>
+            <span>{% trans "Recipes" %}</span>
+        </a>
+        <a href="{% url 'admin_user_list' %}" class="{% if request.resolver_match.url_name == 'admin_user_list' %}active{% endif %}">
+            <i>people</i>
+            <span>{% trans "Users" %}</span>
+        </a>
+        <a href="{% url 'admin_tag_list' %}" class="{% if request.resolver_match.url_name == 'admin_tag_list' %}active{% endif %}">
+            <i>label</i>
+            <span>{% trans "Tags" %}</span>
+        </a>
+        <a href="{% url 'admin_rating_list' %}" class="{% if request.resolver_match.url_name == 'admin_rating_list' %}active{% endif %}">
+            <i>star</i>
+            <span>{% trans "Ratings" %}</span>
+        </a>
+        <a href="{% url 'admin_task_list' %}" class="{% if request.resolver_match.url_name == 'admin_task_list' %}active{% endif %}">
+            <i>assignment</i>
+            <span>{% trans "Tasks" %}</span>
+        </a>
+        <div class="divider"></div>
+        <a href="{% url 'index' %}">
+            <i>home</i>
+            <span>{% trans "Public Site" %}</span>
+        </a>
+    </nav>
+</dialog>
+
+{% if user.is_authenticated %}
+<menu id="user-menu" class="no-wrap left">
+  <a href="{% url 'admin:logout' %}" class="row"><i>logout</i>{% trans "Logout" %}</a>
+</menu>
+{% endif %}
+
+{% if messages %}
+<div class="padding">
+    {% for message in messages %}
+    <div class="snackbar active {% if message.tags == 'error' %}error{% else %}primary{% endif %}">
+        <i>{% if message.tags == 'error' %}error{% else %}info{% endif %}</i>
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block footer %}
+<footer class="padding">
+    <div class="row align-center">
+        <div class="max">
+            <h6 class="small">Sandwitches Admin</h6>
+            <div class="small-text">© {% now "Y" %} Sandwitches Inc.</div>
+        </div>
+        <nav>
+            version {{ version }}
+        </nav>
+    </div>
+</footer>
+{% endblock %}
+
+{% block extra_scripts %}
+{{ block.super }}
+{% block admin_scripts %}{% endblock %}
+{% endblock %}

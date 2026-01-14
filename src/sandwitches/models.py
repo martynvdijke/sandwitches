@@ -2,20 +2,60 @@ from django.db import models
 from django.utils.text import slugify
 from .storage import HashedFilenameStorage
 from simple_history.models import HistoricalRecords
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from django.db.models import Avg
 from .tasks import email_users
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 import logging
 from django.urls import reverse
+from solo.models import SingletonModel
 
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 
 hashed_storage = HashedFilenameStorage()
 
-User = get_user_model()
+
+class Setting(SingletonModel):
+    site_name = models.CharField(max_length=255, default="Sandwitches")
+    site_description = models.TextField(blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    ai_connection_point = models.URLField(blank=True, null=True)
+    ai_model = models.CharField(max_length=255, blank=True, null=True)
+    ai_api_key = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return "Site Settings"
+
+    class Meta:
+        verbose_name = "Site Settings"
+
+
+class User(AbstractUser):
+    avatar = models.ImageField(upload_to="avatars", blank=True, null=True)
+    avatar_thumbnail = ImageSpecField(
+        source="avatar",
+        processors=[ResizeToFill(100, 50)],
+        format="JPEG",
+        options={"quality": 60},
+    )
+    bio = models.TextField(blank=True)
+    language = models.CharField(
+        max_length=10,
+        choices=settings.LANGUAGES,
+        default=settings.LANGUAGE_CODE,
+    )
+    favorites = models.ManyToManyField(
+        "Recipe", related_name="favorited_by", blank=True
+    )
+
+    class Meta:
+        verbose_name = "User"
+        verbose_name_plural = "Users"
+
+    def __str__(self):
+        return self.username
 
 
 class Tag(models.Model):
@@ -48,8 +88,9 @@ class Recipe(models.Model):
     description = models.TextField(blank=True)
     ingredients = models.TextField(blank=True)
     instructions = models.TextField(blank=True)
+    servings = models.IntegerField(default=1, validators=[MinValueValidator(1)])
     uploaded_by = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         related_name="recipes",
         on_delete=models.SET_NULL,
         null=True,
@@ -158,10 +199,13 @@ class Recipe(models.Model):
 
 class Rating(models.Model):
     recipe = models.ForeignKey(Recipe, related_name="ratings", on_delete=models.CASCADE)
-    user = models.ForeignKey(User, related_name="ratings", on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="ratings", on_delete=models.CASCADE
+    )
     score = models.FloatField(
         validators=[MinValueValidator(0.0), MaxValueValidator(10.0)]
     )
+    comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

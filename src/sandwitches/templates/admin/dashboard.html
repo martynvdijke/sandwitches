@@ -1,0 +1,262 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{% trans "Dashboard" %}{% endblock %}
+
+
+
+{% block content %}
+
+<div class="row align-center mb-2">
+
+    <div class="max"></div>
+
+    <form method="get" class="row no-space border round padding surface-variant">
+
+        <div class="field label small transparent">
+
+            <input type="date" name="start_date" value="{{ start_date }}">
+
+            <label>{% trans "Start Date" %}</label>
+
+        </div>
+
+        <div class="divider vertical"></div>
+
+        <div class="field label small transparent">
+
+            <input type="date" name="end_date" value="{{ end_date }}">
+
+            <label>{% trans "End Date" %}</label>
+
+        </div>
+
+        <button type="submit" class="button primary square"><i>refresh</i></button>
+
+    </form>
+
+</div>
+
+
+
+<div class="grid">
+
+    <div class="s12 m4">
+
+        <article class="round primary-container padding">
+
+            <div class="row align-center">
+
+                <i class="extra">restaurant</i>
+
+                <div class="max">
+
+                    <h4 class="bold">{{ recipe_count }}</h4>
+
+                    <div>{% trans "Recipes" %}</div>
+
+                </div>
+
+            </div>
+
+            <nav class="right-align">
+
+                <a href="{% url 'admin_recipe_list' %}" class="button transparent">{% trans "View all" %}</a>
+
+            </nav>
+
+        </article>
+
+    </div>
+
+    <div class="s12 m4">
+
+        <article class="round secondary-container padding">
+
+            <div class="row align-center">
+
+                <i class="extra">people</i>
+
+                <div class="max">
+
+                    <h4 class="bold">{{ user_count }}</h4>
+
+                    <div>{% trans "Users" %}</div>
+
+                </div>
+
+            </div>
+
+            <nav class="right-align">
+
+                <a href="{% url 'admin_user_list' %}" class="button transparent">{% trans "View all" %}</a>
+
+            </nav>
+
+        </article>
+
+    </div>
+
+    <div class="s12 m4">
+
+        <article class="round tertiary-container padding">
+
+            <div class="row align-center">
+
+                <i class="extra">label</i>
+
+                <div class="max">
+
+                    <h4 class="bold">{{ tag_count }}</h4>
+
+                    <div>{% trans "Tags" %}</div>
+
+                </div>
+
+            </div>
+
+            <nav class="right-align">
+
+                <a href="{% url 'admin_tag_list' %}" class="button transparent">{% trans "View all" %}</a>
+
+            </nav>
+
+        </article>
+
+    </div>
+
+
+
+    <!-- Charts Section -->
+
+    <div class="s12 m6">
+
+        <article class="round border padding">
+
+            <h6 class="bold mb-1">{% trans "Recipes Over Time (Last 30 Days)" %}</h6>
+
+            <canvas id="recipeChart" style="width:100%; max-height:300px;"></canvas>
+
+        </article>
+
+    </div>
+
+    <div class="s12 m6">
+
+        <article class="round border padding">
+
+            <h6 class="bold mb-1">{% trans "Average Rating Over Time (Last 30 Days)" %}</h6>
+
+            <canvas id="ratingChart" style="width:100%; max-height:300px;"></canvas>
+
+        </article>
+
+    </div>
+
+
+
+    <div class="s12">
+
+        <h5 class="bold">{% trans "Recent Recipes" %}</h5>
+
+        <table class="border striped no-space">
+
+            <thead>
+
+                <tr>
+
+                    <th>{% trans "Title" %}</th>
+
+                    <th>{% trans "Uploader" %}</th>
+
+                    <th>{% trans "Created At" %}</th>
+
+                    <th class="right-align">{% trans "Actions" %}</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for recipe in recent_recipes %}
+
+                <tr class="pointer" onclick="location.href='{% url 'admin_recipe_edit' recipe.pk %}'">
+
+                    <td>{{ recipe.title }}</td>
+
+                    <td>{{ recipe.uploaded_by.username|default:"-" }}</td>
+
+                    <td>{{ recipe.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+
+                    <td class="right-align">
+
+                        <a href="{% url 'admin_recipe_edit' recipe.pk %}" class="button circle transparent" onclick="event.stopPropagation();"><i>edit</i></a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block admin_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#5d4037';
+        const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim() || '#ff7a18';
+
+        // Recipe Chart
+        new Chart(document.getElementById('recipeChart'), {
+            type: 'line',
+            data: {
+                labels: {{ recipe_labels|safe }},
+                datasets: [{
+                    label: '{% trans "Recipes Created" %}',
+                    data: {{ recipe_counts|safe }},
+                    borderColor: primaryColor,
+                    backgroundColor: primaryColor + '33',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+
+        // Rating Chart
+        new Chart(document.getElementById('ratingChart'), {
+            type: 'bar',
+            data: {
+                labels: {{ rating_labels|safe }},
+                datasets: [{
+                    label: '{% trans "Avg Rating" %}',
+                    data: {{ rating_avgs|safe }},
+                    backgroundColor: secondaryColor,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { min: 0, max: 10 } }
+            }
+        });
+    });
+</script>
+{% endblock %}

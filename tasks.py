@@ -56,6 +56,14 @@ def compile_i8n(c):
 
 
 @task
+def build_web(c):
+    """Build frontend assets with webpack."""
+    print("Building frontend assets with webpack...")
+    c.run("npm install")
+    c.run("npm run build")
+
+
+@task
 def collect_static(c):
     """Collect static files."""
     print("Collecting static files...")
@@ -68,5 +76,6 @@ def ci(c):
     linting(c)
     typecheck(c)
     setup_ci(c)
+    build_web(c)
     collect_static(c)
     tests(c)

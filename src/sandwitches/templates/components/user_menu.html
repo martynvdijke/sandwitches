@@ -1,0 +1,10 @@
+{% load i18n %}
+{% if user.is_authenticated %}
+<menu id="user-menu" class="no-wrap left">
+  {% if user.is_staff %}
+  <a href="{% url 'admin_dashboard' %}" class="row"><i>admin_panel_settings</i>{% trans "Admin" %}</a>
+  <div class="divider"></div>
+  {% endif %}
+  <a href="{% url 'admin:logout' %}" class="row"><i>logout</i>{% trans "Logout" %}</a>
+</menu>
+{% endif %}

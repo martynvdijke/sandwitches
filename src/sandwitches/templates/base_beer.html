@@ -1,0 +1,57 @@
+{% extends "base.html" %} {% load i18n static %} {% block extra_head %}
+<link href="{% static "dist/main.css" %}" rel="stylesheet">
+<script src="{% static "dist/main.js" %}" defer></script>
+<link rel="icon" type="image/svg+xml" href="{% static "icons/favicon.svg" %}">
+<style>
+    main.container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+</style>
+{% endblock %} 
+
+{% block navbar %}
+    {% include "components/navbar.html" %}
+    {% include "components/language_dialog.html" %}
+    {% include "components/user_menu.html" %}
+    {% include "components/side_menu.html" %}
+{% endblock %}
+
+{% block footer %}
+    {% include "components/footer.html" %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('keydown', function(event) {
+        // Don't trigger hotkeys if an input field is focused
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'SELECT') {
+            return;
+        }
+
+        // 'q' for search
+        if (event.key === 'q') {
+            const searchInput = document.getElementById('search');
+            if (searchInput) {
+                event.preventDefault(); // Prevent 'q' from being typed
+                searchInput.focus();
+                // If the advanced search is hidden, show it
+                const advancedSearch = document.getElementById('advanced-search');
+                if (advancedSearch && advancedSearch.style.display === 'none') {
+                    toggleAdvanced(); // Assuming toggleAdvanced is a global function from index.html
+                }
+            }
+        }
+
+        // 'f' for favorite (only on recipe detail pages)
+        if (event.key === 'f') {
+            const favoriteButton = document.getElementById('favorite-toggle-button');
+            if (favoriteButton) {
+                event.preventDefault(); // Prevent default browser behavior (e.g., finding text)
+                favoriteButton.click();
+            }
+        }
+    });
+</script>
+{% block page_scripts %}{% endblock %}
+{% endblock %}

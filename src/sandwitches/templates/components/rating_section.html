@@ -1,0 +1,66 @@
+{% load i18n %}
+<h6 class="bold">{% trans "Rating" %}</h6>
+<div class="row align-center">
+    <i class="primary-text">star</i>
+    <span class="h5 ml-1">{{ avg_rating|floatformat:1 }}</span>
+    <span class="small-text ml-1">({{ rating_count }} {% trans "vote" %}{% if rating_count != 1 %}s{% endif %})</span>
+</div>
+
+<div class="space"></div>
+
+{% if user.is_authenticated %}
+  <article class="border round no-elevate secondary-container">
+      {% if user_rating %}
+        <div class="row align-center">
+            <i class="primary-text">check_circle</i>
+            <span class="ml-2">{% trans "Your rating:" %} <b>{{ user_rating.score }}</b></span>
+        </div>
+        {% if user_rating.comment %}
+            <p class="small-text ml-2">{{ user_rating.comment }}</p>
+        {% endif %}
+      {% endif %}
+      
+      <form method="post" action="{% url 'recipe_rate' pk=recipe.pk %}">
+          {% csrf_token %}
+          <label class="bold">{% trans "Rate this sandwich" %}</label>
+          <div class="field middle-align">
+               <label class="slider">
+                  <input type="range" 
+                      name="{{ rating_form.score.name }}" 
+                      min="0" 
+                      max="10" 
+                      step="0.1" 
+                      value="{{ user_rating.score|default:'5.0' }}"
+                      oninput="document.getElementById('score-output').innerText = parseFloat(this.value).toFixed(1)">
+                  <span></span>
+               </label>
+               <span id="score-output" class="bold ml-2">{{ user_rating.score|default:"5.0" }}</span>
+          </div>
+          <div class="field textarea label border round mt-2">
+              <textarea name="{{ rating_form.comment.name }}" placeholder="{% trans "Add a comment (optional)" %}">{{ user_rating.comment|default:"" }}</textarea>
+              <label>{% trans "Comment" %}</label>
+          </div>
+          <button type="submit" class="button primary round mt-2">{% trans "Submit Rating" %}</button>
+      </form>
+  </article>
+{% else %}
+   <p><a href="{% url 'admin:login' %}" class="link">{% trans "Log in" %}</a> {% trans "to rate this recipe." %}</p>
+{% endif %}
+
+{% if all_ratings %}
+<div class="space"></div>
+<h6 class="bold">{% trans "All Ratings" %}</h6>
+<div class="collection">
+    {% for rating in all_ratings %}
+    <div class="row">
+        <div class="max">
+            <span class="bold">{{ rating.user.username }}</span>
+            <span class="ml-2">{{ rating.score|floatformat:1 }} <i class="small">star</i></span>
+        </div>
+        {% if rating.comment %}
+            <p class="small-text">{{ rating.comment }}</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

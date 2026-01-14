@@ -9,7 +9,7 @@ class SignupViewTests(TestCase):
     def test_get_signup_page(self):
         resp = self.client.get(reverse("signup"))
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "<h2>Sign up")
+        self.assertContains(resp, "Create your account")
 
     def test_post_creates_user_and_logs_in(self):
         data = {
@@ -19,6 +19,7 @@ class SignupViewTests(TestCase):
             "last_name": "User",
             "password1": "complex-password-123",
             "password2": "complex-password-123",
+            "language": "en",
         }
         resp = self.client.post(reverse("signup"), data, follow=True)
         self.assertEqual(resp.status_code, 200)

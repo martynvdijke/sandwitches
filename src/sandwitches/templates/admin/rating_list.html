@@ -1,0 +1,38 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{% trans "Ratings" %}{% endblock %}
+
+{% block content %}
+<h5 class="bold mb-2">{% trans "Recipe Ratings" %}</h5>
+
+<table class="border striped no-space">
+    <thead>
+        <tr>
+            <th>{% trans "Recipe" %}</th>
+            <th>{% trans "User" %}</th>
+            <th class="min center-align">{% trans "Score" %}</th>
+            <th>{% trans "Updated" %}</th>
+            <th class="right-align">{% trans "Actions" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in ratings %}
+        <tr>
+            <td><b>{{ r.recipe.title }}</b></td>
+            <td>{{ r.user.username }}</td>
+            <td class="min center-align">
+                <div class="row align-center">
+                    <i class="primary-text">star</i>
+                    <span>{{ r.score }}</span>
+                </div>
+            </td>
+            <td>{{ r.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+            <td class="right-align">
+                <a href="{% url 'admin_rating_delete' r.pk %}" class="button circle transparent" title="{% trans 'Delete' %}"><i>delete</i></a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

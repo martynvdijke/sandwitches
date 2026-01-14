@@ -1,121 +1,178 @@
-{% extends "base_pico.html" %}
+{% extends "base_beer.html" %}
 {% block title %}{{ recipe.title }} — Sandwitch{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+<style>
+    @media only screen and (min-width: 992px) {
+        main.container {
+            padding-left: 10%;
+            padding-right: 10%;
+        }
+    }
+    .portion-selector {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .portion-selector input[type="number"] {
+        width: 60px;
+        text-align: center;
+    }
+</style>
+{% load custom_filters %} {# Load your custom filters #} 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Recipe",
+  "name": "{{ recipe.title }}",
+  {% if recipe.image %}
+  "image": "{{ request.scheme }}://{{ request.get_host }}{{ recipe.image_medium.url }}",
+  {% endif %}
+  "author": {
+    "@type": "Person",
+    "name": "{% if recipe.uploaded_by %}{{ recipe.uploaded_by.get_full_name|default:recipe.uploaded_by.username }}{% else %}Anonymous{% endif %}"
+  },
+  "datePublished": "{{ recipe.created_at|date:"Y-m-d" }}",
+  "description": "{{ recipe.description|striptags|truncatechars:200 }}",
+  {% if recipe.tags.all %}
+  "recipeCategory": [{% for tag in recipe.tags.all %}"{{ tag.name }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+  {% endif %}
+  "recipeIngredient": [
+    {% for ingredient in recipe.ingredients|linebreaksbr|striptags|split:"\n" %}
+    "{{ ingredient|escapejs }}"{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ],
+  "recipeInstructions": {
+    "@type": "ItemList",
+    "itemListElement": [
+      {% for instruction in recipe.instructions|linebreaksbr|striptags|split:"\n" %}
+      {
+        "@type": "HowToStep",
+        "text": "{{ instruction|escapejs }}"
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  },
+  {% if avg_rating > 0 %}
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{{ avg_rating|floatformat:1 }}",
+    "reviewCount": "{{ rating_count }}"
+  }
+  {% endif %}
+}
+</script>
+{% endblock %}
+
 {% block content %}
 
-{% load i18n markdown_extras %}
-<nav aria-label="breadcrumb" class="container">
-  <a href="{% url 'index' %}">&larr; {% trans "Back to all" %}</a>
+{% load i18n markdown_extras %} {# Keep existing load tags #} 
+
+<div class="space"></div>
+
+<nav>
+  <a href="{% url 'index' %}" class="button transparent circle">
+      <i>arrow_back</i>
+  </a>
+  <h5 class="max ml-2">{% trans "Back to all" %}</h5>
 </nav>
 
+<div class="large-space"></div>
+
 <div class="grid">
-  <article class="card">
-    <figure>
-      {% if recipe.image %}
+  <!-- Left Column: Image and Main Info -->
+  <div class="s12 m12 l5">
+     <article class="round no-padding elevate">
+        {% if recipe.image %}
         <img src="{{ recipe.image_large.url }}" 
              srcset="{{ recipe.image_medium.url }} 700w, {{ recipe.image_large.url }} 1200w" 
-             sizes="(max-width: 768px) 95vw, 900px"
+             sizes="(max-width: 768px) 95vw, 600px"
              alt="{{ recipe.title }}" 
-             loading="lazy">
-      {% endif %}
-    </figure>
-{% trans "Description" %}
-    <header>
-      {{ recipe.title }}
-      {% if recipe.uploaded_by %}
-        <small>{% trans "Uploaded by" %}: {{ recipe.uploaded_by.get_full_name|default:recipe.uploaded_by.username }}</small>
-      {% endif %}
-    </header>
-      <h4>{% trans "Description" %}</h4>
-      {% if recipe.description %}
-        {{ recipe.description|convert_markdown|safe }}
-      {% else %}
-        <p>{% trans "No description yet." %}</p>
-      {% endif %}
+             loading="lazy"
+             class="responsive top-round">
+        {% else %}
+        <div class="primary medium-height top-round middle-align center-align" style="height:300px;">
+           <i class="extra">lunch_dining</i>
+        </div>
+        {% endif %}        
+        <div class="padding">
+            {% include "components/recipe_header.html" %}
+            
+            <div class="space"></div>
+            <div class="divider"></div>
+            <div class="space"></div>
 
-      <h4>{% trans "Ingredients" %}</h4>
-      {% if recipe.ingredients %}
-        {{ recipe.ingredients|convert_markdown|safe }}
-      {% else %}
-        <p>{% trans "No ingredients listed." %}</p>
-      {% endif %}
+            <h6 class="bold">{% trans "Tags" %}</h6>
+            <div class="row wrap">
+              {% for tag in recipe.tags.all %}
+                <a href="{% url 'index' %}?tag={{ tag.name|urlencode }}" class="chip round surface">{{ tag.name }}</a>
+              {% endfor %}
+            </div>
 
-      <h4>{% trans "Instructions" %}</h4>
-      {% if recipe.instructions %}
-        {{ recipe.instructions|convert_markdown|safe }}
-      {% else %}
-        <p>{% trans "No instructions yet." %}</p>
-      {% endif %}
-    
-    <div class="tags-row">
-      <div style="margin-top:12px;">
-        {% for tag in recipe.tags.all %}
-          <span class="tag">{{ tag.name }}</span>
-        {% endfor %}
+            <div class="space"></div>
+            <div class="divider"></div>
+            <div class="space"></div>
+
+            <div class="row wrap">
+                {% if recipe.favorited_by.all %}
+                   <span class="tiny-text">
+                       {% if recipe.favorited_by.count == 1 %}
+                           {% trans "Liked by" %} {{ recipe.favorited_by.first.username }}
+                       {% else %}
+                           {% trans "Liked by" %} {{ recipe.favorited_by.first.username }} {% trans "and" %} {{ recipe.favorited_by.count|add:"-1" }} {% trans "others" %}
+                       {% endif %}
+                   </span>
+                {% endif %}
+            </div>
+
+            <div class="space"></div>
+            <div class="divider"></div>
+            <div class="space"></div>
+            
+            {% include "components/rating_section.html" %}
+
+            {% if user.is_authenticated and user.is_staff %}
+            <div class="space"></div>
+            <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/" class="button transparent border round width-100 center-align">
+                <i>edit</i>
+                <span>{% trans "Edit Recipe" %}</span>
+            </a>
+            {% endif %}
+        </div>
+     </article>
+  </div>
+
+  <!-- Right Column: Details -->
+  <div class="s12 m12 l7">
+      <div class="padding">
+          
+          <h5 class="primary-text">{% trans "Description" %}</h5>
+          <div class="large-text">
+            {% if recipe.description %}
+                {{ recipe.description|convert_markdown|safe }}
+            {% else %}
+                <p class="italic">{% trans "No description yet." %}</p>
+            {% endif %}
+          </div>
+          
+          <div class="large-space"></div>
+          
+          {% include "components/ingredients_section.html" %}
+
+          <div class="large-space"></div>
+
+          {% include "components/instructions_section.html" %}
       </div>
-    </div>
-
-    <div style="margin-top:1rem;">
-      <h4>{% trans "Rating" %}</h4>
-      {% if rating_count %}
-        <p>{% trans "Average:" %} {{ avg_rating|floatformat:1 }} ({{ rating_count }} {% trans "vote" %}{% if rating_count %}s{% endif %})</p>
-      {% else %}
-        <p>{% trans "No ratings yet." %}</p>
-      {% endif %}
-
-      {% if user.is_authenticated %}
-          {% if user_rating %}
-            <p>{% trans "Your rating:" %} {{ user_rating.score }}</p>
-          {% else %}
-            <form method="post" action="{% url 'recipe_rate' pk=recipe.pk %}">
-                      {% csrf_token %}
-
-                      <fieldset>
-                        <legend>{% trans "What would you rate this sandwich?" %}</legend>
-
-                        {% if rating_form.score.errors %}
-                          <div class="card-panel" role="alert">
-                            <ul>
-                              {% for err in rating_form.score.errors %}
-                                <li>{{ err }}</li>
-                              {% endfor %}
-                            </ul>
-                          </div>
-                        {% endif %}
-
-                        <div class="row">
-                          <div class="col-sm-12">
-                            <label for="{{ rating_form.score.id_for_label }}">
-                                {% trans "Score (0-10):" %} <span id="score-output">{{ rating_form.score.value|default:"5.0" }}</span>
-                            </label>
-                            <input 
-                                type="range" 
-                                name="{{ rating_form.score.name }}" 
-                                id="{{ rating_form.score.id_for_label }}" 
-                                min="0" 
-                                max="10" 
-                                step="0.1" 
-                                value="{{ rating_form.score.value|default:'5.0' }}"
-                                oninput="document.getElementById('score-output').innerText = parseFloat(this.value).toFixed(1)"
-                                style="width: 100%;"
-                            >
-                          </div>
-                        </div>
-                      </fieldset>
-                      <p style="margin-top:0.5rem;">
-                        <button type="submit">{% if user_rating %}{% trans "Update" %}{% else %}{% trans "Rate" %}{% endif %}</button>
-                      </p>
-                    </form>
-          {% endif %}        
-      {% else %}
-        <p><a href="{% url 'admin:login' %}">{% trans "Log in" %}</a> {% trans "to rate this recipe." %}</p>
-      {% endif %}
-    </div>
-
-      {% if user.is_authenticated and user.is_staff %}
-    <footer>
-        <a href="/admin/sandwitches/recipe/{{ recipe.pk }}/change/">{% trans "Edit" %}</a>
-    </footer>
-    {% endif %}
-  </article>
+  </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+
+{{ block.super }}
+
+{% include "components/ingredients_scripts.html" %}
+
 {% endblock %}
