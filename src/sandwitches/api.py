@@ -122,8 +122,8 @@ def get_recipes(request):
 @api.get("v1/recipes/{recipe_id}", response=RecipeSchema)
 def get_recipe(request, recipe_id: int):
     recipe = get_object_or_404(
-        Recipe.objects.prefetch_related("favorited_by"),
-        id=recipe_id,  # ty:ignore[unresolved-attribute]
+        Recipe.objects.prefetch_related("favorited_by"),  # ty:ignore[unresolved-attribute]
+        id=recipe_id,
     )
     return recipe
 

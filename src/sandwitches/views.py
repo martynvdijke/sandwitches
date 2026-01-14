@@ -112,7 +112,7 @@ def admin_recipe_list(request):
         Recipe.objects.annotate(avg_rating=Avg("ratings__score"))  # ty:ignore[unresolved-attribute]
         .prefetch_related("tags")
         .all()
-    )  # ty:ignore[unresolved-attribute]
+    )
     return render(
         request,
         "admin/recipe_list.html",
@@ -312,7 +312,7 @@ def admin_tag_delete(request, pk):
 
 @staff_member_required
 def admin_task_list(request):
-    tasks = DBTaskResult.objects.all().order_by("-enqueued_at")[:50]  # ty:ignore[unresolved-attribute]
+    tasks = DBTaskResult.objects.all().order_by("-enqueued_at")[:50]
     return render(
         request,
         "admin/task_list.html",
@@ -336,7 +336,7 @@ def admin_rating_list(request):
         Rating.objects.select_related("recipe", "user")  # ty:ignore[unresolved-attribute]
         .all()
         .order_by("-updated_at")
-    )  # ty:ignore[unresolved-attribute]
+    )
     return render(
         request,
         "admin/rating_list.html",

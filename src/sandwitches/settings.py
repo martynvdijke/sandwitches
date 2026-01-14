@@ -16,7 +16,7 @@ import os
 from django.core.exceptions import ImproperlyConfigured
 from . import storage
 
-DEBUG = bool(os.environ.get("DEBUG", default=0))  # ty:ignore[no-matching-overload]
+DEBUG = bool(os.environ.get("DEBUG", default=0))
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 if not SECRET_KEY:
@@ -26,7 +26,7 @@ if not SECRET_KEY:
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1, localhost").split(",")
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
-DATABASE_FILE = Path(os.environ.get("DATABASE_FILE", default="/db/db.sqlite3"))  # ty:ignore[no-matching-overload]
+DATABASE_FILE = Path(os.environ.get("DATABASE_FILE", default="/db/db.sqlite3"))
 
 storage.is_database_readable(DATABASE_FILE)
 storage.is_database_writable(DATABASE_FILE)
@@ -154,7 +154,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Media files (for uploaded images)
 MEDIA_URL = "/media/"
-MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", default=BASE_DIR / "media"))  # ty:ignore[no-matching-overload]
+MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", default=BASE_DIR / "media"))
 
 # Static (for CSS etc)
 STATIC_URL = "/static/"

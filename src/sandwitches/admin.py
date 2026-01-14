@@ -55,7 +55,7 @@ class RecipeAdmin(ImportExportModelAdmin):
         url = obj.get_absolute_url()
         return format_html("<a href='{url}'>{url}</a>", url=url)
 
-    show_url.short_description = "Recipe Link"  # ty:ignore[unresolved-attribute, inconsistent-mro]
+    show_url.short_description = "Recipe Link"  # ty:ignore[unresolved-attribute]
 
 
 @admin.register(Tag)
