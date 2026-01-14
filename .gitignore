@@ -133,4 +133,5 @@ dist
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
 
+src/static/dist/*
 setup.sh

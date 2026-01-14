@@ -14,15 +14,15 @@
 
         <!-- Collapsible Advanced Search Panel -->
         <div id="advanced-search" class="s12 hidden" style="display: none;">
-            <div class="padding surface border round primary-container">
-                <div class="grid primary-container">
+            <div class="padding surface border round">
+                <div class="grid">
                     <div class="s12 m6 l3">
                         <div class="field label border round">
                             <input type="date" name="date_start" value="{{ request.GET.date_start|default:'' }}">
                             <label>{% trans "Start Date" %}</label>
                         </div>
                     </div>
-                    <div class="s12 m6 l3 primary-container">
+                    <div class="s12 m6 l3">
                         <div class="field label border round">
                             <input type="date" name="date_end" value="{{ request.GET.date_end|default:'' }}">
                             <label>{% trans "End Date" %}</label>

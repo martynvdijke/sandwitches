@@ -29,8 +29,9 @@
     "htmx.org": "^2.0.8",
     "material-dynamic-colors": "^1.1.2",
     "mini-css-extract-plugin": "^2.9.4",
-    "style-loader": "^4.0.0",
-    "webpack": "^5.104.1",
+    "webpack": "^5.104.1"
+  },
+  "devDependencies": {
     "webpack-cli": "^6.0.1"
   }
 }

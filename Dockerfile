@@ -1,3 +1,13 @@
+# Stage 1: Build static assets with Node.js
+FROM node:22 AS builder
+
+WORKDIR /build
+COPY package.json package-lock.json ./
+COPY webpack.config.js babel.config.json ./
+COPY src/static/ ./src/static/
+RUN npm install && npm run build
+
+# Stage 2: Python application
 FROM python:3.14
 
 ARG UID=1000
@@ -25,6 +35,7 @@ RUN pip install --upgrade pip && pip install uv
 COPY uv.lock  /app/
 COPY pyproject.toml  /app/
 COPY . /app/
+COPY --from=builder /build/src/static/dist/ /app/src/static/dist/
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 RUN uv sync --locked --no-dev
