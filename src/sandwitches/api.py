@@ -1,3 +1,4 @@
+import logging
 from ninja import NinjaAPI
 from .models import Recipe, Tag, Setting, Rating
 from django.contrib.auth import get_user_model
@@ -16,7 +17,7 @@ from typing import List, Optional  # Import typing hints
 
 from ninja.security import django_auth
 
-from __init__ import __version__
+from . import __version__
 
 # Get the custom User model
 User = get_user_model()
@@ -128,37 +129,49 @@ def get_recipe(request, recipe_id: int):
     return recipe
 
 
-@api.get(
-    "v1/recipes/{recipe_id}/scale-ingredients", response=List[ScaledIngredient]
-)  # New scaling endpoint
+@api.get("v1/recipes/{recipe_id}/scale-ingredients", response=List[ScaledIngredient])
 def scale_recipe_ingredients(request, recipe_id: int, target_servings: int):
     recipe = get_object_or_404(Recipe, id=recipe_id)
 
+    # Ensure target_servings is at least 1
+    target_servings = max(1, target_servings)
+
     current_servings = recipe.servings
-    if current_servings is None or current_servings <= 0:
-        # Fallback if servings is not set or invalid, assume 1
+    if not current_servings or current_servings <= 0:
         current_servings = 1
 
-    ingredients_text = recipe.ingredients
     ingredient_lines = [
-        line.strip() for line in ingredients_text.split("\n") if line.strip()
+        line.strip() for line in (recipe.ingredients or "").split("\n") if line.strip()
     ]
 
     scaled_ingredients_output = []
     for line in ingredient_lines:
-        parsed = parse_ingredient_line(line)
-        scaled = scale_ingredient(parsed, current_servings, target_servings)
-        formatted_line = format_scaled_ingredient(scaled)
+        try:
+            parsed = parse_ingredient_line(line)
+            scaled = scale_ingredient(parsed, current_servings, target_servings)
+            formatted_line = format_scaled_ingredient(scaled)
 
-        scaled_ingredients_output.append(
-            ScaledIngredient(
-                original_line=line,
-                scaled_line=formatted_line,
-                quantity=scaled["quantity"],
-                unit=scaled["unit"],
-                name=scaled["name"],
+            scaled_ingredients_output.append(
+                ScaledIngredient(
+                    original_line=line,
+                    scaled_line=formatted_line,
+                    quantity=scaled.get("quantity"),
+                    unit=scaled.get("unit"),
+                    name=scaled.get("name"),
+                )
             )
-        )
+        except Exception as e:
+            # Fallback for lines that fail to parse/scale
+            scaled_ingredients_output.append(
+                ScaledIngredient(
+                    original_line=line,
+                    scaled_line=line,
+                    quantity=None,
+                    unit=None,
+                    name=line,
+                )
+            )
+            logging.warning(f"Failed to scale ingredient line '{line}': {e}")
 
     return scaled_ingredients_output
 

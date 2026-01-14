@@ -31,6 +31,17 @@ eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpa
 
 /***/ },
 
+/***/ "./node_modules/beercss/index.js"
+/*!***************************************!*\
+  !*** ./node_modules/beercss/index.js ***!
+  \***************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* reexport safe */ _dist_cdn_beer_min_js__WEBPACK_IMPORTED_MODULE_1__.ui),\n/* harmony export */   ui: () => (/* reexport safe */ _dist_cdn_beer_min_js__WEBPACK_IMPORTED_MODULE_1__.ui)\n/* harmony export */ });\n/* harmony import */ var _dist_cdn_beer_min_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dist/cdn/beer.min.css */ \"./node_modules/beercss/dist/cdn/beer.min.css\");\n/* harmony import */ var _dist_cdn_beer_min_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./dist/cdn/beer.min.js */ \"./node_modules/beercss/dist/cdn/beer.min.js\");\n\n\n\n\n\n//# sourceURL=webpack://sandwitches/./node_modules/beercss/index.js?\n}");
+
+/***/ },
+
 /***/ "./node_modules/htmx.org/dist/htmx.min.js"
 /*!************************************************!*\
   !*** ./node_modules/htmx.org/dist/htmx.min.js ***!
@@ -59,7 +70,7 @@ eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpa
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var beercss_dist_cdn_beer_min_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! beercss/dist/cdn/beer.min.css */ \"./node_modules/beercss/dist/cdn/beer.min.css\");\n/* harmony import */ var beercss_dist_cdn_beer_min_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! beercss/dist/cdn/beer.min.js */ \"./node_modules/beercss/dist/cdn/beer.min.js\");\n/* harmony import */ var material_dynamic_colors_dist_cdn_material_dynamic_colors_min_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! material-dynamic-colors/dist/cdn/material-dynamic-colors.min.js */ \"./node_modules/material-dynamic-colors/dist/cdn/material-dynamic-colors.min.js\");\n/* harmony import */ var htmx_org_dist_htmx_min_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! htmx.org/dist/htmx.min.js */ \"./node_modules/htmx.org/dist/htmx.min.js\");\n/* harmony import */ var htmx_org_dist_htmx_min_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(htmx_org_dist_htmx_min_js__WEBPACK_IMPORTED_MODULE_3__);\n// src/static/js/index.js\n\n\n\n\n\n// You can add your own custom JS here\nconsole.log('Webpack bundle loaded!');\n\n//# sourceURL=webpack://sandwitches/./src/static/js/index.js?\n}");
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var beercss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! beercss */ \"./node_modules/beercss/index.js\");\n/* harmony import */ var material_dynamic_colors_dist_cdn_material_dynamic_colors_min_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! material-dynamic-colors/dist/cdn/material-dynamic-colors.min.js */ \"./node_modules/material-dynamic-colors/dist/cdn/material-dynamic-colors.min.js\");\n/* harmony import */ var htmx_org_dist_htmx_min_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! htmx.org/dist/htmx.min.js */ \"./node_modules/htmx.org/dist/htmx.min.js\");\n/* harmony import */ var htmx_org_dist_htmx_min_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(htmx_org_dist_htmx_min_js__WEBPACK_IMPORTED_MODULE_2__);\n// src/static/js/index.js\n\n\n\n\n\n// Ensure beercss ui is global\nwindow.ui = beercss__WEBPACK_IMPORTED_MODULE_0__.ui;\n\n// Load theme on start\ndocument.addEventListener('DOMContentLoaded', function () {\n  var savedMode = localStorage.getItem(\"mode\");\n  if (savedMode) {\n    (0,beercss__WEBPACK_IMPORTED_MODULE_0__.ui)(\"mode\", savedMode);\n  }\n});\n\n// Function to toggle mode and save preference\nwindow.toggleMode = function () {\n  var currentMode = (0,beercss__WEBPACK_IMPORTED_MODULE_0__.ui)(\"mode\");\n  var newMode = currentMode === \"dark\" ? \"light\" : \"dark\";\n  (0,beercss__WEBPACK_IMPORTED_MODULE_0__.ui)(\"mode\", newMode);\n  localStorage.setItem(\"mode\", newMode);\n};\n\n// You can add your own custom JS here\nconsole.log('Webpack bundle loaded!');\n\n//# sourceURL=webpack://sandwitches/./src/static/js/index.js?\n}");
 
 /***/ }
 

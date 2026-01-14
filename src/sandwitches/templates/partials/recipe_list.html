@@ -15,7 +15,7 @@
          {% if user.is_authenticated %}
          <div class="absolute top left padding">
              <a href="{% url 'toggle_favorite' recipe.pk %}" class="button circle surface white-text">
-                <i class="{% if recipe in user.favorites.all %}error-text{% else %}black-text{% endif %}">
+                <i class="{% if recipe in user.favorites.all %}primary-text{% else %}black-text{% endif %}">
                     {% if recipe in user.favorites.all %}favorite{% else %}favorite_border{% endif %}
                 </i>
              </a>

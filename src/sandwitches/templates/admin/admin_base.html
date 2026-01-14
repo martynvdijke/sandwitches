@@ -2,9 +2,7 @@
 {% load i18n static %}
 
 {% block extra_head %}
-<link href="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.css" rel="stylesheet">
-<script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.js"></script>
-<script src="https://unpkg.com/htmx.org@2.0.8/dist/htmx.min.js"></script>
+<link href="{% static "dist/main.css" %}" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="{% static "icons/favicon.svg" %}">
 <style>
     :root {
@@ -32,7 +30,7 @@
     <h6 class="max">{% block admin_title %}{% trans "Sandwitches Admin" %}{% endblock %}</h6>
   </a>
   <div class="max"></div>
-  <button class="circle transparent" onclick="ui('mode', ui('mode') == 'dark' ? 'light' : 'dark')">
+  <button class="circle transparent" onclick="toggleMode()">
     <i>dark_mode</i>
   </button>
   
@@ -44,13 +42,12 @@
 </nav>
 
 <dialog id="admin-menu" class="left">
-    <nav class="drawer">
+    <nav class="drawer vertical">
         <header>
-            <nav>
-              <img src="{% static 'icons/icon.svg' %}" class="circle">
-              <h6>{% trans "Admin" %}</h6>
-            </nav>
+            <img src="{% static 'icons/icon.svg' %}" class="circle large">
+            <h5 class="max">{% trans "Admin" %}</h5>
         </header>
+        <div class="space"></div>
         <a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
             <i>dashboard</i>
             <span>{% trans "Dashboard" %}</span>
@@ -116,5 +113,6 @@
 {% endblock %}
 
 {% block extra_scripts %}
+{{ block.super }}
 {% block admin_scripts %}{% endblock %}
 {% endblock %}

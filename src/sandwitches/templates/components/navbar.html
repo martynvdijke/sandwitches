@@ -1,14 +1,13 @@
 {% load i18n static %}
 <nav class="top primary-container">
-  <button class="circle transparent" data-ui="#menu">
+  <button class="circle transparent large" onclick="ui('#menu')">
     <i>menu</i>
   </button>
   <a href="{% url 'index' %}" class="row align-center">
     <img src="{% static 'icons/icon.svg' %}" class="circle small">
-    <h6 class="max">Sandwitches</h6>
   </a>
   <div class="max"></div>
-  <button class="circle transparent" onclick="ui('mode', ui('mode') == 'dark' ? 'light' : 'dark')">
+  <button class="circle transparent" onclick="toggleMode()">
     <i>dark_mode</i>
   </button>
   <button class="circle transparent" data-ui="#language-menu">

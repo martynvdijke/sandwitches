@@ -3,35 +3,57 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sandwitches 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-31 15:00+0000\n"
+"POT-Creation-Date: 2026-01-14 18:06+0000\n"
 "PO-Revision-Date: 2025-01-01 00:00+0000\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/sandwitches/forms.py:18
+#: sandwitches/forms.py:18
 msgid "Passwords do not match."
 msgstr "Wachtwoorden komen niet overeen."
 
-#: src/sandwitches/forms.py:30 src/sandwitches/templates/setup.html:41
-#: src/sandwitches/templates/signup.html:35
+#: sandwitches/forms.py:30 sandwitches/templates/setup.html:41
+#: sandwitches/templates/signup.html:108
 msgid "Password"
 msgstr "Wachtwoord"
 
-#: src/sandwitches/forms.py:31
+#: sandwitches/forms.py:31
 msgid "Confirm Password"
 msgstr "Bevestig wachtwoord"
 
-#: src/sandwitches/forms.py:54
+#: sandwitches/forms.py:52
 msgid "Preferred language"
 msgstr "Voorkeurstaal"
 
-#: src/sandwitches/forms.py:99
+#: sandwitches/forms.py:55
+msgid "Profile Image"
+msgstr ""
+
+#: sandwitches/forms.py:57 sandwitches/templates/signup.html:81
+msgid "Bio"
+msgstr ""
+
+#: sandwitches/forms.py:113 sandwitches/templates/recipe_form.html:74
+msgid "Tags (comma separated)"
+msgstr ""
+
+#: sandwitches/forms.py:114
+msgid "e.g. spicy, vegan, quick"
+msgstr ""
+
+#: sandwitches/forms.py:174
 msgid "Your rating"
 msgstr "Jouw beoordeling"
 
-#: src/sandwitches/tasks.py:57
+#: sandwitches/forms.py:178
+#, fuzzy
+#| msgid "Email (optional)"
+msgid "Comment (optional)"
+msgstr "E-mail (optioneel)"
+
+#: sandwitches/tasks.py:52
 #, python-format
 msgid ""
 "\n"
@@ -63,7 +85,7 @@ msgstr ""
 "    Het Sandwitches Team\n"
 "    "
 
-#: src/sandwitches/tasks.py:85
+#: sandwitches/tasks.py:78
 #, python-format
 msgid ""
 "\n"
@@ -130,235 +152,859 @@ msgstr ""
 "    </div>\n"
 "    "
 
-#: src/sandwitches/tasks.py:114
+#: sandwitches/tasks.py:106
 #, python-format
 msgid "Sandwitches - New Recipe: %(title)s by %(uploaded_by)s"
 msgstr "Sandwitches - Nieuw recept: %(title)s door %(uploaded_by)s"
 
-#: src/sandwitches/templates/base_pico.html:175
-msgid "Language"
-msgstr "Taal"
+#: sandwitches/templates/admin/admin_base.html:30
+msgid "Sandwitches Admin"
+msgstr ""
 
-#: src/sandwitches/templates/base_pico.html:185
-msgid "Docs"
-msgstr "Documentatie"
-
-#: src/sandwitches/templates/base_pico.html:187
+#: sandwitches/templates/admin/admin_base.html:49
+#: sandwitches/templates/components/user_menu.html:5
 msgid "Admin"
 msgstr "Beheer"
 
-#: src/sandwitches/templates/base_pico.html:188
+#: sandwitches/templates/admin/admin_base.html:54
+#: sandwitches/templates/admin/dashboard.html:4
+msgid "Dashboard"
+msgstr ""
+
+#: sandwitches/templates/admin/admin_base.html:58
+#: sandwitches/templates/admin/dashboard.html:56
+#: sandwitches/templates/admin/recipe_list.html:4
+#, fuzzy
+#| msgid "Edit Recipe:"
+msgid "Recipes"
+msgstr "Recept bewerken:"
+
+#: sandwitches/templates/admin/admin_base.html:62
+#: sandwitches/templates/admin/dashboard.html:84
+#: sandwitches/templates/admin/user_list.html:4
+#, fuzzy
+#| msgid "Username"
+msgid "Users"
+msgstr "Gebruikersnaam"
+
+#: sandwitches/templates/admin/admin_base.html:66
+#: sandwitches/templates/admin/dashboard.html:112
+#: sandwitches/templates/admin/recipe_list.html:22
+#: sandwitches/templates/admin/tag_list.html:4
+#: sandwitches/templates/components/search_form.html:61
+#: sandwitches/templates/detail.html:107
+msgid "Tags"
+msgstr ""
+
+#: sandwitches/templates/admin/admin_base.html:70
+#: sandwitches/templates/admin/rating_list.html:4
+#, fuzzy
+#| msgid "Rating"
+msgid "Ratings"
+msgstr "Beoordeling"
+
+#: sandwitches/templates/admin/admin_base.html:74
+msgid "Tasks"
+msgstr ""
+
+#: sandwitches/templates/admin/admin_base.html:79
+msgid "Public Site"
+msgstr ""
+
+#: sandwitches/templates/admin/admin_base.html:86
+#: sandwitches/templates/components/user_menu.html:8
 msgid "Logout"
 msgstr "Uitloggen"
 
-#: src/sandwitches/templates/base_pico.html:190
-msgid "Login"
-msgstr "Inloggen"
+#: sandwitches/templates/admin/confirm_delete.html:4
+msgid "Confirm Delete"
+msgstr ""
 
-#: src/sandwitches/templates/base_pico.html:191
-#: src/sandwitches/templates/signup.html:9
-msgid "Sign up"
-msgstr "Aanmelden"
+#: sandwitches/templates/admin/confirm_delete.html:9
+msgid "Are you sure?"
+msgstr ""
 
-#: src/sandwitches/templates/detail.html:7
-msgid "Back to all"
-msgstr "Terug naar alles"
+#: sandwitches/templates/admin/confirm_delete.html:10
+msgid "You are about to delete the following"
+msgstr ""
 
-#: src/sandwitches/templates/detail.html:21
-#: src/sandwitches/templates/detail.html:28
-msgid "Description"
-msgstr "Beschrijving"
+#: sandwitches/templates/admin/confirm_delete.html:11
+msgid "This action cannot be undone."
+msgstr ""
 
-#: src/sandwitches/templates/detail.html:25
-msgid "Uploaded by"
-msgstr "Geüpload door"
-
-#: src/sandwitches/templates/detail.html:32
-msgid "No description yet."
-msgstr "Nog geen beschrijving."
-
-#: src/sandwitches/templates/detail.html:35
-msgid "Ingredients"
-msgstr "Ingrediënten"
-
-#: src/sandwitches/templates/detail.html:39
-msgid "No ingredients listed."
-msgstr "Geen ingrediënten vermeld."
-
-#: src/sandwitches/templates/detail.html:42
-msgid "Instructions"
-msgstr "Instructies"
-
-#: src/sandwitches/templates/detail.html:46
-msgid "No instructions yet."
-msgstr "Nog geen instructies."
-
-#: src/sandwitches/templates/detail.html:58
-msgid "Rating"
-msgstr "Beoordeling"
-
-#: src/sandwitches/templates/detail.html:60
-msgid "Average:"
-msgstr "Gemiddelde:"
-
-#: src/sandwitches/templates/detail.html:60
-msgid "vote"
-msgstr "stem"
-
-#: src/sandwitches/templates/detail.html:62
-msgid "No ratings yet."
-msgstr "Nog geen beoordelingen."
-
-#: src/sandwitches/templates/detail.html:67
-msgid "Your rating:"
-msgstr "Jouw beoordeling:"
-
-#: src/sandwitches/templates/detail.html:73
-msgid "What would you rate this sandwich?"
-msgstr "Wat zou je dit broodje geven?"
-
-#: src/sandwitches/templates/detail.html:88
-msgid "Score (0-10):"
-msgstr "Score (0-10):"
-
-#: src/sandwitches/templates/detail.html:105
-msgid "Update"
-msgstr "Bijwerken"
-
-#: src/sandwitches/templates/detail.html:105
-msgid "Rate"
-msgstr "Beoordeel"
-
-#: src/sandwitches/templates/detail.html:110
-msgid "Log in"
-msgstr "Inloggen"
-
-#: src/sandwitches/templates/detail.html:110
-msgid "to rate this recipe."
-msgstr "om dit recept te beoordelen."
-
-#: src/sandwitches/templates/detail.html:116
-#: src/sandwitches/templates/form.html:5
-#: src/sandwitches/templates/index.html:42
-msgid "Edit"
-msgstr "Bewerk"
-
-#: src/sandwitches/templates/form.html:9
-msgid "Edit Recipe:"
-msgstr "Recept bewerken:"
-
-#: src/sandwitches/templates/form.html:12
-msgid "Save"
-msgstr "Opslaan"
-
-#: src/sandwitches/templates/form.html:13
-#: src/sandwitches/templates/setup.html:49
-#: src/sandwitches/templates/signup.html:43
+#: sandwitches/templates/admin/confirm_delete.html:18
+#: sandwitches/templates/admin/recipe_form.html:144
+#: sandwitches/templates/admin/tag_form.html:25
+#: sandwitches/templates/admin/user_form.html:32
+#: sandwitches/templates/recipe_form.html:83
+#: sandwitches/templates/setup.html:49 sandwitches/templates/signup.html:125
 msgid "Cancel"
 msgstr "Annuleren"
 
-#: src/sandwitches/templates/index.html:8
-msgid "Sandwitches: sandwiches so good, they haunt you!"
-msgstr "Sandwitches: broodjes zo lekker, dat ze je achtervolgen!"
+#: sandwitches/templates/admin/confirm_delete.html:19
+msgid "Yes, Delete"
+msgstr ""
 
-#: src/sandwitches/templates/index.html:12
-msgid "Search by title or tag"
+#: sandwitches/templates/admin/dashboard.html:20
+#: sandwitches/templates/components/favorites_search_form.html:22
+#: sandwitches/templates/components/search_form.html:22
+msgid "Start Date"
+msgstr ""
+
+#: sandwitches/templates/admin/dashboard.html:30
+#: sandwitches/templates/components/favorites_search_form.html:28
+#: sandwitches/templates/components/search_form.html:28
+msgid "End Date"
+msgstr ""
+
+#: sandwitches/templates/admin/dashboard.html:64
+#: sandwitches/templates/admin/dashboard.html:92
+#: sandwitches/templates/admin/dashboard.html:120
+msgid "View all"
+msgstr ""
+
+#: sandwitches/templates/admin/dashboard.html:136
+msgid "Recipes Over Time (Last 30 Days)"
+msgstr ""
+
+#: sandwitches/templates/admin/dashboard.html:148
+msgid "Average Rating Over Time (Last 30 Days)"
+msgstr ""
+
+#: sandwitches/templates/admin/dashboard.html:160
+#, fuzzy
+#| msgid "Edit Recipe:"
+msgid "Recent Recipes"
+msgstr "Recept bewerken:"
+
+#: sandwitches/templates/admin/dashboard.html:168
+#: sandwitches/templates/admin/recipe_list.html:20
+#: sandwitches/templates/recipe_form.html:26
+msgid "Title"
+msgstr ""
+
+#: sandwitches/templates/admin/dashboard.html:170
+#: sandwitches/templates/admin/recipe_list.html:23
+#: sandwitches/templates/components/favorites_search_form.html:36
+#: sandwitches/templates/components/search_form.html:36
+#, fuzzy
+#| msgid "Uploaded by"
+msgid "Uploader"
+msgstr "Geüpload door"
+
+#: sandwitches/templates/admin/dashboard.html:172
+#, fuzzy
+#| msgid "Create admin"
+msgid "Created At"
+msgstr "Maak beheerder"
+
+#: sandwitches/templates/admin/dashboard.html:174
+#: sandwitches/templates/admin/rating_list.html:16
+#: sandwitches/templates/admin/recipe_list.html:25
+#: sandwitches/templates/admin/tag_list.html:21
+#: sandwitches/templates/admin/task_list.html:16
+#: sandwitches/templates/admin/user_list.html:17
+#, fuzzy
+#| msgid "Instructions"
+msgid "Actions"
+msgstr "Instructies"
+
+#: sandwitches/templates/admin/dashboard.html:227
+msgid "Recipes Created"
+msgstr ""
+
+#: sandwitches/templates/admin/dashboard.html:248
+#, fuzzy
+#| msgid "Rating"
+msgid "Avg Rating"
+msgstr "Beoordeling"
+
+#: sandwitches/templates/admin/rating_list.html:7
+#, fuzzy
+#| msgid "Rating"
+msgid "Recipe Ratings"
+msgstr "Beoordeling"
+
+#: sandwitches/templates/admin/rating_list.html:12
+#, fuzzy
+#| msgid "Edit Recipe:"
+msgid "Recipe"
+msgstr "Recept bewerken:"
+
+#: sandwitches/templates/admin/rating_list.html:13
+#: sandwitches/templates/admin/user_list.html:13
+#, fuzzy
+#| msgid "Username"
+msgid "User"
+msgstr "Gebruikersnaam"
+
+#: sandwitches/templates/admin/rating_list.html:14
+msgid "Score"
+msgstr ""
+
+#: sandwitches/templates/admin/rating_list.html:15
+#, fuzzy
+#| msgid "Update"
+msgid "Updated"
+msgstr "Bijwerken"
+
+#: sandwitches/templates/admin/rating_list.html:32
+#: sandwitches/templates/admin/recipe_list.html:58
+#: sandwitches/templates/admin/tag_list.html:31
+#: sandwitches/templates/admin/user_list.html:53
+msgid "Delete"
+msgstr ""
+
+#: sandwitches/templates/admin/recipe_form.html:55
+msgid "Separate tags with commas. New tags will be created automatically."
+msgstr ""
+
+#: sandwitches/templates/admin/recipe_form.html:69
+#: sandwitches/templates/detail.html:151
+#: sandwitches/templates/recipe_form.html:36
+msgid "Description"
+msgstr "Beschrijving"
+
+#: sandwitches/templates/admin/recipe_form.html:80
+msgid "Recipe Image"
+msgstr ""
+
+#: sandwitches/templates/admin/recipe_form.html:94
+msgid "Rotate 90° CCW"
+msgstr ""
+
+#: sandwitches/templates/admin/recipe_form.html:98
+msgid "Rotate 90° CW"
+msgstr ""
+
+#: sandwitches/templates/admin/recipe_form.html:121
+#: sandwitches/templates/components/ingredients_section.html:2
+#: sandwitches/templates/recipe_form.html:46
+msgid "Ingredients"
+msgstr "Ingrediënten"
+
+#: sandwitches/templates/admin/recipe_form.html:132
+#: sandwitches/templates/components/instructions_section.html:2
+#: sandwitches/templates/recipe_form.html:53
+msgid "Instructions"
+msgstr "Instructies"
+
+#: sandwitches/templates/admin/recipe_form.html:147
+#: sandwitches/templates/recipe_form.html:86
+#, fuzzy
+#| msgid "Edit Recipe:"
+msgid "Save Recipe"
+msgstr "Recept bewerken:"
+
+#: sandwitches/templates/admin/recipe_list.html:8
+msgid "Recipe Management"
+msgstr ""
+
+#: sandwitches/templates/admin/recipe_list.html:11
+#: sandwitches/templates/partials/recipe_list.html:83 sandwitches/views.py:139
+#, fuzzy
+#| msgid "Edit Recipe:"
+msgid "Add Recipe"
+msgstr "Recept bewerken:"
+
+#: sandwitches/templates/admin/recipe_list.html:18
+#: sandwitches/templates/admin/tag_list.html:18
+#: sandwitches/templates/admin/task_list.html:12
+msgid "ID"
+msgstr ""
+
+#: sandwitches/templates/admin/recipe_list.html:19
+#: sandwitches/templates/recipe_form.html:61
+msgid "Image"
+msgstr ""
+
+#: sandwitches/templates/admin/recipe_list.html:21
+#: sandwitches/templates/components/rating_section.html:2
+msgid "Rating"
+msgstr "Beoordeling"
+
+#: sandwitches/templates/admin/recipe_list.html:24
+#, fuzzy
+#| msgid "Create admin"
+msgid "Created"
+msgstr "Maak beheerder"
+
+#: sandwitches/templates/admin/tag_form.html:26
+#, fuzzy
+#| msgid "Save"
+msgid "Save Tag"
+msgstr "Opslaan"
+
+#: sandwitches/templates/admin/tag_list.html:8
+msgid "Tag Management"
+msgstr ""
+
+#: sandwitches/templates/admin/tag_list.html:11 sandwitches/views.py:272
+msgid "Add Tag"
+msgstr ""
+
+#: sandwitches/templates/admin/tag_list.html:19
+msgid "Name"
+msgstr ""
+
+#: sandwitches/templates/admin/tag_list.html:20
+msgid "Slug"
+msgstr ""
+
+#: sandwitches/templates/admin/task_detail.html:4
+msgid "Task Details"
+msgstr ""
+
+#: sandwitches/templates/admin/task_detail.html:9
+msgid "Task"
+msgstr ""
+
+#: sandwitches/templates/admin/task_detail.html:15
+msgid "General Information"
+msgstr ""
+
+#: sandwitches/templates/admin/task_detail.html:19
+msgid "Task Path"
+msgstr ""
+
+#: sandwitches/templates/admin/task_detail.html:23
+#: sandwitches/templates/admin/task_list.html:14
+msgid "Status"
+msgstr ""
+
+#: sandwitches/templates/admin/task_detail.html:35
+msgid "Queue"
+msgstr ""
+
+#: sandwitches/templates/admin/task_detail.html:39
+msgid "Priority"
+msgstr ""
+
+#: sandwitches/templates/admin/task_detail.html:45
+msgid "Timeline"
+msgstr ""
+
+#: sandwitches/templates/admin/task_detail.html:48
+msgid "Enqueued At"
+msgstr ""
+
+#: sandwitches/templates/admin/task_detail.html:52
+msgid "Started At"
+msgstr ""
+
+#: sandwitches/templates/admin/task_detail.html:56
+msgid "Finished At"
+msgstr ""
+
+#: sandwitches/templates/admin/task_detail.html:64
+msgid "Arguments"
+msgstr ""
+
+#: sandwitches/templates/admin/task_detail.html:73
+msgid "Result"
+msgstr ""
+
+#: sandwitches/templates/admin/task_detail.html:83
+msgid "Error"
+msgstr ""
+
+#: sandwitches/templates/admin/task_list.html:4
+msgid "Background Tasks"
+msgstr ""
+
+#: sandwitches/templates/admin/task_list.html:7
+msgid "Task Results"
+msgstr ""
+
+#: sandwitches/templates/admin/task_list.html:13
+msgid "Task Class"
+msgstr ""
+
+#: sandwitches/templates/admin/task_list.html:15
+msgid "Finished"
+msgstr ""
+
+#: sandwitches/templates/admin/user_form.html:4
+#, fuzzy
+#| msgid "Edit"
+msgid "Edit User"
+msgstr "Bewerk"
+
+#: sandwitches/templates/admin/user_form.html:33
+msgid "Save"
+msgstr "Opslaan"
+
+#: sandwitches/templates/admin/user_list.html:7
+#, fuzzy
+#| msgid "Username"
+msgid "User Management"
+msgstr "Gebruikersnaam"
+
+#: sandwitches/templates/admin/user_list.html:12
+msgid "Avatar"
+msgstr ""
+
+#: sandwitches/templates/admin/user_list.html:14
+msgid "Email"
+msgstr ""
+
+#: sandwitches/templates/admin/user_list.html:15
+msgid "Staff"
+msgstr ""
+
+#: sandwitches/templates/admin/user_list.html:16
+msgid "Active"
+msgstr ""
+
+#: sandwitches/templates/components/favorites_search_form.html:8
+msgid "Search favorites..."
+msgstr ""
+
+#: sandwitches/templates/components/favorites_search_form.html:9
+#: sandwitches/templates/components/search_form.html:9
+msgid "Advanced Search"
+msgstr ""
+
+#: sandwitches/templates/components/favorites_search_form.html:35
+#: sandwitches/templates/components/favorites_search_form.html:40
+#: sandwitches/templates/components/favorites_search_form.html:41
+#: sandwitches/templates/components/search_form.html:35
+#: sandwitches/templates/components/search_form.html:40
+#: sandwitches/templates/components/search_form.html:41
+msgid "All Uploaders"
+msgstr ""
+
+#: sandwitches/templates/components/favorites_search_form.html:61
+#: sandwitches/templates/components/search_form.html:60
+msgid "All Tags"
+msgstr ""
+
+#: sandwitches/templates/components/favorites_search_form.html:66
+msgid "Tag"
+msgstr ""
+
+#: sandwitches/templates/components/favorites_search_form.html:73
+#: sandwitches/templates/components/search_form.html:94
+msgid "Newest"
+msgstr ""
+
+#: sandwitches/templates/components/favorites_search_form.html:74
+#: sandwitches/templates/components/search_form.html:95
+msgid "Oldest"
+msgstr ""
+
+#: sandwitches/templates/components/favorites_search_form.html:75
+#: sandwitches/templates/components/search_form.html:96
+msgid "Highest Rated"
+msgstr ""
+
+#: sandwitches/templates/components/favorites_search_form.html:76
+#: sandwitches/templates/components/search_form.html:97
+#, fuzzy
+#| msgid "Uploaded by"
+msgid "Uploader (A-Z)"
+msgstr "Geüpload door"
+
+#: sandwitches/templates/components/favorites_search_form.html:78
+#: sandwitches/templates/components/search_form.html:99
+msgid "Sort By"
+msgstr ""
+
+#: sandwitches/templates/components/ingredients_scripts.html:33
+msgid "Error scaling ingredients:"
+msgstr ""
+
+#: sandwitches/templates/components/ingredients_section.html:4
+#, fuzzy
+#| msgid "Instructions"
+msgid "Portions"
+msgstr "Instructies"
+
+#: sandwitches/templates/components/ingredients_section.html:10
+#, fuzzy
+#| msgid "No ingredients listed."
+msgid "Loading ingredients..."
+msgstr "Geen ingrediënten vermeld."
+
+#: sandwitches/templates/components/instructions_section.html:7
+msgid "No instructions yet."
+msgstr "Nog geen instructies."
+
+#: sandwitches/templates/components/language_dialog.html:5
+#, fuzzy
+#| msgid "Language"
+msgid "Select Language"
+msgstr "Taal"
+
+#: sandwitches/templates/components/language_dialog.html:24
+msgid "Close"
+msgstr ""
+
+#: sandwitches/templates/components/navbar.html:24
+msgid "Login"
+msgstr "Inloggen"
+
+#: sandwitches/templates/components/navbar.html:25
+msgid "Sign up"
+msgstr "Aanmelden"
+
+#: sandwitches/templates/components/rating_section.html:6
+msgid "vote"
+msgstr "stem"
+
+#: sandwitches/templates/components/rating_section.html:16
+msgid "Your rating:"
+msgstr "Jouw beoordeling:"
+
+#: sandwitches/templates/components/rating_section.html:25
+#, fuzzy
+#| msgid "What would you rate this sandwich?"
+msgid "Rate this sandwich"
+msgstr "Wat zou je dit broodje geven?"
+
+#: sandwitches/templates/components/rating_section.html:40
+#, fuzzy
+#| msgid "Email (optional)"
+msgid "Add a comment (optional)"
+msgstr "E-mail (optioneel)"
+
+#: sandwitches/templates/components/rating_section.html:41
+msgid "Comment"
+msgstr ""
+
+#: sandwitches/templates/components/rating_section.html:43
+#, fuzzy
+#| msgid "Rating"
+msgid "Submit Rating"
+msgstr "Beoordeling"
+
+#: sandwitches/templates/components/rating_section.html:47
+msgid "Log in"
+msgstr "Inloggen"
+
+#: sandwitches/templates/components/rating_section.html:47
+msgid "to rate this recipe."
+msgstr "om dit recept te beoordelen."
+
+#: sandwitches/templates/components/rating_section.html:52
+#, fuzzy
+#| msgid "Rating"
+msgid "All Ratings"
+msgstr "Beoordeling"
+
+#: sandwitches/templates/components/recipe_header.html:5
+msgid "Toggle Favorite"
+msgstr ""
+
+#: sandwitches/templates/components/recipe_header.html:22
+msgid "Uploaded by"
+msgstr "Geüpload door"
+
+#: sandwitches/templates/components/recipe_header.html:29
+msgid "Unknown uploader"
+msgstr ""
+
+#: sandwitches/templates/components/search_form.html:8
+#, fuzzy
+#| msgid "Search by title or tag"
+msgid "Search by title..."
 msgstr "Zoek op titel of tag"
 
-#: src/sandwitches/templates/index.html:12
-msgid "Search"
-msgstr "Zoeken"
+#: sandwitches/templates/components/search_form.html:85
+msgid "My Favorites"
+msgstr ""
 
-#: src/sandwitches/templates/index.html:50
-msgid "No sandwitches yet, please stay tuned."
+#: sandwitches/templates/components/side_menu.html:11
+msgid "Home"
+msgstr "Home"
+
+#: sandwitches/templates/components/side_menu.html:16
+#: sandwitches/templates/favorites.html:4
+msgid "Favorites"
+msgstr "Favorieten"
+
+#: sandwitches/templates/components/side_menu.html:21
+msgid "API Docs"
+msgstr "API Documentatie"
+
+#: sandwitches/templates/components/side_menu.html:27
+msgid "Admin Dashboard"
+msgstr "Beheer Dashboard"
+
+#: sandwitches/templates/detail.html:79
+msgid "Back to all"
+msgstr "Terug naar alles"
+
+#: sandwitches/templates/detail.html:122 sandwitches/templates/detail.html:124
+#: sandwitches/templates/partials/recipe_list.html:51
+#: sandwitches/templates/partials/recipe_list.html:53
+msgid "Liked by"
+msgstr ""
+
+#: sandwitches/templates/detail.html:124
+#: sandwitches/templates/partials/recipe_list.html:53
+msgid "and"
+msgstr ""
+
+#: sandwitches/templates/detail.html:124
+#: sandwitches/templates/partials/recipe_list.html:53
+msgid "others"
+msgstr ""
+
+#: sandwitches/templates/detail.html:140
+#: sandwitches/templates/recipe_form.html:4 sandwitches/views.py:160
+#, fuzzy
+#| msgid "Edit Recipe:"
+msgid "Edit Recipe"
+msgstr "Recept bewerken:"
+
+#: sandwitches/templates/detail.html:156
+msgid "No description yet."
+msgstr "Nog geen beschrijving."
+
+#: sandwitches/templates/favorites.html:24
+msgid "Your Favorites"
+msgstr ""
+
+#: sandwitches/templates/favorites.html:25
+msgid "The recipes you love the most."
+msgstr ""
+
+#: sandwitches/templates/index.html:24
+msgid "Sandwitches"
+msgstr ""
+
+#: sandwitches/templates/index.html:25
+#, fuzzy
+#| msgid "Sandwitches: sandwiches so good, they haunt you!"
+msgid "Sandwiches so good, they haunt you!"
+msgstr "Sandwitches: broodjes zo lekker, dat ze je achtervolgen!"
+
+#: sandwitches/templates/partials/recipe_list.html:41
+msgid "Unknown"
+msgstr ""
+
+#: sandwitches/templates/partials/recipe_list.html:70
+#, fuzzy
+#| msgid "Edit Recipe:"
+msgid "View Recipe"
+msgstr "Recept bewerken:"
+
+#: sandwitches/templates/partials/recipe_list.html:80
+#, fuzzy
+#| msgid "No sandwitches yet, please stay tuned."
+msgid "No sandwitches found."
 msgstr "Nog geen broodjes, kom later terug."
 
-#: src/sandwitches/templates/setup.html:3
+#: sandwitches/templates/partials/recipe_list.html:81
+msgid "Be the first to create one!"
+msgstr ""
+
+#: sandwitches/templates/recipe_form.html:12
+msgid "Edit Recipe:"
+msgstr "Recept bewerken:"
+
+#: sandwitches/templates/recipe_form.html:14
+#, fuzzy
+#| msgid "Edit Recipe:"
+msgid "New Recipe"
+msgstr "Recept bewerken:"
+
+#: sandwitches/templates/recipe_form.html:67
+msgid "Image Preview"
+msgstr ""
+
+#: sandwitches/templates/setup.html:3
 msgid "Initial setup — Create admin"
 msgstr "Eerste installatie — Beheerder aanmaken"
 
-#: src/sandwitches/templates/setup.html:9
+#: sandwitches/templates/setup.html:9
 msgid "Create initial administrator"
 msgstr "Maak de eerste beheerder"
 
-#: src/sandwitches/templates/setup.html:11
+#: sandwitches/templates/setup.html:11
 msgid ""
 "This page is only available when there are no admin users in the database."
 msgstr ""
 "Deze pagina is alleen beschikbaar als er nog geen beheerders in de database "
 "zijn."
 
-#: src/sandwitches/templates/setup.html:14
+#: sandwitches/templates/setup.html:14
 msgid ""
 "After creating the account you will be logged in and redirected to the admin."
 msgstr "Na aanmaken wordt u ingelogd en doorgestuurd naar het beheerpaneel."
 
-#: src/sandwitches/templates/setup.html:29
-#: src/sandwitches/templates/signup.html:23
+#: sandwitches/templates/setup.html:29 sandwitches/templates/signup.html:53
 msgid "Username"
 msgstr "Gebruikersnaam"
 
-#: src/sandwitches/templates/setup.html:32
-#: src/sandwitches/templates/signup.html:26
+#: sandwitches/templates/setup.html:32 sandwitches/templates/signup.html:61
 msgid "Email (optional)"
 msgstr "E-mail (optioneel)"
 
-#: src/sandwitches/templates/setup.html:35
-#: src/sandwitches/templates/signup.html:29
+#: sandwitches/templates/setup.html:35 sandwitches/templates/signup.html:34
 msgid "First name"
 msgstr "Voornaam"
 
-#: src/sandwitches/templates/setup.html:38
-#: src/sandwitches/templates/signup.html:32
+#: sandwitches/templates/setup.html:38 sandwitches/templates/signup.html:43
 msgid "Last name"
 msgstr "Achternaam"
 
-#: src/sandwitches/templates/setup.html:44
-#: src/sandwitches/templates/signup.html:38
+#: sandwitches/templates/setup.html:44 sandwitches/templates/signup.html:116
 msgid "Confirm password"
 msgstr "Bevestig wachtwoord"
 
-#: src/sandwitches/templates/setup.html:48
+#: sandwitches/templates/setup.html:48
 msgid "Create admin"
 msgstr "Maak beheerder"
 
-#: src/sandwitches/templates/signup.html:3
-#: src/sandwitches/templates/signup.html:42
+#: sandwitches/templates/signup.html:3 sandwitches/templates/signup.html:126
 msgid "Sign Up"
 msgstr "Aanmelden"
 
-#: src/sandwitches/views.py:73
+#: sandwitches/templates/signup.html:12
+msgid "Create your account"
+msgstr ""
+
+#: sandwitches/templates/signup.html:13
+msgid "Join the Sandwitches community today!"
+msgstr ""
+
+#: sandwitches/templates/signup.html:73
+#, fuzzy
+#| msgid "Preferred language"
+msgid "Preferred Language"
+msgstr "Voorkeurstaal"
+
+#: sandwitches/templates/signup.html:93
+msgid "Upload Profile Picture"
+msgstr ""
+
+#: sandwitches/views.py:132
+msgid "Recipe added successfully."
+msgstr ""
+
+#: sandwitches/views.py:150
+msgid "Recipe updated successfully."
+msgstr ""
+
+#: sandwitches/views.py:171
+msgid "Recipe deleted."
+msgstr ""
+
+#: sandwitches/views.py:176
+msgid "recipe"
+msgstr ""
+
+#: sandwitches/views.py:185
+msgid "No image to rotate."
+msgstr ""
+
+#: sandwitches/views.py:197
+msgid "Image rotated successfully."
+msgstr ""
+
+#: sandwitches/views.py:199
+msgid "Error rotating image: "
+msgstr ""
+
+#: sandwitches/views.py:221
+msgid "User updated successfully."
+msgstr ""
+
+#: sandwitches/views.py:236
+msgid "You cannot delete yourself."
+msgstr ""
+
+#: sandwitches/views.py:240
+msgid "User deleted."
+msgstr ""
+
+#: sandwitches/views.py:245
+msgid "user"
+msgstr ""
+
+#: sandwitches/views.py:265
+msgid "Tag added successfully."
+msgstr ""
+
+#: sandwitches/views.py:283
+msgid "Tag updated successfully."
+msgstr ""
+
+#: sandwitches/views.py:293
+#, fuzzy
+#| msgid "Edit"
+msgid "Edit Tag"
+msgstr "Bewerk"
+
+#: sandwitches/views.py:304
+msgid "Tag deleted."
+msgstr ""
+
+#: sandwitches/views.py:309
+msgid "tag"
+msgstr ""
+
+#: sandwitches/views.py:352
+#, fuzzy
+#| msgid "No ratings yet."
+msgid "Rating deleted."
+msgstr "Nog geen beoordelingen."
+
+#: sandwitches/views.py:357
+#, fuzzy
+#| msgid "Rating"
+msgid "rating"
+msgstr "Beoordeling"
+
+#: sandwitches/views.py:414
 msgid "Your rating has been saved."
 msgstr "Je beoordeling is opgeslagen."
 
-#: src/sandwitches/views.py:75
+#: sandwitches/views.py:416
 msgid "Could not save rating."
 msgstr "Kon de beoordeling niet opslaan."
 
-#: src/sandwitches/views.py:101
+#: sandwitches/views.py:425
+msgid "Recipe removed from favorites."
+msgstr ""
+
+#: sandwitches/views.py:428
+msgid "Recipe added to favorites."
+msgstr ""
+
+#: sandwitches/views.py:588
 msgid "Admin account created and signed in."
 msgstr "Beheerderaccount aangemaakt en ingelogd."
 
-#: src/sandwitches/views.py:124
+#: sandwitches/views.py:607
 msgid "Account created and signed in."
 msgstr "Account aangemaakt en ingelogd."
 
-#: src/sandwitches/views.py:135
-msgid "Invalid Media Root Configuration"
-msgstr "Ongeldige Media Root Configuratie"
+#~ msgid "Average:"
+#~ msgstr "Gemiddelde:"
 
-#: src/sandwitches/views.py:137
-msgid "Invalid File Path"
-msgstr "Ongeldig bestandspad"
+#~ msgid "Score (0-10):"
+#~ msgstr "Score (0-10):"
 
-#: src/sandwitches/views.py:142
-msgid "Access Denied"
-msgstr "Toegang geweigerd"
+#~ msgid "Rate"
+#~ msgstr "Beoordeel"
 
-#: src/sandwitches/views.py:145
-msgid "File not found"
-msgstr "Bestand niet gevonden"
+#~ msgid "Search"
+#~ msgstr "Zoeken"
 
-#: src/sandwitches/views.py:149
-msgid "Access Denied: Only image files are allowed."
-msgstr "Toegang geweigerd: Alleen afbeeldingsbestanden zijn toegestaan."
+#~ msgid "Invalid Media Root Configuration"
+#~ msgstr "Ongeldige Media Root Configuratie"
+
+#~ msgid "Invalid File Path"
+#~ msgstr "Ongeldig bestandspad"
+
+#~ msgid "Access Denied"
+#~ msgstr "Toegang geweigerd"
+
+#~ msgid "File not found"
+#~ msgstr "Bestand niet gevonden"
+
+#~ msgid "Access Denied: Only image files are allowed."
+#~ msgstr "Toegang geweigerd: Alleen afbeeldingsbestanden zijn toegestaan."
