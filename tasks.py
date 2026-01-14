@@ -54,12 +54,14 @@ def compile_i8n(c):
     print("Compile i18n message files...")
     c.run("src/manage.py compilemessages")
 
+
 @task
 def build_web(c):
     """Build frontend assets with webpack."""
     print("Building frontend assets with webpack...")
     c.run("npm install")
     c.run("npm run build")
+
 
 @task
 def collect_static(c):
