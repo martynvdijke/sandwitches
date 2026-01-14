@@ -1,10 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
-from .models import Recipe, Tag, Rating
+from .models import Recipe, Tag, Rating, Setting
 from django.utils.html import format_html
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
+from solo.admin import SingletonModelAdmin
+from .forms import SettingForm
 
 
 class RecipeResource(resources.ModelResource):
@@ -23,6 +25,11 @@ class RatingResource(resources.ModelResource):
 
 
 User = get_user_model()
+
+
+@admin.register(Setting)
+class SettingAdmin(SingletonModelAdmin):
+    form = SettingForm
 
 
 @admin.register(User)

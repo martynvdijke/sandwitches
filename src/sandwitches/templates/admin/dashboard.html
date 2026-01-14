@@ -11,6 +11,7 @@
     <a href="#tags-tab">{% trans "Tags" %}</a>
     <a href="#ratings-tab">{% trans "Ratings" %}</a>
     <a href="#tasks-tab">{% trans "Tasks" %}</a>
+    <a href="#settings-tab">{% trans "Settings" %}</a>
 </div>
 
 <div class="tab-content">
@@ -145,6 +146,12 @@
         <h5 class="bold">{% trans "Task Management" %}</h5>
         <p>{% trans "Click here to manage all tasks." %}</p>
         <a href="{% url 'admin_task_list' %}" class="button primary">{% trans "Go to Tasks" %}</a>
+    </div>
+
+    <div id="settings-tab">
+        <h5 class="bold">{% trans "Settings Management" %}</h5>
+        <p>{% trans "Click here to manage all settings." %}</p>
+        <a href="{% url 'admin:sandwitches_setting_changelist' %}" class="button primary">{% trans "Go to Settings" %}</a>
     </div>
 </div>
 

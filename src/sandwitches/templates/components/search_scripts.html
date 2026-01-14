@@ -1,0 +1,98 @@
+<script>
+    function toggleAdvanced() {
+        var el = document.getElementById('advanced-search');
+        if (el.style.display === 'none') {
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
+    }
+
+    function toggleUploaderMenu(event) {
+        event.stopPropagation(); // Prevent closing immediately
+        var el = document.getElementById('uploader-menu');
+        if (el.style.display === 'none') {
+            // Close others if needed, but for now just toggle
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
+    }
+
+    function selectUploader(username, displayName) {
+        document.getElementById('uploader-hidden').value = username;
+        document.getElementById('uploader-display').value = username ? username : ''; // Or displayName
+        
+        // Trigger HTMX
+        document.body.dispatchEvent(new Event('uploaderChange'));
+        
+        // Close menu (handled by toggle or outside click)
+        // document.getElementById('uploader-menu').style.display = 'none'; 
+    }
+
+    function toggleTagMenu(event) {
+        event.stopPropagation();
+        var el = document.getElementById('tag-menu');
+        if (el.style.display === 'none') {
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
+    }
+
+    function updateSelectedTags(triggerEvent = true) {
+        var menu = document.getElementById('tag-menu');
+        var checkboxes = menu.querySelectorAll('input[type="checkbox"]');
+        var hiddenContainer = document.getElementById('tag-hidden-container');
+        var displayInput = document.getElementById('tag-display');
+        
+        hiddenContainer.innerHTML = ''; // Clear existing
+        var selectedNames = [];
+        
+        checkboxes.forEach(function(cb) {
+            if (cb.checked) {
+                selectedNames.push(cb.value);
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'tag';
+                input.value = cb.value;
+                hiddenContainer.appendChild(input);
+            }
+        });
+        
+        if (selectedNames.length > 0) {
+            displayInput.value = selectedNames.join(', ');
+        } else {
+            displayInput.value = '';
+        }
+
+        if (triggerEvent) {
+            // Trigger HTMX
+            document.body.dispatchEvent(new Event('uploaderChange'));
+        }
+    }
+
+    // Initialize display value
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSelectedTags(false);
+    });
+
+    // Close menus on clicking outside
+    document.addEventListener('click', function(event) {
+        var uploaderMenu = document.getElementById('uploader-menu');
+        var uploaderField = document.getElementById('uploader-display').parentElement;
+        if (uploaderMenu && uploaderMenu.style.display === 'block') {
+             if (!uploaderField.contains(event.target)) {
+                 uploaderMenu.style.display = 'none';
+             }
+        }
+
+        var tagMenu = document.getElementById('tag-menu');
+        var tagField = document.getElementById('tag-display').parentElement;
+        if (tagMenu && tagMenu.style.display === 'block') {
+             if (!tagField.contains(event.target)) {
+                 tagMenu.style.display = 'none';
+             }
+        }
+    });
+</script>

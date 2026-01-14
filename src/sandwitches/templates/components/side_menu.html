@@ -1,0 +1,31 @@
+{% load i18n static %}
+<dialog id="menu" class="left">
+    <nav class="drawer">
+        <header>
+            <nav>
+                <img src="{% static 'icons/icon.svg' %}" class="circle">
+                <h6>Sandwitches</h6>
+            </nav>
+        </header>
+        <a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+            <i>home</i>
+            <span>{% trans "Home" %}</span>
+        </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'favorites' %}" class="{% if request.resolver_match.url_name == 'favorites' %}active{% endif %}">
+            <i>favorite</i>
+            <span>{% trans "Favorites" %}</span>
+        </a>
+        {% endif %}
+        <a href="/api/docs">
+            <i>api</i>
+            <span>{% trans "API Docs" %}</span>
+        </a>
+        {% if user.is_staff %}
+        <a href="{% url 'admin_dashboard' %}">
+            <i>admin_panel_settings</i>
+            <span>{% trans "Admin Dashboard" %}</span>
+        </a>
+        {% endif %}
+    </nav>
+</dialog>

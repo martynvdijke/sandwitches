@@ -9,11 +9,27 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 import logging
 from django.urls import reverse
+from solo.models import SingletonModel
 
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 
 hashed_storage = HashedFilenameStorage()
+
+
+class Setting(SingletonModel):
+    site_name = models.CharField(max_length=255, default='Sandwitches')
+    site_description = models.TextField(blank=True)
+    email = models.EmailField(blank=True)
+    ai_connection_point = models.URLField(blank=True)
+    ai_model = models.CharField(max_length=255, blank=True)
+    ai_api_key = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return "Site Settings"
+
+    class Meta:
+        verbose_name = "Site Settings"
 
 
 class User(AbstractUser):

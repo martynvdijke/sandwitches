@@ -98,37 +98,7 @@
         </div>
         {% endif %}        
         <div class="padding">
-            <div class="row align-center">
-                <h4 class="bold max">{{ recipe.title }}</h4>
-                {% if user.is_authenticated %}
-                <a href="{% url 'toggle_favorite' recipe.pk %}" id="favorite-toggle-button" class="button circle transparent" title="{% trans 'Toggle Favorite' %}">
-                    <i class="{% if recipe in user.favorites.all %}error-text{% else %}black-text{% endif %}">
-                        {% if recipe in user.favorites.all %}favorite{% else %}favorite_border{% endif %}
-                    </i>
-                </a>
-                {% endif %}
-            </div>
-            
-            <div class="row align-center">
-                 {% if recipe.uploaded_by %}
-                    <a href="{% url 'index' %}" class="row align-center" style="color: inherit; text-decoration: none;">
-                        {% if recipe.uploaded_by.avatar %}
-                        <img src="{{ recipe.uploaded_by.avatar.url }}" class="circle small" alt="{{ recipe.uploaded_by.username }}">
-                        {% else %}
-                        <i class="small circle surface">person</i>
-                        {% endif %}
-                        <div class="ml-2">
-                            <span class="small-text">{% trans "Uploaded by" %}</span>
-                            <div class="bold">{{ recipe.uploaded_by.get_full_name|default:recipe.uploaded_by.username }}</div>
-                        </div>
-                    </a>
-                {% else %}
-                    <i class="small circle surface">person_off</i>
-                    <div class="ml-2">
-                        <span class="small-text">{% trans "Unknown uploader" %}</span>
-                    </div>
-                {% endif %}
-            </div>
+            {% include "components/recipe_header.html" %}
             
             <div class="space"></div>
             <div class="divider"></div>
@@ -145,46 +115,7 @@
             <div class="divider"></div>
             <div class="space"></div>
             
-            <h6 class="bold">{% trans "Rating" %}</h6>
-            <div class="row align-center">
-                <i class="primary-text">star</i>
-                <span class="h5 ml-1">{{ avg_rating|floatformat:1 }}</span>
-                <span class="small-text ml-1">({{ rating_count }} {% trans "vote" %}{% if rating_count != 1 %}s{% endif %})</span>
-            </div>
-            
-             <div class="space"></div>
-            
-            {% if user.is_authenticated %}
-              <article class="border round no-elevate secondary-container">
-                  {% if user_rating %}
-                    <div class="row align-center">
-                        <i class="primary-text">check_circle</i>
-                        <span class="ml-2">{% trans "Your rating:" %} <b>{{ user_rating.score }}</b></span>
-                    </div>
-                  {% else %}
-                    <form method="post" action="{% url 'recipe_rate' pk=recipe.pk %}">
-                        {% csrf_token %}
-                        <label class="bold">{% trans "Rate this sandwich" %}</label>
-                        <div class="field middle-align">
-                             <label class="slider">
-                                <input type="range" 
-                                    name="{{ rating_form.score.name }}" 
-                                    min="0" 
-                                    max="10" 
-                                    step="0.1" 
-                                    value="{{ rating_form.score.value|default:'5.0' }}"
-                                    oninput="document.getElementById('score-output').innerText = parseFloat(this.value).toFixed(1)">
-                                <span></span>
-                             </label>
-                             <span id="score-output" class="bold ml-2">{{ rating_form.score.value|default:"5.0" }}</span>
-                        </div>
-                        <button type="submit" class="button primary round">{% trans "Submit Rating" %}</button>
-                    </form>
-                  {% endif %}
-              </article>
-            {% else %}
-               <p><a href="{% url 'admin:login' %}" class="link">{% trans "Log in" %}</a> {% trans "to rate this recipe." %}</p>
-            {% endif %}
+            {% include "components/rating_section.html" %}
 
             {% if user.is_authenticated and user.is_staff %}
             <div class="space"></div>
@@ -212,101 +143,16 @@
           
           <div class="large-space"></div>
           
-          <h5 class="primary-text">{% trans "Ingredients" %}</h5>
-          <div class="portion-selector" data-recipe-id="{{ recipe.id }}" data-original-servings="{{ recipe.servings }}">
-              <label for="portions">{% trans "Portions" %}:</label>
-              <button class="button circle transparent" onclick="adjustPortions(-1)">-</button>
-              <input type="number" id="portions" value="{{ recipe.servings }}" min="1" onchange="scaleIngredients()">
-              <button class="button circle transparent" onclick="adjustPortions(1)">+</button>
-          </div>
-           <div id="ingredients-display" class="card padding flat gray1">
-            <p class="text-center">{% trans "Loading ingredients..." %}</p>
-           </div>
+          {% include "components/ingredients_section.html" %}
 
           <div class="large-space"></div>
 
-          <h5 class="primary-text">{% trans "Instructions" %}</h5>
-          <div>
-            {% if recipe.instructions %}
-                {{ recipe.instructions|convert_markdown|safe }}
-            {% else %}
-                <p class="italic">{% trans "No instructions yet." %}</p>
-            {% endif %}
-          </div>
+          {% include "components/instructions_section.html" %}
       </div>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
-    const recipeId = document.querySelector('.portion-selector').dataset.recipeId;
-    const originalServings = parseInt(document.querySelector('.portion-selector').dataset.originalServings || '1');
-    const portionsInput = document.getElementById('portions');
-    const ingredientsDisplay = document.getElementById('ingredients-display');
-
-    function showLoading() {
-        ingredientsDisplay.innerHTML = '<p class="text-center">Loading ingredients...</p>';
-    }
-
-    async function scaleIngredients() {
-        showLoading();
-        let targetServings = parseInt(portionsInput.value);
-
-        if (isNaN(targetServings) || targetServings < 1) {
-            targetServings = originalServings; // Fallback to original
-            if (isNaN(targetServings) || targetServings < 1) {
-                targetServings = 1; // Final fallback
-            }
-            portionsInput.value = targetServings;
-        }
-
-        try {
-            const response = await fetch(`/api/v1/recipes/${recipeId}/scale-ingredients?target_servings=${targetServings}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const scaledIngredients = await response.json();
-            
-            let html = '';
-            scaledIngredients.forEach(item => {
-                html += `<div>${item.scaled_line}</div>`;
-            });
-            ingredientsDisplay.innerHTML = html;
-
-        } catch (error) {
-            console.error("Error scaling ingredients:", error);
-            ingredientsDisplay.innerHTML = `<p class="error-text">Failed to load scaled ingredients. Please try again. (${error.message})</p>`;
-        }
-    }
-
-    function adjustPortions(delta) {
-        let currentPortions = parseInt(portionsInput.value);
-        if (isNaN(currentPortions)) {
-            currentPortions = originalServings;
-            if (isNaN(currentPortions) || currentPortions < 1) {
-                currentPortions = 1;
-            }
-        }
-        currentPortions += delta;
-        if (currentPortions < 1) {
-            currentPortions = 1;
-        }
-        portionsInput.value = currentPortions;
-        scaleIngredients();
-    }
-
-    // Initial scaling when the page loads
-    document.addEventListener('DOMContentLoaded', () => {
-        // Set initial value of portions input to original servings from backend if not already set
-        if (isNaN(parseInt(portionsInput.value)) || parseInt(portionsInput.value) < 1) {
-             portionsInput.value = originalServings;
-             if (isNaN(parseInt(portionsInput.value)) || parseInt(portionsInput.value) < 1) {
-                portionsInput.value = 1; // Final fallback
-            }
-        }
-        scaleIngredients();
-    });
-
-</script>
+{% include "components/ingredients_scripts.html" %}
 {% endblock %}

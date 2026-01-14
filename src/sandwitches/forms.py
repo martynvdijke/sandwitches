@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import gettext_lazy as _
-from .models import Recipe, Tag
+from .models import Recipe, Tag, Setting
 
 User = get_user_model()
 
@@ -173,3 +173,19 @@ class RatingForm(forms.Form):
         ),
         label=_("Your rating"),
     )
+
+
+class SettingForm(forms.ModelForm):
+    class Meta:
+        model = Setting
+        fields = [
+            "site_name",
+            "site_description",
+            "email",
+            "ai_connection_point",
+            "ai_model",
+            "ai_api_key",
+        ]
+        widgets = {
+            "ai_api_key": forms.PasswordInput(render_value=True),
+        }

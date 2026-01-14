@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "imagekit",
     "import_export",
     "simple_history",
+    "solo",
 ]
 
 MIDDLEWARE = [

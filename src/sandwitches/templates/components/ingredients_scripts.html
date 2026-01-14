@@ -1,0 +1,70 @@
+<script>
+    const recipeId = document.querySelector('.portion-selector').dataset.recipeId;
+    const originalServings = parseInt(document.querySelector('.portion-selector').dataset.originalServings || '1');
+    const portionsInput = document.getElementById('portions');
+    const ingredientsDisplay = document.getElementById('ingredients-display');
+
+    function showLoading() {
+        ingredientsDisplay.innerHTML = '<p class="text-center">Loading ingredients...</p>';
+    }
+
+    async function scaleIngredients() {
+        showLoading();
+        let targetServings = parseInt(portionsInput.value);
+
+        if (isNaN(targetServings) || targetServings < 1) {
+            targetServings = originalServings; // Fallback to original
+            if (isNaN(targetServings) || targetServings < 1) {
+                targetServings = 1; // Final fallback
+            }
+            portionsInput.value = targetServings;
+        }
+
+        try {
+            const response = await fetch(`/api/v1/recipes/${recipeId}/scale-ingredients?target_servings=${targetServings}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const scaledIngredients = await response.json();
+            
+            let html = '';
+            scaledIngredients.forEach(item => {
+                html += `<div>${item.scaled_line}</div>`;
+            });
+            ingredientsDisplay.innerHTML = html;
+
+        } catch (error) {
+            console.error("Error scaling ingredients:", error);
+            ingredientsDisplay.innerHTML = `<p class="error-text">Failed to load scaled ingredients. Please try again. (${error.message})</p>`;
+        }
+    }
+
+    function adjustPortions(delta) {
+        let currentPortions = parseInt(portionsInput.value);
+        if (isNaN(currentPortions)) {
+            currentPortions = originalServings;
+            if (isNaN(currentPortions) || currentPortions < 1) {
+                currentPortions = 1;
+            }
+        }
+        currentPortions += delta;
+        if (currentPortions < 1) {
+            currentPortions = 1;
+        }
+        portionsInput.value = currentPortions;
+        scaleIngredients();
+    }
+
+    // Initial scaling when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        // Set initial value of portions input to original servings from backend if not already set
+        if (isNaN(parseInt(portionsInput.value)) || parseInt(portionsInput.value) < 1) {
+             portionsInput.value = originalServings;
+             if (isNaN(parseInt(portionsInput.value)) || parseInt(portionsInput.value) < 1) {
+                portionsInput.value = 1; // Final fallback
+            }
+        }
+        scaleIngredients();
+    });
+
+</script>

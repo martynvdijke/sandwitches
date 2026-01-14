@@ -1,5 +1,5 @@
 from ninja import NinjaAPI
-from .models import Recipe, Tag
+from .models import Recipe, Tag, Setting
 from .utils import (
     parse_ingredient_line,
     scale_ingredient,
@@ -39,6 +39,12 @@ class UserSchema(ModelSchema):
         exclude = ["password", "last_login", "user_permissions"]
 
 
+class SettingSchema(ModelSchema):
+    class Meta:
+        model = Setting
+        fields = "__all__"
+
+
 class Error(Schema):
     message: str
 
@@ -59,6 +65,22 @@ class ScaledIngredient(Schema):  # New Schema for scaled ingredients
 @api.get("ping")
 def ping(request):
     return {"status": "ok", "message": "pong"}
+
+
+@api.get("v1/settings", response=SettingSchema)
+def get_settings(request):
+    return Setting.objects.get()
+
+
+@api.post("v1/settings", auth=django_auth, response=SettingSchema)
+def update_settings(request, payload: SettingSchema):
+    if not request.user.is_staff:
+        return 403, {"message": "You are not authorized to perform this action"}
+    settings = Setting.objects.get()
+    for attr, value in payload.dict().items():
+        setattr(settings, attr, value)
+    settings.save()
+    return settings
 
 
 @api.get("v1/me", response={200: UserSchema, 403: Error})
