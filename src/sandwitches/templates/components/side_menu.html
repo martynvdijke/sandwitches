@@ -20,6 +20,10 @@
             <i class="extra padding">api</i>
             <span class="large-text">{% trans "API Docs" %}</span>
         </a>
+        <a href="{% url 'latest_recipes_feed' %}" class="padding">
+            <i class="extra padding">rss_feed</i>
+            <span class="large-text">{% trans "RSS Feed" %}</span>
+        </a>
         {% if user.is_staff %}
         <div class="divider"></div>
         <a href="{% url 'admin_dashboard' %}" class="padding">
