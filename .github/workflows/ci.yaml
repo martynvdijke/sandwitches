@@ -1,4 +1,4 @@
-name: Run linting, formatting checks tests and Build Docker Image
+name: CI checks
 
 on:
   push:
