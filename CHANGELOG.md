@@ -1,3 +1,16 @@
+# [2.1.0](https://github.com/martynvdijke/sandwitches/compare/v2.0.0...v2.1.0) (2026-01-15)
+
+
+### Bug Fixes
+
+* **ci:** set django allowed async in task env ([c944e38](https://github.com/martynvdijke/sandwitches/commit/c944e38e4738e9ed4a22eee2785e0521469e9912))
+* **web:** use our login instead of django default login ([1de3e74](https://github.com/martynvdijke/sandwitches/commit/1de3e744b8daf019c32e585f3a27f217095a681f))
+
+
+### Features
+
+* **tests:** add basiss playwright tests ([4525eef](https://github.com/martynvdijke/sandwitches/commit/4525eefed2dfaa7a7814b517160743014cf79297))
+
 # [2.0.0](https://github.com/martynvdijke/sandwitches/compare/v1.4.2...v2.0.0) (2026-01-14)
 
 
