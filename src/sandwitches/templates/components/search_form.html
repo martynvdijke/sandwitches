@@ -28,14 +28,14 @@
                             <label>{% trans "End Date" %}</label>
                         </div>
                     </div>
-                    
+
                     <!-- Custom Uploader Dropdown with Avatar -->
                     <div class="s12 m6 l3">
                         <div class="field label border round suffix relative" onclick="toggleUploaderMenu(event)">
                             <input type="text" id="uploader-display" readonly value="{{ request.GET.uploader|default:'' }}" placeholder="{% trans 'All Uploaders' %}" style="cursor: pointer;">
                             <label>{% trans "Uploader" %}</label>
                             <i class="chevron-down">arrow_drop_down</i>
-                            
+
                             <div id="uploader-menu" class="absolute surface elevate round left top-round bottom-round scroll" style="top: 100%; left: 0; right: 0; max-height: 300px; display: none; z-index: 20;">
                                 <a class="row padding hover pointer" onclick="selectUploader('', '{% trans 'All Uploaders' %}')">
                                     <span>{% trans "All Uploaders" %}</span>

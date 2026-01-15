@@ -19,10 +19,10 @@
             {% trans "After creating the account you will be logged in and redirected to the admin." %}
           </p>
       </div>
-      
+
       <form method="post" novalidate>
         {% csrf_token %}
-        
+
         {% if form.non_field_errors %}
           <div class="padding error surface round mb">
              {% for err in form.non_field_errors %}
@@ -70,7 +70,7 @@
                 <span class="helper error-text">{{ form.email.errors.0 }}</span>
             {% endif %}
         </div>
-        
+
         <div class="space"></div>
         <div class="divider"></div>
         <div class="space"></div>
@@ -92,7 +92,7 @@
         </div>
 
         <div class="large-space"></div>
-        
+
         <nav class="right-align">
             <a class="button transparent border round" href="{% url 'index' %}">{% trans "Cancel" %}</a>
             <button type="submit" class="button primary round">{% trans "Create admin" %}</button>

@@ -12,10 +12,10 @@
           <h4 class="center-align primary-text">{% trans "Create your account" %}</h4>
           <p class="center-align">{% trans "Join the Sandwitches community today!" %}</p>
       </div>
-      
+
       <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
-        
+
         {% if form.non_field_errors %}
           <div class="padding error surface round mb">
              {% for err in form.non_field_errors %}
@@ -63,7 +63,7 @@
                 <span class="helper error-text">{{ form.email.errors.0 }}</span>
             {% endif %}
         </div>
-        
+
         <div class="field label border round {% if form.language.errors %}error{% endif %}">
             <select name="{{ form.language.name }}" id="{{ form.language.id_for_label }}">
                 {% for value, label in form.language.field.choices %}
@@ -83,7 +83,7 @@
                  <span class="helper error-text">{{ form.bio.errors.0 }}</span>
             {% endif %}
         </div>
-        
+
         <div class="field middle-align {% if form.avatar.errors %}error{% endif %}">
              <nav>
                 <div class="max">
@@ -120,7 +120,7 @@
         </div>
 
         <div class="large-space"></div>
-        
+
         <nav class="right-align">
             <a class="button transparent border round" href="{% url 'index' %}">{% trans "Cancel" %}</a>
             <button type="submit" class="button primary round">{% trans "Sign Up" %}</button>

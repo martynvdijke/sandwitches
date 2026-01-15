@@ -22,12 +22,12 @@
     function selectUploader(username, displayName) {
         document.getElementById('uploader-hidden').value = username;
         document.getElementById('uploader-display').value = username ? username : ''; // Or displayName
-        
+
         // Trigger HTMX
         document.body.dispatchEvent(new Event('uploaderChange'));
-        
+
         // Close menu (handled by toggle or outside click)
-        // document.getElementById('uploader-menu').style.display = 'none'; 
+        // document.getElementById('uploader-menu').style.display = 'none';
     }
 
     function toggleTagMenu(event) {
@@ -45,10 +45,10 @@
         var checkboxes = menu.querySelectorAll('input[type="checkbox"]');
         var hiddenContainer = document.getElementById('tag-hidden-container');
         var displayInput = document.getElementById('tag-display');
-        
+
         hiddenContainer.innerHTML = ''; // Clear existing
         var selectedNames = [];
-        
+
         checkboxes.forEach(function(cb) {
             if (cb.checked) {
                 selectedNames.push(cb.value);
@@ -59,7 +59,7 @@
                 hiddenContainer.appendChild(input);
             }
         });
-        
+
         if (selectedNames.length > 0) {
             displayInput.value = selectedNames.join(', ');
         } else {

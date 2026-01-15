@@ -47,7 +47,7 @@
                     <label>{{ form.title.label }}</label>
                     {% if form.title.errors %}<span class="error">{{ form.title.errors|striptags }}</span>{% endif %}
                 </div>
-                
+
                 <div class="field label border round mt-1">
                     {{ form.tags_string }}
                     <label>{{ form.tags_string.label }}</label>
@@ -74,11 +74,11 @@
                 {% if form.description.errors %}<span class="error">{{ form.description.errors|striptags }}</span>{% endif %}
             </div>
         </div>
-        
+
         <div class="s12 m4">
             <article class="round padding border center-align">
                 <h6 class="bold mb-1">{% trans "Recipe Image" %}</h6>
-                
+
                 <div class="relative mb-1" style="overflow: hidden; min-height: 200px; display: flex; align-items: center; justify-content: center;">
                     {% if recipe.image %}
                     <img src="{{ recipe.image_medium.url }}" class="responsive round" id="image-preview" style="max-height: 300px; width: 100%; object-fit: contain; transition: transform 0.3s ease;">
@@ -100,7 +100,7 @@
                     </button>
                 </div>
                 {% endif %}
-                
+
                 <div class="field file border round">
                     <input type="text" readonly>
                     {{ form.image }}
@@ -114,7 +114,7 @@
         <!-- Ingredients and Instructions (Full Width) -->
         <div class="s12">
             <div class="divider mb-2"></div>
-            
+
             <div class="form-section">
                 <div class="row align-center mb-1">
                     <i class="primary-text">shopping_cart</i>
@@ -153,7 +153,7 @@
 {% block admin_scripts %}
 <script>
     let currentRotation = 0;
-    
+
     function rotatePreview(angle) {
         currentRotation = (currentRotation + angle) % 360;
         const img = document.getElementById('image-preview');
@@ -168,7 +168,7 @@
         fields.forEach(id => {
             const el = document.getElementById(id);
             if (el) {
-                new EasyMDE({ 
+                new EasyMDE({
                     element: el,
                     spellChecker: false,
                     autosave: {

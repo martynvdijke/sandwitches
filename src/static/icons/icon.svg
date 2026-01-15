@@ -9,7 +9,7 @@
             <stop offset="1" stop-color="#9B59B6" stop-opacity="0"/>
         </radialGradient>
     </defs>
-    
+
     <circle cx="256" cy="256" r="240" fill="url(#magicGlow)"/>
 
     <g id="sandwich" transform="translate(0, 60)">

@@ -19,17 +19,17 @@
             <p class="small-text ml-2">{{ user_rating.comment }}</p>
         {% endif %}
       {% endif %}
-      
+
       <form method="post" action="{% url 'recipe_rate' pk=recipe.pk %}">
           {% csrf_token %}
           <label class="bold">{% trans "Rate this sandwich" %}</label>
           <div class="field middle-align">
                <label class="slider">
-                  <input type="range" 
-                      name="{{ rating_form.score.name }}" 
-                      min="0" 
-                      max="10" 
-                      step="0.1" 
+                  <input type="range"
+                      name="{{ rating_form.score.name }}"
+                      min="0"
+                      max="10"
+                      step="0.1"
                       value="{{ user_rating.score|default:'5.0' }}"
                       oninput="document.getElementById('score-output').innerText = parseFloat(this.value).toFixed(1)">
                   <span></span>

@@ -13,7 +13,7 @@
   <button class="circle transparent" data-ui="#language-menu">
       <i>language</i>
   </button>
-  
+
   {% if user.is_authenticated %}
     {% if user.avatar %}
     <img src="{{ user.avatar.url }}" class="circle" data-ui="#user-menu">

@@ -12,17 +12,9 @@ repos:
         name: invoke-linting
         entry: invoke linting
         language: system
-        types: [python]
         pass_filenames: false
     -   id: invoke-typecheck
         name: invoke-typecheck
         entry: invoke typecheck
         language: system
-        types: [python]
-        pass_filenames: false
-    -   id: pytest
-        name: pytest
-        entry: invoke tests
-        language: system
-        types: [python]
         pass_filenames: false

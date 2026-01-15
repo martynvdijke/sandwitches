@@ -21,7 +21,7 @@ RUN groupadd -g ${GID} ${USERNAME} && \
     mkdir /app
 WORKDIR /app
 
-# Set environment variables 
+# Set environment variables
 # Prevents Python from writing pyc files to disk
 ENV PYTHONDONTWRITEBYTECODE=1
 # Prevents Python from buffering stdout and stderr

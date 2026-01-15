@@ -9,7 +9,7 @@
             <path d="M10 10 L13 13 L10 16 L7 13 Z" fill="#7DCE13" opacity="0.3"/>
         </pattern>
     </defs>
-    
+
     <rect width="800" height="200" fill="url(#bannerBg)"/>
     <rect width="800" height="200" fill="url(#magicPattern)"/>
 

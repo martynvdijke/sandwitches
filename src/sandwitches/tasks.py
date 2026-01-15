@@ -51,7 +51,7 @@ def send_emails(recipe_id, emails):
 
     raw_message_fmt = _("""
     Hungry? We just added <strong>%(title)s</strong> to our collection.
-    
+
     It's a delicious recipe that you won't want to miss!
     %(description)s
 

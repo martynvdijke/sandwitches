@@ -11,7 +11,7 @@
            <i class="extra">lunch_dining</i>
          </div>
          {% endif %}
-         
+
          {% if user.is_authenticated %}
          <div class="absolute top left padding">
              <a href="{% url 'toggle_favorite' recipe.pk %}" class="button circle surface white-text">
@@ -22,10 +22,10 @@
          </div>
          {% endif %}
        </div>
-       
+
        <div class="padding">
          <h5 class="truncate pointer" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">{{ recipe.title }}</h5>
-         
+
          <div class="row align-center">
             {% if recipe.uploaded_by %}
                 <a href="{% url 'index' %}?uploader={{ recipe.uploaded_by.username|urlencode }}" class="row align-center" style="color: inherit; text-decoration: none;">
@@ -41,7 +41,7 @@
                 <span class="tiny-text left-margin">{% trans "Unknown" %}</span>
             {% endif %}
          </div>
-         
+
          <div class="space"></div>
 
          <div class="row wrap">
@@ -57,14 +57,14 @@
          </div>
 
          <div class="space"></div>
-         
+
          <div class="row wrap">
            {% for tag in recipe.tags.all %}
            <a href="{% url 'index' %}?tag={{ tag.name|urlencode }}" class="chip small round surface margin-bottom">{{ tag.name }}</a>
            {% endfor %}
          </div>
        </div>
-       
+
        <div class="padding pt-0">
          <a href="{% url 'recipe_detail' recipe.slug %}" class="button fill round responsive">
            <span>{% trans 'View Recipe' %}</span>

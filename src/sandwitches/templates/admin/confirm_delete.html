@@ -9,9 +9,9 @@
     <h5>{% trans "Are you sure?" %}</h5>
     <p>{% trans "You are about to delete the following" %} {{ type }}: <b>{{ object }}</b></p>
     <p>{% trans "This action cannot be undone." %}</p>
-    
+
     <div class="space"></div>
-    
+
     <form method="post">
         {% csrf_token %}
         <nav class="center-align">

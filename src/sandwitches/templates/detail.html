@@ -21,7 +21,7 @@
         text-align: center;
     }
 </style>
-{% load custom_filters %} {# Load your custom filters #} 
+{% load custom_filters %} {# Load your custom filters #}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -68,7 +68,7 @@
 
 {% block content %}
 
-{% load i18n markdown_extras %} {# Keep existing load tags #} 
+{% load i18n markdown_extras %} {# Keep existing load tags #}
 
 <div class="space"></div>
 
@@ -86,20 +86,20 @@
   <div class="s12 m12 l5">
      <article class="round no-padding elevate">
         {% if recipe.image %}
-        <img src="{{ recipe.image_large.url }}" 
-             srcset="{{ recipe.image_medium.url }} 700w, {{ recipe.image_large.url }} 1200w" 
+        <img src="{{ recipe.image_large.url }}"
+             srcset="{{ recipe.image_medium.url }} 700w, {{ recipe.image_large.url }} 1200w"
              sizes="(max-width: 768px) 95vw, 600px"
-             alt="{{ recipe.title }}" 
+             alt="{{ recipe.title }}"
              loading="lazy"
              class="responsive top-round">
         {% else %}
         <div class="primary medium-height top-round middle-align center-align" style="height:300px;">
            <i class="extra">lunch_dining</i>
         </div>
-        {% endif %}        
+        {% endif %}
         <div class="padding">
             {% include "components/recipe_header.html" %}
-            
+
             <div class="space"></div>
             <div class="divider"></div>
             <div class="space"></div>
@@ -130,7 +130,7 @@
             <div class="space"></div>
             <div class="divider"></div>
             <div class="space"></div>
-            
+
             {% include "components/rating_section.html" %}
 
             {% if user.is_authenticated and user.is_staff %}
@@ -147,7 +147,7 @@
   <!-- Right Column: Details -->
   <div class="s12 m12 l7">
       <div class="padding">
-          
+
           <h5 class="primary-text">{% trans "Description" %}</h5>
           <div class="large-text">
             {% if recipe.description %}
@@ -156,9 +156,9 @@
                 <p class="italic">{% trans "No description yet." %}</p>
             {% endif %}
           </div>
-          
+
           <div class="large-space"></div>
-          
+
           {% include "components/ingredients_section.html" %}
 
           <div class="large-space"></div>

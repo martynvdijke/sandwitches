@@ -85,7 +85,7 @@
         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('submit', showLoading);
         });
-        
+
         // Hide loading animation on page load completion (after initial DOMContentLoaded)
         window.addEventListener('load', hideLoading);
 

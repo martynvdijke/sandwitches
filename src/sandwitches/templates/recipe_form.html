@@ -15,15 +15,15 @@
             {% endif %}
         </h4>
         <div class="space"></div>
-        
+
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            
+
             <div class="grid">
                 <div class="s12">
                     <div class="field label border round">
                         {{ form.title }}
-                        <label>{% trans "Title" %}</label> 
+                        <label>{% trans "Title" %}</label>
                     </div>
                     {% if form.title.errors %}
                     <p class="error-text tiny-text no-margin">{{ form.title.errors.0 }}</p>
@@ -77,7 +77,7 @@
             </div>
 
             <div class="large-space"></div>
-            
+
             <div class="row right-align">
                 <!-- Fallback to index if referer is missing, or history.back -->
                 <a href="javascript:history.back()" class="button transparent border round">{% trans "Cancel" %}</a>
