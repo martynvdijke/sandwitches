@@ -34,6 +34,7 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "invoke>=2.2.1",
+    "pre-commit>=4.5.1",
     "pytest-django>=4.11.1",
     "pytest-playwright>=0.7.2",
     "pytest>=8.4.2",
