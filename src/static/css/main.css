@@ -1,1 +1,9 @@
 /* src/static/css/main.css */
+.recipe-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.recipe-card article {
+    flex-grow: 1;
+}
