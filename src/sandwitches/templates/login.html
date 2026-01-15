@@ -1,0 +1,57 @@
+{% extends "base_beer.html" %}
+{% load static i18n %}
+{% block title %}{% trans "Login" %}{% endblock %}
+
+{% block content %}
+<div class="large-space"></div>
+
+<div class="grid">
+  <div class="s12 m10 l8 xl6 middle-align center-align" style="margin: 0 auto;">
+    <article class="round elevate">
+      <div class="padding">
+          <h4 class="center-align primary-text">{% trans "Login to your account" %}</h4>
+          <p class="center-align">{% trans "Welcome back!" %}</p>
+      </div>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <div class="padding error surface round mb">
+             {% for error in form.non_field_errors %}
+                <div class="row align-center">
+                    <i class="error-text">warning</i>
+                    <span class="error-text">{{ error }}</span>
+                </div>
+             {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="field label border round {% if form.username.errors %}error{% endif %}">
+            <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" value="{{ form.username.value|default:'' }}">
+            <label>{% trans "Username" %}</label>
+            {% if form.username.errors %}
+                <span class="helper error-text">{{ form.username.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <div class="field label border round {% if form.password.errors %}error{% endif %}">
+             <input type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}">
+            <label>{% trans "Password" %}</label>
+             {% if form.password.errors %}
+                <span class="helper error-text">{{ form.password.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <div class="large-space"></div>
+
+        <nav class="right-align">
+            <a class="button transparent border round" href="{% url 'index' %}">{% trans "Cancel" %}</a>
+            <button type="submit" class="button primary round">{% trans "Login" %}</button>
+        </nav>
+
+      </form>
+    </article>
+  </div>
+</div>
+{% endblock %}

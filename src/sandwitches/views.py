@@ -23,10 +23,17 @@ import mimetypes
 from PIL import Image
 from django.db.models import Q, Avg
 from django_tasks.backends.database.models import DBTaskResult
+from django.contrib.auth.views import LoginView
+
 
 from sandwitches import __version__ as sandwitches_version
 
 User = get_user_model()
+
+
+class CustomLoginView(LoginView):
+    template_name = "login.html"
+    redirect_authenticated_user = True
 
 
 @staff_member_required

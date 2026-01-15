@@ -44,7 +44,7 @@
       </form>
   </article>
 {% else %}
-   <p><a href="{% url 'admin:login' %}" class="link">{% trans "Log in" %}</a> {% trans "to rate this recipe." %}</p>
+   <p><a href="{% url 'login' %}" class="link">{% trans "Log in" %}</a> {% trans "to rate this recipe." %}</p>
 {% endif %}
 
 {% if all_ratings %}

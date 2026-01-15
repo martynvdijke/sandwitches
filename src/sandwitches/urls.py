@@ -21,6 +21,7 @@ from . import views
 from .api import api
 from django.conf.urls.i18n import i18n_patterns
 from .feeds import LatestRecipesFeed  # Import the feed class
+from django.contrib.auth.views import LogoutView  # Import LogoutView
 
 
 import os
@@ -30,6 +31,8 @@ import sys
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
     path("signup/", views.signup, name="signup"),
+    path("login/", views.CustomLoginView.as_view(), name="login"),
+    path("logout/", LogoutView.as_view(next_page="index"), name="logout"),
     path("admin/", admin.site.urls),
     path("api/", api.urls),
     path("media/<path:file_path>", views.media, name="media"),
