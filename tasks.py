@@ -46,6 +46,7 @@ def setup_ci(c):
     os.environ["DEBUG"] = "1"
     os.environ["ALLOWED_HOSTS"] = "127.0.0.1"
     os.environ["CSRF_TRUSTED_ORIGINS"] = "http://127.0.0.1"
+    os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 
 @task

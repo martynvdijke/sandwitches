@@ -31,7 +31,7 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
       - name: Run invoke.ci
-        run: DJANGO_ALLOW_ASYNC_UNSAFE=true uv run invoke ci
+        run: uv run invoke ci
 
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag martynvandijke/sandwitches:latest
