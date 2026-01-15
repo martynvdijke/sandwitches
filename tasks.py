@@ -71,6 +71,13 @@ def collect_static(c):
 
 
 @task
+def install_playwright_browsers(c):
+    """Install playwright browsers."""
+    print("Installing Playwright browsers...")
+    c.run("playwright install")
+
+
+@task
 def ci(c):
     """Run ci checks linting and pytest."""
     linting(c)
@@ -78,4 +85,5 @@ def ci(c):
     setup_ci(c)
     build_web(c)
     collect_static(c)
+    install_playwright_browsers(c)
     tests(c)

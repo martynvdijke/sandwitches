@@ -46,3 +46,4 @@ package = true
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "sandwitches.settings"
+pytest_playwright_sync_api = true
