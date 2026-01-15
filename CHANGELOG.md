@@ -1,3 +1,12 @@
+## [2.1.2](https://github.com/martynvdijke/sandwitches/compare/v2.1.1...v2.1.2) (2026-01-15)
+
+
+### Bug Fixes
+
+* **admin:** invalide photo rotation cache ([4ee8d69](https://github.com/martynvdijke/sandwitches/commit/4ee8d6953fc78ef7ae7c49cb1774e8c9b6e572ba))
+* **web:** keep recipe card the same height ([b13cae3](https://github.com/martynvdijke/sandwitches/commit/b13cae31ec77927e3f2efd0b7bd38525270b05b6))
+* **web:** use own login instead of django default login ([c307da6](https://github.com/martynvdijke/sandwitches/commit/c307da65c45fa68d43c9209e7f5dabb063fafab8))
+
 ## [2.1.1](https://github.com/martynvdijke/sandwitches/compare/v2.1.0...v2.1.1) (2026-01-15)
 
 
