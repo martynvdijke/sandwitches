@@ -49,6 +49,24 @@ def test_setup_creates_superuser(client):
     assert response.redirect_chain[-1][0] == reverse("admin:index")
 
 
+
+
+@pytest.mark.django_db
+def test_setup_view_uses_correct_template_and_styling(client):
+    """Test that the setup view uses setup.html and has the correct styling."""
+    # Ensure no superuser exists to access the setup page
+    User.objects.filter(is_superuser=True).delete()
+    
+    url = reverse("setup")
+    response = client.get(url)
+    
+    assert response.status_code == 200
+    # Check that the correct template is used
+    assert "setup.html" in [t.name for t in response.templates]
+    # Check for the presence of the form with the "elevate" class
+    assert '<article class="round elevate">' in response.content.decode()
+
+
 @pytest.mark.django_db
 def test_index_redirects_to_setup_if_no_superuser(client):
     User.objects.filter(is_superuser=True).delete()
