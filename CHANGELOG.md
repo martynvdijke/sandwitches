@@ -1,3 +1,11 @@
+## [2.1.1](https://github.com/martynvdijke/sandwitches/compare/v2.1.0...v2.1.1) (2026-01-15)
+
+
+### Bug Fixes
+
+* **ci:** add in pre commit hooks ([2bec5be](https://github.com/martynvdijke/sandwitches/commit/2bec5be828cef8c0dd2c2e962bc840af0cb8ca21))
+* **ci:** update pre-commit to include all files ([5e5cc94](https://github.com/martynvdijke/sandwitches/commit/5e5cc94eb1b1885a33fac841803e72fb98df3979))
+
 # [2.1.0](https://github.com/martynvdijke/sandwitches/compare/v2.0.0...v2.1.0) (2026-01-15)
 
 
