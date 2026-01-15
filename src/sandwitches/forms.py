@@ -149,8 +149,8 @@ class RecipeForm(forms.ModelForm):
                 # PIL rotates counter-clockwise by default, our 'rotation' is clockwise
                 img = img.rotate(-rotation, expand=True)
                 img.save(recipe.image.path)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Error rotating image: {e}")
 
         if commit:
             recipe.set_tags_from_string(self.cleaned_data.get("tags_string", ""))

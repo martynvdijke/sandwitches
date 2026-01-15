@@ -81,7 +81,7 @@
 
                 <div class="relative mb-1" style="overflow: hidden; min-height: 200px; display: flex; align-items: center; justify-content: center;">
                     {% if recipe.image %}
-                    <img src="{{ recipe.image_medium.url }}" class="responsive round" id="image-preview" style="max-height: 300px; width: 100%; object-fit: contain; transition: transform 0.3s ease;">
+                    <img src="{{ recipe.image_medium.url }}?v={% now "U" %}" class="responsive round" id="image-preview" style="max-height: 300px; width: 100%; object-fit: contain; transition: transform 0.3s ease;">
                     {% else %}
                     <div class="medium-height middle-align center-align gray1 round" id="image-placeholder" style="width: 100%;">
                         <i class="extra">image</i>
