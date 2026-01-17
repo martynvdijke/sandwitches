@@ -1,3 +1,17 @@
+# [2.2.0](https://github.com/martynvdijke/sandwitches/compare/v2.1.2...v2.2.0) (2026-01-17)
+
+
+### Bug Fixes
+
+* prevent carousel items overlap by forcing flex-shrink 0 and explicit width ([edf6d0c](https://github.com/martynvdijke/sandwitches/commit/edf6d0c81d581758fdde64198a9c603e1989bdc0))
+
+
+### Features
+
+* implement highlighted sandwiches carousel on homepage ([e8e12ae](https://github.com/martynvdijke/sandwitches/commit/e8e12aec2be8b51644ffef2d5974ffa85052175c))
+* improve highlighted recipe carousel with auto-scroll and navigation ([27fc4fa](https://github.com/martynvdijke/sandwitches/commit/27fc4fae6e76ad176c21ed6e63bd32cd3973a54b))
+* **ui:** implement recipe highlight and carasol ([f288b9e](https://github.com/martynvdijke/sandwitches/commit/f288b9e902a578b9c5e6ece0d98ec99c96cdd611))
+
 ## [2.1.2](https://github.com/martynvdijke/sandwitches/compare/v2.1.1...v2.1.2) (2026-01-15)
 
 
