@@ -56,3 +56,19 @@ def staff_user(user_factory):
     Creates and returns a staff user.
     """
     return user_factory(username="staff_test", is_staff=True, email="staff@example.com")
+
+
+@pytest.fixture(autouse=True)
+def override_static_storage(settings):
+    """
+    Use standard StaticFilesStorage for tests to avoid manifest missing errors
+    with WhiteNoise's CompressedManifestStaticFilesStorage.
+    """
+    settings.STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
