@@ -36,7 +36,7 @@
 <div class="relative">
     <div class="row scroll snap no-scrollbar" id="highlighted-carousel">
         {% for recipe in highlighted_recipes %}
-        <article class="round no-padding elevate small-width">
+        <article class="round no-padding elevate" style="min-width: 300px; width: 300px; margin: 10px; flex-shrink: 0;">
             <a href="{{ recipe.get_absolute_url }}">
                 {% if recipe.image %}
                 <img src="{{ recipe.image_medium.url }}" class="responsive top-round" alt="{{ recipe.title }}" style="height: 200px; object-fit: cover;">
