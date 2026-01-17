@@ -1,0 +1,59 @@
+<script>
+(function() {
+    const carousel = document.getElementById('highlighted-carousel');
+    const scrollAmount = 320; // Approximately card width + margin
+    let autoScrollInterval;
+
+    window.scrollCarousel = function(direction) {
+        if (carousel) {
+            const currentScroll = carousel.scrollLeft;
+            const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+            
+            let newScroll = currentScroll + (direction * scrollAmount);
+            
+            // Loop functionality for manual navigation? 
+            // Maybe just stop at ends or loop? Let's just scroll.
+            carousel.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+        }
+    }
+
+    function autoScroll() {
+        if (!carousel) return;
+
+        const currentScroll = carousel.scrollLeft;
+        const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+        
+        // Tolerance for float calculation
+        if (currentScroll >= maxScroll - 10) {
+            // Loop back to start
+            carousel.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+            carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+    }
+
+    function startAutoScroll() {
+        stopAutoScroll(); // Clear any existing
+        autoScrollInterval = setInterval(autoScroll, 5000); // 5 seconds
+    }
+
+    function stopAutoScroll() {
+        if (autoScrollInterval) {
+            clearInterval(autoScrollInterval);
+        }
+    }
+
+    if (carousel) {
+        // Start auto-scroll
+        startAutoScroll();
+
+        // Pause on interaction
+        carousel.addEventListener('mouseenter', stopAutoScroll);
+        carousel.addEventListener('mouseleave', startAutoScroll);
+        
+        // Touch events for mobile
+        carousel.addEventListener('touchstart', stopAutoScroll);
+        carousel.addEventListener('touchend', startAutoScroll);
+    }
+})();
+</script>

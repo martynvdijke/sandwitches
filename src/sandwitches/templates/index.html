@@ -33,24 +33,33 @@
 
 {% if highlighted_recipes %}
 <div class="large-space"></div>
-<div class="row scroll snap">
-    {% for recipe in highlighted_recipes %}
-    <article class="round no-padding elevate small-width">
-        <a href="{{ recipe.get_absolute_url }}">
-            {% if recipe.image %}
-            <img src="{{ recipe.image_medium.url }}" class="responsive top-round" alt="{{ recipe.title }}" style="height: 200px; object-fit: cover;">
-            {% else %}
-            <div class="primary medium-height top-round middle-align center-align" style="height:200px;">
-                <i class="extra">lunch_dining</i>
-            </div>
-            {% endif %}
-            <div class="padding">
-                <h6 class="bold truncate">{{ recipe.title }}</h6>
-                <p class="truncate">{{ recipe.description }}</p>
-            </div>
-        </a>
-    </article>
-    {% endfor %}
+<div class="relative">
+    <div class="row scroll snap no-scrollbar" id="highlighted-carousel">
+        {% for recipe in highlighted_recipes %}
+        <article class="round no-padding elevate small-width">
+            <a href="{{ recipe.get_absolute_url }}">
+                {% if recipe.image %}
+                <img src="{{ recipe.image_medium.url }}" class="responsive top-round" alt="{{ recipe.title }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="primary medium-height top-round middle-align center-align" style="height:200px;">
+                    <i class="extra">lunch_dining</i>
+                </div>
+                {% endif %}
+                <div class="padding">
+                    <h6 class="bold truncate">{{ recipe.title }}</h6>
+                    <p class="truncate">{{ recipe.description }}</p>
+                </div>
+            </a>
+        </article>
+        {% endfor %}
+    </div>
+    
+    <button class="circle surface absolute left middle-align elevate" onclick="scrollCarousel(-1)" style="top: 50%; transform: translateY(-50%); left: -20px; z-index: 10;">
+        <i>chevron_left</i>
+    </button>
+    <button class="circle surface absolute right middle-align elevate" onclick="scrollCarousel(1)" style="top: 50%; transform: translateY(-50%); right: -20px; z-index: 10;">
+        <i>chevron_right</i>
+    </button>
 </div>
 {% endif %}
 
@@ -62,4 +71,5 @@
 
 {% block page_scripts %}
 {% include "components/search_scripts.html" %}
+{% include "components/carousel_scripts.html" %}
 {% endblock %}
