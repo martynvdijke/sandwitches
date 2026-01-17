@@ -33,11 +33,13 @@
 
 {% if highlighted_recipes %}
 <div class="large-space"></div>
+<h4 class="upper center-align">{% trans 'Highlights' %}</h4>
+<div class="small-space"></div>
 <div class="relative">
-    <div class="row scroll snap no-scrollbar" id="highlighted-carousel">
+    <div class="row scroll snap no-scrollbar" id="highlighted-carousel" style="gap: 20px; flex-wrap: nowrap;">
         {% for recipe in highlighted_recipes %}
-        <article class="round no-padding elevate" style="min-width: 300px; width: 300px; margin: 10px; flex-shrink: 0;">
-            <a href="{{ recipe.get_absolute_url }}">
+        <a href="{{ recipe.get_absolute_url }}">
+        <article class="round no-padding elevate" style="min-width: 300px; width: 300px; flex-shrink: 0; scroll-snap-align: start;">
                 {% if recipe.image %}
                 <img src="{{ recipe.image_medium.url }}" class="responsive top-round" alt="{{ recipe.title }}" style="height: 200px; object-fit: cover;">
                 {% else %}
@@ -45,12 +47,11 @@
                     <i class="extra">lunch_dining</i>
                 </div>
                 {% endif %}
-                <div class="padding">
-                    <h6 class="bold truncate">{{ recipe.title }}</h6>
-                    <p class="truncate">{{ recipe.description }}</p>
-                </div>
-            </a>
+            <div class="padding">
+                <h5>{{ recipe.title }}</h5>
+            </div>
         </article>
+        </a>
         {% endfor %}
     </div>
     
