@@ -563,6 +563,8 @@ def index(request):
     uploaders = User.objects.filter(recipes__isnull=False).distinct()
     tags = Tag.objects.all()  # ty:ignore[unresolved-attribute]
 
+    highlighted_recipes = Recipe.objects.filter(is_highlighted=True)  # ty:ignore[unresolved-attribute]
+
     return render(
         request,
         "index.html",
@@ -573,6 +575,7 @@ def index(request):
             "tags": tags,
             "selected_tags": request.GET.getlist("tag"),
             "user": request.user,  # Pass user to template
+            "highlighted_recipes": highlighted_recipes,
         },
     )
 

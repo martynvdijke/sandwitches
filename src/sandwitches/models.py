@@ -127,6 +127,7 @@ class Recipe(models.Model):
         options={"quality": 95},
     )
     tags = models.ManyToManyField(Tag, blank=True, related_name="recipes")
+    is_highlighted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()

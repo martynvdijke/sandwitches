@@ -42,7 +42,8 @@ class CustomUserAdmin(UserAdmin):
 @admin.register(Recipe)
 class RecipeAdmin(ImportExportModelAdmin):
     resource_classes = [RecipeResource]
-    list_display = ("title", "uploaded_by", "created_at", "show_url")
+    list_display = ("title", "uploaded_by", "created_at", "is_highlighted", "show_url")
+    list_editable = ("is_highlighted",)
     readonly_fields = ("created_at", "updated_at")
 
     def save_model(self, request, obj, form, change):

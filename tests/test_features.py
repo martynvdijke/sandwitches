@@ -87,3 +87,27 @@ class FeatureTests(TestCase):
         self.assertContains(response, "user2")
         self.assertContains(response, "9.0")
         self.assertContains(response, "Comment by user2")
+
+    def test_highlighted_recipes_on_index_page(self):
+        # Create a highlighted recipe
+        highlighted_recipe = Recipe.objects.create(
+            title="Highlighted Sandwich",
+            instructions="Make it pop!",
+            ingredients="Glitter",
+            uploaded_by=self.superuser,
+            is_highlighted=True,
+        )
+
+        # Ensure a superuser exists (handled in setUp)
+        response = self.client.get(reverse("index"))
+        self.assertEqual(response.status_code, 200)
+
+        # Check context
+        self.assertIn("highlighted_recipes", response.context)
+        self.assertIn(highlighted_recipe, response.context["highlighted_recipes"])
+        self.assertNotIn(
+            self.recipe, response.context["highlighted_recipes"]
+        )  # self.recipe is not highlighted
+
+        # Check content
+        self.assertContains(response, "Highlighted Sandwich")

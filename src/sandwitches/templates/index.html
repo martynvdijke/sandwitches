@@ -31,6 +31,29 @@
 
 {% include "components/search_form.html" %}
 
+{% if highlighted_recipes %}
+<div class="large-space"></div>
+<div class="row scroll snap">
+    {% for recipe in highlighted_recipes %}
+    <article class="round no-padding elevate small-width">
+        <a href="{{ recipe.get_absolute_url }}">
+            {% if recipe.image %}
+            <img src="{{ recipe.image_medium.url }}" class="responsive top-round" alt="{{ recipe.title }}" style="height: 200px; object-fit: cover;">
+            {% else %}
+            <div class="primary medium-height top-round middle-align center-align" style="height:200px;">
+                <i class="extra">lunch_dining</i>
+            </div>
+            {% endif %}
+            <div class="padding">
+                <h6 class="bold truncate">{{ recipe.title }}</h6>
+                <p class="truncate">{{ recipe.description }}</p>
+            </div>
+        </a>
+    </article>
+    {% endfor %}
+</div>
+{% endif %}
+
 <div class="large-space"></div>
 
 {% include "partials/recipe_list.html" %}
