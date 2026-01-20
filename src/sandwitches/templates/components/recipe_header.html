@@ -30,3 +30,11 @@
         </div>
     {% endif %}
 </div>
+
+<div class="space"></div>
+{% if recipe.price %}
+<div class="row align-center">
+    <i class="primary-text">euro_symbol</i>
+    <h5 class="bold ml-1">{{ recipe.price }}</h5>
+</div>
+{% endif %}

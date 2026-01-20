@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
-from .models import Recipe, Tag, Rating, Setting
+from .models import Recipe, Tag, Rating, Setting, Order
 from django.utils.html import format_html
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
@@ -24,6 +24,11 @@ class RatingResource(resources.ModelResource):
         model = Rating
 
 
+class OrderResource(resources.ModelResource):
+    class Meta:
+        model = Order
+
+
 User = get_user_model()
 
 
@@ -42,7 +47,14 @@ class CustomUserAdmin(UserAdmin):
 @admin.register(Recipe)
 class RecipeAdmin(ImportExportModelAdmin):
     resource_classes = [RecipeResource]
-    list_display = ("title", "uploaded_by", "created_at", "is_highlighted", "show_url")
+    list_display = (
+        "title",
+        "uploaded_by",
+        "price",
+        "created_at",
+        "is_highlighted",
+        "show_url",
+    )
     list_editable = ("is_highlighted",)
     readonly_fields = ("created_at", "updated_at")
 
@@ -67,3 +79,12 @@ class TagAdmin(ImportExportModelAdmin):
 @admin.register(Rating)
 class RatingAdmin(ImportExportModelAdmin):
     resource_classes = [RatingResource]
+
+
+@admin.register(Order)
+class OrderAdmin(ImportExportModelAdmin):
+    resource_classes = [OrderResource]
+    list_display = ("id", "user", "recipe", "status", "total_price", "created_at")
+    list_filter = ("status", "created_at")
+    search_fields = ("user__username", "recipe__title")
+    readonly_fields = ("total_price", "created_at", "updated_at")

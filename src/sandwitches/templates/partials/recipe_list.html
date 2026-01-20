@@ -26,6 +26,13 @@
        <div class="padding">
          <h5 class="truncate pointer" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">{{ recipe.title }}</h5>
 
+         {% if recipe.price %}
+         <div class="row align-center mb-1">
+            <i class="small-text primary-text">euro_symbol</i>
+            <span class="bold">{{ recipe.price }}</span>
+         </div>
+         {% endif %}
+
          <div class="row align-center">
             {% if recipe.uploaded_by %}
                 <a href="{% url 'index' %}?uploader={{ recipe.uploaded_by.username|urlencode }}" class="row align-center" style="color: inherit; text-decoration: none;">

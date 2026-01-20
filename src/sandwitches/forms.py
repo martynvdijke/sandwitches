@@ -136,6 +136,7 @@ class RecipeForm(forms.ModelForm):
             "description",
             "ingredients",
             "instructions",
+            "price",
         ]
         widgets = {
             "image": forms.FileInput(),
