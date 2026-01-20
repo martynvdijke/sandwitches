@@ -89,6 +89,9 @@ class Recipe(models.Model):
     ingredients = models.TextField(blank=True)
     instructions = models.TextField(blank=True)
     servings = models.IntegerField(default=1, validators=[MinValueValidator(1)])
+    price = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Price (€)"
+    )
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name="recipes",

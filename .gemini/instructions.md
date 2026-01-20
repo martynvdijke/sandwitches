@@ -17,3 +17,5 @@ Before marking any software engineering task as complete, especially those invol
     ```
 
 If either of these commands fails, fix the reported issues before proceeding.
+After adding a new feature you should also make a unit test for that new feature to ensure no regressions happens.
+For UI fixes you must also make a new playwright test to check the UI flow is correct.

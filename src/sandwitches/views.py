@@ -14,6 +14,7 @@ from .forms import (
     RatingForm,
     UserEditForm,
     TagForm,
+    UserProfileForm,
 )
 from django.http import HttpResponseBadRequest
 from django.conf import settings
@@ -645,3 +646,18 @@ def media(request, file_path=None):
 
     response = FileResponse(open(full_path, "rb"), as_attachment=True)
     return response
+
+
+@login_required
+def user_profile(request):
+    if request.method == "POST":
+        form = UserProfileForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _("Profile updated successfully."))
+            return redirect("user_profile")
+    else:
+        form = UserProfileForm(instance=request.user)
+    return render(
+        request, "profile.html", {"form": form, "version": sandwitches_version}
+    )

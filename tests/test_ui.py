@@ -68,7 +68,7 @@ def test_login_flow(page: Page, live_server, user):
     expect(page).to_have_url(f"{live_server.url}/")
 
     # Verify user is logged in by checking for the user menu avatar
-    expect(page.locator("img[data-ui='#user-menu']")).to_be_visible()
+    expect(page.locator("a[href*='/profile'] img")).to_be_visible()
 
 
 @pytest.mark.django_db
@@ -162,4 +162,4 @@ def test_signup_flow(page: Page, live_server):
 
     # Should redirect to index and be logged in
     expect(page).to_have_url(f"{live_server.url}/")
-    expect(page.locator("img[data-ui='#user-menu']")).to_be_visible()
+    expect(page.locator("a[href*='/profile'] img")).to_be_visible()
