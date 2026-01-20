@@ -1,3 +1,15 @@
+# [2.3.0](https://github.com/martynvdijke/sandwitches/compare/v2.2.0...v2.3.0) (2026-01-20)
+
+
+### Bug Fixes
+
+* **web:** add in profile page settings ([b2abed2](https://github.com/martynvdijke/sandwitches/commit/b2abed284e3d6da2b1c7f658bce3edd964816cd2))
+
+
+### Features
+
+* add orders to recipes ([32afdb2](https://github.com/martynvdijke/sandwitches/commit/32afdb2bb2485e29c9935a4de5f31a1d09b48a3c))
+
 # [2.2.0](https://github.com/martynvdijke/sandwitches/compare/v2.1.2...v2.2.0) (2026-01-17)
 
 
