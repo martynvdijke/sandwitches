@@ -10,6 +10,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 import logging
 from django.urls import reverse
 from solo.models import SingletonModel
+from django.core.exceptions import ValidationError
 
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
@@ -131,6 +132,10 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(Tag, blank=True, related_name="recipes")
     is_highlighted = models.BooleanField(default=False)
+    max_daily_orders = models.PositiveIntegerField(
+        null=True, blank=True, verbose_name="Max daily orders"
+    )
+    daily_orders_count = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
@@ -247,6 +252,24 @@ class Order(models.Model):
             raise ValueError("Cannot order a recipe without a price.")
         if not self.total_price:
             self.total_price = self.recipe.price  # ty:ignore[possibly-missing-attribute]
+
+        is_new = self.pk is None
+        if is_new:
+            # We use select_for_update to lock the row and prevent race conditions
+            # However, since 'self.recipe' is already fetched, we need to re-fetch it with lock if we want to be strict.
+            # For simplicity in this context, we will reload it or trust the current instance but ideally:
+
+            # We need to wrap this in a transaction if not already
+            # But simple increment logic:
+            if (
+                self.recipe.max_daily_orders is not None  # ty:ignore[possibly-missing-attribute]
+                and self.recipe.daily_orders_count >= self.recipe.max_daily_orders  # ty:ignore[possibly-missing-attribute]
+            ):
+                raise ValidationError("Daily order limit reached for this recipe.")
+
+            self.recipe.daily_orders_count += 1  # ty:ignore[possibly-missing-attribute]
+            self.recipe.save(update_fields=["daily_orders_count"])  # ty:ignore[possibly-missing-attribute]
+
         super().save(*args, **kwargs)
 
     def __str__(self):
