@@ -1,0 +1,90 @@
+{% load i18n %}
+<div class="grid" hx-get="." hx-trigger="every 30s" hx-swap="outerHTML">
+    <div class="s12 m4">
+        <article class="round border padding">
+            <h6 class="bold mb-1">{% trans "Recipes Over Time" %}</h6>
+            <canvas id="recipeChart" style="width:100%; max-height:300px;"></canvas>
+        </article>
+    </div>
+    <div class="s12 m4">
+        <article class="round border padding">
+            <h6 class="bold mb-1">{% trans "Orders Over Time" %}</h6>
+            <canvas id="orderChart" style="width:100%; max-height:300px;"></canvas>
+        </article>
+    </div>
+    <div class="s12 m4">
+        <article class="round border padding">
+            <h6 class="bold mb-1">{% trans "Avg Rating" %}</h6>
+            <canvas id="ratingChart" style="width:100%; max-height:300px;"></canvas>
+        </article>
+    </div>
+
+    <script>
+        (function() {
+            const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#5d4037';
+            const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim() || '#ff7a18';
+            const tertiaryColor = getComputedStyle(document.documentElement).getPropertyValue('--tertiary').trim() || '#4caf50';
+
+            // Recipe Chart
+            new Chart(document.getElementById('recipeChart'), {
+                type: 'line',
+                data: {
+                    labels: {{ recipe_labels|safe }},
+                    datasets: [{
+                        label: '{% trans "Recipes" %}',
+                        data: {{ recipe_counts|safe }},
+                        borderColor: primaryColor,
+                        backgroundColor: primaryColor + '33',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+
+            // Order Chart
+            new Chart(document.getElementById('orderChart'), {
+                type: 'line',
+                data: {
+                    labels: {{ order_labels|safe }},
+                    datasets: [{
+                        label: '{% trans "Orders" %}',
+                        data: {{ order_counts|safe }},
+                        borderColor: tertiaryColor,
+                        backgroundColor: tertiaryColor + '33',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+
+            // Rating Chart
+            new Chart(document.getElementById('ratingChart'), {
+                type: 'bar',
+                data: {
+                    labels: {{ rating_labels|safe }},
+                    datasets: [{
+                        label: '{% trans "Avg Rating" %}',
+                        data: {{ rating_avgs|safe }},
+                        backgroundColor: secondaryColor,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { min: 0, max: 10 } }
+                }
+            });
+        })();
+    </script>
+</div>

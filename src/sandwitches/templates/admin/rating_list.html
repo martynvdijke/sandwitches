@@ -12,6 +12,7 @@
             <th>{% trans "Recipe" %}</th>
             <th>{% trans "User" %}</th>
             <th class="min center-align">{% trans "Score" %}</th>
+            <th>{% trans "Comment" %}</th>
             <th>{% trans "Updated" %}</th>
             <th class="right-align">{% trans "Actions" %}</th>
         </tr>
@@ -27,6 +28,7 @@
                     <span>{{ r.score }}</span>
                 </div>
             </td>
+            <td>{{ r.comment|default:"-"|truncatechars:50 }}</td>
             <td>{{ r.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td>
             <td class="right-align">
                 <a href="{% url 'admin_rating_delete' r.pk %}" class="button circle transparent" title="{% trans 'Delete' %}"><i>delete</i></a>

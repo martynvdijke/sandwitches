@@ -25,6 +25,29 @@ def test_admin_dashboard_accessible_by_staff(client):
     response = client.get(url)
     assert response.status_code == 200
     assert "Dashboard" in response.content.decode()
+    # Check if orders chart labels are in content
+    assert "order_labels" in response.context
+    assert "order_counts" in response.context
+
+
+@pytest.mark.django_db
+def test_admin_dashboard_htmx_partial(client):
+    staff = User.objects.create_user(
+        username="staff_htmx", password="password", is_staff=True
+    )
+    client.force_login(staff)
+    url = reverse("admin_dashboard")
+
+    # Test HTMX request
+    response = client.get(url, headers={"HX-Request": "true"})
+    assert response.status_code == 200
+    content = response.content.decode()
+
+    # Should contain chart canvases but NOT the full page sidebar/nav
+    assert "recipeChart" in content
+    assert "orderChart" in content
+    assert "ratingChart" in content
+    assert "Dashboard" not in content  # "Dashboard" is in block admin_title
 
 
 @pytest.mark.django_db

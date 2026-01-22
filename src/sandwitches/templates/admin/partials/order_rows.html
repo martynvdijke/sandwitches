@@ -1,0 +1,28 @@
+{% load i18n %}
+{% for order in orders %}
+<tr>
+    <td>{{ order.id }}</td>
+    <td>
+        <div class="row align-center">
+            {% if order.user.avatar %}
+            <img src="{{ order.user.avatar.url }}" class="circle tiny">
+            {% else %}
+            <i class="circle tiny">person</i>
+            {% endif %}
+            <span class="max">{{ order.user.username }}</span>
+        </div>
+    </td>
+    <td>{{ order.recipe.title }}</td>
+    <td>{{ order.total_price }} €</td>
+    <td>
+        <span class="chip {% if order.status == 'PENDING' %}surface-variant{% elif order.status == 'COMPLETED' %}primary{% else %}error{% endif %}">
+            {{ order.get_status_display }}
+        </span>
+    </td>
+    <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="6" class="center-align">{% trans "No orders found." %}</td>
+</tr>
+{% endfor %}

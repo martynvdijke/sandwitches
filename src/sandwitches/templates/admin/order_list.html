@@ -1,0 +1,30 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{% trans "Orders" %}{% endblock %}
+
+{% block content %}
+<div class="padding">
+    <div class="row align-center">
+        <h5 class="max">{% trans "Orders" %}</h5>
+    </div>
+
+    <div class="space"></div>
+
+    <table class="border">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>{% trans "User" %}</th>
+                <th>{% trans "Recipe" %}</th>
+                <th>{% trans "Price" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Date" %}</th>
+            </tr>
+        </thead>
+        <tbody hx-get="{% url 'admin_order_list' %}" hx-trigger="every 5s">
+            {% include "admin/partials/order_rows.html" %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

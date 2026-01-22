@@ -132,6 +132,7 @@ LOGGING = {
 
 LOGIN_REDIRECT_URL = "index"
 LOGOUT_REDIRECT_URL = "index"
+LOGIN_URL = "login"
 
 
 # Password validation

@@ -12,21 +12,52 @@
     </a>
 </div>
 
-<table class="border striped no-space">
-    <thead>
-        <tr>
-            <th class="min">{% trans "ID" %}</th>
-            <th class="min">{% trans "Image" %}</th>
-            <th class="max">{% trans "Title" %}</th>
-            <th class="min">{% trans "Rating" %}</th>
-            <th class="m l">{% trans "Tags" %}</th>
-            <th>{% trans "Uploader" %}</th>
-            <th>{% trans "Created" %}</th>
-            <th class="right-align">{% trans "Actions" %}</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for recipe in recipes %}
+    <table class="border striped no-space">
+        <thead>
+            <tr>
+                <th class="min">{% trans "ID" %}</th>
+                <th class="min">{% trans "Image" %}</th>
+                <th class="max">
+                    <a href="?sort={% if current_sort == 'title' %}-title{% else %}title{% endif %}" class="row align-center">
+                        {% trans "Title" %}
+                        {% if current_sort == 'title' %}<i>arrow_upward</i>{% elif current_sort == '-title' %}<i>arrow_downward</i>{% endif %}
+                    </a>
+                </th>
+                <th class="min">
+                    <a href="?sort={% if current_sort == 'price' %}-price{% else %}price{% endif %}" class="row align-center">
+                        {% trans "Price" %}
+                        {% if current_sort == 'price' %}<i>arrow_upward</i>{% elif current_sort == '-price' %}<i>arrow_downward</i>{% endif %}
+                    </a>
+                </th>
+                <th class="min">
+                    <a href="?sort={% if current_sort == 'orders' %}-orders{% else %}orders{% endif %}" class="row align-center">
+                        {% trans "Orders" %}
+                        {% if current_sort == 'orders' %}<i>arrow_upward</i>{% elif current_sort == '-orders' %}<i>arrow_downward</i>{% endif %}
+                    </a>
+                </th>
+                <th class="min">
+                    <a href="?sort={% if current_sort == 'rating' %}-rating{% else %}rating{% endif %}" class="row align-center">
+                        {% trans "Rating" %}
+                        {% if current_sort == 'rating' %}<i>arrow_upward</i>{% elif current_sort == '-rating' %}<i>arrow_downward</i>{% endif %}
+                    </a>
+                </th>
+                <th class="m l">{% trans "Tags" %}</th>
+                <th>
+                    <a href="?sort={% if current_sort == 'uploader' %}-uploader{% else %}uploader{% endif %}" class="row align-center">
+                        {% trans "Uploader" %}
+                        {% if current_sort == 'uploader' %}<i>arrow_upward</i>{% elif current_sort == '-uploader' %}<i>arrow_downward</i>{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="?sort={% if current_sort == 'created_at' %}-created_at{% else %}created_at{% endif %}" class="row align-center">
+                        {% trans "Created" %}
+                        {% if current_sort == 'created_at' %}<i>arrow_upward</i>{% elif current_sort == '-created_at' %}<i>arrow_downward</i>{% endif %}
+                    </a>
+                </th>
+                <th class="right-align">{% trans "Actions" %}</th>
+            </tr>
+        </thead>
+        <tbody>        {% for recipe in recipes %}
         <tr class="pointer" onclick="location.href='{% url 'admin_recipe_edit' recipe.pk %}'">
             <td class="min">{{ recipe.id }}</td>
             <td class="min">
@@ -39,7 +70,20 @@
                 {% endif %}
             </td>
             <td class="max">
+                {% if recipe.is_highlighted %}
+                <i class="tiny amber-text">star</i>
+                {% endif %}
                 <b>{{ recipe.title }}</b>
+            </td>
+            <td class="min no-wrap">
+                {% if recipe.price %}
+                {{ recipe.price }} €
+                {% else %}
+                -
+                {% endif %}
+            </td>
+            <td class="min no-wrap">
+                {{ recipe.daily_orders_count }} / {{ recipe.max_daily_orders|default:"∞" }}
             </td>
             <td class="min center-align">
                 <div class="row align-center">

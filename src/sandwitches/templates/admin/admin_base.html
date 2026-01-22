@@ -68,6 +68,10 @@
             <i>star</i>
             <span>{% trans "Ratings" %}</span>
         </a>
+        <a href="{% url 'admin_order_list' %}" class="{% if request.resolver_match.url_name == 'admin_order_list' %}active{% endif %}">
+            <i>shopping_cart</i>
+            <span>{% trans "Orders" %}</span>
+        </a>
         <a href="{% url 'admin_task_list' %}" class="{% if request.resolver_match.url_name == 'admin_task_list' %}active{% endif %}">
             <i>assignment</i>
             <span>{% trans "Tasks" %}</span>

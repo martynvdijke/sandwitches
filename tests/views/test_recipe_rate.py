@@ -52,7 +52,7 @@ def test_rate_recipe_unauthenticated(client, recipe):
 
     # Should redirect to login
     assert response.status_code == 302
-    assert "/accounts/login/" in response.url
+    assert "/login/" in response.url
     assert Rating.objects.count() == 0
 
 

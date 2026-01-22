@@ -127,37 +127,31 @@
 
 
 
-    <!-- Charts Section -->
-
-    <div class="s12 m6">
-
-        <article class="round border padding">
-
-            <h6 class="bold mb-1">{% trans "Recipes Over Time (Last 30 Days)" %}</h6>
-
-            <canvas id="recipeChart" style="width:100%; max-height:300px;"></canvas>
-
-        </article>
-
-    </div>
-
-    <div class="s12 m6">
-
-        <article class="round border padding">
-
-            <h6 class="bold mb-1">{% trans "Average Rating Over Time (Last 30 Days)" %}</h6>
-
-            <canvas id="ratingChart" style="width:100%; max-height:300px;"></canvas>
-
-        </article>
-
-    </div>
+        <!-- Charts Section -->
 
 
 
-    <div class="s12">
+        <div class="s12">
 
-        <h5 class="bold">{% trans "Recent Recipes" %}</h5>
+
+
+            {% include "admin/partials/dashboard_charts.html" %}
+
+
+
+        </div>
+
+
+
+
+
+
+
+        <div class="s12">
+
+
+
+            <h5 class="bold">{% trans "Recent Recipes" %}</h5>
 
         <table class="border striped no-space">
 
@@ -213,50 +207,4 @@
 
 {% block admin_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#5d4037';
-        const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim() || '#ff7a18';
-
-        // Recipe Chart
-        new Chart(document.getElementById('recipeChart'), {
-            type: 'line',
-            data: {
-                labels: {{ recipe_labels|safe }},
-                datasets: [{
-                    label: '{% trans "Recipes Created" %}',
-                    data: {{ recipe_counts|safe }},
-                    borderColor: primaryColor,
-                    backgroundColor: primaryColor + '33',
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-            }
-        });
-
-        // Rating Chart
-        new Chart(document.getElementById('ratingChart'), {
-            type: 'bar',
-            data: {
-                labels: {{ rating_labels|safe }},
-                datasets: [{
-                    label: '{% trans "Avg Rating" %}',
-                    data: {{ rating_avgs|safe }},
-                    backgroundColor: secondaryColor,
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: { y: { min: 0, max: 10 } }
-            }
-        });
-    });
-</script>
 {% endblock %}

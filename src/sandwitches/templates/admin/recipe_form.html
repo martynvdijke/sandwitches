@@ -60,6 +60,25 @@
                     <label>{{ form.uploaded_by.label }}</label>
                     {% if form.uploaded_by.errors %}<span class="error">{{ form.uploaded_by.errors|striptags }}</span>{% endif %}
                 </div>
+
+                <div class="field label border round mt-1">
+                    {{ form.price }}
+                    <label>{{ form.price.label }}</label>
+                    {% if form.price.errors %}<span class="error">{{ form.price.errors|striptags }}</span>{% endif %}
+                </div>
+
+                <div class="field label border round mt-1">
+                    {{ form.max_daily_orders }}
+                    <label>{{ form.max_daily_orders.label }}</label>
+                    {% if form.max_daily_orders.errors %}<span class="error">{{ form.max_daily_orders.errors|striptags }}</span>{% endif %}
+                </div>
+
+                <div class="field middle-align mt-1">
+                    <label class="checkbox">
+                        {{ form.is_highlighted }}
+                        <span>{{ form.is_highlighted.label }}</span>
+                    </label>
+                </div>
             </article>
 
             <!-- Description -->

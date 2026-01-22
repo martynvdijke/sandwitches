@@ -100,6 +100,7 @@ urlpatterns += i18n_patterns(
         views.admin_rating_delete,
         name="admin_rating_delete",
     ),
+    path("dashboard/orders/", views.admin_order_list, name="admin_order_list"),
     prefix_default_language=True,
 )
 

@@ -36,5 +36,14 @@
 <div class="row align-center">
     <i class="primary-text">euro_symbol</i>
     <h5 class="bold ml-1">{{ recipe.price }}</h5>
+    {% if user.is_authenticated %}
+    <form action="{% url 'order_recipe' recipe.pk %}" method="post" class="ml-2">
+        {% csrf_token %}
+        <button type="submit" class="button primary round">
+            <i>shopping_cart</i>
+            <span>{% trans "Order Now" %}</span>
+        </button>
+    </form>
+    {% endif %}
 </div>
 {% endif %}

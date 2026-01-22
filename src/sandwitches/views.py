@@ -90,6 +90,15 @@ def admin_dashboard(request):
         .order_by("date")
     )
 
+    # Orders over time
+    order_data = (
+        Order.objects.filter(created_at__date__range=(start_date, end_date))  # ty:ignore[unresolved-attribute]
+        .annotate(date=TruncDate("created_at"))
+        .values("date")
+        .annotate(count=Count("id"))
+        .order_by("date")
+    )
+
     # Prepare labels and data for JS
     recipe_labels = [d["date"].strftime("%d/%m/%Y") for d in recipe_data]
     recipe_counts = [d["count"] for d in recipe_data]
@@ -97,36 +106,68 @@ def admin_dashboard(request):
     rating_labels = [d["date"].strftime("%d/%m/%Y") for d in rating_data]
     rating_avgs = [float(d["avg"]) for d in rating_data]
 
+    order_labels = [d["date"].strftime("%d/%m/%Y") for d in order_data]
+    order_counts = [d["count"] for d in order_data]
+
+    context = {
+        "recipe_count": recipe_count,
+        "user_count": user_count,
+        "tag_count": tag_count,
+        "recent_recipes": recent_recipes,
+        "recipe_labels": recipe_labels,
+        "recipe_counts": recipe_counts,
+        "rating_labels": rating_labels,
+        "rating_avgs": rating_avgs,
+        "order_labels": order_labels,
+        "order_counts": order_counts,
+        "start_date": start_date.strftime("%Y-%m-%d"),
+        "end_date": end_date.strftime("%Y-%m-%d"),
+        "version": sandwitches_version,
+    }
+
+    if request.headers.get("HX-Request"):
+        return render(request, "admin/partials/dashboard_charts.html", context)
+
     return render(
         request,
         "admin/dashboard.html",
-        {
-            "recipe_count": recipe_count,
-            "user_count": user_count,
-            "tag_count": tag_count,
-            "recent_recipes": recent_recipes,
-            "recipe_labels": recipe_labels,
-            "recipe_counts": recipe_counts,
-            "rating_labels": rating_labels,
-            "rating_avgs": rating_avgs,
-            "start_date": start_date.strftime("%Y-%m-%d"),
-            "end_date": end_date.strftime("%Y-%m-%d"),
-            "version": sandwitches_version,
-        },
+        context,
     )
 
 
 @staff_member_required
 def admin_recipe_list(request):
+    sort_param = request.GET.get("sort", "-created_at")
+    allowed_sorts = {
+        "title": "title",
+        "-title": "-title",
+        "created_at": "created_at",
+        "-created_at": "-created_at",
+        "uploader": "uploaded_by__username",
+        "-uploader": "-uploaded_by__username",
+        "price": "price",
+        "-price": "-price",
+        "orders": "daily_orders_count",
+        "-orders": "-daily_orders_count",
+        "rating": "avg_rating",
+        "-rating": "-avg_rating",
+    }
+
+    order_by = allowed_sorts.get(sort_param, "-created_at")
+
     recipes = (
         Recipe.objects.annotate(avg_rating=Avg("ratings__score"))  # ty:ignore[unresolved-attribute]
         .prefetch_related("tags")
-        .all()
+        .order_by(order_by)
     )
     return render(
         request,
         "admin/recipe_list.html",
-        {"recipes": recipes, "version": sandwitches_version},
+        {
+            "recipes": recipes,
+            "version": sandwitches_version,
+            "current_sort": sort_param,
+        },
     )
 
 
@@ -365,6 +406,28 @@ def admin_rating_delete(request, pk):
         request,
         "admin/confirm_delete.html",
         {"object": rating, "type": _("rating"), "version": sandwitches_version},
+    )
+
+
+@staff_member_required
+def admin_order_list(request):
+    orders = (
+        Order.objects.select_related("user", "recipe")  # ty:ignore[unresolved-attribute]
+        .all()
+        .order_by("-created_at")
+    )
+
+    if request.headers.get("HX-Request"):
+        return render(
+            request,
+            "admin/partials/order_rows.html",
+            {"orders": orders, "version": sandwitches_version},
+        )
+
+    return render(
+        request,
+        "admin/order_list.html",
+        {"orders": orders, "version": sandwitches_version},
     )
 
 

@@ -56,6 +56,18 @@
         </svg>
     </div>
     {% block navbar %}{% endblock %}
+
+    {% if messages %}
+    <div class="padding no-margin">
+        {% for message in messages %}
+        <div class="snackbar active {% if message.tags == 'error' %}error{% else %}primary{% endif %}">
+            <i>{% if message.tags == 'error' %}error{% else %}info{% endif %}</i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <main class="container" role="main">{% block content %}{% endblock %}</main>
     {% block footer %}{% endblock %}
     {% block extra_scripts %}{% endblock %}

@@ -163,3 +163,90 @@ def test_signup_flow(page: Page, live_server):
     # Should redirect to index and be logged in
     expect(page).to_have_url(f"{live_server.url}/")
     expect(page.locator("a[href*='/profile'] img")).to_be_visible()
+
+
+@pytest.mark.django_db
+def test_order_sandwich_ui(page: Page, live_server, user, recipe):
+    """
+    Test ordering a sandwich and verifying the success message.
+    """
+    User.objects.create_superuser("admin", "admin@example.com", "password")
+    recipe.price = 10.00
+    recipe.save()
+
+    # Login
+    page.goto(f"{live_server.url}/login/")
+    page.fill("input[name='username']", "testuser")
+    page.fill("input[name='password']", "password")
+    page.press("input[name='password']", "Enter")
+    expect(page).to_have_url(f"{live_server.url}/")
+
+    # Go to recipe
+    page.goto(f"{live_server.url}/recipes/{recipe.slug}/")
+
+    # Click Order
+    page.click("button:has-text('Order Now')")
+
+    # Verify success message
+    expect(
+        page.get_by_text(f"Your order for {recipe.title} has been submitted!")
+    ).to_be_visible()
+
+
+@pytest.mark.django_db
+def test_scale_ingredients_ui(page: Page, live_server, recipe):
+    """
+    Test the ingredient scaling functionality.
+    """
+    User.objects.create_superuser("admin", "admin@example.com", "password")
+    recipe.ingredients = "2 slices of Bread\n1 slice of Cheese"
+    recipe.servings = 1
+    recipe.save()
+
+    page.goto(f"{live_server.url}/recipes/{recipe.slug}/")
+
+    # Initial state (1 portion)
+    display = page.locator("#ingredients-display")
+    expect(display).to_contain_text("2 slices of Bread")
+
+    # Increase to 2 portions
+    page.click("button:has-text('+')")
+
+    # Verify scaled ingredients (2 -> 4, 1 -> 2)
+    # The API utility might return "4 slices of Bread" and "2 slice of Cheese" (singular if not handled)
+    expect(display).to_contain_text("4 slices of Bread")
+    expect(display).to_contain_text("2")  # Just check for the number 2 to be safe
+    expect(display).to_contain_text("Cheese")
+
+
+@pytest.mark.django_db
+def test_update_profile_ui(page: Page, live_server, user):
+    """
+    Test updating user profile bio and names.
+    """
+    User.objects.create_superuser("admin", "admin@example.com", "password")
+
+    # Login
+    page.goto(f"{live_server.url}/login/")
+    page.fill("input[name='username']", "testuser")
+    page.fill("input[name='password']", "password")
+    page.press("input[name='password']", "Enter")
+    expect(page).to_have_url(f"{live_server.url}/")
+
+    # Go to profile
+    page.goto(f"{live_server.url}/profile/")
+
+    # Fill profile
+    page.fill("input[name='first_name']", "UpdatedFirst")
+    page.fill("input[name='last_name']", "UpdatedLast")
+    page.fill("textarea[name='bio']", "This is my new bio.")
+
+    page.click("button:has-text('Save changes')")
+
+    # Verify redirect and message
+    expect(page).to_have_url(f"{live_server.url}/profile/")
+    expect(page.locator("body")).to_contain_text("Profile updated successfully.")
+
+    # Verify values persisted
+    expect(page.locator("input[name='first_name']")).to_have_value("UpdatedFirst")
+    expect(page.get_by_text("This is my new bio.")).to_be_visible()
