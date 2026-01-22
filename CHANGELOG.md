@@ -1,3 +1,13 @@
+## [2.3.1](https://github.com/martynvdijke/sandwitches/compare/v2.3.0...v2.3.1) (2026-01-22)
+
+
+### Bug Fixes
+
+* **admin:** admin dashboard fixes ([62fe19a](https://github.com/martynvdijke/sandwitches/commit/62fe19aa6851bbb2948271b674da1d5f3c9c5084))
+* **backend:** add in bassis for recipe ordering ([7c2a7df](https://github.com/martynvdijke/sandwitches/commit/7c2a7dffbefb855e25c7fe7eaf45d8072b46c6f4))
+* orders backend and notification ([513dd0d](https://github.com/martynvdijke/sandwitches/commit/513dd0d4fcd372f64378b88e6e0425ffef41723a))
+* **web:** ui base for login ([4a41807](https://github.com/martynvdijke/sandwitches/commit/4a418074beca5666aafa161aa96aecbec9300753))
+
 # [2.3.0](https://github.com/martynvdijke/sandwitches/compare/v2.2.0...v2.3.0) (2026-01-20)
 
 
