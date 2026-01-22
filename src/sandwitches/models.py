@@ -4,7 +4,7 @@ from .storage import HashedFilenameStorage
 from simple_history.models import HistoricalRecords
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Avg
-from .tasks import email_users
+from .tasks import email_users, notify_order_submitted
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 import logging
@@ -271,6 +271,9 @@ class Order(models.Model):
             self.recipe.save(update_fields=["daily_orders_count"])  # ty:ignore[possibly-missing-attribute]
 
         super().save(*args, **kwargs)
+
+        if is_new:
+            notify_order_submitted.enqueue(order_id=self.pk)
 
     def __str__(self):
         return f"Order #{self.pk} - {self.user} - {self.recipe}"

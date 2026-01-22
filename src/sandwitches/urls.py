@@ -49,6 +49,7 @@ urlpatterns += i18n_patterns(
     path("recipes/<slug:slug>/", views.recipe_detail, name="recipe_detail"),
     path("setup/", views.setup, name="setup"),
     path("recipes/<int:pk>/rate/", views.recipe_rate, name="recipe_rate"),
+    path("recipes/<int:pk>/order/", views.order_recipe, name="order_recipe"),
     path("recipes/<int:pk>/favorite/", views.toggle_favorite, name="toggle_favorite"),
     path("dashboard/", views.admin_dashboard, name="admin_dashboard"),
     path("dashboard/recipes/", views.admin_recipe_list, name="admin_recipe_list"),

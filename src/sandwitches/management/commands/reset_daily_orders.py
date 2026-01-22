@@ -1,14 +1,14 @@
 from django.core.management.base import BaseCommand
-from sandwitches.models import Recipe
+from sandwitches.tasks import reset_daily_orders
 
 
 class Command(BaseCommand):
     help = "Resets the daily order count for all recipes. Should be run at midnight."
 
     def handle(self, *args, **options):
-        count = Recipe.objects.update(daily_orders_count=0)  # ty:ignore[unresolved-attribute]
+        task_result = reset_daily_orders.enqueue()
         self.stdout.write(
             self.style.SUCCESS(
-                f"Successfully reset daily order count for {count} recipes."
+                f"Enqueued daily order count reset task (Result ID: {task_result.id})."
             )
         )

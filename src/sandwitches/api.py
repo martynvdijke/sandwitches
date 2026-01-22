@@ -1,6 +1,6 @@
 import logging
 from ninja import NinjaAPI
-from .models import Recipe, Tag, Setting, Rating
+from .models import Recipe, Tag, Setting, Rating, Order
 from django.contrib.auth import get_user_model
 from .utils import (
     parse_ingredient_line,
@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404
 from datetime import date
 import random
 from typing import List, Optional  # Import typing hints
+from django.core.exceptions import ValidationError
 
 from ninja.security import django_auth
 
@@ -80,6 +81,16 @@ class ScaledIngredient(Schema):  # New Schema for scaled ingredients
     quantity: Optional[float]
     unit: Optional[str]
     name: Optional[str]
+
+
+class OrderSchema(ModelSchema):
+    class Meta:
+        model = Order
+        fields = ["id", "status", "total_price", "created_at"]
+
+
+class CreateOrderSchema(Schema):
+    recipe_id: int
 
 
 @api.get("ping")
@@ -205,3 +216,13 @@ def get_tags(request):
 def get_tag(request, tag_id: int):
     tag = get_object_or_404(Tag, id=tag_id)
     return tag
+
+
+@api.post("v1/orders", auth=django_auth, response={201: OrderSchema, 400: Error})
+def create_order(request, payload: CreateOrderSchema):
+    recipe = get_object_or_404(Recipe, id=payload.recipe_id)
+    try:
+        order = Order.objects.create(user=request.user, recipe=recipe)  # ty:ignore[unresolved-attribute]
+        return 201, order
+    except (ValidationError, ValueError) as e:
+        return 400, {"message": str(e)}

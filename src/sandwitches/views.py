@@ -1,3 +1,5 @@
+import logging
+from django.core.exceptions import ValidationError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.contrib import messages
@@ -6,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.translation import gettext as _
-from .models import Recipe, Rating, Tag
+from .models import Recipe, Rating, Tag, Order
 from .forms import (
     RecipeForm,
     AdminSetupForm,
@@ -399,6 +401,28 @@ def recipe_detail(request, slug):
             ),  # Add all ratings for display
         },
     )
+
+
+@login_required
+def order_recipe(request, pk):
+    """
+    Create an order for the given recipe by the logged-in user.
+    """
+    recipe = get_object_or_404(Recipe, pk=pk)
+    if request.method != "POST":
+        return redirect("recipe_detail", slug=recipe.slug)
+
+    try:
+        order = Order.objects.create(user=request.user, recipe=recipe)  # ty:ignore[unresolved-attribute]
+        logging.debug(f"Created {order}")
+        messages.success(
+            request,
+            _("Your order for %(title)s has been submitted!") % {"title": recipe.title},
+        )
+    except (ValidationError, ValueError) as e:
+        messages.error(request, str(e))
+
+    return redirect("recipe_detail", slug=recipe.slug)
 
 
 @login_required

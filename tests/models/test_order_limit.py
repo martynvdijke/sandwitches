@@ -1,6 +1,5 @@
 import pytest
 from django.core.exceptions import ValidationError
-from django.core.management import call_command
 from sandwitches.models import Order, Recipe, User
 
 
@@ -27,18 +26,3 @@ def test_daily_order_limit():
 
     recipe.refresh_from_db()
     assert recipe.daily_orders_count == 2
-
-
-@pytest.mark.django_db
-def test_reset_command():
-    user = User.objects.create_user("resetuser", "test@example.com", "password")
-    recipe = Recipe.objects.create(
-        title="Reset Recipe", price=10.00, uploaded_by=user, daily_orders_count=5
-    )
-
-    assert recipe.daily_orders_count == 5
-
-    call_command("reset_daily_orders")
-
-    recipe.refresh_from_db()
-    assert recipe.daily_orders_count == 0

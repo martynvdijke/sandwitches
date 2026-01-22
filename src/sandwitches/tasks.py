@@ -35,6 +35,80 @@ def email_users(context, recipe_id):
     return True
 
 
+@task(priority=5)
+def reset_daily_orders():
+    from .models import Recipe
+
+    count = Recipe.objects.update(daily_orders_count=0)  # ty:ignore[unresolved-attribute]
+    logging.info(f"Successfully reset daily order count for {count} recipes.")
+    return count
+
+
+@task(priority=2, queue_name="emails")
+def notify_order_submitted(order_id):
+    from .models import Order
+
+    try:
+        order = Order.objects.select_related("user", "recipe").get(pk=order_id)  # ty:ignore[unresolved-attribute]
+    except Order.DoesNotExist:  # ty:ignore[unresolved-attribute]
+        logging.warning(f"Order {order_id} not found. Skipping notification.")
+        return
+
+    user = order.user
+    if not user.email:
+        logging.warning(f"User {user.username} has no email. Skipping notification.")
+        return
+
+    recipe = order.recipe
+    subject = _("Order Confirmation: %(recipe_title)s") % {"recipe_title": recipe.title}
+    from_email = getattr(settings, "EMAIL_FROM_ADDRESS")
+
+    context_data = {
+        "user_name": user.get_full_name() or user.username,
+        "recipe_title": recipe.title,
+        "order_id": order.id,
+        "total_price": order.total_price,
+    }
+
+    text_content = (
+        _(
+            "Hello %(user_name)s,\n\n"
+            "Your order for %(recipe_title)s has been successfully submitted!\n"
+            "Order ID: %(order_id)s\n"
+            "Total Price: %(total_price)s\n\n"
+            "Thank you for ordering with Sandwitches.\n"
+        )
+        % context_data
+    )
+
+    html_content = (
+        _(
+            "<div style='font-family: sans-serif;'>"
+            "<h2>Order Confirmation</h2>"
+            "<p>Hello <strong>%(user_name)s</strong>,</p>"
+            "<p>Your order for <strong>%(recipe_title)s</strong> has been successfully submitted!</p>"
+            "<ul>"
+            "<li>Order ID: %(order_id)s</li>"
+            "<li>Total Price: %(total_price)s</li>"
+            "</ul>"
+            "<p>Thank you for ordering with Sandwitches.</p>"
+            "</div>"
+        )
+        % context_data
+    )
+
+    msg = EmailMultiAlternatives(
+        subject=subject,
+        body=text_content,
+        from_email=from_email,
+        to=[user.email],
+    )
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+
+    logging.info(f"Order confirmation email sent to {user.email} for order {order.id}")
+
+
 def send_emails(recipe_id, emails):
     from .models import Recipe
 
