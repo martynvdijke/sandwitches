@@ -17,10 +17,11 @@ from .forms import (
     UserEditForm,
     TagForm,
     UserProfileForm,
+    UserRecipeSubmissionForm,
 )
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, Http404
 from django.conf import settings
-from django.http import FileResponse, Http404
+from django.http import FileResponse
 from pathlib import Path
 import mimetypes
 from PIL import Image
@@ -32,6 +33,30 @@ from django.contrib.auth.views import LoginView
 from sandwitches import __version__ as sandwitches_version
 
 User = get_user_model()
+
+
+@login_required
+def submit_recipe(request):
+    if request.method == "POST":
+        form = UserRecipeSubmissionForm(request.POST, request.FILES)
+        if form.is_valid():
+            recipe = form.save(commit=False)
+            recipe.uploaded_by = request.user
+            recipe.is_approved = False  # Explicitly set to False just in case
+            recipe.save()
+            form.save_m2m()
+            messages.success(
+                request,
+                _("Your recipe has been submitted and is awaiting admin approval."),
+            )
+            return redirect("user_profile")
+    else:
+        form = UserRecipeSubmissionForm()
+    return render(
+        request,
+        "recipe_form.html",
+        {"form": form, "title": _("Submit Recipe"), "version": sandwitches_version},
+    )
 
 
 class CustomLoginView(LoginView):
@@ -109,11 +134,14 @@ def admin_dashboard(request):
     order_labels = [d["date"].strftime("%d/%m/%Y") for d in order_data]
     order_counts = [d["count"] for d in order_data]
 
+    pending_recipes = Recipe.objects.filter(is_approved=False).order_by("-created_at")  # ty:ignore[unresolved-attribute]
+
     context = {
         "recipe_count": recipe_count,
         "user_count": user_count,
         "tag_count": tag_count,
         "recent_recipes": recent_recipes,
+        "pending_recipes": pending_recipes,
         "recipe_labels": recipe_labels,
         "recipe_counts": recipe_counts,
         "rating_labels": rating_labels,
@@ -212,6 +240,17 @@ def admin_recipe_edit(request, pk):
             "version": sandwitches_version,
         },
     )
+
+
+@staff_member_required
+def admin_recipe_approve(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    recipe.is_approved = True
+    recipe.save()
+    messages.success(
+        request, _("Recipe '%(title)s' approved.") % {"title": recipe.title}
+    )
+    return redirect("admin_recipe_list")
 
 
 @staff_member_required
@@ -433,6 +472,14 @@ def admin_order_list(request):
 
 def recipe_detail(request, slug):
     recipe = get_object_or_404(Recipe, slug=slug)
+
+    if not recipe.is_approved:
+        if not (
+            request.user.is_authenticated
+            and (request.user.is_staff or recipe.uploaded_by == request.user)
+        ):
+            raise Http404("Recipe not found or pending approval.")
+
     avg = recipe.average_rating()
     count = recipe.rating_count()
     user_rating = None
@@ -597,9 +644,16 @@ def favorites(request):
 def index(request):
     if not User.objects.filter(is_superuser=True).exists():
         return redirect("setup")
-    recipes = (
-        Recipe.objects.all().prefetch_related("favorited_by")  # ty:ignore[unresolved-attribute]
-    )  # Start with all, order later
+
+    recipes = Recipe.objects.all().prefetch_related("favorited_by")  # ty:ignore[unresolved-attribute]
+
+    if not (request.user.is_authenticated and request.user.is_staff):
+        if request.user.is_authenticated:
+            # Show approved recipes OR recipes uploaded by the current user
+            recipes = recipes.filter(Q(is_approved=True) | Q(uploaded_by=request.user))
+        else:
+            # Show only approved recipes for anonymous users
+            recipes = recipes.filter(is_approved=True)
 
     # Filtering
     q = request.GET.get("q")

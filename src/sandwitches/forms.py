@@ -138,6 +138,7 @@ class RecipeForm(forms.ModelForm):
             "instructions",
             "price",
             "is_highlighted",
+            "is_approved",
             "max_daily_orders",
         ]
         widgets = {
@@ -171,6 +172,39 @@ class RecipeForm(forms.ModelForm):
             recipe.set_tags_from_string(self.cleaned_data.get("tags_string", ""))
         else:
             # We'll need to handle this in the view if commit=False
+            self.save_m2m = lambda: recipe.set_tags_from_string(
+                self.cleaned_data.get("tags_string", "")
+            )
+        return recipe
+
+
+class UserRecipeSubmissionForm(forms.ModelForm):
+    tags_string = forms.CharField(
+        required=False,
+        label=_("Tags (comma separated)"),
+        widget=forms.TextInput(attrs={"placeholder": _("e.g. spicy, vegan, quick")}),
+    )
+
+    class Meta:
+        model = Recipe
+        fields = [
+            "title",
+            "image",
+            "description",
+            "ingredients",
+            "instructions",
+            "price",
+            "servings",
+        ]
+        widgets = {
+            "image": forms.FileInput(),
+        }
+
+    def save(self, commit=True):
+        recipe = super().save(commit=commit)
+        if commit:
+            recipe.set_tags_from_string(self.cleaned_data.get("tags_string", ""))
+        else:
             self.save_m2m = lambda: recipe.set_tags_from_string(
                 self.cleaned_data.get("tags_string", "")
             )

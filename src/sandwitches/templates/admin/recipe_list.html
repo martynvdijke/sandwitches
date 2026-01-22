@@ -35,12 +35,8 @@
                         {% if current_sort == 'orders' %}<i>arrow_upward</i>{% elif current_sort == '-orders' %}<i>arrow_downward</i>{% endif %}
                     </a>
                 </th>
-                <th class="min">
-                    <a href="?sort={% if current_sort == 'rating' %}-rating{% else %}rating{% endif %}" class="row align-center">
-                        {% trans "Rating" %}
-                        {% if current_sort == 'rating' %}<i>arrow_upward</i>{% elif current_sort == '-rating' %}<i>arrow_downward</i>{% endif %}
-                    </a>
-                </th>
+                <th class="min">{% trans "Rating" %}</th>
+                <th class="min">{% trans "Approved" %}</th>
                 <th class="m l">{% trans "Tags" %}</th>
                 <th>
                     <a href="?sort={% if current_sort == 'uploader' %}-uploader{% else %}uploader{% endif %}" class="row align-center">
@@ -90,6 +86,16 @@
                     <i class="primary-text">star</i>
                     <span>{{ recipe.avg_rating|default:0|floatformat:1 }}</span>
                 </div>
+            </td>
+            <td class="min center-align">
+                {% if recipe.is_approved %}
+                <i class="primary-text">check_circle</i>
+                {% else %}
+                <a href="{% url 'admin_recipe_approve' recipe.pk %}" class="button tiny primary round" onclick="event.stopPropagation();">
+                    <i>check</i>
+                    <span>{% trans "Approve" %}</span>
+                </a>
+                {% endif %}
             </td>
             <td class="m l">
                 {% for tag in recipe.tags.all %}

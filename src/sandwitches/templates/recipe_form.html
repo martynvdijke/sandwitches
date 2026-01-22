@@ -68,9 +68,23 @@
                     </div>
                 </div>
 
+                <div class="s12 m6">
+                    <div class="field label border round">
+                        {{ form.price }}
+                        <label>{% trans "Price" %}</label>
+                    </div>
+                </div>
+
+                <div class="s12 m6">
+                    <div class="field label border round">
+                        {{ form.servings }}
+                        <label>{% trans "Servings" %}</label>
+                    </div>
+                </div>
+
                 <div class="s12">
                     <div class="field label border round">
-                        {{ form.tags }}
+                        {{ form.tags_string }}
                         <label>{% trans "Tags (comma separated)" %}</label>
                     </div>
                 </div>

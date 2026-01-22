@@ -131,15 +131,15 @@
 
 
 
-        <div class="s12">
+            <div class="s12">
 
 
 
-            {% include "admin/partials/dashboard_charts.html" %}
+                {% include "admin/partials/dashboard_charts.html" %}
 
 
 
-        </div>
+            </div>
 
 
 
@@ -147,11 +147,127 @@
 
 
 
-        <div class="s12">
+            {% if pending_recipes %}
 
 
 
-            <h5 class="bold">{% trans "Recent Recipes" %}</h5>
+            <div class="s12">
+
+
+
+                <h5 class="bold error-text">{% trans "Pending Approvals" %}</h5>
+
+
+
+                <table class="border striped no-space">
+
+
+
+                    <thead>
+
+
+
+                        <tr>
+
+
+
+                            <th>{% trans "Title" %}</th>
+
+
+
+                            <th>{% trans "Uploader" %}</th>
+
+
+
+                            <th>{% trans "Created At" %}</th>
+
+
+
+                            <th class="right-align">{% trans "Actions" %}</th>
+
+
+
+                        </tr>
+
+
+
+                    </thead>
+
+
+
+                    <tbody>
+
+
+
+                        {% for recipe in pending_recipes %}
+
+
+
+                        <tr class="pointer" onclick="location.href='{% url 'admin_recipe_edit' recipe.pk %}'">
+
+
+
+                            <td>{{ recipe.title }}</td>
+
+
+
+                            <td>{{ recipe.uploaded_by.username|default:"-" }}</td>
+
+
+
+                            <td>{{ recipe.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+
+
+
+                            <td class="right-align">
+
+
+
+                                <a href="{% url 'admin_recipe_approve' recipe.pk %}" class="button circle transparent" onclick="event.stopPropagation();" title="{% trans 'Approve' %}"><i>check</i></a>
+
+
+
+                                <a href="{% url 'admin_recipe_edit' recipe.pk %}" class="button circle transparent" onclick="event.stopPropagation();"><i>edit</i></a>
+
+
+
+                            </td>
+
+
+
+                        </tr>
+
+
+
+                        {% endfor %}
+
+
+
+                    </tbody>
+
+
+
+                </table>
+
+
+
+            </div>
+
+
+
+            {% endif %}
+
+
+
+
+
+
+
+            <div class="s12">
+
+
+
+                <h5 class="bold">{% trans "Recent Recipes" %}</h5>
 
         <table class="border striped no-space">
 
