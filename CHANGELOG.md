@@ -1,3 +1,10 @@
+## [2.3.3](https://github.com/martynvdijke/sandwitches/compare/v2.3.2...v2.3.3) (2026-01-24)
+
+
+### Bug Fixes
+
+* remove static main css in admin dashboard ([fd20fec](https://github.com/martynvdijke/sandwitches/commit/fd20fecebef9eb0ed665bfb8cb204856aebd3ee1))
+
 ## [2.3.2](https://github.com/martynvdijke/sandwitches/compare/v2.3.1...v2.3.2) (2026-01-24)
 
 
