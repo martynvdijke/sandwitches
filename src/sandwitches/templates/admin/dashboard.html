@@ -3,7 +3,10 @@
 
 {% block admin_title %}{% trans "Dashboard" %}{% endblock %}
 
-
+{% block extra_head %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
 
 {% block content %}
 
@@ -317,10 +320,4 @@
 
 </div>
 
-{% endblock %}
-
-
-
-{% block admin_scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
