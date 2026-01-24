@@ -33,10 +33,10 @@ def test_recipe_submission_and_approval_flow(
     page.press("input[name='password']", "Enter")
     expect(page).to_have_url(f"{live_server.url}/")
 
-    # 2. Go to Submit Recipe
+    # 2. Go to Community
     # Open sidebar first
     page.click("button:has-text('menu')")
-    page.click("a:has-text('Submit Recipe')")
+    page.click("a:has-text('Community')")
 
     # 3. Fill submission form
     page.fill("input[name='title']", "Community Sandwich")
@@ -45,7 +45,7 @@ def test_recipe_submission_and_approval_flow(
     page.fill("textarea[name='instructions']", "Mix both.")
     page.fill("input[name='price']", "0.00")
 
-    page.click("button:has-text('Save Recipe')")
+    page.click("button:has-text('Submit Recipe')")
 
     # 4. Verify success message and redirect to profile
     expect(page).to_have_url(re.compile(r".*/profile/$"))

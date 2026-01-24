@@ -34,7 +34,7 @@ urlpatterns = [
     path("login/", views.CustomLoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(next_page="index"), name="logout"),
     path("profile/", views.user_profile, name="user_profile"),
-    path("submit-recipe/", views.submit_recipe, name="submit_recipe"),
+    path("community/", views.community, name="community"),
     path("admin/", admin.site.urls),
     path("api/", api.urls),
     path("media/<path:file_path>", views.media, name="media"),

@@ -36,7 +36,7 @@ User = get_user_model()
 
 
 @login_required
-def submit_recipe(request):
+def community(request):
     if request.method == "POST":
         form = UserRecipeSubmissionForm(request.POST, request.FILES)
         if form.is_valid():
@@ -54,8 +54,8 @@ def submit_recipe(request):
         form = UserRecipeSubmissionForm()
     return render(
         request,
-        "recipe_form.html",
-        {"form": form, "title": _("Submit Recipe"), "version": sandwitches_version},
+        "community.html",
+        {"form": form, "title": _("Community"), "version": sandwitches_version},
     )
 
 

@@ -1,18 +1,14 @@
 {% extends "base_beer.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Edit Recipe" %}{% endblock %}
+{% block title %}{% trans "Community" %}{% endblock %}
 
 {% block content %}
 <div class="large-space"></div>
 <article class="round s12 m10 l8 offset-m1 offset-l2 elevate">
     <div class="padding">
         <h4 class="center-align">
-            {% if recipe.pk %}
-                {% trans "Edit Recipe:" %} {{ recipe.title }}
-            {% else %}
-                {% trans "New Recipe" %}
-            {% endif %}
+            {% trans "Submit a Recipe" %}
         </h4>
         <div class="space"></div>
 
@@ -97,7 +93,7 @@
                 <a href="javascript:history.back()" class="button transparent border round">{% trans "Cancel" %}</a>
                 <button type="submit" class="button primary round">
                     <i class="front">save</i>
-                    <span>{% trans "Save Recipe" %}</span>
+                    <span>{% trans "Submit Recipe" %}</span>
                 </button>
             </div>
         </form>

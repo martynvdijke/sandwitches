@@ -15,9 +15,9 @@
             <i class="extra padding">favorite</i>
             <span class="large-text">{% trans "Favorites" %}</span>
         </a>
-        <a href="{% url 'submit_recipe' %}" class="padding {% if request.resolver_match.url_name == 'submit_recipe' %}active{% endif %}">
-            <i class="extra padding">add_circle</i>
-            <span class="large-text">{% trans "Submit Recipe" %}</span>
+        <a href="{% url 'community' %}" class="padding {% if request.resolver_match.url_name == 'community' %}active{% endif %}">
+            <i class="extra padding">group</i>
+            <span class="large-text">{% trans "Community" %}</span>
         </a>
         {% endif %}
         <a href="/api/docs" class="padding">
