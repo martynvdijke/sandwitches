@@ -88,7 +88,7 @@
                 </div>
             </td>
             <td class="min center-align">
-                {% if recipe.is_approved %}
+                {% if recipe.is_community_made %}
                 <i class="primary-text">check_circle</i>
                 {% else %}
                 <a href="{% url 'admin_recipe_approve' recipe.pk %}" class="button tiny primary round" onclick="event.stopPropagation();">

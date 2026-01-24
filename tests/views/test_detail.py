@@ -14,6 +14,7 @@ def test_index_view_with_recipes(client, db):
         description="This is a test recipe.",
         ingredients="Ingredient 1, Ingredient 2",
         instructions="Step 1, Step 2",
+        is_community_made=True,
     )
     response = client.get("/recipes/test-recipe/", follow=True)
     assert response.status_code == 200
@@ -33,6 +34,7 @@ def test_anonymous_cannot_rate_recipe(client):
         description="Rate this",
         ingredients="",
         instructions="",
+        is_community_made=True,
     )
     resp = client.post(reverse("recipe_rate", kwargs={"pk": recipe.pk}))
     assert resp.status_code == 302
@@ -49,6 +51,7 @@ def test_logged_in_user_can_create_and_update_rating(client):
         description="Rateable",
         ingredients="",
         instructions="",
+        is_community_made=True,
     )
 
     # create rating
@@ -85,6 +88,7 @@ def test_multiple_users_affect_average_and_count(client):
         description="ManyRaters",
         ingredients="",
         instructions="",
+        is_community_made=True,
     )
 
     client.login(username="u1", password="pw1")
@@ -111,6 +115,7 @@ def test_invalid_rating_rejected(client):
         description="Invalid",
         ingredients="",
         instructions="",
+        is_community_made=True,
     )
     client.login(username="rater2", password="pw222")
     resp = client.post(  # noqa: F841
@@ -124,7 +129,9 @@ def test_invalid_rating_rejected(client):
 @pytest.mark.django_db
 def test_detail_view_tags_are_linked(client):
     User.objects.create_superuser("admin", "admin@example.com", "strongpassword123")
-    recipe = Recipe.objects.create(title="Tagged Recipe", description="Desc")
+    recipe = Recipe.objects.create(
+        title="Tagged Recipe", description="Desc", is_community_made=True
+    )
     recipe.set_tags_from_string("tag1, tag2")
 
     url = reverse("recipe_detail", kwargs={"slug": recipe.slug})

@@ -138,7 +138,7 @@ class RecipeForm(forms.ModelForm):
             "instructions",
             "price",
             "is_highlighted",
-            "is_approved",
+            "is_community_made",
             "max_daily_orders",
         ]
         widgets = {

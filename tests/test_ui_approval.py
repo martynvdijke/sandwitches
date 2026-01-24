@@ -55,7 +55,7 @@ def test_recipe_submission_and_approval_flow(
 
     # 5. Verify it's NOT on the main index for anonymous users (or just check the approval flag in DB first)
     recipe = Recipe.objects.get(title="Community Sandwich")
-    assert recipe.is_approved is False
+    assert recipe.is_community_made is True
 
     # Logout and check index as anonymous
     page.context.clear_cookies()
@@ -90,7 +90,7 @@ def test_recipe_submission_and_approval_flow(
     expect(page.get_by_text("Pending Approvals")).not_to_be_visible()
 
     recipe.refresh_from_db()
-    assert recipe.is_approved is True
+    assert recipe.is_community_made is True
 
     # 7. Verify it's now on the community index
     page.goto(f"{live_server.url}/community/")

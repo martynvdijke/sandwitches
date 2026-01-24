@@ -29,6 +29,7 @@ def test_index_view_with_recipes(client, db):
         description="This is a test recipe.",
         ingredients="Ingredient 1, Ingredient 2",
         instructions="Step 1, Step 2",
+        is_community_made=False,
     )
     response = client.get("/")
     assert response.status_code == 200

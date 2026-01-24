@@ -19,6 +19,7 @@ class FeatureTests(TestCase):
             instructions="Instructions",
             ingredients="Ingredients",
             uploaded_by=self.user1,
+            is_community_made=True,
         )
 
         # User1 likes the recipe

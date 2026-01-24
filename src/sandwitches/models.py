@@ -132,7 +132,7 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(Tag, blank=True, related_name="recipes")
     is_highlighted = models.BooleanField(default=False)
-    is_approved = models.BooleanField(default=True)
+    is_community_made = models.BooleanField(default=False)
     max_daily_orders = models.PositiveIntegerField(
         null=True, blank=True, verbose_name="Max daily orders"
     )

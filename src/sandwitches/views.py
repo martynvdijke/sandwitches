@@ -42,7 +42,7 @@ def community(request):
         if form.is_valid():
             recipe = form.save(commit=False)
             recipe.uploaded_by = request.user
-            recipe.is_approved = False  # Explicitly set to False just in case
+            recipe.is_community_made = True
             recipe.save()
             form.save_m2m()
             messages.success(
@@ -54,13 +54,15 @@ def community(request):
         form = UserRecipeSubmissionForm()
 
     # Community recipes = non-staff uploaded
-    recipes = Recipe.objects.filter(uploaded_by__is_staff=False).prefetch_related(
+    recipes = Recipe.objects.filter(is_community_made=True).prefetch_related(  # ty:ignore[unresolved-attribute]
         "favorited_by"
     )
 
     if not request.user.is_staff:
         # Regular users only see approved community recipes or their own
-        recipes = recipes.filter(Q(is_approved=True) | Q(uploaded_by=request.user))
+        recipes = recipes.filter(
+            Q(is_community_made=True) | Q(uploaded_by=request.user)
+        )
 
     recipes = recipes.order_by("-created_at")
 
@@ -152,8 +154,9 @@ def admin_dashboard(request):
     order_labels = [d["date"].strftime("%d/%m/%Y") for d in order_data]
     order_counts = [d["count"] for d in order_data]
 
-    pending_recipes = Recipe.objects.filter(is_approved=False).order_by("-created_at")  # ty:ignore[unresolved-attribute]
-
+    pending_recipes = Recipe.objects.filter(  # ty:ignore[unresolved-attribute]
+        uploaded_by__is_staff=False, uploaded_by__is_superuser=False
+    ).order_by("-created_at")
     context = {
         "recipe_count": recipe_count,
         "user_count": user_count,
@@ -263,7 +266,7 @@ def admin_recipe_edit(request, pk):
 @staff_member_required
 def admin_recipe_approve(request, pk):
     recipe = get_object_or_404(Recipe, pk=pk)
-    recipe.is_approved = True
+    recipe.is_community_made = True
     recipe.save()
     messages.success(
         request, _("Recipe '%(title)s' approved.") % {"title": recipe.title}
@@ -491,7 +494,7 @@ def admin_order_list(request):
 def recipe_detail(request, slug):
     recipe = get_object_or_404(Recipe, slug=slug)
 
-    if not recipe.is_approved:
+    if not recipe.is_community_made:
         if not (
             request.user.is_authenticated
             and (request.user.is_staff or recipe.uploaded_by == request.user)
@@ -666,15 +669,7 @@ def index(request):
     recipes = Recipe.objects.all().prefetch_related("favorited_by")  # ty:ignore[unresolved-attribute]
 
     # Only show "normal" recipes (uploaded by staff or no uploader)
-    recipes = recipes.filter(Q(uploaded_by__is_staff=True) | Q(uploaded_by__isnull=True))
-
-    if not (request.user.is_authenticated and request.user.is_staff):
-        if request.user.is_authenticated:
-            # Show approved recipes OR recipes uploaded by the current user
-            recipes = recipes.filter(Q(is_approved=True) | Q(uploaded_by=request.user))
-        else:
-            # Show only approved recipes for anonymous users
-            recipes = recipes.filter(is_approved=True)
+    recipes = recipes.filter(Q(is_community_made=False))
 
     # Filtering
     q = request.GET.get("q")

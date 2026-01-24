@@ -8,7 +8,7 @@ User = get_user_model()
 
 @pytest.fixture
 def recipe():
-    return Recipe.objects.create(title="Rate Me")
+    return Recipe.objects.create(title="Rate Me", is_community_made=True)
 
 
 @pytest.mark.django_db

@@ -201,6 +201,7 @@ def test_scale_ingredients_ui(page: Page, live_server, recipe):
     User.objects.create_superuser("admin", "admin@example.com", "password")
     recipe.ingredients = "2 slices of Bread\n1 slice of Cheese"
     recipe.servings = 1
+    recipe.is_community_made = True
     recipe.save()
 
     page.goto(f"{live_server.url}/recipes/{recipe.slug}/")

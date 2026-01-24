@@ -2,15 +2,15 @@
 {% load i18n static %}
 
 {% block extra_head %}
-<link href="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.css" rel="stylesheet">
-<script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
-<script src="https://unpkg.com/htmx.org@2.0.8/dist/htmx.min.js"></script>
+<link href="{% static "dist/main.css" %}" rel="stylesheet">
+<script src="{% static "dist/main.js" %}" defer></script>
 <link rel="icon" type="image/svg+xml" href="{% static "icons/favicon.svg" %}">
 <style>
     main.container {
         padding-top: 2rem;
         padding-bottom: 2rem;
+        padding-left: 5%;
+        padding-right: 5%;
     }
     .admin-thumb {
         width: 80px;
