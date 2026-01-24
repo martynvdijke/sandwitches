@@ -92,6 +92,6 @@ def test_recipe_submission_and_approval_flow(
     recipe.refresh_from_db()
     assert recipe.is_approved is True
 
-    # 7. Verify it's now on the main index
-    page.goto(f"{live_server.url}/")
+    # 7. Verify it's now on the community index
+    page.goto(f"{live_server.url}/community/")
     expect(page.get_by_text("Community Sandwich")).to_be_visible()

@@ -52,10 +52,28 @@ def community(request):
             return redirect("user_profile")
     else:
         form = UserRecipeSubmissionForm()
+
+    # Community recipes = non-staff uploaded
+    recipes = Recipe.objects.filter(uploaded_by__is_staff=False).prefetch_related(
+        "favorited_by"
+    )
+
+    if not request.user.is_staff:
+        # Regular users only see approved community recipes or their own
+        recipes = recipes.filter(Q(is_approved=True) | Q(uploaded_by=request.user))
+
+    recipes = recipes.order_by("-created_at")
+
     return render(
         request,
         "community.html",
-        {"form": form, "title": _("Community"), "version": sandwitches_version},
+        {
+            "form": form,
+            "recipes": recipes,
+            "title": _("Community"),
+            "version": sandwitches_version,
+            "user": request.user,
+        },
     )
 
 
@@ -646,6 +664,9 @@ def index(request):
         return redirect("setup")
 
     recipes = Recipe.objects.all().prefetch_related("favorited_by")  # ty:ignore[unresolved-attribute]
+
+    # Only show "normal" recipes (uploaded by staff or no uploader)
+    recipes = recipes.filter(Q(uploaded_by__is_staff=True) | Q(uploaded_by__isnull=True))
 
     if not (request.user.is_authenticated and request.user.is_staff):
         if request.user.is_authenticated:

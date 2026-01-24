@@ -24,9 +24,10 @@ class FeatureTests(TestCase):
         # User1 likes the recipe
         self.user1.favorites.add(self.recipe)
 
-    def test_recipe_liked_by_users_on_index_page(self):
+    def test_recipe_liked_by_users_on_community_page(self):
         # Ensure a superuser exists for the index page to not redirect to setup
-        response = self.client.get(reverse("index"))
+        self.client.login(username="user1", password="password")
+        response = self.client.get(reverse("community"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Liked by user1")
 
