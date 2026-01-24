@@ -1,3 +1,13 @@
+## [2.3.2](https://github.com/martynvdijke/sandwitches/compare/v2.3.1...v2.3.2) (2026-01-24)
+
+
+### Bug Fixes
+
+* **ui:** dashboard charts not rendering by loading Chart.js in head ([7b8a73a](https://github.com/martynvdijke/sandwitches/commit/7b8a73a234a762380f18ebce3ba89912dcc5b726))
+* **ui:** fix ui and tests ([4b8c93c](https://github.com/martynvdijke/sandwitches/commit/4b8c93cdfe6e0990009f2dfee73f75c62dcd4c63))
+* **ui:** move recipe submission to a dedicated 'Community' page ([46992d6](https://github.com/martynvdijke/sandwitches/commit/46992d6146702735cb4bd57dc8a764cbc1378330))
+* **ui:** separate normal and community recipes on index and community pages ([c287cdd](https://github.com/martynvdijke/sandwitches/commit/c287cdd8f85da5e25f880a12809f66e75bdebc7c))
+
 ## [2.3.1](https://github.com/martynvdijke/sandwitches/compare/v2.3.0...v2.3.1) (2026-01-22)
 
 
