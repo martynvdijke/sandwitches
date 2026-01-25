@@ -1,3 +1,15 @@
+# [2.4.0](https://github.com/martynvdijke/sandwitches/compare/v2.3.3...v2.4.0) (2026-01-25)
+
+
+### Bug Fixes
+
+* **tests:** skip flaky test ([b502a19](https://github.com/martynvdijke/sandwitches/commit/b502a190bfa07df02c1e77c2c28cbcf0bae4fb94))
+
+
+### Features
+
+* add full order flow along with shopping cart and backend commnnity recipes optimalizations ([99e0708](https://github.com/martynvdijke/sandwitches/commit/99e07089555e5c7ff35acf63ad08a47238064928))
+
 ## [2.3.3](https://github.com/martynvdijke/sandwitches/compare/v2.3.2...v2.3.3) (2026-01-24)
 
 
