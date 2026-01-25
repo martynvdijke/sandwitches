@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from sandwitches.models import Recipe
 from django.urls import reverse
+from django.contrib.auth.models import Group
 
 User = get_user_model()
 
@@ -9,17 +10,28 @@ User = get_user_model()
 class FeatureTests(TestCase):
     def setUp(self):
         self.client = Client()
+
+        # Setup groups
+        self.admin_group, _ = Group.objects.get_or_create(name="admin")
+        self.community_group, _ = Group.objects.get_or_create(name="community")
+
         self.user1 = User.objects.create_user(username="user1", password="password")
+        self.user1.groups.add(self.community_group)
+
         self.user2 = User.objects.create_user(username="user2", password="password")
+        self.user2.groups.add(self.community_group)
+
         self.superuser = User.objects.create_superuser(
             "admin", "admin@example.com", "strongpassword123"
         )
+        self.superuser.groups.add(self.admin_group)
+
         self.recipe = Recipe.objects.create(
             title="Test Recipe",
             instructions="Instructions",
             ingredients="Ingredients",
             uploaded_by=self.user1,
-            is_community_made=True,
+            is_approved=True,
         )
 
         # User1 likes the recipe

@@ -1,0 +1,102 @@
+{% extends "base_beer.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Your Cart" %}{% endblock %}
+
+{% block content %}
+<main class="responsive">
+    <div class="large-space"></div>
+    <div class="row align-center">
+        <i class="extra">shopping_cart</i>
+        <h4 class="max">{% trans "Your Shopping Cart" %}</h4>
+    </div>
+    <div class="space"></div>
+
+    {% if cart_items %}
+    <div class="grid">
+        <div class="s12 m8">
+            <div class="padding border round surface">
+                <table class="border striped no-space">
+                    <thead>
+                        <tr>
+                            <th class="min">{% trans "Item" %}</th>
+                            <th class="max">{% trans "Description" %}</th>
+                            <th class="min">{% trans "Quantity" %}</th>
+                            <th class="min">{% trans "Price" %}</th>
+                            <th class="min"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart_items %}
+                        <tr>
+                            <td class="min">
+                                {% if item.recipe.image %}
+                                <img src="{{ item.recipe.image_thumbnail.url }}" class="circle small">
+                                {% else %}
+                                <i class="circle small gray1">restaurant</i>
+                                {% endif %}
+                            </td>
+                            <td class="max">
+                                <a href="{% url 'recipe_detail' item.recipe.slug %}" class="bold">{{ item.recipe.title }}</a>
+                            </td>
+                            <td class="min">
+                                <form action="{% url 'update_cart_quantity' item.pk %}" method="post" class="row no-space align-center">
+                                    {% csrf_token %}
+                                    <div class="field border round small no-margin" style="width: 80px;">
+                                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" onchange="this.form.submit()">
+                                    </div>
+                                </form>
+                            </td>
+                            <td class="min no-wrap">{{ item.total_price }} €</td>
+                            <td class="min">
+                                <a href="{% url 'remove_from_cart' item.pk %}" class="button circle transparent">
+                                    <i>delete</i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="s12 m4">
+            <article class="round padding border primary-container">
+                <h6 class="bold">{% trans "Summary" %}</h6>
+                <div class="row mt-1">
+                    <div class="max">{% trans "Subtotal" %}</div>
+                    <div class="bold">{{ total }} €</div>
+                </div>
+                <div class="divider mt-1 mb-1"></div>
+                <div class="row">
+                    <div class="max bold">{% trans "Total" %}</div>
+                    <div class="bold large-text">{{ total }} €</div>
+                </div>
+                <div class="space"></div>
+                <form action="{% url 'checkout_cart' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="button primary round extend">
+                        <i>check</i>
+                        <span>{% trans "Checkout" %}</span>
+                    </button>
+                </form>
+            </article>
+            <div class="space"></div>
+            <a href="{% url 'index' %}" class="button transparent extend">
+                <i>arrow_back</i>
+                <span>{% trans "Continue Shopping" %}</span>
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="center-align padding">
+        <i class="extra gray-text">shopping_cart_off</i>
+        <h5 class="gray-text">{% trans "Your cart is empty." %}</h5>
+        <div class="space"></div>
+        <a href="{% url 'index' %}" class="button primary round">
+            <span>{% trans "Start Shopping" %}</span>
+        </a>
+    </div>
+    {% endif %}
+    <div class="large-space"></div>
+</main>
+{% endblock %}

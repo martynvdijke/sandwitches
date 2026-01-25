@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.translation import gettext as _
-from .models import Recipe, Rating, Tag, Order
+from .models import Recipe, Rating, Tag, Order, CartItem
 from .forms import (
     RecipeForm,
     AdminSetupForm,
@@ -42,7 +42,7 @@ def community(request):
         if form.is_valid():
             recipe = form.save(commit=False)
             recipe.uploaded_by = request.user
-            recipe.is_community_made = True
+            recipe.is_approved = False
             recipe.save()
             form.save_m2m()
             messages.success(
@@ -53,16 +53,17 @@ def community(request):
     else:
         form = UserRecipeSubmissionForm()
 
-    # Community recipes = non-staff uploaded
-    recipes = Recipe.objects.filter(is_community_made=True).prefetch_related(  # ty:ignore[unresolved-attribute]
-        "favorited_by"
-    )
+    # Community recipes = uploaded by users in 'community' group
+    recipes = Recipe.objects.filter(  # ty:ignore[unresolved-attribute]
+        uploaded_by__groups__name="community"
+    ).prefetch_related("favorited_by")
 
-    if not request.user.is_staff:
+    if not (request.user.is_staff or request.user.groups.filter(name="admin").exists()):
         # Regular users only see approved community recipes or their own
-        recipes = recipes.filter(
-            Q(is_community_made=True) | Q(uploaded_by=request.user)
-        )
+        recipes = recipes.filter(Q(is_approved=True) | Q(uploaded_by=request.user))
+    else:
+        # Admins see all community recipes
+        pass
 
     recipes = recipes.order_by("-created_at")
 
@@ -155,7 +156,7 @@ def admin_dashboard(request):
     order_counts = [d["count"] for d in order_data]
 
     pending_recipes = Recipe.objects.filter(  # ty:ignore[unresolved-attribute]
-        uploaded_by__is_staff=False, uploaded_by__is_superuser=False
+        is_approved=False, uploaded_by__groups__name="community"
     ).order_by("-created_at")
     context = {
         "recipe_count": recipe_count,
@@ -221,6 +222,21 @@ def admin_recipe_list(request):
 
 
 @staff_member_required
+def admin_recipe_approval_list(request):
+    recipes = Recipe.objects.filter(  # ty:ignore[unresolved-attribute]
+        is_approved=False, uploaded_by__groups__name="community"
+    ).order_by("-created_at")
+    return render(
+        request,
+        "admin/recipe_approval_list.html",
+        {
+            "recipes": recipes,
+            "version": sandwitches_version,
+        },
+    )
+
+
+@staff_member_required
 def admin_recipe_add(request):
     if request.method == "POST":
         form = RecipeForm(request.POST, request.FILES)
@@ -266,11 +282,14 @@ def admin_recipe_edit(request, pk):
 @staff_member_required
 def admin_recipe_approve(request, pk):
     recipe = get_object_or_404(Recipe, pk=pk)
-    recipe.is_community_made = True
+    recipe.is_approved = True
     recipe.save()
     messages.success(
         request, _("Recipe '%(title)s' approved.") % {"title": recipe.title}
     )
+    referer = request.META.get("HTTP_REFERER")
+    if referer and "dashboard/approvals" in referer:
+        return redirect("admin_recipe_approval_list")
     return redirect("admin_recipe_list")
 
 
@@ -494,10 +513,19 @@ def admin_order_list(request):
 def recipe_detail(request, slug):
     recipe = get_object_or_404(Recipe, slug=slug)
 
-    if not recipe.is_community_made:
+    # If it's a community recipe, it must be approved or viewed by staff/owner
+    is_community = (
+        recipe.uploaded_by
+        and recipe.uploaded_by.groups.filter(name="community").exists()
+    )
+    if is_community and not recipe.is_approved:
         if not (
             request.user.is_authenticated
-            and (request.user.is_staff or recipe.uploaded_by == request.user)
+            and (
+                request.user.is_staff
+                or recipe.uploaded_by == request.user
+                or request.user.groups.filter(name="admin").exists()
+            )
         ):
             raise Http404("Recipe not found or pending approval.")
 
@@ -668,8 +696,8 @@ def index(request):
 
     recipes = Recipe.objects.all().prefetch_related("favorited_by")  # ty:ignore[unresolved-attribute]
 
-    # Only show "normal" recipes (uploaded by staff or no uploader)
-    recipes = recipes.filter(Q(is_community_made=False))
+    # Only show recipes from people in the admin group
+    recipes = recipes.filter(uploaded_by__groups__name="admin")
 
     # Filtering
     q = request.GET.get("q")
@@ -743,6 +771,8 @@ def setup(request):
     First-time setup page: create initial superuser if none exists.
     Visible only while there are no superusers in the DB.
     """
+    from django.contrib.auth.models import Group
+
     # do not allow access if a superuser already exists
     if User.objects.filter(is_superuser=True).exists():
         return redirect("index")
@@ -751,6 +781,12 @@ def setup(request):
         form = AdminSetupForm(request.POST)
         if form.is_valid():
             user = form.save()
+
+            # Ensure groups exist and add user to admin group
+            admin_group, created = Group.objects.get_or_create(name="admin")
+            Group.objects.get_or_create(name="community")
+            user.groups.add(admin_group)
+
             user.backend = "django.contrib.auth.backends.ModelBackend"
             login(request, user)
             messages.success(request, _("Admin account created and signed in."))
@@ -765,10 +801,17 @@ def signup(request):
     """
     User signup page: create new regular user accounts.
     """
+    from django.contrib.auth.models import Group
+
     if request.method == "POST":
         form = UserSignupForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
+
+            # Add user to community group
+            community_group, created = Group.objects.get_or_create(name="community")
+            user.groups.add(community_group)
+
             # log in the newly created user
             user.backend = "django.contrib.auth.backends.ModelBackend"
             login(request, user)
@@ -818,3 +861,102 @@ def user_profile(request):
     return render(
         request, "profile.html", {"form": form, "version": sandwitches_version}
     )
+
+
+@login_required
+def view_cart(request):
+    cart_items = CartItem.objects.filter(user=request.user).select_related("recipe")  # ty:ignore[unresolved-attribute]
+    total = sum(item.total_price for item in cart_items)
+    return render(
+        request,
+        "cart.html",
+        {
+            "cart_items": cart_items,
+            "total": total,
+            "version": sandwitches_version,
+        },
+    )
+
+
+@login_required
+def add_to_cart(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    if not recipe.price:
+        messages.error(request, _("This recipe cannot be ordered (no price set)."))
+        return redirect("recipe_detail", slug=recipe.slug)
+
+    cart_item, created = CartItem.objects.get_or_create(  # ty:ignore[unresolved-attribute]
+        user=request.user, recipe=recipe
+    )
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+
+    messages.success(
+        request, _("Added %(title)s to your cart.") % {"title": recipe.title}
+    )
+    return redirect("view_cart")
+
+
+@login_required
+def remove_from_cart(request, pk):
+    cart_item = get_object_or_404(CartItem, pk=pk, user=request.user)
+    cart_item.delete()
+    messages.success(request, _("Removed from cart."))
+    return redirect("view_cart")
+
+
+@login_required
+def update_cart_quantity(request, pk):
+    if request.method == "POST":
+        cart_item = get_object_or_404(CartItem, pk=pk, user=request.user)
+        try:
+            quantity = int(request.POST.get("quantity", 1))
+            if quantity > 0:
+                cart_item.quantity = quantity
+                cart_item.save()
+            else:
+                cart_item.delete()
+        except ValueError:
+            pass
+    return redirect("view_cart")
+
+
+@login_required
+def checkout_cart(request):
+    cart_items = CartItem.objects.filter(user=request.user)  # ty:ignore[unresolved-attribute]
+    if not cart_items.exists():
+        messages.error(request, _("Your cart is empty."))
+        return redirect("view_cart")
+
+    created_orders = []  # noqa: F841
+    errors = []
+
+    # We use a transaction to ensure either all orders are created or none if something goes wrong
+    from django.db import transaction
+
+    try:
+        with transaction.atomic():
+            for item in cart_items:
+                # Create Order for each recipe in cart (quantity times?)
+                # Current Order model doesn't have quantity, so we create multiple orders or update Order model.
+                # For now, let's create 'quantity' number of orders as per current schema
+                # OR we could update Order model to support quantity.
+                # Let's see if Order has quantity. (Checked: it does not).
+                for i in range(item.quantity):
+                    try:
+                        Order.objects.create(user=request.user, recipe=item.recipe)  # ty:ignore[unresolved-attribute]
+                    except (ValidationError, ValueError) as e:
+                        errors.append(f"{item.recipe.title}: {str(e)}")
+                        raise e  # Trigger rollback
+
+            cart_items.delete()
+            messages.success(request, _("Orders submitted successfully!"))
+            return redirect("user_profile")
+    except Exception:
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+        else:
+            messages.error(request, _("An error occurred during checkout."))
+        return redirect("view_cart")

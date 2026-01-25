@@ -2,24 +2,31 @@ import pytest
 import re
 from playwright.sync_api import Page, expect
 from sandwitches.models import User, Recipe
+from django.contrib.auth.models import Group
 
 
 @pytest.fixture
 def staff_user(db):
-    return User.objects.create_user(
+    user = User.objects.create_user(
         username="admin_ui",
         email="admin@example.com",
         password="password",
         is_staff=True,
         is_superuser=True,
     )
+    admin_group, _ = Group.objects.get_or_create(name="admin")
+    user.groups.add(admin_group)
+    return user
 
 
 @pytest.fixture
 def regular_user(db):
-    return User.objects.create_user(
+    user = User.objects.create_user(
         username="user_ui", email="user@example.com", password="password"
     )
+    community_group, _ = Group.objects.get_or_create(name="community")
+    user.groups.add(community_group)
+    return user
 
 
 @pytest.mark.django_db
@@ -53,9 +60,10 @@ def test_recipe_submission_and_approval_flow(
         "Your recipe has been submitted and is awaiting admin approval."
     )
 
-    # 5. Verify it's NOT on the main index for anonymous users (or just check the approval flag in DB first)
+    # 5. Verify it's NOT on the main index
     recipe = Recipe.objects.get(title="Community Sandwich")
-    assert recipe.is_community_made is True
+    assert recipe.uploaded_by.groups.filter(name="community").exists()
+    assert recipe.is_approved is False
 
     # Logout and check index as anonymous
     page.context.clear_cookies()
@@ -70,27 +78,25 @@ def test_recipe_submission_and_approval_flow(
     page.fill("input[name='password']", "password")
     page.press("input[name='password']", "Enter")
 
-    page.goto(f"{live_server.url}/dashboard/")
+    # Go to the new Approvals page
+    page.goto(f"{live_server.url}/dashboard/approvals/")
 
-    # Check Pending Approvals section
-    pending_section = page.locator(".s12:has(h5:has-text('Pending Approvals'))")
-    expect(pending_section).to_be_visible()
-
-    row = pending_section.get_by_role("row", name="Community Sandwich")
+    row = page.get_by_role("row", name="Community Sandwich")
     expect(row).to_be_visible()
 
     # Click Approve
-    # Use the check icon button in that row
     row.get_by_role("link", name="check").click()
 
     # Verify it's approved
     expect(
         page.get_by_text("Recipe 'Community Sandwich' approved.").first
     ).to_be_visible()
-    expect(page.get_by_text("Pending Approvals")).not_to_be_visible()
+
+    # Should be gone from approvals page table row
+    expect(page.get_by_role("row", name="Community Sandwich")).not_to_be_visible()
 
     recipe.refresh_from_db()
-    assert recipe.is_community_made is True
+    assert recipe.is_approved is True
 
     # 7. Verify it's now on the community index
     page.goto(f"{live_server.url}/community/")

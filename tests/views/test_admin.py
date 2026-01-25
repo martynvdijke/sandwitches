@@ -2,8 +2,21 @@ import pytest
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from sandwitches.models import Recipe, Tag
+from django.contrib.auth.models import Group
 
 User = get_user_model()
+
+
+@pytest.fixture
+def admin_group(db):
+    group, _ = Group.objects.get_or_create(name="admin")
+    return group
+
+
+@pytest.fixture
+def community_group(db):
+    group, _ = Group.objects.get_or_create(name="community")
+    return group
 
 
 @pytest.mark.django_db
@@ -369,14 +382,13 @@ def test_admin_user_delete_self_fails(client):
 
 
 @pytest.mark.django_db
-def test_index_favorites_filter_isolation(client):
+def test_index_favorites_filter_isolation(client, admin_group):
     user1 = User.objects.create_user(username="u1", password="pw")
-    User.objects.create_user(username="u2", password="pw")
-    # Need a superuser for index page to work
-    User.objects.create_superuser("admin_iso", "admin@example.com", "pw")
+    admin = User.objects.create_superuser("admin_iso", "admin@example.com", "pw")
+    admin.groups.add(admin_group)
 
-    r1 = Recipe.objects.create(title="User1 Fav", description="D1")
-    Recipe.objects.create(title="User2 Fav", description="D2")
+    r1 = Recipe.objects.create(title="User1 Fav", description="D1", uploaded_by=admin)
+    Recipe.objects.create(title="User2 Fav", description="D2", uploaded_by=admin)
 
     user1.favorites.add(r1)
     # r2 is not user1's favorite
@@ -436,8 +448,9 @@ def test_admin_task_detail_with_error(client):
 
 
 @pytest.mark.django_db
-def test_index_template_attributes(client):
+def test_index_template_attributes(client, admin_group):
     # Verify hx-swap="outerHTML" is present to prevent layout squishing
-    User.objects.create_superuser("admin_attr", "admin@example.com", "pw")
+    admin = User.objects.create_superuser("admin_attr", "admin@example.com", "pw")
+    admin.groups.add(admin_group)
     resp = client.get("/")
     assert 'hx-swap="outerHTML"' in resp.content.decode()

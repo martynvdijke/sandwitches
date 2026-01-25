@@ -56,6 +56,10 @@
             <i>restaurant</i>
             <span>{% trans "Recipes" %}</span>
         </a>
+        <a href="{% url 'admin_recipe_approval_list' %}" class="{% if request.resolver_match.url_name == 'admin_recipe_approval_list' %}active{% endif %}">
+            <i>how_to_reg</i>
+            <span>{% trans "Approvals" %}</span>
+        </a>
         <a href="{% url 'admin_user_list' %}" class="{% if request.resolver_match.url_name == 'admin_user_list' %}active{% endif %}">
             <i>people</i>
             <span>{% trans "Users" %}</span>

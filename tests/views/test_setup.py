@@ -44,6 +44,8 @@ def test_setup_creates_superuser(client):
     response = client.post(url, data, follow=True)
 
     assert User.objects.filter(username="admin", is_superuser=True).exists()
+    u = User.objects.get(username="admin")
+    assert u.groups.filter(name="admin").exists()
     assert response.status_code == 200
     # Should redirect to admin index
     assert response.redirect_chain[-1][0] == reverse("admin:index")

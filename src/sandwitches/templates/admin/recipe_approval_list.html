@@ -1,0 +1,56 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{% trans "Pending Approvals" %}{% endblock %}
+
+{% block content %}
+<div class="row align-center mb-2">
+    <h5 class="max bold">{% trans "Recipes Awaiting Approval" %}</h5>
+</div>
+
+<table class="border striped no-space">
+    <thead>
+        <tr>
+            <th class="min">{% trans "Image" %}</th>
+            <th class="max">{% trans "Title" %}</th>
+            <th>{% trans "Uploader" %}</th>
+            <th>{% trans "Created" %}</th>
+            <th class="right-align">{% trans "Actions" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for recipe in recipes %}
+        <tr class="pointer" onclick="location.href='{% url 'admin_recipe_edit' recipe.pk %}'">
+            <td class="min">
+                {% if recipe.image %}
+                <img src="{{ recipe.image_thumbnail.url }}" class="admin-thumb round">
+                {% else %}
+                <div class="admin-thumb round gray1 middle-align center-align">
+                    <i class="extra">restaurant</i>
+                </div>
+                {% endif %}
+            </td>
+            <td class="max">
+                <b>{{ recipe.title }}</b>
+            </td>
+            <td>{{ recipe.uploaded_by.username|default:"-" }}</td>
+            <td>{{ recipe.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+            <td class="right-align">
+                <a href="{% url 'admin_recipe_approve' recipe.pk %}" class="button tiny primary round" onclick="event.stopPropagation();">
+                    <i>check</i>
+                    <span>{% trans "Approve" %}</span>
+                </a>
+                <a href="{% url 'admin_recipe_edit' recipe.pk %}" class="button circle transparent" onclick="event.stopPropagation();" title="{% trans 'Edit' %}"><i>edit</i></a>
+                <a href="{% url 'admin_recipe_delete' recipe.pk %}" class="button circle transparent" onclick="event.stopPropagation();" title="{% trans 'Delete' %}"><i>delete</i></a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="center-align padding">
+                {% trans "No recipes pending approval." %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

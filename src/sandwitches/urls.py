@@ -39,6 +39,13 @@ urlpatterns = [
     path("api/", api.urls),
     path("media/<path:file_path>", views.media, name="media"),
     path("favorites/", views.favorites, name="favorites"),
+    path("cart/", views.view_cart, name="view_cart"),
+    path("cart/add/<int:pk>/", views.add_to_cart, name="add_to_cart"),
+    path("cart/remove/<int:pk>/", views.remove_from_cart, name="remove_from_cart"),
+    path(
+        "cart/update/<int:pk>/", views.update_cart_quantity, name="update_cart_quantity"
+    ),
+    path("cart/checkout/", views.checkout_cart, name="checkout_cart"),
     path("", views.index, name="index"),
     path("feeds/latest/", LatestRecipesFeed(), name="latest_recipes_feed"),
     path(
@@ -54,6 +61,11 @@ urlpatterns += i18n_patterns(
     path("recipes/<int:pk>/favorite/", views.toggle_favorite, name="toggle_favorite"),
     path("dashboard/", views.admin_dashboard, name="admin_dashboard"),
     path("dashboard/recipes/", views.admin_recipe_list, name="admin_recipe_list"),
+    path(
+        "dashboard/approvals/",
+        views.admin_recipe_approval_list,
+        name="admin_recipe_approval_list",
+    ),
     path("dashboard/recipes/add/", views.admin_recipe_add, name="admin_recipe_add"),
     path(
         "dashboard/recipes/<int:pk>/edit/",

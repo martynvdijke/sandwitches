@@ -132,7 +132,7 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(Tag, blank=True, related_name="recipes")
     is_highlighted = models.BooleanField(default=False)
-    is_community_made = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)
     max_daily_orders = models.PositiveIntegerField(
         null=True, blank=True, verbose_name="Max daily orders"
     )
@@ -278,3 +278,29 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.pk} - {self.user} - {self.recipe}"
+
+
+class CartItem(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="cart_items", on_delete=models.CASCADE
+    )
+    recipe = models.ForeignKey(
+        Recipe, related_name="cart_items", on_delete=models.CASCADE
+    )
+    quantity = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("user", "recipe")
+        verbose_name = "Cart Item"
+        verbose_name_plural = "Cart Items"
+
+    def __str__(self):
+        return f"{self.user.username}'s cart: {self.recipe.title} (x{self.quantity})"
+
+    @property
+    def total_price(self):
+        if self.recipe.price:
+            return self.recipe.price * self.quantity
+        return 0

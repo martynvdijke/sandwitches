@@ -29,6 +29,7 @@ class SignupViewTests(TestCase):
         self.assertTrue(resp.context["user"].is_authenticated)
         self.assertFalse(user.is_staff)
         self.assertFalse(user.is_superuser)
+        self.assertTrue(user.groups.filter(name="community").exists())
 
     def test_duplicate_username_shows_error(self):
         User.objects.create_user(username="dup", password="x")

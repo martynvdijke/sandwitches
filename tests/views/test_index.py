@@ -2,8 +2,19 @@ from sandwitches.models import Recipe
 import pytest
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 
 User = get_user_model()
+
+
+@pytest.fixture
+def admin_user(db):
+    user = User.objects.create_superuser(
+        "admin", "admin@example.com", "strongpassword123"
+    )
+    admin_group, _ = Group.objects.get_or_create(name="admin")
+    user.groups.add(admin_group)
+    return user
 
 
 @pytest.mark.django_db
@@ -14,22 +25,21 @@ def test_index_view_redirects_to_setup(client):
 
 
 @pytest.mark.django_db
-def test_index(client, db):
-    User.objects.create_superuser("admin", "admin@example.com", "strongpassword123")
+def test_index(client, admin_user):
     response = client.get("/")
     assert response.status_code == 200
     assert b"No sandwitches found." in response.content
 
 
 @pytest.mark.django_db
-def test_index_view_with_recipes(client, db):
-    User.objects.create_superuser("admin", "admin@example.com", "strongpassword123")
+def test_index_view_with_recipes(client, admin_user):
     Recipe.objects.create(
         title="Test Recipe",
         description="This is a test recipe.",
         ingredients="Ingredient 1, Ingredient 2",
         instructions="Step 1, Step 2",
-        is_community_made=False,
+        is_approved=True,
+        uploaded_by=admin_user,
     )
     response = client.get("/")
     assert response.status_code == 200
@@ -66,16 +76,22 @@ def test_setup_creates_superuser_and_logs_in(client):
     assert u.is_superuser and u.is_staff
     # the user should be logged in after setup
     assert resp.context["user"].is_authenticated
+    assert u.groups.filter(name="admin").exists()
 
 
 @pytest.mark.django_db
-def test_index_multi_tag_filter(client):
-    User.objects.create_superuser("admin", "admin@example.com", "pw")
-    r1 = Recipe.objects.create(title="Recipe One", description="D1")
+def test_index_multi_tag_filter(client, admin_user):
+    r1 = Recipe.objects.create(
+        title="Recipe One", description="D1", uploaded_by=admin_user
+    )
     r1.set_tags_from_string("tag1, tag2")
-    r2 = Recipe.objects.create(title="Recipe Two", description="D2")
+    r2 = Recipe.objects.create(
+        title="Recipe Two", description="D2", uploaded_by=admin_user
+    )
     r2.set_tags_from_string("tag2, tag3")
-    r3 = Recipe.objects.create(title="Recipe Three", description="D3")
+    r3 = Recipe.objects.create(
+        title="Recipe Three", description="D3", uploaded_by=admin_user
+    )
     r3.set_tags_from_string("tag3")
 
     # Filter by tag1 (should get R1)
@@ -92,14 +108,15 @@ def test_index_multi_tag_filter(client):
 
 
 @pytest.mark.django_db
-def test_index_favorites_filter(client):
-    user = User.objects.create_superuser("admin", "admin@example.com", "pw")
-    client.force_login(user)
+def test_index_favorites_filter(client, admin_user):
+    client.force_login(admin_user)
 
-    r1 = Recipe.objects.create(title="Fav Recipe", description="D1")
-    Recipe.objects.create(title="Not Fav", description="D2")
+    r1 = Recipe.objects.create(
+        title="Fav Recipe", description="D1", uploaded_by=admin_user
+    )
+    Recipe.objects.create(title="Not Fav", description="D2", uploaded_by=admin_user)
 
-    user.favorites.add(r1)
+    admin_user.favorites.add(r1)
 
     # Filter by favorites
     resp = client.get("/", {"favorites": "on"})
