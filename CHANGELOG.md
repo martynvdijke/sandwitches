@@ -1,3 +1,12 @@
+## [2.4.1](https://github.com/martynvdijke/sandwitches/compare/v2.4.0...v2.4.1) (2026-01-27)
+
+
+### Bug Fixes
+
+* **ui:** add in photo cropper support ([131908b](https://github.com/martynvdijke/sandwitches/commit/131908b67a803fc97d752628595c74b1b33baa24))
+* **web:** add orders history and have order history and order status ([66202d0](https://github.com/martynvdijke/sandwitches/commit/66202d01456c70cacd73730aea7091d15ad4ba60))
+* **web:** serve dist and css ourselves ([1e72961](https://github.com/martynvdijke/sandwitches/commit/1e729615df399a626cf7361675bd7668633d395d))
+
 # [2.4.0](https://github.com/martynvdijke/sandwitches/compare/v2.3.3...v2.4.0) (2026-01-25)
 
 
