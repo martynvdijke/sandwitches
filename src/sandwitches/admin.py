@@ -84,7 +84,15 @@ class RatingAdmin(ImportExportModelAdmin):
 @admin.register(Order)
 class OrderAdmin(ImportExportModelAdmin):
     resource_classes = [OrderResource]
-    list_display = ("id", "user", "recipe", "status", "total_price", "created_at")
-    list_filter = ("status", "created_at")
+    list_display = (
+        "id",
+        "user",
+        "recipe",
+        "status",
+        "completed",
+        "total_price",
+        "created_at",
+    )
+    list_filter = ("status", "completed", "created_at")
     search_fields = ("user__username", "recipe__title")
     readonly_fields = ("total_price", "created_at", "updated_at")

@@ -15,7 +15,7 @@
     <td>{{ order.recipe.title }}</td>
     <td>{{ order.total_price }} €</td>
     <td>
-        <span class="chip {% if order.status == 'PENDING' %}surface-variant{% elif order.status == 'COMPLETED' %}primary{% else %}error{% endif %}">
+        <span class="chip {% if order.status == 'PENDING' %}surface-variant{% elif order.status == 'COMPLETED' %}primary{% elif order.status == 'CANCELLED' %}error{% else %}secondary{% endif %}">
             {{ order.get_status_display }}
         </span>
     </td>

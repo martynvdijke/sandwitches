@@ -1,0 +1,68 @@
+{% extends "base_beer.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Order Details" %} #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="large-space"></div>
+
+<div class="grid">
+  <div class="s12 m10 l8 xl6 middle-align center-align" style="margin: 0 auto;">
+    <article class="round elevate left-align">
+      <div class="padding">
+          <nav>
+              <a href="{% url 'user_profile' %}" class="button transparent circle">
+                  <i>arrow_back</i>
+              </a>
+              <h5 class="max">{% trans "Order" %} #{{ order.id }}</h5>
+              <span class="chip {% if order.status == 'PENDING' %}surface-variant{% elif order.status == 'COMPLETED' %}primary{% elif order.status == 'CANCELLED' %}error{% else %}secondary{% endif %}">
+                  {{ order.get_status_display }}
+              </span>
+          </nav>
+          <div class="divider"></div>
+
+          <div class="grid">
+              <div class="s12 m6">
+                  <p class="small-text">{% trans "Date Ordered" %}</p>
+                  <p>{{ order.created_at|date:"d F Y, H:i" }}</p>
+              </div>
+              <div class="s12 m6">
+                   <p class="small-text">{% trans "Last Update" %}</p>
+                   <p>{{ order.updated_at|date:"d F Y, H:i" }}</p>
+              </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h6>{% trans "Item Details" %}</h6>
+          <div class="row">
+              <div class="max">
+                  <a href="{% url 'recipe_detail' order.recipe.slug %}" class="bold primary-text">{{ order.recipe.title }}</a>
+                  <p class="small-text">{{ order.recipe.description|truncatewords:20 }}</p>
+              </div>
+              <div class="min">
+                  <span class="bold">{{ order.total_price }} €</span>
+              </div>
+          </div>
+
+          {% if order.recipe.image %}
+          <div class="space"></div>
+          <img src="{{ order.recipe.image.url }}" class="responsive round border" alt="{{ order.recipe.title }}">
+          {% endif %}
+
+          <div class="divider"></div>
+
+          <div class="row">
+              <div class="max text-right">
+                  <span class="bold">{% trans "Total" %}</span>
+              </div>
+               <div class="min">
+                  <span class="bold text-primary">{{ order.total_price }} €</span>
+              </div>
+          </div>
+
+      </div>
+    </article>
+  </div>
+</div>
+{% endblock %}

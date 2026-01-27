@@ -11,6 +11,7 @@ import logging
 from django.urls import reverse
 from solo.models import SingletonModel
 from django.core.exceptions import ValidationError
+from django.core.validators import EmailValidator
 
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
@@ -21,7 +22,7 @@ hashed_storage = HashedFilenameStorage()
 class Setting(SingletonModel):
     site_name = models.CharField(max_length=255, default="Sandwitches")
     site_description = models.TextField(blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
+    email = models.EmailField(blank=True, null=True, validators=[EmailValidator()])
     ai_connection_point = models.URLField(blank=True, null=True)
     ai_model = models.CharField(max_length=255, blank=True, null=True)
     ai_api_key = models.CharField(max_length=255, blank=True, null=True)
@@ -34,6 +35,8 @@ class Setting(SingletonModel):
 
 
 class User(AbstractUser):
+    username = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(validators=[EmailValidator()])
     avatar = models.ImageField(upload_to="avatars", blank=True, null=True)
     avatar_thumbnail = ImageSpecField(
         source="avatar",
@@ -230,6 +233,9 @@ class Rating(models.Model):
 class Order(models.Model):
     STATUS_CHOICES = (
         ("PENDING", "Pending"),
+        ("PREPARING", "Preparing"),
+        ("MADE", "Made"),
+        ("SHIPPED", "Shipped"),
         ("COMPLETED", "Completed"),
         ("CANCELLED", "Cancelled"),
     )
@@ -239,6 +245,7 @@ class Order(models.Model):
     )
     recipe = models.ForeignKey(Recipe, related_name="orders", on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
+    completed = models.BooleanField(default=False)
     total_price = models.DecimalField(max_digits=6, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

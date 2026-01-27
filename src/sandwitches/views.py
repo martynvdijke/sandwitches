@@ -28,6 +28,7 @@ from PIL import Image
 from django.db.models import Q, Avg
 from django_tasks.backends.database.models import DBTaskResult
 from django.contrib.auth.views import LoginView
+from django.core.paginator import Paginator
 
 
 from sandwitches import __version__ as sandwitches_version
@@ -858,8 +859,52 @@ def user_profile(request):
             return redirect("user_profile")
     else:
         form = UserProfileForm(instance=request.user)
+
+    orders = request.user.orders.select_related("recipe").all()
+
+    # Filtering
+    status_filter = request.GET.get("status")
+    if status_filter:
+        orders = orders.filter(status=status_filter)
+
+    # Sorting
+    sort_param = request.GET.get("sort", "-created_at")
+    allowed_sorts = {
+        "date_asc": "created_at",
+        "date_desc": "-created_at",
+        "price_asc": "total_price",
+        "price_desc": "-total_price",
+        "status": "status",
+    }
+    order_by = allowed_sorts.get(sort_param, "-created_at")
+    orders = orders.order_by(order_by)
+
+    # Pagination
+    paginator = Paginator(orders, 5)  # Show 5 orders per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
     return render(
-        request, "profile.html", {"form": form, "version": sandwitches_version}
+        request,
+        "profile.html",
+        {
+            "form": form,
+            "version": sandwitches_version,
+            "orders": page_obj,
+            "current_status": status_filter,
+            "current_sort": sort_param,
+            "status_choices": Order.STATUS_CHOICES,
+        },
+    )
+
+
+@login_required
+def user_order_detail(request, pk):
+    order = get_object_or_404(Order, pk=pk, user=request.user)
+    return render(
+        request,
+        "order_detail.html",
+        {"order": order, "version": sandwitches_version},
     )
 
 

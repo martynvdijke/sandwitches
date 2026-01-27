@@ -34,6 +34,7 @@ urlpatterns = [
     path("login/", views.CustomLoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(next_page="index"), name="logout"),
     path("profile/", views.user_profile, name="user_profile"),
+    path("orders/<int:pk>/", views.user_order_detail, name="user_order_detail"),
     path("community/", views.community, name="community"),
     path("admin/", admin.site.urls),
     path("api/", api.urls),

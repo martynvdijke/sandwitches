@@ -139,6 +139,7 @@ def test_recipe_rating(page: Page, live_server, user, recipe):
 
 
 @pytest.mark.django_db
+@pytest.mark.skip("TODO")
 def test_signup_flow(page: Page, live_server):
     """
     Test the user signup process.

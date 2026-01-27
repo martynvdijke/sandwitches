@@ -90,6 +90,96 @@
 
       </form>
     </article>
+
+    <div class="large-space"></div>
+
+    <h4 class="center-align primary-text">{% trans "Order History" %}</h4>
+
+    <form method="get" class="row no-wrap middle-align">
+        <div class="field label border round small">
+            <select name="status" onchange="this.form.submit()">
+                <option value="">{% trans "All Statuses" %}</option>
+                {% for code, label in status_choices %}
+                <option value="{{ code }}" {% if current_status == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <label>{% trans "Filter by Status" %}</label>
+        </div>
+        <div class="space"></div>
+        <div class="field label border round small">
+             <select name="sort" onchange="this.form.submit()">
+                <option value="date_desc" {% if current_sort == 'date_desc' %}selected{% endif %}>{% trans "Newest First" %}</option>
+                <option value="date_asc" {% if current_sort == 'date_asc' %}selected{% endif %}>{% trans "Oldest First" %}</option>
+                <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>{% trans "Price: High to Low" %}</option>
+                <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>{% trans "Price: Low to High" %}</option>
+            </select>
+            <label>{% trans "Sort by" %}</label>
+        </div>
+    </form>
+
+    {% if orders %}
+    <div class="padding border round surface left-align">
+        <table class="border striped">
+            <thead>
+                <tr>
+                    <th class="min">#</th>
+                    <th class="max">{% trans "Recipe" %}</th>
+                    <th class="min">{% trans "Date" %}</th>
+                    <th class="min">{% trans "Status" %}</th>
+                    <th class="min">{% trans "Price" %}</th>
+                    <th class="min"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>
+                        <a href="{% url 'recipe_detail' order.recipe.slug %}">{{ order.recipe.title }}</a>
+                    </td>
+                    <td class="no-wrap">{{ order.created_at|date:"d/m/Y" }}</td>
+                    <td>
+                        <span class="chip tiny {% if order.status == 'PENDING' %}surface-variant{% elif order.status == 'COMPLETED' %}primary{% elif order.status == 'CANCELLED' %}error{% else %}secondary{% endif %}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="no-wrap">{{ order.total_price }} €</td>
+                    <td>
+                        <a href="{% url 'user_order_detail' order.id %}" class="button circle transparent small">
+                            <i>visibility</i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if orders.paginator.num_pages > 1 %}
+    <div class="center-align padding">
+        <nav class="row">
+            {% if orders.has_previous %}
+                <a href="?page={{ orders.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="button transparent circle"><i>chevron_left</i></a>
+            {% else %}
+                <button class="button transparent circle" disabled><i>chevron_left</i></button>
+            {% endif %}
+
+            <span class="padding">{{ orders.number }} / {{ orders.paginator.num_pages }}</span>
+
+            {% if orders.has_next %}
+                 <a href="?page={{ orders.next_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="button transparent circle"><i>chevron_right</i></a>
+            {% else %}
+                <button class="button transparent circle" disabled><i>chevron_right</i></button>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="padding border round surface">
+        <p class="center-align">{% trans "No previous orders found." %}</p>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
