@@ -86,6 +86,8 @@ class UserSignupForm(UserCreationForm, BaseUserFormMixin):
 
 
 class UserProfileForm(forms.ModelForm):
+    image_data = forms.CharField(widget=forms.HiddenInput(), required=False)
+
     class Meta:
         model = User
         fields = (
@@ -96,8 +98,25 @@ class UserProfileForm(forms.ModelForm):
             "bio",
         )
 
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        image_data = self.cleaned_data.get("image_data")
+        if image_data and image_data.startswith("data:image"):
+            import base64
+            from django.core.files.base import ContentFile
+
+            format, imgstr = image_data.split(";base64,")
+            ext = format.split("/")[-1]
+            data = ContentFile(base64.b64decode(imgstr), name=f"avatar.{ext}")
+            user.avatar = data
+        if commit:
+            user.save()
+        return user
+
 
 class UserEditForm(forms.ModelForm):
+    image_data = forms.CharField(widget=forms.HiddenInput(), required=False)
+
     class Meta:
         model = User
         fields = (
@@ -111,6 +130,21 @@ class UserEditForm(forms.ModelForm):
             "avatar",
             "bio",
         )
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        image_data = self.cleaned_data.get("image_data")
+        if image_data and image_data.startswith("data:image"):
+            import base64
+            from django.core.files.base import ContentFile
+
+            format, imgstr = image_data.split(";base64,")
+            ext = format.split("/")[-1]
+            data = ContentFile(base64.b64decode(imgstr), name=f"avatar.{ext}")
+            user.avatar = data
+        if commit:
+            user.save()
+        return user
 
 
 class TagForm(forms.ModelForm):
@@ -126,6 +160,7 @@ class RecipeForm(forms.ModelForm):
         widget=forms.TextInput(attrs={"placeholder": _("e.g. spicy, vegan, quick")}),
     )
     rotation = forms.IntegerField(widget=forms.HiddenInput(), initial=0, required=False)
+    image_data = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     class Meta:
         model = Recipe
@@ -153,11 +188,22 @@ class RecipeForm(forms.ModelForm):
             )
 
     def save(self, commit=True):
-        recipe = super().save(commit=commit)
+        recipe = super().save(commit=False)
 
-        # Handle rotation if an image exists and rotation is requested
+        # Handle base64 image data from cropper
+        image_data = self.cleaned_data.get("image_data")
+        if image_data and image_data.startswith("data:image"):
+            import base64
+            from django.core.files.base import ContentFile
+
+            format, imgstr = image_data.split(";base64,")
+            ext = format.split("/")[-1]
+            data = ContentFile(base64.b64decode(imgstr), name=f"recipe_image.{ext}")
+            recipe.image = data
+
+        # Handle rotation if an image exists and rotation is requested (fallback for simple rotation)
         rotation = self.cleaned_data.get("rotation", 0)
-        if rotation != 0 and recipe.image:
+        if rotation != 0 and recipe.image and not image_data:
             try:
                 from PIL import Image as PILImage
 
@@ -169,9 +215,9 @@ class RecipeForm(forms.ModelForm):
                 print(f"Error rotating image: {e}")
 
         if commit:
+            recipe.save()
             recipe.set_tags_from_string(self.cleaned_data.get("tags_string", ""))
         else:
-            # We'll need to handle this in the view if commit=False
             self.save_m2m = lambda: recipe.set_tags_from_string(
                 self.cleaned_data.get("tags_string", "")
             )
@@ -184,6 +230,7 @@ class UserRecipeSubmissionForm(forms.ModelForm):
         label=_("Tags (comma separated)"),
         widget=forms.TextInput(attrs={"placeholder": _("e.g. spicy, vegan, quick")}),
     )
+    image_data = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     class Meta:
         model = Recipe
@@ -201,8 +248,21 @@ class UserRecipeSubmissionForm(forms.ModelForm):
         }
 
     def save(self, commit=True):
-        recipe = super().save(commit=commit)
+        recipe = super().save(commit=False)
+
+        # Handle base64 image data from cropper
+        image_data = self.cleaned_data.get("image_data")
+        if image_data and image_data.startswith("data:image"):
+            import base64
+            from django.core.files.base import ContentFile
+
+            format, imgstr = image_data.split(";base64,")
+            ext = format.split("/")[-1]
+            data = ContentFile(base64.b64decode(imgstr), name=f"recipe_image.{ext}")
+            recipe.image = data
+
         if commit:
+            recipe.save()
             recipe.set_tags_from_string(self.cleaned_data.get("tags_string", ""))
         else:
             self.save_m2m = lambda: recipe.set_tags_from_string(

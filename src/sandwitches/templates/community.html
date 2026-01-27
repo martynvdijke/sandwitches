@@ -4,6 +4,17 @@
 {% block title %}{% trans "Community" %}{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+<style>
+    .cropper-container {
+        max-height: 70vh;
+    }
+    #cropper-image {
+        display: block;
+        max-width: 100%;
+    }
+</style>
 <main class="responsive">
 <div class="large-space"></div>
 <article class="round s12 m10 l8 offset-m1 offset-l2 elevate">
@@ -15,6 +26,7 @@
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
+            {{ form.image_data }}
 
             <div class="grid">
                 <div class="s12">
@@ -53,15 +65,21 @@
 
                 <!-- Image Upload with Preview -->
                 <div class="s12 m6">
-                     <div class="field label border round">
+                     <div class="field file label border round">
+                        <input type="text" readonly>
                         {{ form.image }}
                         <label>{% trans "Image" %}</label>
+                        <i>publish</i>
                     </div>
                 </div>
                 <div class="s12 m6 center-align relative">
-                    <div class="padding border round dashed surface-variant" style="min-height: 150px; display: flex; align-items: center; justify-content: center;">
-                         <img id="image-preview" src="{% if recipe.image %}{{ recipe.image.url }}{% endif %}" class="responsive round" style="max-height: 200px; {% if not recipe.image %}display:none;{% endif %}">
+                    <div class="padding border round dashed surface-variant" style="min-height: 150px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                         <img id="image-preview" src="{% if recipe.image %}{{ recipe.image.url }}{% endif %}" class="responsive round mb-1" style="max-height: 200px; {% if not recipe.image %}display:none;{% endif %}">
                          <span id="image-placeholder" class="gray-text" {% if recipe.image %}style="display:none;"{% endif %}>{% trans "Image Preview" %}</span>
+                         <button type="button" id="edit-image-btn" class="button transparent border round" style="display: none;" onclick="openCropper()">
+                            <i>crop_rotate</i>
+                            <span>{% trans "Edit Image" %}</span>
+                         </button>
                     </div>
                 </div>
 
@@ -101,6 +119,41 @@
     </div>
 </article>
 
+<dialog id="cropper-dialog" class="large">
+    <div class="padding">
+        <h5 class="bold mb-1">{% trans "Edit Image" %}</h5>
+        <div class="cropper-container mb-1">
+            <img id="cropper-image" src="">
+        </div>
+        <div class="row scroll no-space border round mb-1">
+            <button type="button" class="button transparent max" onclick="cropper.rotate(-90)" title="{% trans 'Rotate Left' %}">
+                <i>rotate_left</i>
+            </button>
+            <button type="button" class="button transparent max" onclick="cropper.rotate(90)" title="{% trans 'Rotate Right' %}">
+                <i>rotate_right</i>
+            </button>
+            <div class="divider vertical"></div>
+            <button type="button" class="button transparent max" onclick="cropper.scaleX(-cropper.getData().scaleX || -1)" title="{% trans 'Flip Horizontal' %}">
+                <i>flip</i>
+            </button>
+            <button type="button" class="button transparent max" onclick="cropper.scaleY(-cropper.getData().scaleY || -1)" title="{% trans 'Flip Vertical' %}">
+                <i>flip</i>
+            </button>
+            <div class="divider vertical"></div>
+            <button type="button" class="button transparent max" onclick="cropper.setAspectRatio(1)" title="{% trans '1:1' %}">1:1</button>
+            <button type="button" class="button transparent max" onclick="cropper.setAspectRatio(4/3)" title="{% trans '4:3' %}">4:3</button>
+            <button type="button" class="button transparent max" onclick="cropper.setAspectRatio(16/9)" title="{% trans '16:9' %}">16:9</button>
+            <button type="button" class="button transparent max" onclick="cropper.setAspectRatio(NaN)" title="{% trans 'Free' %}">
+                <i>crop_free</i>
+            </button>
+        </div>
+        <nav class="right-align">
+            <button type="button" class="button transparent" onclick="ui('#cropper-dialog')">{% trans "Cancel" %}</button>
+            <button type="button" class="button primary" onclick="applyCrop()">{% trans "Apply" %}</button>
+        </nav>
+    </div>
+</dialog>
+
 
 <div class="large-space"></div>
 
@@ -117,21 +170,67 @@
 
 {% block page_scripts %}
 <script>
-    // Image Preview Logic
-    var imageInput = document.querySelector('input[type="file"]');
+    let cropper;
+    const imageInput = document.querySelector('input[type="file"]');
+    const imagePreview = document.getElementById('image-preview');
+    const imagePlaceholder = document.getElementById('image-placeholder');
+    const editImageBtn = document.getElementById('edit-image-btn');
+    const imageDataInput = document.getElementsByName('image_data')[0];
+    const cropperImage = document.getElementById('cropper-image');
+
+    function openCropper() {
+        if (!imagePreview.src || imagePreview.src === window.location.href) return;
+        cropperImage.src = imagePreview.src;
+        ui('#cropper-dialog');
+
+        if (cropper) {
+            cropper.destroy();
+        }
+
+        setTimeout(() => {
+            cropper = new Cropper(cropperImage, {
+                viewMode: 1,
+                autoCropArea: 1,
+                responsive: true,
+                restore: false,
+                checkCrossOrigin: true,
+                guides: true,
+                center: true,
+                highlight: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false,
+            });
+        }, 100);
+    }
+
+    function applyCrop() {
+        const canvas = cropper.getCroppedCanvas({
+            maxWidth: 2000,
+            maxHeight: 2000,
+        });
+
+        const croppedData = canvas.toDataURL('image/jpeg', 0.9);
+        imagePreview.src = croppedData;
+        imagePreview.style.display = 'block';
+        if (imagePlaceholder) imagePlaceholder.style.display = 'none';
+        if (editImageBtn) editImageBtn.style.display = 'inline-flex';
+        imageDataInput.value = croppedData;
+
+        ui('#cropper-dialog');
+    }
+
     if (imageInput) {
         imageInput.onchange = function (evt) {
-            var tgt = evt.target || window.event.srcElement,
-                files = tgt.files;
-
+            const files = evt.target.files;
             if (FileReader && files && files.length) {
-                var fr = new FileReader();
+                const fr = new FileReader();
                 fr.onload = function () {
-                    var preview = document.getElementById('image-preview');
-                    var placeholder = document.getElementById('image-placeholder');
-                    preview.src = fr.result;
-                    preview.style.display = 'block';
-                    if(placeholder) placeholder.style.display = 'none';
+                    imagePreview.src = fr.result;
+                    imagePreview.style.display = 'block';
+                    if (imagePlaceholder) imagePlaceholder.style.display = 'none';
+                    if (editImageBtn) editImageBtn.style.display = 'inline-flex';
+                    openCropper();
                 }
                 fr.readAsDataURL(files[0]);
             }

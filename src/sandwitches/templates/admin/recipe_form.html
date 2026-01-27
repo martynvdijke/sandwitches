@@ -7,6 +7,8 @@
 {{ block.super }}
 <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
 <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 <style>
     /* Ensure EasyMDE fits well with BeerCSS containers */
     .editor-toolbar {
@@ -31,6 +33,14 @@
     .form-section {
         margin-bottom: 2rem;
     }
+    /* Cropper styles */
+    .cropper-container {
+        max-height: 70vh;
+    }
+    #cropper-image {
+        display: block;
+        max-width: 100%;
+    }
 </style>
 {% endblock %}
 
@@ -38,6 +48,7 @@
 <form method="post" enctype="multipart/form-data" id="recipe-form">
     {% csrf_token %}
     {{ form.rotation }}
+    {{ form.image_data }}
     <div class="grid">
         <!-- Top Section: Title, Tags, and Image -->
         <div class="s12 m8">
@@ -107,25 +118,21 @@
 
                 <div class="relative mb-1" style="overflow: hidden; min-height: 200px; display: flex; align-items: center; justify-content: center;">
                     {% if recipe.image %}
-                    <img src="{{ recipe.image_medium.url }}?v={% now "U" %}" class="responsive round" id="image-preview" style="max-height: 300px; width: 100%; object-fit: contain; transition: transform 0.3s ease;">
+                    <img src="{{ recipe.image_medium.url }}?v={% now "U" %}" class="responsive round" id="image-preview" style="max-height: 300px; width: 100%; object-fit: contain;">
                     {% else %}
+                    <img src="" class="responsive round" id="image-preview" style="max-height: 300px; width: 100%; object-fit: contain; display: none;">
                     <div class="medium-height middle-align center-align gray1 round" id="image-placeholder" style="width: 100%;">
                         <i class="extra">image</i>
                     </div>
                     {% endif %}
                 </div>
 
-                {% if recipe.image %}
-                <div class="row no-space border round mb-1">
-                    <button type="button" class="button transparent max" onclick="rotatePreview(-90)" title="{% trans 'Rotate 90° CCW' %}">
-                        <i>rotate_left</i>
-                    </button>
-                    <div class="divider vertical"></div>
-                    <button type="button" class="button transparent max" onclick="rotatePreview(90)" title="{% trans 'Rotate 90° CW' %}">
-                        <i>rotate_right</i>
+                <div id="image-tools" class="row no-space border round mb-1" style="{% if not recipe.image %}display: none;{% endif %}">
+                    <button type="button" class="button transparent max" onclick="openCropper()" title="{% trans 'Edit Image' %}">
+                        <i>crop_rotate</i>
+                        <span>{% trans "Edit" %}</span>
                     </button>
                 </div>
-                {% endif %}
 
                 <div class="field file border round">
                     <input type="text" readonly>
@@ -174,20 +181,110 @@
         </button>
     </nav>
 </form>
+
+<dialog id="cropper-dialog" class="large">
+    <div class="padding">
+        <h5 class="bold mb-1">{% trans "Edit Image" %}</h5>
+        <div class="cropper-container mb-1">
+            <img id="cropper-image" src="">
+        </div>
+        <div class="row scroll no-space border round mb-1">
+            <button type="button" class="button transparent max" onclick="cropper.rotate(-90)" title="{% trans 'Rotate Left' %}">
+                <i>rotate_left</i>
+            </button>
+            <button type="button" class="button transparent max" onclick="cropper.rotate(90)" title="{% trans 'Rotate Right' %}">
+                <i>rotate_right</i>
+            </button>
+            <div class="divider vertical"></div>
+            <button type="button" class="button transparent max" onclick="cropper.scaleX(-cropper.getData().scaleX || -1)" title="{% trans 'Flip Horizontal' %}">
+                <i>flip</i>
+            </button>
+            <button type="button" class="button transparent max" onclick="cropper.scaleY(-cropper.getData().scaleY || -1)" title="{% trans 'Flip Vertical' %}">
+                <i>flip</i>
+            </button>
+            <div class="divider vertical"></div>
+            <button type="button" class="button transparent max" onclick="cropper.setAspectRatio(1)" title="{% trans '1:1' %}">1:1</button>
+            <button type="button" class="button transparent max" onclick="cropper.setAspectRatio(4/3)" title="{% trans '4:3' %}">4:3</button>
+            <button type="button" class="button transparent max" onclick="cropper.setAspectRatio(16/9)" title="{% trans '16:9' %}">16:9</button>
+            <button type="button" class="button transparent max" onclick="cropper.setAspectRatio(NaN)" title="{% trans 'Free' %}">
+                <i>crop_free</i>
+            </button>
+        </div>
+        <nav class="right-align">
+            <button type="button" class="button transparent" onclick="ui('#cropper-dialog')">{% trans "Cancel" %}</button>
+            <button type="button" class="button primary" onclick="applyCrop()">{% trans "Apply" %}</button>
+        </nav>
+    </div>
+</dialog>
 {% endblock %}
 
 {% block admin_scripts %}
 <script>
-    let currentRotation = 0;
+    let cropper;
+    const imagePreview = document.getElementById('image-preview');
+    const imagePlaceholder = document.getElementById('image-placeholder');
+    const imageTools = document.getElementById('image-tools');
+    const imageInput = document.getElementById('id_image');
+    const imageDataInput = document.getElementById('id_image_data');
+    const cropperImage = document.getElementById('cropper-image');
 
-    function rotatePreview(angle) {
-        currentRotation = (currentRotation + angle) % 360;
-        const img = document.getElementById('image-preview');
-        if (img) {
-            img.style.transform = `rotate(${currentRotation}deg)`;
-            document.getElementsByName('rotation')[0].value = currentRotation;
+    function openCropper() {
+        if (!imagePreview.src || imagePreview.src === window.location.href) return;
+        cropperImage.src = imagePreview.src;
+        ui('#cropper-dialog');
+
+        if (cropper) {
+            cropper.destroy();
         }
+
+        setTimeout(() => {
+            cropper = new Cropper(cropperImage, {
+                viewMode: 1,
+                autoCropArea: 1,
+                responsive: true,
+                restore: false,
+                checkCrossOrigin: true,
+                guides: true,
+                center: true,
+                highlight: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false,
+            });
+        }, 100);
     }
+
+    function applyCrop() {
+        const canvas = cropper.getCroppedCanvas({
+            maxWidth: 2000,
+            maxHeight: 2000,
+        });
+
+        const croppedData = canvas.toDataURL('image/jpeg', 0.9);
+        imagePreview.src = croppedData;
+        imagePreview.style.display = 'block';
+        if (imagePlaceholder) imagePlaceholder.style.display = 'none';
+        imageTools.style.display = 'flex';
+        imageDataInput.value = croppedData;
+
+        ui('#cropper-dialog');
+    }
+
+    imageInput.addEventListener('change', function(e) {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                imagePreview.src = event.target.result;
+                imagePreview.style.display = 'block';
+                if (imagePlaceholder) imagePlaceholder.style.display = 'none';
+                imageTools.style.display = 'flex';
+                // Automatically open cropper for new images
+                openCropper();
+            };
+            reader.readAsDataURL(files[0]);
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', function() {
         const fields = ['id_description', 'id_ingredients', 'id_instructions'];
