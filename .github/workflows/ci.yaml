@@ -2,9 +2,11 @@ name: CI checks
 
 on:
   push:
+    branches-ignore:
+          - 'main'
+  pull_request:
     branches:
       - "**"
-
 jobs:
   ci:
     runs-on: ubuntu-latest

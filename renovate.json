@@ -11,6 +11,8 @@
   "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
   "ignorePresets": [":ignoreModulesAndTests"],
   "platform": "github",
+  "platformAutomerge": true,
+  "prAutomerge": true,
   "prCreation": "immediate",
   "prHourlyLimit": 10,
   "rebaseWhen": "conflicted",
