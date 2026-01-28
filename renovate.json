@@ -6,15 +6,16 @@
     ":combinePatchMinorReleases",
     "group:allNonMajor"
   ],
-  "timezone": "UTC+1",
-  "platform": "github",
-  "repositories": ["martynvdijke/sandwitches"],
-  "dependencyDashboard": true,
   "automergeType": "pr",
-  "prCreation": "immediate",
-  "ignorePresets": [":ignoreModulesAndTests"],
+  "dependencyDashboard": true,
   "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
+  "ignorePresets": [":ignoreModulesAndTests"],
+  "platform": "github",
+  "prCreation": "immediate",
+  "prHourlyLimit": 10,
   "rebaseWhen": "conflicted",
+  "repositories": ["martynvdijke/sandwitches"],
+  "timezone": "UTC+1",
   "lockFileMaintenance": {
     "enabled": true
   },
