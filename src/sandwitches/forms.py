@@ -300,7 +300,10 @@ class SettingForm(forms.ModelForm):
             "ai_connection_point",
             "ai_model",
             "ai_api_key",
+            "gotify_url",
+            "gotify_token",
         ]
         widgets = {
             "ai_api_key": forms.PasswordInput(render_value=True),
+            "gotify_token": forms.PasswordInput(render_value=True),
         }

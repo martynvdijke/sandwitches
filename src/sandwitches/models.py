@@ -4,7 +4,7 @@ from .storage import HashedFilenameStorage
 from simple_history.models import HistoricalRecords
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Avg
-from .tasks import email_users, notify_order_submitted
+from .tasks import email_users, notify_order_submitted, send_gotify_notification
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 import logging
@@ -26,6 +26,18 @@ class Setting(SingletonModel):
     ai_connection_point = models.URLField(blank=True, null=True)
     ai_model = models.CharField(max_length=255, blank=True, null=True)
     ai_api_key = models.CharField(max_length=255, blank=True, null=True)
+
+    gotify_url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="The URL of your Gotify server (e.g., https://gotify.example.com)",
+    )
+    gotify_token = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="The application token for Gotify",
+    )
 
     def __str__(self):
         return "Site Settings"
@@ -65,6 +77,16 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            send_gotify_notification.enqueue(
+                title="New User Created",
+                message=f"User {self.username} has joined Sandwitches!",
+                priority=4,
+            )
 
 
 class Tag(models.Model):
@@ -178,6 +200,12 @@ class Recipe(models.Model):
                 logging.warning(
                     "Email sending is disabled; not sending email notification, make sure SEND_EMAIL is set to True in settings."
                 )
+
+            send_gotify_notification.enqueue(
+                title="New Recipe Uploaded",
+                message=f"A new recipe '{self.title}' has been uploaded by {self.uploaded_by or 'Unknown'}.",
+                priority=5,
+            )
         else:
             logging.debug(
                 "Existing recipe saved (update); skipping email notification."
@@ -287,6 +315,11 @@ class Order(models.Model):
 
         if is_new:
             notify_order_submitted.enqueue(order_id=self.pk)
+            send_gotify_notification.enqueue(
+                title="New Order Received",
+                message=f"Order #{self.pk} for '{self.recipe.title}' by {self.user.username}. Total: {self.total_price}€",
+                priority=6,
+            )
 
     def __str__(self):
         return f"Order #{self.pk} - {self.user} - {self.recipe}"

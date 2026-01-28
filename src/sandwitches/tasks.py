@@ -1,5 +1,5 @@
-# from gunicorn.http.wsgi import log
 import logging
+import requests
 
 # from django.core.mail import send_mail
 from django_tasks import task
@@ -107,6 +107,36 @@ def notify_order_submitted(order_id):
     msg.send()
 
     logging.info(f"Order confirmation email sent to {user.email} for order {order.id}")
+
+
+@task(priority=1, queue_name="emails")
+def send_gotify_notification(title, message, priority=5):
+    from .models import Setting
+
+    config = Setting.get_solo()
+    url = config.gotify_url
+    token = config.gotify_token
+
+    if not url or not token:
+        logging.debug("Gotify URL or Token not configured. Skipping notification.")
+        return False
+
+    try:
+        response = requests.post(
+            f"{url.rstrip('/')}/message?token={token}",
+            json={
+                "title": title,
+                "message": message,
+                "priority": priority,
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
+        logging.info(f"Gotify notification sent: {title}")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to send Gotify notification: {e}")
+        return False
 
 
 def send_emails(recipe_id, emails):
