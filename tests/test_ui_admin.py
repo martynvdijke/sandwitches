@@ -211,3 +211,89 @@ def test_admin_rating_management_ui(page: Page, live_server, staff_user):
 
     expect(page.get_by_text("Rating deleted.").first).to_be_visible()
     expect(page.get_by_text("Terrible!")).not_to_be_visible()
+
+
+@pytest.mark.django_db
+def test_admin_gotify_settings_ui(page: Page, live_server):
+    # Use superuser directly to avoid PermissionDenied in Django Admin
+    User.objects.create_superuser("admin_ui", "admin@ui.com", "password")
+
+    # Ensure Setting instance exists
+    from sandwitches.models import Setting
+
+    Setting.objects.get_or_create()
+
+    # Login
+    page.goto(f"{live_server.url}/login/")
+    page.fill("input[name='username']", "admin_ui")
+    page.fill("input[name='password']", "password")
+    page.press("input[name='password']", "Enter")
+
+    # Go to Site Settings (Django Admin via Solo)
+    # Solo redirects but if it fails in test environment, we go direct
+    setting = Setting.get_solo()
+    page.goto(f"{live_server.url}/admin/sandwitches/setting/{setting.pk}/change/")
+
+    # Fill Gotify fields
+    page.fill("input[name='gotify_url']", "https://gotify.test.com")
+    page.fill("input[name='gotify_token']", "test-token-123")
+
+    # Save
+    page.click("input[name='_save']")
+
+    # Verify persistence
+    from sandwitches.models import Setting
+
+    config = Setting.get_solo()
+    assert config.gotify_url == "https://gotify.test.com"
+    assert config.gotify_token == "test-token-123"
+
+
+@pytest.mark.django_db
+def test_admin_photo_rotation_ui(page: Page, live_server, staff_user):
+    # Ensure superuser
+    User.objects.create_superuser("admin", "admin@example.com", "password")
+
+    # Create recipe with VALID image (1x1 transparent GIF)
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    gif_data = (
+        b"\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff"
+        b"\x00\x00\x00\x21\xf9\x04\x01\x00\x00\x00\x00\x2c\x00\x00\x00\x00"
+        b"\x01\x00\x01\x00\x00\x02\x02\x44\x01\x00\x3b"
+    )
+    image = SimpleUploadedFile("test.gif", gif_data, content_type="image/gif")
+    recipe = Recipe.objects.create(
+        title="Rotate Me", image=image, uploaded_by=staff_user
+    )
+
+    # Login
+    page.goto(f"{live_server.url}/login/")
+    page.fill("input[name='username']", "staff_ui")
+    page.fill("input[name='password']", "password")
+    page.press("input[name='password']", "Enter")
+
+    # Go to edit recipe
+    page.goto(f"{live_server.url}/dashboard/recipes/{recipe.pk}/edit/")
+
+    # Click "Edit" button to open cropper
+    page.click("button:has-text('Edit')")
+
+    # Verify cropper dialog is visible
+    expect(page.locator("#cropper-dialog")).to_be_visible()
+
+    # Find rotation buttons (rotate_left, rotate_right icons)
+    expect(page.locator("i:has-text('rotate_left')")).to_be_visible()
+    expect(page.locator("i:has-text('rotate_right')")).to_be_visible()
+
+    # Click rotate right
+    page.click("i:has-text('rotate_right')")
+
+    # Click Apply
+    page.click("button:has-text('Apply')")
+
+    # Dialog should close
+    expect(page.locator("#cropper-dialog")).not_to_be_visible()
+
+    # Check that image_data hidden field is now populated with base64
+    expect(page.locator("input[name='image_data']")).not_to_have_value("")

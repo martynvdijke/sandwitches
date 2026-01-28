@@ -253,3 +253,82 @@ def test_update_profile_ui(page: Page, live_server, user):
     # Verify values persisted
     expect(page.locator("input[name='first_name']")).to_have_value("UpdatedFirst")
     expect(page.get_by_text("This is my new bio.")).to_be_visible()
+
+
+@pytest.mark.django_db
+def test_user_settings_ui(page: Page, live_server, user):
+    """
+    Test changing user settings (language and theme).
+    """
+    User.objects.create_superuser("admin", "admin@example.com", "password")
+
+    # Login
+    page.goto(f"{live_server.url}/login/")
+    page.fill("input[name='username']", "testuser")
+    page.fill("input[name='password']", "password")
+    page.press("input[name='password']", "Enter")
+
+    # Go to settings
+    page.goto(f"{live_server.url}/settings/")
+
+    # Change theme to dark
+    page.select_option("select[name='theme']", "dark")
+    # Change language to Nederlands
+    page.select_option("select[name='language']", "nl")
+
+    page.click("button:has-text('Save changes')")
+
+    # Verify redirection and success message (in Dutch if language changed correctly)
+    # The message in Dutch for "Settings updated successfully." is "Instellingen succesvol bijgewerkt."
+    # But since activation might take a refresh or it's on the next page:
+    expect(page).to_have_url(re.compile(r".*/settings/$"))
+
+    # Check if the body has 'dark' class or data-ui attribute if BeerCSS uses it
+    # BeerCSS usually uses <body class="dark"> or similar.
+    # Let's check the database first to be sure it saved.
+    user.refresh_from_db()
+    assert user.theme == "dark"
+    assert user.language == "nl"
+
+
+@pytest.mark.django_db
+def test_order_tracking_ui(page: Page, live_server, user, recipe):
+    """
+    Test that orders appear in the profile and filtering works.
+    """
+    User.objects.create_superuser("admin", "admin@example.com", "password")
+    from sandwitches.models import Order
+    from decimal import Decimal
+
+    # Recipe must have a price
+    recipe.price = Decimal("15.00")
+    recipe.save()
+
+    # Create an order
+    Order.objects.create(
+        user=user, recipe=recipe, status="SHIPPED", total_price=Decimal("15.00")
+    )
+
+    # Login
+    page.goto(f"{live_server.url}/login/")
+    page.fill("input[name='username']", "testuser")
+    page.fill("input[name='password']", "password")
+    page.press("input[name='password']", "Enter")
+
+    # Go to profile
+    page.goto(f"{live_server.url}/profile/")
+
+    # Check that order is visible
+    # Use more specific locator for status chip to avoid ambiguity with the filter dropdown
+    expect(page.locator("span.chip", has_text="Shipped")).to_be_visible()
+    expect(page.get_by_text("15.00 €")).to_be_visible()
+    expect(page.get_by_text(recipe.title)).to_be_visible()
+
+    # Filter by Status
+    page.select_option("select[name='status']", "PENDING")
+    # Page should reload
+    expect(page.get_by_text("No previous orders found.")).to_be_visible()
+
+    # Filter back to all or shipped
+    page.select_option("select[name='status']", "SHIPPED")
+    expect(page.locator("span.chip", has_text="Shipped")).to_be_visible()
