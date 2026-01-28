@@ -1,5 +1,5 @@
 # Stage 1: Build static assets with Node.js
-FROM node:22 AS builder
+FROM node:24 AS builder
 
 WORKDIR /build
 COPY package.json package-lock.json ./
