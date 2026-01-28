@@ -1,3 +1,16 @@
+# [2.5.0](https://github.com/martynvdijke/sandwitches/compare/v2.4.1...v2.5.0) (2026-01-28)
+
+
+### Bug Fixes
+
+* add user config panel to clean up ui ([501a014](https://github.com/martynvdijke/sandwitches/commit/501a014b7161ae36bb8abbe7203208453ef19cfe))
+
+
+### Features
+
+* add gotify notifications ([8965e20](https://github.com/martynvdijke/sandwitches/commit/8965e20778d590afe9b6858d408e85b0659c8201))
+* **ci:** add noreavate support ([efacab0](https://github.com/martynvdijke/sandwitches/commit/efacab07c3ca126368be9847b6813c98c33f9e30))
+
 ## [2.4.1](https://github.com/martynvdijke/sandwitches/compare/v2.4.0...v2.4.1) (2026-01-27)
 
 
