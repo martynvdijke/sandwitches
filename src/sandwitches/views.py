@@ -908,7 +908,6 @@ def user_settings(request):
             user = form.save()
             # Update language in session and cookie
             translation.activate(user.language)
-            request.session[translation.LANGUAGE_SESSION_KEY] = user.language  # ty:ignore[unresolved-attribute]
             messages.success(request, _("Settings updated successfully."))
             response = redirect("user_settings")
             response.set_cookie(settings.LANGUAGE_COOKIE_NAME, user.language)
