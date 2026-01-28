@@ -6,22 +6,31 @@
     ":combinePatchMinorReleases",
     "group:allNonMajor"
   ],
-  "timezone": "UTC",
-  "schedule": ["every day"],
+  "timezone": "UTC+1",
+  "platform": "github",
+  "repositories": ["martynvdijke/sandwitches"],
+  "dependencyDashboard": true,
+  "automergeType": "pr",
+  "prCreation": "immediate",
+  "ignorePresets": [":ignoreModulesAndTests"],
+  "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
+  "rebaseWhen": "conflicted",
+  "lockFileMaintenance": {
+    "enabled": true
+  },
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true
     }
   ],
-  "npm": {
+  "github-actions": {
     "enabled": true
   },
-  "pip_python": {
-    "enabled": true,
-    "fileMatch": ["(^|/)/pyproject\.toml$"]
+  "pep621": {
+    "enabled": true
   },
-  "uv": {
+  "npm": {
     "enabled": true
   }
 }
