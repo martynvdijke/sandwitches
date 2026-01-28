@@ -139,7 +139,6 @@ def test_recipe_rating(page: Page, live_server, user, recipe):
 
 
 @pytest.mark.django_db
-@pytest.mark.skip("TODO")
 def test_signup_flow(page: Page, live_server):
     """
     Test the user signup process.
@@ -153,6 +152,7 @@ def test_signup_flow(page: Page, live_server):
     page.fill("input[name='first_name']", "New")
     page.fill("input[name='last_name']", "User")
     page.fill("input[name='username']", new_username)
+    page.fill("input[name='email']", "new@example.com")
     # Use a stronger password to avoid validation errors
     strong_pass = "SecurePass123!"
     page.fill("input[name='password1']", strong_pass)
@@ -167,7 +167,6 @@ def test_signup_flow(page: Page, live_server):
 
 
 @pytest.mark.django_db
-@pytest.mark.skip(reason="Flaky test - needs investigation")
 def test_order_sandwich_ui(page: Page, live_server, user, recipe):
     """
     Test ordering a sandwich and verifying the success message.
@@ -186,13 +185,11 @@ def test_order_sandwich_ui(page: Page, live_server, user, recipe):
     # Go to recipe
     page.goto(f"{live_server.url}/recipes/{recipe.slug}/")
 
-    # Click Order
-    page.click("button:has-text('Order Now')")
+    # Click Add to Cart
+    page.click("button:has-text('Add to Cart')")
 
-    # Verify success message
-    expect(
-        page.get_by_text(f"Your order for {recipe.title} has been submitted!")
-    ).to_be_visible()
+    # Verify success message (Added [title] to your cart.)
+    expect(page.get_by_text(f"Added {recipe.title} to your cart.")).to_be_visible()
 
 
 @pytest.mark.django_db

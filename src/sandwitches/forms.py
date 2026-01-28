@@ -128,6 +128,7 @@ class UserEditForm(forms.ModelForm):
             "email",
             "is_staff",
             "is_active",
+            "language",
             "avatar",
             "bio",
         )

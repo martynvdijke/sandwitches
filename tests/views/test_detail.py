@@ -150,7 +150,6 @@ def test_detail_view_tags_are_linked(client):
 
 
 @pytest.mark.django_db
-@pytest.mark.skip(reason="no way of currently testing this")
 def test_detail_view_uploader_is_linked(client):
     User.objects.create_superuser("admin", "admin@example.com", "strongpassword123")
     uploader = User.objects.create_user("chef", "chef@example.com", "pw")
