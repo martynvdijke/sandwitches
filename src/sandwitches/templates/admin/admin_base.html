@@ -30,9 +30,6 @@
     <h6 class="max">{% block admin_title %}{% trans "Sandwitches Admin" %}{% endblock %}</h6>
   </a>
   <div class="max"></div>
-  <button class="circle transparent" onclick="toggleMode()">
-    <i>dark_mode</i>
-  </button>
 
   {% if user.avatar %}
   <img src="{{ user.avatar.url }}" class="circle" data-ui="#user-menu">

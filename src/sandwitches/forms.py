@@ -1,5 +1,4 @@
 from django import forms
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import gettext_lazy as _
@@ -47,11 +46,6 @@ class AdminSetupForm(forms.ModelForm, BaseUserFormMixin):
 
 
 class UserSignupForm(UserCreationForm, BaseUserFormMixin):
-    language = forms.ChoiceField(
-        choices=settings.LANGUAGES,
-        label=_("Preferred language"),
-        initial=settings.LANGUAGE_CODE,
-    )
     avatar = forms.ImageField(label=_("Profile Image"), required=False)
     bio = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 3}), label=_("Bio"), required=False
@@ -64,7 +58,6 @@ class UserSignupForm(UserCreationForm, BaseUserFormMixin):
             "first_name",
             "last_name",
             "email",
-            "language",
             "avatar",
             "bio",
         )
@@ -77,7 +70,6 @@ class UserSignupForm(UserCreationForm, BaseUserFormMixin):
         user.is_superuser = False
         user.is_staff = False
         # Explicitly save the extra fields if they aren't automatically handled by ModelForm save (they should be if in Meta.fields)
-        user.language = self.cleaned_data["language"]
         user.avatar = self.cleaned_data["avatar"]
         user.bio = self.cleaned_data["bio"]
         if commit:
@@ -114,6 +106,16 @@ class UserProfileForm(forms.ModelForm):
         return user
 
 
+class UserSettingsForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ("language", "theme")
+        labels = {
+            "language": _("Preferred Language"),
+            "theme": _("Preferred Theme"),
+        }
+
+
 class UserEditForm(forms.ModelForm):
     image_data = forms.CharField(widget=forms.HiddenInput(), required=False)
 
@@ -126,7 +128,6 @@ class UserEditForm(forms.ModelForm):
             "email",
             "is_staff",
             "is_active",
-            "language",
             "avatar",
             "bio",
         )

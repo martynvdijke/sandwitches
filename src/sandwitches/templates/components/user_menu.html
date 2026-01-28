@@ -1,6 +1,7 @@
 {% load i18n %}
 {% if user.is_authenticated %}
 <menu id="user-menu" class="no-wrap left">
+  <a href="{% url 'user_settings' %}" class="row"><i>settings</i>{% trans "Settings" %}</a>
   {% if user.is_staff %}
   <a href="{% url 'admin_dashboard' %}" class="row"><i>admin_panel_settings</i>{% trans "Admin" %}</a>
   <div class="divider"></div>

@@ -7,12 +7,6 @@
     <img src="{% static 'icons/icon.svg' %}" class="circle small">
   </a>
   <div class="max"></div>
-  <button class="circle transparent" onclick="ui('mode', ui('mode') == 'dark' ? 'light' : 'dark')">
-    <i>dark_mode</i>
-  </button>
-  <button class="circle transparent" data-ui="#language-menu">
-      <i>language</i>
-  </button>
 
   {% if user.is_authenticated %}
     <a href="{% url 'view_cart' %}" class="button circle transparent">

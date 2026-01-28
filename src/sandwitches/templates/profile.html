@@ -84,6 +84,7 @@
         <div class="large-space"></div>
 
         <nav class="right-align">
+            <a class="button transparent border round" href="{% url 'user_settings' %}"><i>settings</i> {% trans "Settings" %}</a>
             <a class="button transparent border round" href="{% url 'index' %}">{% trans "Cancel" %}</a>
             <button type="submit" class="button primary round">{% trans "Save changes" %}</button>
         </nav>

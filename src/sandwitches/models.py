@@ -50,6 +50,11 @@ class User(AbstractUser):
         choices=settings.LANGUAGES,
         default=settings.LANGUAGE_CODE,
     )
+    theme = models.CharField(
+        max_length=10,
+        choices=[("light", "Light"), ("dark", "Dark")],
+        default="light",
+    )
     favorites = models.ManyToManyField(
         "Recipe", related_name="favorited_by", blank=True
     )

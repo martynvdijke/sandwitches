@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.translation import gettext as _
+from django.utils import translation
 from .models import Recipe, Rating, Tag, Order, CartItem
 from .forms import (
     RecipeForm,
@@ -18,6 +19,7 @@ from .forms import (
     TagForm,
     UserProfileForm,
     UserRecipeSubmissionForm,
+    UserSettingsForm,
 )
 from django.http import HttpResponseBadRequest, Http404
 from django.conf import settings
@@ -894,6 +896,32 @@ def user_profile(request):
             "current_status": status_filter,
             "current_sort": sort_param,
             "status_choices": Order.STATUS_CHOICES,
+        },
+    )
+
+
+@login_required
+def user_settings(request):
+    if request.method == "POST":
+        form = UserSettingsForm(request.POST, instance=request.user)
+        if form.is_valid():
+            user = form.save()
+            # Update language in session and cookie
+            translation.activate(user.language)
+            request.session[translation.LANGUAGE_SESSION_KEY] = user.language  # ty:ignore[unresolved-attribute]
+            messages.success(request, _("Settings updated successfully."))
+            response = redirect("user_settings")
+            response.set_cookie(settings.LANGUAGE_COOKIE_NAME, user.language)
+            return response
+    else:
+        form = UserSettingsForm(instance=request.user)
+
+    return render(
+        request,
+        "settings.html",
+        {
+            "form": form,
+            "version": sandwitches_version,
         },
     )
 

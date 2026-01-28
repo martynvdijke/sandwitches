@@ -19,6 +19,10 @@
             <i class="extra padding">group</i>
             <span class="large-text">{% trans "Community" %}</span>
         </a>
+        <a href="{% url 'user_settings' %}" class="padding {% if request.resolver_match.url_name == 'user_settings' %}active{% endif %}">
+            <i class="extra padding">settings</i>
+            <span class="large-text">{% trans "Settings" %}</span>
+        </a>
         {% endif %}
         <a href="/api/docs" class="padding">
             <i class="extra padding">api</i>

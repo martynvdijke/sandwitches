@@ -1,0 +1,53 @@
+{% extends "base_beer.html" %}
+{% load static i18n %}
+{% block title %}{% trans "Settings" %}{% endblock %}
+
+{% block content %}
+<div class="large-space"></div>
+
+<div class="grid">
+  <div class="s12 m8 l6 xl4 middle-align center-align" style="margin: 0 auto;">
+    <article class="round elevate">
+      <div class="padding">
+          <h4 class="center-align primary-text">{% trans "User Settings" %}</h4>
+      </div>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="field label border round {% if form.language.errors %}error{% endif %}">
+            <select name="{{ form.language.name }}" id="{{ form.language.id_for_label }}">
+                {% for value, label in form.language.field.choices %}
+                <option value="{{ value }}" {% if form.language.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <label>{% trans "Preferred Language" %}</label>
+            {% if form.language.errors %}
+                <span class="helper error-text">{{ form.language.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <div class="field label border round {% if form.theme.errors %}error{% endif %}">
+            <select name="{{ form.theme.name }}" id="{{ form.theme.id_for_label }}">
+                {% for value, label in form.theme.field.choices %}
+                <option value="{{ value }}" {% if form.theme.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <label>{% trans "Preferred Theme" %}</label>
+            {% if form.theme.errors %}
+                <span class="helper error-text">{{ form.theme.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <div class="large-space"></div>
+
+        <nav class="right-align">
+            <a class="button transparent border round" href="{% url 'index' %}">{% trans "Cancel" %}</a>
+            <button type="submit" class="button primary round">{% trans "Save changes" %}</button>
+        </nav>
+
+      </form>
+    </article>
+  </div>
+</div>
+{% endblock %}
