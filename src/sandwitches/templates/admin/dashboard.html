@@ -13,313 +13,123 @@
 {% block content %}
 
 <div class="row align-center mb-2">
-
     <div class="max"></div>
-
     <form method="get" class="row no-space border round padding surface-variant">
-
         <div class="field label small transparent">
-
             <input type="date" name="start_date" value="{{ start_date }}">
-
             <label>{% trans "Start Date" %}</label>
-
         </div>
-
         <div class="divider vertical"></div>
-
         <div class="field label small transparent">
-
             <input type="date" name="end_date" value="{{ end_date }}">
-
             <label>{% trans "End Date" %}</label>
-
         </div>
-
         <button type="submit" class="button primary square"><i>refresh</i></button>
-
     </form>
-
 </div>
 
 
 
 <div class="grid">
-
     <div class="s12 m4">
-
         <article class="round primary-container padding">
-
             <div class="row align-center">
-
                 <i class="extra">restaurant</i>
-
                 <div class="max">
-
                     <h4 class="bold">{{ recipe_count }}</h4>
-
                     <div>{% trans "Recipes" %}</div>
-
                 </div>
-
             </div>
-
             <nav class="right-align">
-
                 <a href="{% url 'admin_recipe_list' %}" class="button transparent">{% trans "View all" %}</a>
-
             </nav>
-
         </article>
-
     </div>
 
     <div class="s12 m4">
-
         <article class="round secondary-container padding">
-
             <div class="row align-center">
-
                 <i class="extra">people</i>
-
                 <div class="max">
-
                     <h4 class="bold">{{ user_count }}</h4>
-
                     <div>{% trans "Users" %}</div>
-
                 </div>
-
             </div>
-
             <nav class="right-align">
-
                 <a href="{% url 'admin_user_list' %}" class="button transparent">{% trans "View all" %}</a>
-
             </nav>
-
         </article>
-
     </div>
 
     <div class="s12 m4">
-
         <article class="round tertiary-container padding">
-
             <div class="row align-center">
-
                 <i class="extra">label</i>
-
                 <div class="max">
-
                     <h4 class="bold">{{ tag_count }}</h4>
-
                     <div>{% trans "Tags" %}</div>
-
                 </div>
-
             </div>
-
             <nav class="right-align">
-
                 <a href="{% url 'admin_tag_list' %}" class="button transparent">{% trans "View all" %}</a>
-
             </nav>
-
         </article>
-
+    </div>
+    <div class="s12">
+        {% include "admin/partials/dashboard_charts.html" %}
     </div>
 
-
-
-        <!-- Charts Section -->
-
-
-
-            <div class="s12">
-
-
-
-                {% include "admin/partials/dashboard_charts.html" %}
-
-
-
-            </div>
-
-
-
-
-
-
-
-            {% if pending_recipes %}
-
-
-
-            <div class="s12">
-
-
-
-                <h5 class="bold error-text">{% trans "Pending Approvals" %}</h5>
-
-
-
-                <table class="border striped no-space">
-
-
-
-                    <thead>
-
-
-
-                        <tr>
-
-
-
-                            <th>{% trans "Title" %}</th>
-
-
-
-                            <th>{% trans "Uploader" %}</th>
-
-
-
-                            <th>{% trans "Created At" %}</th>
-
-
-
-                            <th class="right-align">{% trans "Actions" %}</th>
-
-
-
-                        </tr>
-
-
-
-                    </thead>
-
-
-
-                    <tbody>
-
-
-
-                        {% for recipe in pending_recipes %}
-
-
-
-                        <tr class="pointer" onclick="location.href='{% url 'admin_recipe_edit' recipe.pk %}'">
-
-
-
-                            <td>{{ recipe.title }}</td>
-
-
-
-                            <td>{{ recipe.uploaded_by.username|default:"-" }}</td>
-
-
-
-                            <td>{{ recipe.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
-
-
-
-                            <td class="right-align">
-
-
-
-                                <a href="{% url 'admin_recipe_approve' recipe.pk %}" class="button circle transparent" onclick="event.stopPropagation();" title="{% trans 'Approve' %}"><i>check</i></a>
-
-
-
-                                <a href="{% url 'admin_recipe_edit' recipe.pk %}" class="button circle transparent" onclick="event.stopPropagation();"><i>edit</i></a>
-
-
-
-                            </td>
-
-
-
-                        </tr>
-
-
-
-                        {% endfor %}
-
-
-
-                    </tbody>
-
-
-
-                </table>
-
-
-
-            </div>
-
-
-
-            {% endif %}
-
-
-
-
-
-
-
-            <div class="s12">
-
-
-
-                <h5 class="bold">{% trans "Recent Recipes" %}</h5>
-
+    <div class="s12">
+        <h5 class="bold error-text">{% trans "Pending Approvals" %}</h5>
         <table class="border striped no-space">
-
             <thead>
-
                 <tr>
-
                     <th>{% trans "Title" %}</th>
-
                     <th>{% trans "Uploader" %}</th>
-
                     <th>{% trans "Created At" %}</th>
-
                     <th class="right-align">{% trans "Actions" %}</th>
-
                 </tr>
-
             </thead>
-
             <tbody>
-
-                {% for recipe in recent_recipes %}
-
+                {% for recipe in pending_recipes %}
                 <tr class="pointer" onclick="location.href='{% url 'admin_recipe_edit' recipe.pk %}'">
-
                     <td>{{ recipe.title }}</td>
-
                     <td>{{ recipe.uploaded_by.username|default:"-" }}</td>
-
                     <td>{{ recipe.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
-
                     <td class="right-align">
-
+                        <a href="{% url 'admin_recipe_approve' recipe.pk %}" class="button circle transparent" onclick="event.stopPropagation();" title="{% trans 'Approve' %}"><i>check</i></a>
                         <a href="{% url 'admin_recipe_edit' recipe.pk %}" class="button circle transparent" onclick="event.stopPropagation();"><i>edit</i></a>
-
                     </td>
-
                 </tr>
-
                 {% endfor %}
-
             </tbody>
-
         </table>
-
     </div>
-
+    <div class="s12">
+        <h5 class="bold">{% trans "Recent Recipes" %}</h5>
+        <table class="border striped scroll surface">
+            <thead>
+                <tr>
+                    <th>{% trans "Title" %}</th>
+                    <th>{% trans "Uploader" %}</th>
+                    <th>{% trans "Created At" %}</th>
+                    <th >{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for recipe in recent_recipes %}
+                <tr class="pointer" onclick="location.href='{% url 'admin_recipe_edit' recipe.pk %}'">
+                    <td>{{ recipe.title }}</td>
+                    <td>{{ recipe.uploaded_by.username|default:"-" }}</td>
+                    <td>{{ recipe.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+                    <td>
+                        <a href="{% url 'admin_recipe_edit' recipe.pk %}" class="button circle transparent" onclick="event.stopPropagation();"><i>edit</i></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 {% endblock %}

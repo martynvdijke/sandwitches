@@ -12,22 +12,18 @@
     </a>
 </div>
 
-<table class="border striped no-space">
+<table class="border striped large-space scroll surface">
     <thead>
         <tr>
-            <th class="min">{% trans "ID" %}</th>
-            <th class="max">{% trans "Name" %}</th>
-            <th>{% trans "Slug" %}</th>
-            <th class="right-align">{% trans "Actions" %}</th>
+            <th>{% trans "Name" %}</th>
+            <th>{% trans "Actions" %}</th>
         </tr>
     </thead>
     <tbody>
         {% for tag in tags %}
         <tr class="pointer" onclick="location.href='{% url 'admin_tag_edit' tag.pk %}'">
-            <td class="min">{{ tag.id }}</td>
-            <td class="max"><b>{{ tag.name }}</b></td>
-            <td>{{ tag.slug }}</td>
-            <td class="right-align">
+            <td><b>{{ tag.name }}</b></td>
+            <td>
                 <a href="{% url 'admin_tag_delete' tag.pk %}" class="button circle transparent" onclick="event.stopPropagation();" title="{% trans 'Delete' %}"><i>delete</i></a>
             </td>
         </tr>

@@ -104,17 +104,7 @@
 {% endblock %}
 
 {% block footer %}
-<footer class="padding">
-    <div class="row align-center">
-        <div class="max">
-            <h6 class="small">Sandwitches Admin</h6>
-            <div class="small-text">© {% now "Y" %} Sandwitches Inc.</div>
-        </div>
-        <nav>
-            version {{ version }}
-        </nav>
-    </div>
-</footer>
+    {% include "components/footer.html" %}
 {% endblock %}
 
 {% block extra_scripts %}
