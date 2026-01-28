@@ -4,7 +4,7 @@ import 'beercss/dist/cdn/beer.min.css';
 import 'beercss/dist/cdn/beer.min.js';
 import Chart from 'chart.js/auto';
 import Cropper from 'cropperjs';
-import 'cropperjs/dist/cropper.css';
+import 'cropperjs/dist/cropper.min.js';
 
 // This makes Chart available to your HTML/scripts
 window.Chart = Chart;
