@@ -18,7 +18,6 @@
   "lockFileMaintenance": {
     "enabled": true
   },
-  "baseBranchPatterns": ["$default", "next"],
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
