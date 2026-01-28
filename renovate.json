@@ -7,19 +7,28 @@
     "group:allNonMajor"
   ],
   "timezone": "UTC+1",
-  "schedule": ["at any time"],
   "platform": "github",
   "repositories": ["martynvdijke/sandwitches"],
+  "dependencyDashboard": true,
+  "automergeType": "pr",
+  "prCreation": "immediate",
+  "ignorePresets": [":ignoreModulesAndTests"],
+  "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
+  "rebaseWhen": "conflicted",
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "baseBranchPatterns": ["$default", "next"],
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true
     }
   ],
-  "pip_setup": {
+  "github-actions": {
     "enabled": true
   },
-  "uv": {
+  "pep621": {
     "enabled": true
   },
   "npm": {
