@@ -7,7 +7,7 @@
     "group:allNonMajor"
   ],
   "timezone": "UTC+1",
-  "schedule": ["every day"],
+  "schedule": ["at any time"],
   "platform": "github",
   "repositories": ["martynvdijke/sandwitches"],
   "packageRules": [
@@ -16,14 +16,13 @@
       "automerge": true
     }
   ],
-  "npm": {
+  "pip_setup": {
     "enabled": true
   },
-  "pip": {
-    "enabled": true,
-    "fileMatch": ["(^|/)/pyproject\\.toml$"]
-  },
   "uv": {
+    "enabled": true
+  },
+  "npm": {
     "enabled": true
   }
 }
