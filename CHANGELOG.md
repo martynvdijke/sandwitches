@@ -1,3 +1,13 @@
+## [2.5.1](https://github.com/martynvdijke/sandwitches/compare/v2.5.0...v2.5.1) (2026-01-28)
+
+
+### Bug Fixes
+
+* renovate config ([463f015](https://github.com/martynvdijke/sandwitches/commit/463f0153c8e8bc5998d5a5b4d7fe8a9d540d761b))
+* renovate config v2 ([8afcf61](https://github.com/martynvdijke/sandwitches/commit/8afcf615582438c159ade2518372932779bc2231))
+* renovate config v3 ([9470a87](https://github.com/martynvdijke/sandwitches/commit/9470a87a9b9b2181bfa251e938f91eb59054c3f8))
+* renovate config v4 ([242b0cd](https://github.com/martynvdijke/sandwitches/commit/242b0cded29b3e6ccaae8f435af67cf6dac13969))
+
 # [2.5.0](https://github.com/martynvdijke/sandwitches/compare/v2.4.1...v2.5.0) (2026-01-28)
 
 
