@@ -6,8 +6,10 @@
     ":combinePatchMinorReleases",
     "group:allNonMajor"
   ],
-  "timezone": "UTC",
+  "timezone": "UTC+1",
   "schedule": ["every day"],
+  "platform": "github",
+  "repositories": ["martynvdijke/sandwitches"],
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
@@ -17,9 +19,9 @@
   "npm": {
     "enabled": true
   },
-  "pip_python": {
+  "pip": {
     "enabled": true,
-    "fileMatch": ["(^|/)/pyproject\.toml$"]
+    "fileMatch": ["(^|/)/pyproject\\.toml$"]
   },
   "uv": {
     "enabled": true
