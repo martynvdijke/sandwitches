@@ -86,6 +86,6 @@ def test_admin_recipe_list_columns(client):
     content = response.content.decode()
 
     # Check for new columns/values
-    assert "15.50 €" in content
+    assert "€ 15.50" in content
     assert "5 / 10" in content
     assert "star" in content  # Highlight icon

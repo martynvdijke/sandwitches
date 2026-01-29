@@ -13,11 +13,24 @@
         </div>
     </td>
     <td>{{ order.recipe.title }}</td>
-    <td>{{ order.total_price }} €</td>
+    <td>€ {{ order.total_price }} </td>
     <td>
-        <span class="chip {% if order.status == 'PENDING' %}surface-variant{% elif order.status == 'COMPLETED' %}primary{% elif order.status == 'CANCELLED' %}error{% else %}secondary{% endif %}">
-            {{ order.get_status_display }}
-        </span>
+        <form method="post" action="{% url 'admin_order_update_status' order.pk %}" class="row align-center no-space">
+            {% csrf_token %}
+            <div class="field border round small no-margin">
+                <select name="status" onchange="this.form.submit()" {% if order.status == 'COMPLETED' or order.status == 'CANCELLED' %}disabled{% endif %}>
+                    {% for val, label in status_choices %}
+                    <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <i>arrow_drop_down</i>
+            </div>
+            {% if order.status == 'COMPLETED' or order.status == 'CANCELLED' %}
+            <span class="chip {% if order.status == 'COMPLETED' %}primary{% else %}error{% endif %} margin">
+                {{ order.get_status_display }}
+            </span>
+            {% endif %}
+        </form>
     </td>
     <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
 </tr>

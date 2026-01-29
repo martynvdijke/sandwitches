@@ -12,7 +12,7 @@
     <a href="{% url 'view_cart' %}" class="button circle transparent">
         <i>shopping_cart</i>
         {% if user.cart_items.exists %}
-        <badge class="red">{{ user.cart_items.count }}</badge>
+        <badge class="tertiary round small-padding">{{ user.cart_items.count }}</badge>
         {% endif %}
     </a>
     <a href="{% url 'user_profile' %}">
@@ -22,9 +22,9 @@
       <img src="https://www.w3schools.com/howto/img_avatar.png" class="circle">
       {% endif %}
     </a>
-    <button class="circle transparent" data-ui="#user-menu">
+    <a href="{% url 'user_settings' %}" class="{% if request.resolver_match.url_name == 'user_settings' %}active{% endif %}">
       <i>more_vert</i>
-    </button>
+    </a>
   {% else %}
     <a href="{% url 'login' %}"><button class="chip transparent border white-text">{% trans "Login" %}</button></a>
     <a href="{% url 'signup' %}"><button class="chip primary">{% trans "Sign up" %}</button></a>

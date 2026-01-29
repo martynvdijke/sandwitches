@@ -1,3 +1,20 @@
+## [2.5.2](https://github.com/martynvdijke/sandwitches/compare/v2.5.1...v2.5.2) (2026-01-29)
+
+
+### Bug Fixes
+
+* **ci:** add back in ci tests and update renovate ([852f987](https://github.com/martynvdijke/sandwitches/commit/852f98719565cd8e9a0108d338555167a6d41a94))
+* **ci:** update ci checks to run on all pr's ([4b2ac36](https://github.com/martynvdijke/sandwitches/commit/4b2ac36f07021a8a1f75aeefcfbd024c83ce8e2d))
+* **ci:** update renovate with correct config ([82ab090](https://github.com/martynvdijke/sandwitches/commit/82ab0909dc3eb70ba9aa0fcc4e612c0f7c428b35))
+* cropper js import ([b05d41f](https://github.com/martynvdijke/sandwitches/commit/b05d41f491783e15f095b6fb0fb4e76c77e1b4bd))
+* **deps:** update dependency beercss to v4 ([3088299](https://github.com/martynvdijke/sandwitches/commit/3088299b2756965cab6c7e61583b49a0b3aa8013))
+* **deps:** update dependency cropperjs to v2 ([15a35f3](https://github.com/martynvdijke/sandwitches/commit/15a35f3e3e193902ee98ff742794d5f192c17cb2))
+* release workflow and settings fix ([38f58ce](https://github.com/martynvdijke/sandwitches/commit/38f58ceb287f8f6b0a01e2c447611985c2134e24))
+* release workflow and settings fix ([6009b39](https://github.com/martynvdijke/sandwitches/commit/6009b3976e6332a9c6984db0642e9ee688ce0645))
+* tests ([f20962f](https://github.com/martynvdijke/sandwitches/commit/f20962f4fc0bb31f8af30bc73ff5ffefc2ca99f1))
+* tests & add request depedency ([1d3f451](https://github.com/martynvdijke/sandwitches/commit/1d3f451db9ba5d83474293a959d29191c9d95fb8))
+* **ui:** make admin tables bigger and more readable ([15948b6](https://github.com/martynvdijke/sandwitches/commit/15948b65872027d850e6999f7ed1275f50988859))
+
 ## [2.5.1](https://github.com/martynvdijke/sandwitches/compare/v2.5.0...v2.5.1) (2026-01-28)
 
 

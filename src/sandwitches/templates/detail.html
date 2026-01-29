@@ -81,10 +81,9 @@
 
 <div class="large-space"></div>
 
-<div class="grid">
-  <!-- Left Column: Image and Main Info -->
-  <div class="s12 m12 l5">
-     <article class="round no-padding elevate">
+<div>
+  <aside class="left rounded padding">
+    <article class="round no-padding elevate">
         {% if recipe.image %}
         <img src="{{ recipe.image_large.url }}"
              srcset="{{ recipe.image_medium.url }} 700w, {{ recipe.image_large.url }} 1200w"
@@ -128,8 +127,6 @@
             </div>
 
             <div class="space"></div>
-            <div class="divider"></div>
-            <div class="space"></div>
 
             {% include "components/rating_section.html" %}
 
@@ -142,31 +139,26 @@
             {% endif %}
         </div>
      </article>
-  </div>
-
-  <!-- Right Column: Details -->
-  <div class="s12 m12 l7">
-      <div class="padding">
-
-          <h5 class="primary-text">{% trans "Description" %}</h5>
-          <div class="large-text">
-            {% if recipe.description %}
-                {{ recipe.description|convert_markdown|safe }}
-            {% else %}
-                <p class="italic">{% trans "No description yet." %}</p>
-            {% endif %}
-          </div>
-
-          <div class="large-space"></div>
-
-          {% include "components/ingredients_section.html" %}
-
-          <div class="large-space"></div>
-
-          {% include "components/instructions_section.html" %}
-      </div>
-  </div>
+  </aside>
+  <h5>{{ recipe.title }}</h5>
+    <div class="large-padding">
+      <div class="page active">
+        <h5 class="primary-text">{% trans "Description" %}</h5>
+        <div class="large-text">
+          {% if recipe.description %}
+              {{ recipe.description|convert_markdown|safe }}
+          {% else %}
+              <p class="italic">{% trans "No description yet." %}</p>
+          {% endif %}
+        </div>
+        <div class="small-space"></div>
+        {% include "components/ingredients_section.html" %}
+        <div class="small-space"></div>
+        {% include "components/instructions_section.html" %}
+        </div>
+    </div>
 </div>
+
 {% endblock %}
 
 {% block extra_scripts %}

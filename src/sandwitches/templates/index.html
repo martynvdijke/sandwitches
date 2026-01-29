@@ -36,10 +36,10 @@
 <h4 class="upper center-align">{% trans 'Highlights' %}</h4>
 <div class="small-space"></div>
 <div class="relative">
-    <div class="row scroll snap no-scrollbar" id="highlighted-carousel" style="gap: 20px; flex-wrap: nowrap;">
+    <div class="row scroll snap no-scrollbar large-padding" id="highlighted-carousel" style="gap: 20px; flex-wrap: nowrap;">
         {% for recipe in highlighted_recipes %}
         <a href="{{ recipe.get_absolute_url }}">
-        <article class="round no-padding elevate" style="min-width: 300px; width: 300px; flex-shrink: 0; scroll-snap-align: start;">
+        <article class="round no-padding elevate tertiary-container" style="min-width: 300px; width: 300px; flex-shrink: 0; scroll-snap-align: start;">
                 {% if recipe.image %}
                 <img src="{{ recipe.image_medium.url }}" class="responsive top-round" alt="{{ recipe.title }}" style="height: 200px; object-fit: cover;">
                 {% else %}
@@ -54,7 +54,6 @@
         </a>
         {% endfor %}
     </div>
-    
     <button class="circle surface absolute left middle-align elevate" onclick="scrollCarousel(-1)" style="top: 50%; transform: translateY(-50%); left: -20px; z-index: 10;">
         <i>chevron_left</i>
     </button>
