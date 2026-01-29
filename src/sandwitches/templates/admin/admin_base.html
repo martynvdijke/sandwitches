@@ -26,8 +26,7 @@
     <i>menu</i>
   </button>
   <a href="{% url 'admin_dashboard' %}" class="row align-center">
-    <img src="{% static 'icons/icon.svg' %}" class="circle small">
-    <h6 class="max">{% trans "Sandwitches Admin" %} | {% block admin_title %}{% endblock %}</h6>
+    <img src="{% static 'icons/icon.svg' %}" class="circle">
   </a>
   <div class="max"></div>
 
@@ -45,52 +44,52 @@
             <h5 class="max">{% trans "Admin" %}</h5>
         </header>
         <div class="space"></div>
-        <a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+        <a href="{% url 'admin_dashboard' %}" class="padding {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
             <i>dashboard</i>
-            <span>{% trans "Dashboard" %}</span>
+            <span class="large-text">{% trans "Dashboard" %}</span>
         </a>
-        <a href="{% url 'admin_recipe_list' %}" class="{% if request.resolver_match.url_name == 'admin_recipe_list' %}active{% endif %}">
+        <a href="{% url 'admin_recipe_list' %}" class="padding {% if request.resolver_match.url_name == 'admin_recipe_list' %}active{% endif %}">
             <i>restaurant</i>
-            <span>{% trans "Recipes" %}</span>
+            <span class="large-text">{% trans "Recipes" %}</span>
         </a>
-        <a href="{% url 'admin_recipe_approval_list' %}" class="{% if request.resolver_match.url_name == 'admin_recipe_approval_list' %}active{% endif %}">
+        <a href="{% url 'admin_recipe_approval_list' %}" class="padding {% if request.resolver_match.url_name == 'admin_recipe_approval_list' %}active{% endif %}">
             <i>how_to_reg</i>
-            <span>{% trans "Approvals" %}</span>
+            <span class="large-text">{% trans "Approvals" %}</span>
         </a>
-        <a href="{% url 'admin_user_list' %}" class="{% if request.resolver_match.url_name == 'admin_user_list' %}active{% endif %}">
+        <a href="{% url 'admin_user_list' %}" class="padding {% if request.resolver_match.url_name == 'admin_user_list' %}active{% endif %}">
             <i>people</i>
-            <span>{% trans "Users" %}</span>
+            <span class="large-text">{% trans "Users" %}</span>
         </a>
-        <a href="{% url 'admin_tag_list' %}" class="{% if request.resolver_match.url_name == 'admin_tag_list' %}active{% endif %}">
+        <a href="{% url 'admin_tag_list' %}" class="padding {% if request.resolver_match.url_name == 'admin_tag_list' %}active{% endif %}">
             <i>label</i>
-            <span>{% trans "Tags" %}</span>
+            <span class="large-text">{% trans "Tags" %}</span>
         </a>
-        <a href="{% url 'admin_rating_list' %}" class="{% if request.resolver_match.url_name == 'admin_rating_list' %}active{% endif %}">
+        <a href="{% url 'admin_rating_list' %}" class="padding {% if request.resolver_match.url_name == 'admin_rating_list' %}active{% endif %}">
             <i>star</i>
-            <span>{% trans "Ratings" %}</span>
+            <span class="large-text">{% trans "Ratings" %}</span>
         </a>
-        <a href="{% url 'admin_order_list' %}" class="{% if request.resolver_match.url_name == 'admin_order_list' %}active{% endif %}">
+        <a href="{% url 'admin_order_list' %}" class="padding {% if request.resolver_match.url_name == 'admin_order_list' %}active{% endif %}">
             <i>shopping_cart</i>
-            <span>{% trans "Orders" %}</span>
+            <span class="large-text">{% trans "Orders" %}</span>
         </a>
-        <a href="{% url 'admin_settings' %}" class="{% if request.resolver_match.url_name == 'admin_settings' %}active{% endif %}">
+        <a href="{% url 'admin_settings' %}" class="padding {% if request.resolver_match.url_name == 'admin_settings' %}active{% endif %}">
             <i>settings</i>
-            <span>{% trans "Site Settings" %}</span>
+            <span class="large-text">{% trans "Site Settings" %}</span>
         </a>
-        <a href="{% url 'admin_task_list' %}" class="{% if request.resolver_match.url_name == 'admin_task_list' %}active{% endif %}">
+        <a href="{% url 'admin_task_list' %}" class="padding {% if request.resolver_match.url_name == 'admin_task_list' %}active{% endif %}">
             <i>assignment</i>
-            <span>{% trans "Tasks" %}</span>
+            <span class="large-text">{% trans "Tasks" %}</span>
         </a>
         <div class="divider"></div>
-        <a href="{% url 'index' %}">
+        <a href="{% url 'index' %}" class="padding">
             <i>home</i>
-            <span>{% trans "Public Site" %}</span>
+            <span class="large-text">{% trans "Public Site" %}</span>
         </a>
     </nav>
 </dialog>
 
 {% if user.is_authenticated %}
-<menu id="user-menu" class="no-wrap left">
+<menu id="user-menu" class="left">
   <a href="{% url 'admin:logout' %}" class="row"><i>logout</i>{% trans "Logout" %}</a>
 </menu>
 {% endif %}

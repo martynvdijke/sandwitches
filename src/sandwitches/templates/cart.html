@@ -15,31 +15,31 @@
     {% if cart_items %}
     <div class="grid">
         <div class="s12 m8">
-            <div class="padding border round surface">
-                <table class="border striped no-space">
+            <div class="padding border round secondary-container">
+                <table class="border striped large-space">
                     <thead>
                         <tr>
-                            <th class="min">{% trans "Item" %}</th>
-                            <th class="max">{% trans "Description" %}</th>
-                            <th class="min">{% trans "Quantity" %}</th>
-                            <th class="min">{% trans "Price" %}</th>
-                            <th class="min"></th>
+                            <th>{% trans "Item" %}</th>
+                            <th>{% trans "Description" %}</th>
+                            <th>{% trans "Quantity" %}</th>
+                            <th>{% trans "Price" %}</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in cart_items %}
                         <tr>
-                            <td class="min">
+                            <td>
                                 {% if item.recipe.image %}
-                                <img src="{{ item.recipe.image_thumbnail.url }}" class="circle small">
+                                <img src="{{ item.recipe.image_thumbnail.url }}" class="large circle" alt="{{ item.recipe.title }}">
                                 {% else %}
                                 <i class="circle small gray1">restaurant</i>
                                 {% endif %}
                             </td>
-                            <td class="max">
+                            <td>
                                 <a href="{% url 'recipe_detail' item.recipe.slug %}" class="bold">{{ item.recipe.title }}</a>
                             </td>
-                            <td class="min">
+                            <td>
                                 <form action="{% url 'update_cart_quantity' item.pk %}" method="post" class="row no-space align-center">
                                     {% csrf_token %}
                                     <div class="field border round small no-margin" style="width: 80px;">
@@ -47,8 +47,8 @@
                                     </div>
                                 </form>
                             </td>
-                            <td class="min no-wrap">{{ item.total_price }} €</td>
-                            <td class="min">
+                            <td>{{ item.total_price }} €</td>
+                            <td>
                                 <a href="{% url 'remove_from_cart' item.pk %}" class="button circle transparent">
                                     <i>delete</i>
                                 </a>
@@ -66,7 +66,6 @@
                     <div class="max">{% trans "Subtotal" %}</div>
                     <div class="bold">{{ total }} €</div>
                 </div>
-                <div class="divider mt-1 mb-1"></div>
                 <div class="row">
                     <div class="max bold">{% trans "Total" %}</div>
                     <div class="bold large-text">{{ total }} €</div>
@@ -74,14 +73,14 @@
                 <div class="space"></div>
                 <form action="{% url 'checkout_cart' %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="button primary round extend">
+                    <button type="submit" class="button primary round">
                         <i>check</i>
                         <span>{% trans "Checkout" %}</span>
                     </button>
                 </form>
             </article>
             <div class="space"></div>
-            <a href="{% url 'index' %}" class="button transparent extend">
+            <a href="{% url 'index' %}" class="button secondary round">
                 <i>arrow_back</i>
                 <span>{% trans "Continue Shopping" %}</span>
             </a>

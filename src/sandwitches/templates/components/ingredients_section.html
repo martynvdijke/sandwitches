@@ -6,6 +6,6 @@
     <input type="number" id="portions" value="{{ recipe.servings }}" min="1" onchange="scaleIngredients()">
     <button class="button circle transparent" onclick="adjustPortions(1)">+</button>
 </div>
- <div id="ingredients-display" class="card padding flat gray1">
+ <div id="ingredients-display" class="card padding">
   <p class="text-center">{% trans "Loading ingredients..." %}</p>
  </div>

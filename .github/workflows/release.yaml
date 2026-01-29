@@ -9,7 +9,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yaml
+    secrets: inherit
+
   release:
+    needs: ci
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     name: Release
     runs-on: ubuntu-latest
@@ -36,15 +41,6 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
 
-      - name: Install the project
-        run: uv sync --locked --all-extras --dev
-
-      - name: Run invoke.ci
-        run: uv run invoke ci
-
-      - name: Run uv lock (for version bump)
-        run: uv lock
-
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v5
         with:
@@ -69,12 +65,9 @@ jobs:
           UV_PUBLISH_USERNAME: ${{ secrets.PYPI_USERNAME }}
           UV_PUBLISH_PASSWORD: ${{ secrets.PYPI_TOKEN }}
 
-      - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag martynvandijke/sandwitches:latest
-
       - name: Push Docker image
         run: |
-           docker push martynvandijke/sandwitches:latest
-           echo "Pushing versioned tag: ${{ steps.uv_version.outputs.version }}"
-           docker tag martynvandijke/sandwitches:latest martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}
-           docker push martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}
+          docker push martynvandijke/sandwitches:latest
+          echo "Pushing versioned tag: ${{ steps.uv_version.outputs.version }}"
+          docker tag martynvandijke/sandwitches:latest martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}
+          docker push martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}

@@ -40,6 +40,7 @@
               <textarea name="{{ rating_form.comment.name }}" placeholder="{% trans "Add a comment (optional)" %}">{{ user_rating.comment|default:"" }}</textarea>
               <label>{% trans "Comment" %}</label>
           </div>
+          <div class="space"></div>
           <button type="submit" class="button primary round mt-2">{% trans "Submit Rating" %}</button>
       </form>
   </article>

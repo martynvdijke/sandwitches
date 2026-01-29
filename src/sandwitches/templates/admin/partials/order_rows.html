@@ -13,7 +13,7 @@
         </div>
     </td>
     <td>{{ order.recipe.title }}</td>
-    <td>{{ order.total_price }} €</td>
+    <td>€ {{ order.total_price }} </td>
     <td>
         <form method="post" action="{% url 'admin_order_update_status' order.pk %}" class="row align-center no-space">
             {% csrf_token %}

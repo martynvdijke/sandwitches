@@ -2,7 +2,7 @@
 <div class="grid justify-center" id="recipe-grid">
   {% for recipe in recipes %}
   <div class="s12 m6 l4 xl3 recipe-card">
-    <article class="round no-padding elevate">
+    <article class="round no-padding elevate secondary-container">
        <div style="position: relative;">
          {% if recipe.image %}
          <img src="{{ recipe.image_medium.url }}" class="responsive top-round" style="height:220px; width:100%; object-fit:cover; cursor:pointer;" loading="lazy" alt="{{ recipe.title }}" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">
@@ -14,18 +14,27 @@
 
          {% if user.is_authenticated %}
          <div class="absolute top left padding">
-             <a href="{% url 'toggle_favorite' recipe.pk %}" class="button circle surface white-text">
-                <i class="{% if recipe in user.favorites.all %}primary-text{% else %}black-text{% endif %}">
+             <a href="{% url 'toggle_favorite' recipe.pk %}" class="button circle transparent">
+                <i class="{% if recipe in user.favorites.all %}red-text{% else %}black-text{% endif %}">
                     {% if recipe in user.favorites.all %}favorite{% else %}favorite_border{% endif %}
                 </i>
              </a>
          </div>
          {% endif %}
+        {% if user.is_authenticated and recipe.price %}
+         <div class="absolute top right padding">
+          <form action="{% url 'add_to_cart' recipe.pk %}" method="post" class="ml-1">
+              {% csrf_token %}
+              <button type="submit" class="button circle primary" title="{% trans 'Add to Cart' %}">
+                <i>add_shopping_cart</i>
+              </button>
+          </form>
+         </div>
+         {% endif %}
        </div>
 
-       <div class="padding">
+       <div class="padding grow">
          <h5 class="truncate pointer" onclick="location.href='{% url 'recipe_detail' recipe.slug %}';">{{ recipe.title }}</h5>
-
          {% if recipe.price %}
          <div class="row align-center mb-1">
             <i class="small-text primary-text">euro_symbol</i>
@@ -48,23 +57,27 @@
                 <span class="tiny-text left-margin">{% trans "Unknown" %}</span>
             {% endif %}
          </div>
-
          <div class="space"></div>
-
          <div class="row wrap">
-             {% if recipe.favorited_by.all %}
+             {% with favoriters=recipe.favorited_by.all %}
+             {% with count=favoriters.count %}
+             {% if count > 0 %}
                 <span class="tiny-text">
-                    {% if recipe.favorited_by.count == 1 %}
-                        {% trans "Liked by" %} {{ recipe.favorited_by.first.username }}
+                    {% trans "Liked by" %}
+                    {% if count == 1 %}
+                        {{ favoriters.0.username }}
+                    {% elif count == 2 %}
+                        {{ favoriters.0.username }} {% trans "and" %} {{ favoriters.1.username }}
                     {% else %}
-                        {% trans "Liked by" %} {{ recipe.favorited_by.first.username }} {% trans "and" %} {{ recipe.favorited_by.count|add:"-1" }} {% trans "others" %}
+                        {{ favoriters.0.username }}, {{ favoriters.1.username }} {% trans "and" %} {{ count|add:"-2" }} {% trans "others" %}
                     {% endif %}
                 </span>
              {% endif %}
+             {% endwith %}
+             {% endwith %}
          </div>
 
          <div class="space"></div>
-
          <div class="row wrap">
            {% for tag in recipe.tags.all %}
            <a href="{% url 'index' %}?tag={{ tag.name|urlencode }}" class="chip small round surface margin-bottom">{{ tag.name }}</a>
@@ -77,14 +90,6 @@
            <span>{% trans 'View' %}</span>
            <i class="suffix">arrow_forward</i>
          </a>
-         {% if user.is_authenticated and recipe.price %}
-         <form action="{% url 'add_to_cart' recipe.pk %}" method="post" class="ml-1">
-            {% csrf_token %}
-            <button type="submit" class="button circle primary" title="{% trans 'Add to Cart' %}">
-              <i>add_shopping_cart</i>
-            </button>
-         </form>
-         {% endif %}
        </div>
     </article>
   </div>

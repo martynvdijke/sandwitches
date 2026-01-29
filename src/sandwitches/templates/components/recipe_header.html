@@ -3,7 +3,7 @@
     <h4 class="bold max">{{ recipe.title }}</h4>
     {% if user.is_authenticated %}
     <a href="{% url 'toggle_favorite' recipe.pk %}" id="favorite-toggle-button" class="button circle transparent" title="{% trans 'Toggle Favorite' %}">
-        <i class="{% if recipe in user.favorites.all %}primary-text{% else %}black-text{% endif %}">
+        <i class="{% if recipe in user.favorites.all %}red-text{% else %}primary-text{% endif %}">
             {% if recipe in user.favorites.all %}favorite{% else %}favorite_border{% endif %}
         </i>
     </a>

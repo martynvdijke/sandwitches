@@ -38,7 +38,6 @@
                 <th>{% trans "Rating" %}
                     <i class="primary-text">star</i>
                 </th>
-                <th>{% trans "Approved" %}</th>
                 <th>{% trans "Tags" %}</th>
                 <th>
                     <a href="?sort={% if current_sort == 'uploader' %}-uploader{% else %}uploader{% endif %}" class="row align-center">
@@ -75,7 +74,7 @@
             </td>
             <td>
                 {% if recipe.price %}
-                {{ recipe.price }} €
+                € {{ recipe.price }}
                 {% else %}
                 -
                 {% endif %}
@@ -88,13 +87,6 @@
                     <i class="primary-text">star</i>
                     <span>{{ recipe.avg_rating|default:0|floatformat:1 }}</span>
                 </div>
-            </td>
-            <td class="center-align">
-                {% if recipe.is_approved %}
-                <i class="primary-text">check_circle</i>
-                {% else %}
-                <i class="primary-text">close</i>
-                {% endif %}
             </td>
             <td>
                 {% for tag in recipe.tags.all %}

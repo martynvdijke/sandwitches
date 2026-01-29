@@ -5,8 +5,7 @@
 {% block content %}
 <div class="large-space"></div>
 
-<div class="grid">
-  <div class="s12 m10 l8 xl6 middle-align center-align" style="margin: 0 auto;">
+  <div class="s12 m10 l8 xl6 middle-align center-align" >
     <article class="round elevate">
       <div class="padding">
           <h4 class="center-align primary-text">{% trans "Edit your profile" %}</h4>
@@ -73,7 +72,7 @@
                     </label>
                 </div>
                  {% if user.avatar %}
-                    <img src="{{ user.avatar.url }}" class="circle small">
+                    <img src="{{ user.avatar.url }}" class="circle">
                  {% endif %}
             </nav>
             {% if form.avatar.errors %}
@@ -91,13 +90,13 @@
 
       </form>
     </article>
+    </div>
 
     <div class="large-space"></div>
-
-    <h4 class="center-align primary-text">{% trans "Order History" %}</h4>
-
+    <div class="middle-align center-align ">
+    <h4 class="center-align padding">{% trans "Order History" %}</h4>
     <form method="get" class="row no-wrap middle-align">
-        <div class="field label border round small">
+        <div class="field label border round">
             <select name="status" onchange="this.form.submit()">
                 <option value="">{% trans "All Statuses" %}</option>
                 {% for code, label in status_choices %}
@@ -107,7 +106,7 @@
             <label>{% trans "Filter by Status" %}</label>
         </div>
         <div class="space"></div>
-        <div class="field label border round small">
+        <div class="field label border round">
              <select name="sort" onchange="this.form.submit()">
                 <option value="date_desc" {% if current_sort == 'date_desc' %}selected{% endif %}>{% trans "Newest First" %}</option>
                 <option value="date_asc" {% if current_sort == 'date_asc' %}selected{% endif %}>{% trans "Oldest First" %}</option>
@@ -117,18 +116,19 @@
             <label>{% trans "Sort by" %}</label>
         </div>
     </form>
+    </div>
 
     {% if orders %}
     <div class="padding border round surface left-align">
-        <table class="border striped">
+        <table class="border striped large-space">
             <thead>
                 <tr>
-                    <th class="min">#</th>
-                    <th class="max">{% trans "Recipe" %}</th>
-                    <th class="min">{% trans "Date" %}</th>
-                    <th class="min">{% trans "Status" %}</th>
-                    <th class="min">{% trans "Price" %}</th>
-                    <th class="min"></th>
+                    <th>{% trans "Order Id" %}</th>
+                    <th>{% trans "Recipe" %}</th>
+                    <th>{% trans "Date" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Price" %}</th>
+                    <th>{% trans "View Order" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -138,13 +138,13 @@
                     <td>
                         <a href="{% url 'recipe_detail' order.recipe.slug %}">{{ order.recipe.title }}</a>
                     </td>
-                    <td class="no-wrap">{{ order.created_at|date:"d/m/Y" }}</td>
+                    <td>{{ order.created_at|date:"d/m/Y" }}</td>
                     <td>
                         <span class="chip tiny {% if order.status == 'PENDING' %}surface-variant{% elif order.status == 'COMPLETED' %}primary{% elif order.status == 'CANCELLED' %}error{% else %}secondary{% endif %}">
                             {{ order.get_status_display }}
                         </span>
                     </td>
-                    <td class="no-wrap">{{ order.total_price }} €</td>
+                    <td>{{ order.total_price }} €</td>
                     <td>
                         <a href="{% url 'user_order_detail' order.id %}" class="button circle transparent small">
                             <i>visibility</i>
@@ -182,5 +182,5 @@
     </div>
     {% endif %}
   </div>
-</div>
+
 {% endblock %}
