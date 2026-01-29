@@ -1,0 +1,41 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<main class="container">
+    <article class="round padding">
+        <header>
+            <h5 class="max">{% trans "Site Settings" %}</h5>
+        </header>
+        <div class="space"></div>
+        <form method="post">
+            {% csrf_token %}
+            <div class="grid">
+                {% for field in form %}
+                <div class="s12 m6">
+                    <div class="field label border round">
+                        {{ field }}
+                        <label>{{ field.label }}</label>
+                        {% if field.help_text %}
+                        <div class="helper">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% if field.errors %}
+                        <span class="error">{{ field.errors|striptags }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="space"></div>
+            <nav class="right-align">
+                <button type="submit" class="button primary round">
+                    <i>save</i>
+                    <span>{% trans "Save Settings" %}</span>
+                </button>
+            </nav>
+        </form>
+    </article>
+</main>
+{% endblock %}

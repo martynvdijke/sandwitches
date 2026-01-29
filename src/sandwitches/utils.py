@@ -51,6 +51,9 @@ COMMON_UNITS = {
     "to taste",
 }
 
+# Simple in-memory DB for order status tracking
+ORDER_DB = {}
+
 
 def parse_ingredient_line(line):
     """

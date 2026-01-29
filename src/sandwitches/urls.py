@@ -120,7 +120,13 @@ urlpatterns += i18n_patterns(
         views.admin_rating_delete,
         name="admin_rating_delete",
     ),
+    path("dashboard/settings/", views.admin_settings, name="admin_settings"),
     path("dashboard/orders/", views.admin_order_list, name="admin_order_list"),
+    path(
+        "dashboard/orders/<int:pk>/status/",
+        views.admin_order_update_status,
+        name="admin_order_update_status",
+    ),
     prefix_default_language=True,
 )
 

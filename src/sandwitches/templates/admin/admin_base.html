@@ -73,6 +73,10 @@
             <i>shopping_cart</i>
             <span>{% trans "Orders" %}</span>
         </a>
+        <a href="{% url 'admin_settings' %}" class="{% if request.resolver_match.url_name == 'admin_settings' %}active{% endif %}">
+            <i>settings</i>
+            <span>{% trans "Site Settings" %}</span>
+        </a>
         <a href="{% url 'admin_task_list' %}" class="{% if request.resolver_match.url_name == 'admin_task_list' %}active{% endif %}">
             <i>assignment</i>
             <span>{% trans "Tasks" %}</span>

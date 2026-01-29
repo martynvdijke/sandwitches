@@ -9,7 +9,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.translation import gettext as _
 from django.utils import translation
-from .models import Recipe, Rating, Tag, Order, CartItem
+from .models import Recipe, Rating, Tag, Order, CartItem, Setting
+from .utils import ORDER_DB
 from .forms import (
     RecipeForm,
     AdminSetupForm,
@@ -20,6 +21,7 @@ from .forms import (
     UserProfileForm,
     UserRecipeSubmissionForm,
     UserSettingsForm,
+    SettingForm,
 )
 from django.http import HttpResponseBadRequest, Http404
 from django.conf import settings
@@ -492,6 +494,52 @@ def admin_rating_delete(request, pk):
 
 
 @staff_member_required
+def admin_settings(request):
+    instance = Setting.get_solo()
+    if request.method == "POST":
+        form = SettingForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _("Site settings updated successfully."))
+            return redirect("admin_settings")
+    else:
+        form = SettingForm(instance=instance)
+    return render(
+        request,
+        "admin/settings.html",
+        {"form": form, "title": _("Site Settings"), "version": sandwitches_version},
+    )
+
+
+@staff_member_required
+def admin_order_update_status(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    if request.method == "POST":
+        new_status = request.POST.get("status")
+        if new_status in dict(Order.STATUS_CHOICES):
+            # Immutability check: if status is CANCELLED or COMPLETED, it shouldn't be changed
+            if order.status in ["COMPLETED", "CANCELLED"]:
+                messages.error(
+                    request,
+                    _("Cannot change status of a completed or cancelled order."),
+                )
+            else:
+                order.status = new_status
+                if new_status == "COMPLETED":
+                    order.completed = True
+                order.save()
+
+                # Update ORDER_DB
+                ORDER_DB[order.pk] = new_status
+
+                messages.success(request, _("Order status updated."))
+        else:
+            messages.error(request, _("Invalid status."))
+
+    return redirect("admin_order_list")
+
+
+@staff_member_required
 def admin_order_list(request):
     orders = (
         Order.objects.select_related("user", "recipe")  # ty:ignore[unresolved-attribute]
@@ -503,13 +551,21 @@ def admin_order_list(request):
         return render(
             request,
             "admin/partials/order_rows.html",
-            {"orders": orders, "version": sandwitches_version},
+            {
+                "orders": orders,
+                "version": sandwitches_version,
+                "status_choices": Order.STATUS_CHOICES,
+            },
         )
 
     return render(
         request,
         "admin/order_list.html",
-        {"orders": orders, "version": sandwitches_version},
+        {
+            "orders": orders,
+            "version": sandwitches_version,
+            "status_choices": Order.STATUS_CHOICES,
+        },
     )
 
 
