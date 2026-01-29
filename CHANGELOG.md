@@ -1,3 +1,11 @@
+## [2.5.3](https://github.com/martynvdijke/sandwitches/compare/v2.5.2...v2.5.3) (2026-01-29)
+
+
+### Bug Fixes
+
+* **ci:** disable docker container ([e0d7eb3](https://github.com/martynvdijke/sandwitches/commit/e0d7eb3e681a7a22257068e427078120eeeb63ee))
+* **ui:** add tabeed interface ([eeb346f](https://github.com/martynvdijke/sandwitches/commit/eeb346faaa91c15fbc35b0bddd7e2e7b71c4c911))
+
 ## [2.5.2](https://github.com/martynvdijke/sandwitches/compare/v2.5.1...v2.5.2) (2026-01-29)
 
 
