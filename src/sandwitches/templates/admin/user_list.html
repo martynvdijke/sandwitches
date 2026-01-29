@@ -19,10 +19,10 @@
     </thead>
     <tbody>
         {% for user in users %}
-        <tr class="pointer" onclick="location.href='{% url 'admin_user_edit' u.pk %}'">
+        <tr class="pointer" onclick="location.href='{% url 'admin_user_edit' user.pk %}'">
             <td>
-                {% if u.avatar %}
-                <img src="{{ u.avatar.url }}" class="admin-thumb round">
+                {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" class="admin-thumb round">
                 {% else %}
                 <div class="admin-thumb round gray1 middle-align center-align">
                     <i class="extra">person</i>

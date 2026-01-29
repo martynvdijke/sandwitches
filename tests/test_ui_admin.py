@@ -140,7 +140,7 @@ def test_admin_tag_management_ui(page: Page, live_server, staff_user):
     expect(page.get_by_role("cell", name="Spicy", exact=True)).to_be_visible()
 
     # Edit Tag
-    page.click("tr:has-text('Spicy')")
+    page.click("tr:has-text('Spicy') td >> nth=0")
     page.fill("input[name='name']", "Extra Spicy")
     page.click("button:has-text('Save')")
     expect(page.get_by_role("cell", name="Extra Spicy", exact=True)).to_be_visible()

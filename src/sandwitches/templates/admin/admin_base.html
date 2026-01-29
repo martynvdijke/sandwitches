@@ -27,7 +27,7 @@
   </button>
   <a href="{% url 'admin_dashboard' %}" class="row align-center">
     <img src="{% static 'icons/icon.svg' %}" class="circle small">
-    <h6 class="max">{% block admin_title %}{% trans "Sandwitches Admin" %}{% endblock %}</h6>
+    <h6 class="max">{% trans "Sandwitches Admin" %} | {% block admin_title %}{% endblock %}</h6>
   </a>
   <div class="max"></div>
 

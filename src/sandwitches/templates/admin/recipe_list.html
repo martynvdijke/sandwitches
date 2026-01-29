@@ -69,13 +69,13 @@
             </td>
             <td>
                 {% if recipe.is_highlighted %}
-                <i class="tiny amber-text">highlight</i>
+                <i class="tiny amber-text">star</i>
                 {% endif %}
                 <b>{{ recipe.title }}</b>
             </td>
             <td>
                 {% if recipe.price %}
-                € {{ recipe.price }}
+                {{ recipe.price }} €
                 {% else %}
                 -
                 {% endif %}
