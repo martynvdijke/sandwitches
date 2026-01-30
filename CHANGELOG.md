@@ -1,3 +1,10 @@
+## [2.5.4](https://github.com/martynvdijke/sandwitches/compare/v2.5.3...v2.5.4) (2026-01-30)
+
+
+### Bug Fixes
+
+* **ci:** push docker image on release ([7e4c2dd](https://github.com/martynvdijke/sandwitches/commit/7e4c2dd3f5b0d23ef75d878ec4d1ac7ee6974574))
+
 ## [2.5.3](https://github.com/martynvdijke/sandwitches/compare/v2.5.2...v2.5.3) (2026-01-29)
 
 
