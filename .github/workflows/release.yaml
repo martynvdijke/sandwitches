@@ -65,6 +65,9 @@ jobs:
           UV_PUBLISH_USERNAME: ${{ secrets.PYPI_USERNAME }}
           UV_PUBLISH_PASSWORD: ${{ secrets.PYPI_TOKEN }}
 
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag martynvandijke/sandwitches:latest
+
       - name: Push Docker image
         run: |
           docker push martynvandijke/sandwitches:latest
