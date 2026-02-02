@@ -10,12 +10,10 @@
   "dependencyDashboard": true,
   "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
   "ignorePresets": [":ignoreModulesAndTests"],
-  "platform": "github",
   "platformAutomerge": true,
   "prCreation": "immediate",
   "prHourlyLimit": 10,
   "rebaseWhen": "conflicted",
-  "repositories": ["martynvdijke/sandwitches"],
   "timezone": "UTC+1",
   "lockFileMaintenance": {
     "enabled": true
@@ -23,6 +21,7 @@
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "matchCurrentVersion": "!/^0/",
       "automerge": true
     }
   ],
