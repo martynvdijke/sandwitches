@@ -35,22 +35,24 @@
           <div class="divider"></div>
 
           <h6>{% trans "Item Details" %}</h6>
+          {% for item in order.items.all %}
           <div class="row">
               <div class="max">
-                  <a href="{% url 'recipe_detail' order.recipe.slug %}" class="bold primary-text">{{ order.recipe.title }}</a>
-                  <p class="small-text">{{ order.recipe.description|truncatewords:20 }}</p>
+                  <a href="{% url 'recipe_detail' item.recipe.slug %}" class="bold primary-text">{{ item.quantity }}x {{ item.recipe.title }}</a>
+                  <p class="small-text">{{ item.recipe.description|truncatewords:20 }}</p>
               </div>
               <div class="min">
-                  <span class="bold">{{ order.total_price }} €</span>
+                   <!-- Calculate item total: price * quantity -->
+                  <span class="bold">{% widthratio item.price 1 item.quantity %} €</span>
               </div>
           </div>
 
-          {% if order.recipe.image %}
+          {% if item.recipe.image %}
           <div class="space"></div>
-          <img src="{{ order.recipe.image.url }}" class="responsive round border" alt="{{ order.recipe.title }}">
+          <img src="{{ item.recipe.image.url }}" class="responsive round border" alt="{{ item.recipe.title }}" style="max-height: 200px; object-fit: cover;">
           {% endif %}
-
           <div class="divider"></div>
+          {% endfor %}
 
           <div class="row">
               <div class="max text-right">

@@ -1,6 +1,6 @@
 import pytest
 from django.core import mail
-from sandwitches.models import Recipe, Order
+from sandwitches.models import Recipe, Order, OrderItem
 from sandwitches.tasks import reset_daily_orders, notify_order_submitted
 from django_tasks.backends.database.models import DBTaskResult
 
@@ -31,15 +31,18 @@ def test_notify_order_submitted_task(user_factory):
     recipe = Recipe.objects.create(
         title="Delicious Sandwich", price=8.50, uploaded_by=user
     )
-    order = Order.objects.create(user=user, recipe=recipe)
+    order = Order.objects.create(user=user, total_price=8.50)
+    OrderItem.objects.create(order=order, recipe=recipe, quantity=1)
 
     notify_order_submitted.func(order.id)
 
     assert len(mail.outbox) == 1
     email = mail.outbox[0]
     assert email.to == ["test@example.com"]
-    assert "Order Confirmation: Delicious Sandwich" in email.subject
+    # Subject changed to Order #ID
+    assert f"Order Confirmation: Order #{order.id}" in email.subject
     assert "Order ID: " + str(order.id) in email.body
+    assert "Delicious Sandwich" in email.body
 
 
 @pytest.mark.django_db
@@ -57,7 +60,9 @@ def test_create_order_api(client, user_factory):
     assert data["status"] == "PENDING"
     assert float(data["total_price"]) == 10.00
 
-    assert Order.objects.filter(user=user, recipe=recipe).exists()
+    assert Order.objects.filter(user=user).exists()
+    order = Order.objects.filter(user=user).last()
+    assert order.items.filter(recipe=recipe).exists()
 
     # Check if task was enqueued
     # Since we use database backend, we can check DBTaskResult

@@ -12,7 +12,11 @@
             <span class="max">{{ order.user.username }}</span>
         </div>
     </td>
-    <td>{{ order.recipe.title }}</td>
+    <td>
+        {% for item in order.items.all %}
+            <div>{{ item.quantity }}x {{ item.recipe.title }}</div>
+        {% endfor %}
+    </td>
     <td>€ {{ order.total_price }} </td>
     <td>
         <form method="post" action="{% url 'admin_order_update_status' order.pk %}" class="row align-center no-space">

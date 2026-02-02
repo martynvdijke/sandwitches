@@ -1,7 +1,7 @@
 import pytest
 import re
 from playwright.sync_api import Page, expect
-from sandwitches.models import User, Recipe
+from sandwitches.models import User, Recipe, Order, OrderItem
 
 
 @pytest.fixture
@@ -64,7 +64,6 @@ def test_login_flow(page: Page, live_server, user):
     # Submit via Enter key
     page.press("input[name='password']", "Enter")
 
-    # Should redirect to index (fixed in settings)
     expect(page).to_have_url(f"{live_server.url}/")
 
     # Verify user is logged in by checking for the user menu avatar
@@ -98,7 +97,6 @@ def test_recipe_favoriting(page: Page, live_server, user, recipe):
     toggle_btn.click()
 
     # Verify state change (icon is favorite)
-    # The page reloads or updates. We expect the icon text to change.
     expect(toggle_btn.locator("i")).to_have_text("favorite")
 
     # Go to Favorites page
@@ -127,13 +125,11 @@ def test_recipe_rating(page: Page, live_server, user, recipe):
 
     # Rate
     comment_text = "This is a fantastic test sandwich!"
-    # 'Comment' is the label for the textarea, but let's use name to be safe
     page.fill("textarea[name='comment']", comment_text)
 
     page.click("button:has-text('Submit Rating')")
 
     # Verify the rating appears on the page
-    # Use .first to avoid strict mode violation if text appears in textarea and display
     expect(page.get_by_text(comment_text).first).to_be_visible()
     expect(page.get_by_text("Your rating:")).to_be_visible()
 
@@ -153,7 +149,6 @@ def test_signup_flow(page: Page, live_server):
     page.fill("input[name='last_name']", "User")
     page.fill("input[name='username']", new_username)
     page.fill("input[name='email']", "new@example.com")
-    # Use a stronger password to avoid validation errors
     strong_pass = "SecurePass123!"
     page.fill("input[name='password1']", strong_pass)
     page.fill("input[name='password2']", strong_pass)
@@ -212,10 +207,9 @@ def test_scale_ingredients_ui(page: Page, live_server, recipe):
     # Increase to 2 portions
     page.click("button:has-text('+')")
 
-    # Verify scaled ingredients (2 -> 4, 1 -> 2)
-    # The API utility might return "4 slices of Bread" and "2 slice of Cheese" (singular if not handled)
+    # Verify scaled ingredients
     expect(display).to_contain_text("4 slices of Bread")
-    expect(display).to_contain_text("2")  # Just check for the number 2 to be safe
+    expect(display).to_contain_text("2")
     expect(display).to_contain_text("Cheese")
 
 
@@ -275,14 +269,9 @@ def test_user_settings_ui(page: Page, live_server, user):
 
     page.click("button:has-text('Save changes')")
 
-    # Verify redirection and success message (in Dutch if language changed correctly)
-    # The message in Dutch for "Settings updated successfully." is "Instellingen succesvol bijgewerkt."
-    # But since activation might take a refresh or it's on the next page:
+    # Verify redirection and success message
     expect(page).to_have_url(re.compile(r".*/settings/$"))
 
-    # Check if the body has 'dark' class or data-ui attribute if BeerCSS uses it
-    # BeerCSS usually uses <body class="dark"> or similar.
-    # Let's check the database first to be sure it saved.
     user.refresh_from_db()
     assert user.theme == "dark"
     assert user.language == "nl"
@@ -294,7 +283,6 @@ def test_order_tracking_ui(page: Page, live_server, user, recipe):
     Test that orders appear in the profile and filtering works.
     """
     User.objects.create_superuser("admin", "admin@example.com", "password")
-    from sandwitches.models import Order
     from decimal import Decimal
 
     # Recipe must have a price
@@ -302,9 +290,8 @@ def test_order_tracking_ui(page: Page, live_server, user, recipe):
     recipe.save()
 
     # Create an order
-    Order.objects.create(
-        user=user, recipe=recipe, status="SHIPPED", total_price=Decimal("15.00")
-    )
+    o = Order.objects.create(user=user, status="SHIPPED", total_price=Decimal("15.00"))
+    OrderItem.objects.create(order=o, recipe=recipe)
 
     # Login
     page.goto(f"{live_server.url}/login/")
@@ -316,7 +303,6 @@ def test_order_tracking_ui(page: Page, live_server, user, recipe):
     page.goto(f"{live_server.url}/profile/")
 
     # Check that order is visible
-    # Use more specific locator for status chip to avoid ambiguity with the filter dropdown
     expect(page.locator("span.chip", has_text="Shipped")).to_be_visible()
     expect(page.get_by_text("15.00 €")).to_be_visible()
     expect(page.get_by_text(recipe.title)).to_be_visible()
@@ -329,3 +315,55 @@ def test_order_tracking_ui(page: Page, live_server, user, recipe):
     # Filter back to all or shipped
     page.select_option("select[name='status']", "SHIPPED")
     expect(page.locator("span.chip", has_text="Shipped")).to_be_visible()
+
+
+@pytest.mark.django_db
+def test_checkout_multiple_items_ui(page: Page, live_server, user):
+    """
+    Test checking out with multiple items in the cart.
+    """
+    User.objects.create_superuser("admin", "admin@example.com", "password")
+    r1 = Recipe.objects.create(  # noqa: F841
+        title="Sandwich 1", price=10.00, slug="s1", is_approved=True
+    )
+    r2 = Recipe.objects.create(  # noqa: F841
+        title="Sandwich 2", price=20.00, slug="s2", is_approved=True
+    )
+
+    # Login
+    page.goto(f"{live_server.url}/login/")
+    page.fill("input[name='username']", "testuser")
+    page.fill("input[name='password']", "password")
+    page.press("input[name='password']", "Enter")
+
+    # Add r1
+    page.goto(f"{live_server.url}/recipes/s1/")
+    page.click("button:has-text('Add to Cart')")
+
+    # Add r2
+    page.goto(f"{live_server.url}/recipes/s2/")
+    page.click("button:has-text('Add to Cart')")
+
+    # Go to cart
+    page.goto(f"{live_server.url}/cart/")
+
+    # Verify items are there
+    expect(page.get_by_text("Sandwich 1")).to_be_visible()
+    expect(page.get_by_text("Sandwich 2")).to_be_visible()
+    # Flexible check for total
+    expect(page.locator("body")).to_contain_text("30")
+    expect(page.locator("body")).to_contain_text("€")
+
+    # Click Checkout
+    # Use a more robust locator if possible
+    checkout_btn = page.get_by_role("button", name="Checkout")
+    expect(checkout_btn).to_be_enabled()
+    checkout_btn.click()
+
+    # Should redirect to profile
+    expect(page).to_have_url(f"{live_server.url}/profile/")
+    expect(page.get_by_text("Orders submitted successfully!")).to_be_visible()
+
+    # Verify order items
+    expect(page.get_by_text("Sandwich 1")).to_be_visible()
+    expect(page.get_by_text("(+1)")).to_be_visible()  # Sandwich 1 (+1 other item)

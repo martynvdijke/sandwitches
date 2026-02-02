@@ -55,9 +55,53 @@ def test_cart_functionality(client, user_factory):
     url_checkout = reverse("checkout_cart")
     resp = client.post(url_checkout, follow=True)
     assert resp.status_code == 200
+
+    # Check for error messages if any
+    messages = list(resp.context["messages"]) if resp.context else []
+    for m in messages:
+        print(f"Message: {m}")
+
     assert not CartItem.objects.filter(user=user).exists()
-    # Should have created 3 orders
-    assert Order.objects.filter(user=user, recipe=recipe).count() == 3
+
+    # Should have created 1 order
+    assert Order.objects.filter(user=user).exists()
+    order = Order.objects.filter(user=user).first()
+    assert order.items.count() == 1
+    item = order.items.first()
+    assert item.recipe == recipe
+    assert item.quantity == 3
+    assert order.total_price == 30.00
+
+
+@pytest.mark.django_db
+def test_cart_multiple_items_checkout(client, user_factory):
+    user = user_factory(username="multi_cart_user")
+    client.force_login(user)
+
+    r1 = Recipe.objects.create(title="S1", price=10.00, is_approved=True)
+    r2 = Recipe.objects.create(title="S2", price=20.00, is_approved=True)
+
+    # Add both to cart
+    client.post(reverse("add_to_cart", kwargs={"pk": r1.pk}))
+    client.post(reverse("add_to_cart", kwargs={"pk": r2.pk}))
+
+    assert CartItem.objects.filter(user=user).count() == 2
+
+    # Checkout
+    resp = client.post(reverse("checkout_cart"), follow=True)
+    assert resp.status_code == 200
+
+    # Check messages
+    messages = (
+        [m.message for m in list(resp.context["messages"])] if resp.context else []
+    )
+    assert "Orders submitted successfully!" in messages
+
+    assert not CartItem.objects.filter(user=user).exists()
+    assert Order.objects.filter(user=user).count() == 1
+    order = Order.objects.get(user=user)
+    assert order.items.count() == 2
+    assert order.total_price == 30.00
 
 
 @pytest.mark.django_db

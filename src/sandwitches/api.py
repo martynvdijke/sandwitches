@@ -220,9 +220,25 @@ def get_tag(request, tag_id: int):
 
 @api.post("v1/orders", auth=django_auth, response={201: OrderSchema, 400: Error})
 def create_order(request, payload: CreateOrderSchema):
+    from .models import OrderItem
+    from django.db import transaction
+    from .tasks import notify_order_submitted, send_gotify_notification
+
     recipe = get_object_or_404(Recipe, id=payload.recipe_id)
     try:
-        order = Order.objects.create(user=request.user, recipe=recipe)  # ty:ignore[unresolved-attribute]
+        with transaction.atomic():
+            order = Order.objects.create(user=request.user)  # ty:ignore[unresolved-attribute]
+            OrderItem.objects.create(order=order, recipe=recipe, quantity=1)  # ty:ignore[unresolved-attribute]
+            order.total_price = recipe.price
+            order.save()
+
+            notify_order_submitted.enqueue(order_id=order.pk)
+            send_gotify_notification.enqueue(
+                title="New Order Received",
+                message=f"Order #{order.pk} by {request.user.username}. Total: {order.total_price}€",
+                priority=6,
+            )
+
         return 201, order
     except (ValidationError, ValueError) as e:
         return 400, {"message": str(e)}

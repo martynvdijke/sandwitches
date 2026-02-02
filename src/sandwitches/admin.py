@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
-from .models import Recipe, Tag, Rating, Setting, Order
+from .models import Recipe, Tag, Rating, Setting, Order, OrderItem
 from django.utils.html import format_html
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
@@ -81,18 +81,23 @@ class RatingAdmin(ImportExportModelAdmin):
     resource_classes = [RatingResource]
 
 
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+
+
 @admin.register(Order)
 class OrderAdmin(ImportExportModelAdmin):
     resource_classes = [OrderResource]
+    inlines = [OrderItemInline]
     list_display = (
         "id",
         "user",
-        "recipe",
         "status",
         "completed",
         "total_price",
         "created_at",
     )
     list_filter = ("status", "completed", "created_at")
-    search_fields = ("user__username", "recipe__title")
+    search_fields = ("user__username",)
     readonly_fields = ("total_price", "created_at", "updated_at")

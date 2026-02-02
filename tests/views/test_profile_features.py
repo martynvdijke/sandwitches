@@ -1,6 +1,6 @@
 import pytest
 from django.urls import reverse
-from sandwitches.models import Recipe, Order
+from sandwitches.models import Recipe, Order, OrderItem
 from decimal import Decimal
 import datetime
 from django.utils import timezone
@@ -16,9 +16,10 @@ def test_profile_pagination(client, user_factory):
 
     # Create 6 orders (page size is 5)
     for i in range(6):
-        Order.objects.create(
-            user=user, recipe=recipe, total_price=Decimal("5.00"), status="PENDING"
+        o = Order.objects.create(
+            user=user, total_price=Decimal("5.00"), status="PENDING"
         )
+        OrderItem.objects.create(order=o, recipe=recipe)
 
     url = reverse("user_profile")
     response = client.get(url)
@@ -41,12 +42,13 @@ def test_profile_filtering(client, user_factory):
         title="Test Sandwich", price=Decimal("5.00"), servings=1
     )
 
-    Order.objects.create(
-        user=user, recipe=recipe, total_price=Decimal("5.00"), status="PENDING"
+    o1 = Order.objects.create(user=user, total_price=Decimal("5.00"), status="PENDING")
+    OrderItem.objects.create(order=o1, recipe=recipe)
+
+    o2 = Order.objects.create(
+        user=user, total_price=Decimal("5.00"), status="COMPLETED"
     )
-    Order.objects.create(
-        user=user, recipe=recipe, total_price=Decimal("5.00"), status="COMPLETED"
-    )
+    OrderItem.objects.create(order=o2, recipe=recipe)
 
     url = reverse("user_profile")
 
@@ -72,14 +74,16 @@ def test_profile_sorting(client, user_factory):
     )
 
     order1 = Order.objects.create(
-        user=user, recipe=recipe, total_price=Decimal("10.00"), status="PENDING"
+        user=user, total_price=Decimal("10.00"), status="PENDING"
     )
+    OrderItem.objects.create(order=order1, recipe=recipe, price=Decimal("10.00"))
     order1.created_at = timezone.now() - datetime.timedelta(days=2)
     order1.save()
 
     order2 = Order.objects.create(
-        user=user, recipe=recipe, total_price=Decimal("5.00"), status="PENDING"
+        user=user, total_price=Decimal("5.00"), status="PENDING"
     )
+    OrderItem.objects.create(order=order2, recipe=recipe, price=Decimal("5.00"))
     order2.created_at = timezone.now() - datetime.timedelta(days=1)
     order2.save()
 
@@ -118,8 +122,9 @@ def test_user_order_detail(client, user_factory):
         title="Test Sandwich", price=Decimal("5.00"), servings=1
     )
     order = Order.objects.create(
-        user=user, recipe=recipe, total_price=Decimal("5.00"), status="PENDING"
+        user=user, total_price=Decimal("5.00"), status="PENDING"
     )
+    OrderItem.objects.create(order=order, recipe=recipe)
 
     url = reverse("user_order_detail", kwargs={"pk": order.pk})
     response = client.get(url)

@@ -276,10 +276,9 @@ class Order(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name="orders", on_delete=models.CASCADE
     )
-    recipe = models.ForeignKey(Recipe, related_name="orders", on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
     completed = models.BooleanField(default=False)
-    total_price = models.DecimalField(max_digits=6, decimal_places=2)
+    total_price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -289,40 +288,54 @@ class Order(models.Model):
         verbose_name_plural = "Orders"
 
     def save(self, *args, **kwargs):
-        if not self.recipe.price:  # ty:ignore[possibly-missing-attribute]
-            raise ValueError("Cannot order a recipe without a price.")
-        if not self.total_price:
-            self.total_price = self.recipe.price  # ty:ignore[possibly-missing-attribute]
-
         is_new = self.pk is None
-        if is_new:
-            # We use select_for_update to lock the row and prevent race conditions
-            # However, since 'self.recipe' is already fetched, we need to re-fetch it with lock if we want to be strict.
-            # For simplicity in this context, we will reload it or trust the current instance but ideally:
-
-            # We need to wrap this in a transaction if not already
-            # But simple increment logic:
-            if (
-                self.recipe.max_daily_orders is not None  # ty:ignore[possibly-missing-attribute]
-                and self.recipe.daily_orders_count >= self.recipe.max_daily_orders  # ty:ignore[possibly-missing-attribute]
-            ):
-                raise ValidationError("Daily order limit reached for this recipe.")
-
-            self.recipe.daily_orders_count += 1  # ty:ignore[possibly-missing-attribute]
-            self.recipe.save(update_fields=["daily_orders_count"])  # ty:ignore[possibly-missing-attribute]
-
         super().save(*args, **kwargs)
-
         if is_new:
             notify_order_submitted.enqueue(order_id=self.pk)
             send_gotify_notification.enqueue(
                 title="New Order Received",
-                message=f"Order #{self.pk} for '{self.recipe.title}' by {self.user.username}. Total: {self.total_price}€",
+                message=f"Order #{self.pk} by {self.user.username}. Total: {self.total_price}€",
                 priority=6,
             )
 
     def __str__(self):
-        return f"Order #{self.pk} - {self.user} - {self.recipe}"
+        return f"Order #{self.pk} - {self.user}"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, related_name="items", on_delete=models.CASCADE)
+    recipe = models.ForeignKey(
+        Recipe, related_name="order_items", on_delete=models.CASCADE
+    )
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+
+    class Meta:
+        verbose_name = "Order Item"
+        verbose_name_plural = "Order Items"
+
+    def save(self, *args, **kwargs):
+        if not self.price:
+            self.price = self.recipe.price
+
+        is_new = self.pk is None
+        if is_new:
+            if (
+                self.recipe.max_daily_orders is not None
+                and self.recipe.daily_orders_count + self.quantity
+                > self.recipe.max_daily_orders
+            ):
+                raise ValidationError(
+                    f"Daily order limit reached for {self.recipe.title}."
+                )
+
+            self.recipe.daily_orders_count += self.quantity
+            self.recipe.save(update_fields=["daily_orders_count"])
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.quantity}x {self.recipe.title} in Order #{self.order.pk}"
 
 
 class CartItem(models.Model):

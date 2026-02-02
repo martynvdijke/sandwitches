@@ -25,14 +25,12 @@ def test_order_status_and_completed():
     user = User.objects.create_user(
         username="orderuser", email="order@example.com", password="password"
     )
-    recipe = Recipe.objects.create(
+    recipe = Recipe.objects.create(  # noqa: F841
         title="Test Sandwich", price=Decimal("10.00"), servings=1
     )
 
     # Test new status choices
-    order = Order.objects.create(
-        user=user, recipe=recipe, status="PREPARING", completed=False
-    )
+    order = Order.objects.create(user=user, status="PREPARING", completed=False)
 
     assert order.status == "PREPARING"
     assert not order.completed

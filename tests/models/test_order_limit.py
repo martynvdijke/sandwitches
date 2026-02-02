@@ -1,6 +1,6 @@
 import pytest
 from django.core.exceptions import ValidationError
-from sandwitches.models import Order, Recipe, User
+from sandwitches.models import Order, OrderItem, Recipe, User
 
 
 @pytest.mark.django_db
@@ -11,18 +11,21 @@ def test_daily_order_limit():
     )
 
     # First order
-    Order.objects.create(user=user, recipe=recipe)
+    o1 = Order.objects.create(user=user)
+    OrderItem.objects.create(order=o1, recipe=recipe)
     recipe.refresh_from_db()
     assert recipe.daily_orders_count == 1
 
     # Second order
-    Order.objects.create(user=user, recipe=recipe)
+    o2 = Order.objects.create(user=user)
+    OrderItem.objects.create(order=o2, recipe=recipe)
     recipe.refresh_from_db()
     assert recipe.daily_orders_count == 2
 
     # Third order should fail
+    o3 = Order.objects.create(user=user)
     with pytest.raises(ValidationError, match="Daily order limit reached"):
-        Order.objects.create(user=user, recipe=recipe)
+        OrderItem.objects.create(order=o3, recipe=recipe)
 
     recipe.refresh_from_db()
     assert recipe.daily_orders_count == 2

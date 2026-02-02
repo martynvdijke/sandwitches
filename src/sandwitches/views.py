@@ -9,7 +9,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.translation import gettext as _
 from django.utils import translation
-from .models import Recipe, Rating, Tag, Order, CartItem, Setting
+from .models import Recipe, Rating, Tag, Order, CartItem, Setting, OrderItem
+from .tasks import (
+    notify_order_submitted,
+    send_gotify_notification,
+)
 from .utils import ORDER_DB
 from .forms import (
     RecipeForm,
@@ -542,7 +546,8 @@ def admin_order_update_status(request, pk):
 @staff_member_required
 def admin_order_list(request):
     orders = (
-        Order.objects.select_related("user", "recipe")  # ty:ignore[unresolved-attribute]
+        Order.objects.select_related("user")  # ty:ignore[unresolved-attribute]
+        .prefetch_related("items__recipe")
         .all()
         .order_by("-created_at")
     )
@@ -626,12 +631,27 @@ def order_recipe(request, pk):
     """
     Create an order for the given recipe by the logged-in user.
     """
+    from django.db import transaction
+    from .models import OrderItem
+
     recipe = get_object_or_404(Recipe, pk=pk)
     if request.method != "POST":
         return redirect("recipe_detail", slug=recipe.slug)
 
     try:
-        order = Order.objects.create(user=request.user, recipe=recipe)  # ty:ignore[unresolved-attribute]
+        with transaction.atomic():
+            order = Order.objects.create(user=request.user)  # ty:ignore[unresolved-attribute]
+            OrderItem.objects.create(order=order, recipe=recipe, quantity=1)  # ty:ignore[unresolved-attribute]
+            order.total_price = recipe.price
+            order.save()
+
+            notify_order_submitted.enqueue(order_id=order.pk)
+            send_gotify_notification.enqueue(
+                title="New Order Received",
+                message=f"Order #{order.pk} by {request.user.username}. Total: {order.total_price}€",
+                priority=6,
+            )
+
         logging.debug(f"Created {order}")
         messages.success(
             request,
@@ -918,7 +938,7 @@ def user_profile(request):
     else:
         form = UserProfileForm(instance=request.user)
 
-    orders = request.user.orders.select_related("recipe").all()
+    orders = request.user.orders.prefetch_related("items__recipe").all()
 
     # Filtering
     status_filter = request.GET.get("status")
@@ -1052,39 +1072,82 @@ def update_cart_quantity(request, pk):
 
 @login_required
 def checkout_cart(request):
-    cart_items = CartItem.objects.filter(user=request.user)  # ty:ignore[unresolved-attribute]
+    if request.method != "POST":
+        return redirect("view_cart")
+
+    cart_items = CartItem.objects.filter(user=request.user).select_related("recipe")  # ty:ignore[unresolved-attribute]
     if not cart_items.exists():
         messages.error(request, _("Your cart is empty."))
         return redirect("view_cart")
 
-    created_orders = []  # noqa: F841
-    errors = []
-
-    # We use a transaction to ensure either all orders are created or none if something goes wrong
     from django.db import transaction
 
     try:
         with transaction.atomic():
+            # 1. Validate all items have prices and satisfy limits
             for item in cart_items:
-                # Create Order for each recipe in cart (quantity times?)
-                # Current Order model doesn't have quantity, so we create multiple orders or update Order model.
-                # For now, let's create 'quantity' number of orders as per current schema
-                # OR we could update Order model to support quantity.
-                # Let's see if Order has quantity. (Checked: it does not).
-                for i in range(item.quantity):
-                    try:
-                        Order.objects.create(user=request.user, recipe=item.recipe)  # ty:ignore[unresolved-attribute]
-                    except (ValidationError, ValueError) as e:
-                        errors.append(f"{item.recipe.title}: {str(e)}")
-                        raise e  # Trigger rollback
+                if not item.recipe.price:
+                    raise ValidationError(
+                        _(
+                            "Recipe '%(title)s' cannot be ordered because it has no price."
+                        )
+                        % {"title": item.recipe.title}
+                    )
 
+                if (
+                    item.recipe.max_daily_orders is not None
+                    and item.recipe.daily_orders_count + item.quantity
+                    > item.recipe.max_daily_orders
+                ):
+                    raise ValidationError(
+                        _("Daily order limit reached for %(title)s.")
+                        % {"title": item.recipe.title}
+                    )
+
+            # 2. Create the order
+            order = Order.objects.create(user=request.user)  # ty:ignore[unresolved-attribute]
+            total_price = 0
+
+            # 3. Create order items and update recipe counts
+            for item in cart_items:
+                order_item = OrderItem.objects.create(  # ty:ignore[unresolved-attribute]
+                    order=order,
+                    recipe=item.recipe,
+                    quantity=item.quantity,
+                    price=item.recipe.price,
+                )
+                total_price += order_item.price * order_item.quantity
+
+                # Note: OrderItem.save already updates daily_orders_count
+                # But since we already checked it, it should be fine.
+
+            # 4. Finalize order
+            order.total_price = total_price
+            order.save()
+
+            # 5. Clear cart
             cart_items.delete()
-            messages.success(request, _("Orders submitted successfully!"))
-            return redirect("user_profile")
-    except Exception:
-        if errors:
-            for error in errors:
-                messages.error(request, error)
-        else:
-            messages.error(request, _("An error occurred during checkout."))
+
+        # 6. Notifications (outside atomic block for better reliability if using DB-backed tasks)
+        notify_order_submitted.enqueue(order_id=order.pk)
+        send_gotify_notification.enqueue(
+            title="New Order Received",
+            message=f"Order #{order.pk} by {request.user.username}. Total: {order.total_price}€",
+            priority=6,
+        )
+
+        messages.success(request, _("Orders submitted successfully!"))
+        return redirect("user_profile")
+
+    except ValidationError as e:
+        # Specific validation error (e.g. price missing or limit reached)
+        messages.error(request, str(e))
+        return redirect("view_cart")
+    except Exception as e:
+        # General error
+        logging.exception("Error during checkout")
+        messages.error(
+            request,
+            _("An error occurred during checkout: %(error)s") % {"error": str(e)},
+        )
         return redirect("view_cart")

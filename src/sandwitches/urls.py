@@ -50,9 +50,6 @@ urlpatterns = [
     path("cart/checkout/", views.checkout_cart, name="checkout_cart"),
     path("", views.index, name="index"),
     path("feeds/latest/", LatestRecipesFeed(), name="latest_recipes_feed"),
-    path(
-        "feeds/latest/", LatestRecipesFeed(), name="latest_recipes_feed"
-    ),  # Add this line
 ]
 
 urlpatterns += i18n_patterns(

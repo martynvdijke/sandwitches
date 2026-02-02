@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from sandwitches.models import Recipe, Order
+from sandwitches.models import Recipe, Order, OrderItem
 
 User = get_user_model()
 
@@ -13,7 +13,8 @@ def test_admin_order_list_view(client):
     )
     user = User.objects.create_user(username="user", password="password")
     recipe = Recipe.objects.create(title="Recipe 1", price=10.00, uploaded_by=staff)
-    Order.objects.create(user=user, recipe=recipe)
+    o = Order.objects.create(user=user)
+    OrderItem.objects.create(order=o, recipe=recipe)
 
     client.force_login(staff)
     url = reverse("admin_order_list")
@@ -32,7 +33,8 @@ def test_admin_order_list_htmx(client):
     )
     user = User.objects.create_user(username="user", password="password")
     recipe = Recipe.objects.create(title="Recipe 1", price=10.00, uploaded_by=staff)
-    Order.objects.create(user=user, recipe=recipe)
+    o = Order.objects.create(user=user)
+    OrderItem.objects.create(order=o, recipe=recipe)
 
     client.force_login(staff)
     url = reverse("admin_order_list")

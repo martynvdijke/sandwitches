@@ -136,7 +136,16 @@
                 <tr>
                     <td>{{ order.id }}</td>
                     <td>
-                        <a href="{% url 'recipe_detail' order.recipe.slug %}">{{ order.recipe.title }}</a>
+                        {% with first_item=order.items.first %}
+                            {% if first_item %}
+                                <a href="{% url 'recipe_detail' first_item.recipe.slug %}">{{ first_item.recipe.title }}</a>
+                                {% if order.items.count > 1 %}
+                                    <span class="small-text">(+{{ order.items.count|add:"-1" }})</span>
+                                {% endif %}
+                            {% else %}
+                                <span>{% trans "No items" %}</span>
+                            {% endif %}
+                        {% endwith %}
                     </td>
                     <td>{{ order.created_at|date:"d/m/Y" }}</td>
                     <td>

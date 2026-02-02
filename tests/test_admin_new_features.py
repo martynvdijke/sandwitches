@@ -41,8 +41,8 @@ def test_admin_order_status_update(client):
         username="staff", password="password", is_staff=True
     )
     user = User.objects.create_user(username="user", password="password")
-    recipe = Recipe.objects.create(title="Recipe 1", price=10.00)
-    order = Order.objects.create(user=user, recipe=recipe, status="PENDING")
+    recipe = Recipe.objects.create(title="Recipe 1", price=10.00)  # noqa: F841
+    order = Order.objects.create(user=user, status="PENDING")
 
     client.force_login(staff)
     url = reverse("admin_order_update_status", kwargs={"pk": order.pk})
@@ -75,12 +75,10 @@ def test_order_status_immutability(client):
         username="staff", password="password", is_staff=True
     )
     user = User.objects.create_user(username="user", password="password")
-    recipe = Recipe.objects.create(title="Recipe 1", price=10.00)
+    recipe = Recipe.objects.create(title="Recipe 1", price=10.00)  # noqa: F841
 
     # Completed order
-    order_comp = Order.objects.create(
-        user=user, recipe=recipe, status="COMPLETED", completed=True
-    )
+    order_comp = Order.objects.create(user=user, status="COMPLETED", completed=True)
     client.force_login(staff)
     url_comp = reverse("admin_order_update_status", kwargs={"pk": order_comp.pk})
 
@@ -90,7 +88,7 @@ def test_order_status_immutability(client):
     assert order_comp.status == "COMPLETED"  # Should not change
 
     # Cancelled order
-    order_can = Order.objects.create(user=user, recipe=recipe, status="CANCELLED")
+    order_can = Order.objects.create(user=user, status="CANCELLED")
     url_can = reverse("admin_order_update_status", kwargs={"pk": order_can.pk})
 
     response = client.post(url_can, {"status": "PENDING"})

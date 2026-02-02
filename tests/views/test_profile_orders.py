@@ -1,6 +1,6 @@
 import pytest
 from django.urls import reverse
-from sandwitches.models import Recipe, Order
+from sandwitches.models import Recipe, Order, OrderItem
 from decimal import Decimal
 
 
@@ -13,8 +13,9 @@ def test_profile_shows_orders(client, user_factory):
         title="Test Sandwich", price=Decimal("5.00"), servings=1
     )
     order = Order.objects.create(
-        user=user, recipe=recipe, total_price=Decimal("5.00"), status="PENDING"
+        user=user, total_price=Decimal("5.00"), status="PENDING"
     )
+    OrderItem.objects.create(order=order, recipe=recipe)
 
     url = reverse("user_profile")
     response = client.get(url)
@@ -36,12 +37,13 @@ def test_profile_order_filtering(client, user_factory):
     r1 = Recipe.objects.create(title="S1", price=Decimal("1.00"))
     r2 = Recipe.objects.create(title="S2", price=Decimal("2.00"))
 
-    Order.objects.create(
-        user=user, recipe=r1, status="PENDING", total_price=Decimal("1.00")
+    o1 = Order.objects.create(user=user, status="PENDING", total_price=Decimal("1.00"))
+    OrderItem.objects.create(order=o1, recipe=r1)
+
+    o2 = Order.objects.create(
+        user=user, status="COMPLETED", total_price=Decimal("2.00")
     )
-    Order.objects.create(
-        user=user, recipe=r2, status="COMPLETED", total_price=Decimal("2.00")
-    )
+    OrderItem.objects.create(order=o2, recipe=r2)
 
     url = reverse("user_profile")
 
@@ -49,12 +51,14 @@ def test_profile_order_filtering(client, user_factory):
     response = client.get(f"{url}?status=COMPLETED")
     assert response.status_code == 200
     assert len(response.context["orders"]) == 1
-    assert response.context["orders"][0].recipe.title == "S2"
+    # Check recipe title via item
+    # Since we use first item in template
+    assert response.context["orders"][0].items.first().recipe.title == "S2"
 
     # Filter by PENDING
     response = client.get(f"{url}?status=PENDING")
     assert len(response.context["orders"]) == 1
-    assert response.context["orders"][0].recipe.title == "S1"
+    assert response.context["orders"][0].items.first().recipe.title == "S1"
 
 
 @pytest.mark.django_db
@@ -65,8 +69,11 @@ def test_profile_order_sorting(client, user_factory):
     r1 = Recipe.objects.create(title="A", price=Decimal("10.00"))
     r2 = Recipe.objects.create(title="B", price=Decimal("5.00"))
 
-    Order.objects.create(user=user, recipe=r1, total_price=Decimal("10.00"))
-    Order.objects.create(user=user, recipe=r2, total_price=Decimal("5.00"))
+    o1 = Order.objects.create(user=user, total_price=Decimal("10.00"))
+    OrderItem.objects.create(order=o1, recipe=r1)
+
+    o2 = Order.objects.create(user=user, total_price=Decimal("5.00"))
+    OrderItem.objects.create(order=o2, recipe=r2)
 
     url = reverse("user_profile")
 
