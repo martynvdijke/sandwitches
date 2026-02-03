@@ -1,3 +1,11 @@
+## [2.5.5](https://github.com/martynvdijke/sandwitches/compare/v2.5.4...v2.5.5) (2026-02-03)
+
+
+### Bug Fixes
+
+* **ci:** clean up renovate config ([04795a1](https://github.com/martynvdijke/sandwitches/commit/04795a1c4bf32325531b4cc2327a21f50de77cbe))
+* shopping cart supports multiple sandwithces ([1b77c1c](https://github.com/martynvdijke/sandwitches/commit/1b77c1ca05fd5bed6bbbdabf11ccd4aff241c0f7))
+
 ## [2.5.4](https://github.com/martynvdijke/sandwitches/compare/v2.5.3...v2.5.4) (2026-01-30)
 
 

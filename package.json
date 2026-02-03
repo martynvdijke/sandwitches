@@ -1,6 +1,6 @@
 {
   "name": "sandwitches",
-  "version": "2.5.4",
+  "version": "2.5.5",
   "description": "<p align=\"center\">   <img src=\"src/static/icons/banner.svg\" alt=\"Sandwitches Banner\" width=\"600px\"> </p>",
   "main": "index.js",
   "directories": {
