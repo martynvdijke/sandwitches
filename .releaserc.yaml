@@ -1,5 +1,15 @@
 plugins:
-  - "@semantic-release/commit-analyzer"
+  - [
+      "@semantic-release/commit-analyzer",
+      {
+        "preset": "conventionalcommits",
+        "releaseRules": [
+          { "type": "chore", "scope": "deps", "release": "patch" },
+          { "type": "chore", "scope": "dependencies", "release": "patch" },
+          { "type": "chore", "scope": "deps-dev", "release": "patch" }
+        ]
+      }
+    ]
   - "@semantic-release/release-notes-generator"
   - "@semantic-release/changelog"
   - [
