@@ -2,11 +2,13 @@ plugins:
   - [
       "@semantic-release/commit-analyzer",
       {
-        "preset": "conventionalcommits",
         "releaseRules": [
           { "type": "chore", "scope": "deps", "release": "patch" },
           { "type": "chore", "scope": "dependencies", "release": "patch" },
-          { "type": "chore", "scope": "deps-dev", "release": "patch" }
+          { "type": "chore", "scope": "deps-dev", "release": "patch" },
+          { "type": "docs", "scope": "README", "release": "patch" },
+          { "type": "refactor", "release": "patch" },
+          { "type": "style", "release": "patch" }
         ]
       }
     ]
