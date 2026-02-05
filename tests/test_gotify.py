@@ -1,7 +1,8 @@
 import pytest
 from unittest.mock import patch, MagicMock, ANY
 from sandwitches.tasks import send_gotify_notification
-from sandwitches.models import Setting, Recipe, Order, User
+from sandwitches.models import Setting, Recipe, User
+from django.urls import reverse
 
 
 @pytest.mark.django_db
@@ -55,24 +56,36 @@ def test_recipe_save_enqueues_gotify():
 
 
 @pytest.mark.django_db
-@pytest.mark.skip(reason="Order model changes may affect this test")
-def test_order_save_enqueues_gotify():
-    user = User.objects.create_user(username="buyer", password="pw")
+def test_order_recipe_view_enqueues_gotify(client):
+    User.objects.create_user(username="buyer", password="pw")
+    client.login(username="buyer", password="pw")
     recipe = Recipe.objects.create(title="Order Me", price=15)
 
-    with patch("sandwitches.models.send_gotify_notification") as mock_task:
-        Order.objects.create(user=user, recipe=recipe)
+    with patch("sandwitches.views.send_gotify_notification") as mock_task:
+        client.post(reverse("order_recipe", args=[recipe.pk]))
         mock_task.enqueue.assert_called_with(
             title="New Order Received",
-            message=ANY,  # contains price and order ID which might be dynamic
+            message=ANY,
             priority=6,
         )
 
-        call_args = mock_task.enqueue.call_args
-        message = call_args[1]["message"]
-        assert "Order #" in message
-        assert "Order Me" in message
-        assert "buyer" in message
+
+@pytest.mark.django_db
+def test_checkout_cart_view_enqueues_gotify(client):
+    user = User.objects.create_user(username="cartbuyer", password="pw")
+    client.login(username="cartbuyer", password="pw")
+    recipe = Recipe.objects.create(title="Cart Item", price=10)
+    from sandwitches.models import CartItem
+
+    CartItem.objects.create(user=user, recipe=recipe, quantity=2)
+
+    with patch("sandwitches.views.send_gotify_notification") as mock_task:
+        client.post(reverse("checkout_cart"))
+        mock_task.enqueue.assert_called_with(
+            title="New Order Received",
+            message=ANY,
+            priority=6,
+        )
 
 
 @pytest.mark.django_db
