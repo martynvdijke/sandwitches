@@ -1,0 +1,97 @@
+{% extends "base_beer.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Track Order" %} #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="large-space"></div>
+
+<div class="grid">
+  <div class="s12 m10 l8 xl6 middle-align center-align" style="margin: 0 auto;">
+    <article class="round elevate left-align">
+      <div class="padding">
+          <nav>
+              <a href="{% url 'index' %}" class="button transparent circle">
+                  <i>home</i>
+              </a>
+              <h5 class="max">{% trans "Track Order" %} #{{ order.id }}</h5>
+              <span class="chip {% if order.status == 'PENDING' %}surface-variant{% elif order.status == 'COMPLETED' %}primary{% elif order.status == 'CANCELLED' %}error{% else %}secondary{% endif %}">
+                  {{ order.get_status_display }}
+              </span>
+          </nav>
+          <div class="divider"></div>
+
+          <div class="grid">
+              <div class="s12 m6">
+                  <p class="small-text">{% trans "Date Ordered" %}</p>
+                  <p>{{ order.created_at|date:"d F Y, H:i" }}</p>
+              </div>
+              <div class="s12 m6">
+                   <p class="small-text">{% trans "Current Status" %}</p>
+                   <p class="bold">{{ order.get_status_display }}</p>
+              </div>
+          </div>
+
+          <div class="divider"></div>
+
+          {# Status Progress Bar / Icons #}
+          <div class="row padding center-align">
+              <div class="max grid">
+                  <div class="s2 center-align {% if order.status == 'PENDING' or order.status == 'PREPARING' or order.status == 'MADE' or order.status == 'SHIPPED' or order.status == 'COMPLETED' %}primary-text{% else %}grey-text{% endif %}">
+                      <i>pending_actions</i>
+                      <div class="small-text">{% trans "Pending" %}</div>
+                  </div>
+                  <div class="s2 center-align {% if order.status == 'PREPARING' or order.status == 'MADE' or order.status == 'SHIPPED' or order.status == 'COMPLETED' %}primary-text{% else %}grey-text{% endif %}">
+                      <i>restaurant</i>
+                      <div class="small-text">{% trans "Preparing" %}</div>
+                  </div>
+                  <div class="s2 center-align {% if order.status == 'MADE' or order.status == 'SHIPPED' or order.status == 'COMPLETED' %}primary-text{% else %}grey-text{% endif %}">
+                      <i>check_circle</i>
+                      <div class="small-text">{% trans "Made" %}</div>
+                  </div>
+                  <div class="s2 center-align {% if order.status == 'SHIPPED' or order.status == 'COMPLETED' %}primary-text{% else %}grey-text{% endif %}">
+                      <i>local_shipping</i>
+                      <div class="small-text">{% trans "Shipped" %}</div>
+                  </div>
+                  <div class="s2 center-align {% if order.status == 'COMPLETED' %}primary-text{% else %}grey-text{% endif %}">
+                      <i>done_all</i>
+                      <div class="small-text">{% trans "Done" %}</div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h6>{% trans "Order Items" %}</h6>
+          {% for item in order.items.all %}
+          <div class="row">
+              <div class="max">
+                  <span class="bold">{{ item.quantity }}x {{ item.recipe.title }}</span>
+              </div>
+              <div class="min">
+                  <span class="bold">{% widthratio item.price 1 item.quantity %} €</span>
+              </div>
+          </div>
+          {% endfor %}
+
+          <div class="divider"></div>
+
+          <div class="row">
+              <div class="max text-right">
+                  <span class="bold">{% trans "Total" %}</span>
+              </div>
+               <div class="min">
+                  <span class="bold text-primary">{{ order.total_price }} €</span>
+              </div>
+          </div>
+
+          <div class="space"></div>
+          <p class="small-text center-align">
+              {% trans "Bookmark this page to track your order status." %}
+          </p>
+
+      </div>
+    </article>
+  </div>
+</div>
+{% endblock %}

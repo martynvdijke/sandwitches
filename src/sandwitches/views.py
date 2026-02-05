@@ -1011,6 +1011,15 @@ def user_order_detail(request, pk):
     )
 
 
+def order_tracker(request, token):
+    order = get_object_or_404(Order, tracking_token=token)
+    return render(
+        request,
+        "order_tracker.html",
+        {"order": order, "version": sandwitches_version},
+    )
+
+
 @login_required
 def view_cart(request):
     cart_items = CartItem.objects.filter(user=request.user).select_related("recipe")  # ty:ignore[unresolved-attribute]

@@ -36,6 +36,7 @@ urlpatterns = [
     path("profile/", views.user_profile, name="user_profile"),
     path("settings/", views.user_settings, name="user_settings"),
     path("orders/<int:pk>/", views.user_order_detail, name="user_order_detail"),
+    path("orders/track/<uuid:token>/", views.order_tracker, name="order_tracker"),
     path("community/", views.community, name="community"),
     path("admin/", admin.site.urls),
     path("api/", api.urls),

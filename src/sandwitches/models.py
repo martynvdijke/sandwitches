@@ -1,10 +1,11 @@
 from django.db import models
 from django.utils.text import slugify
+import uuid
 from .storage import HashedFilenameStorage
 from simple_history.models import HistoricalRecords
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Avg
-from .tasks import email_users, notify_order_submitted, send_gotify_notification
+from .tasks import email_users, send_gotify_notification
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 import logging
@@ -12,6 +13,7 @@ from django.urls import reverse
 from solo.models import SingletonModel
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
+from django.utils.translation import gettext_lazy as _
 
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
@@ -40,10 +42,10 @@ class Setting(SingletonModel):
     )
 
     def __str__(self):
-        return "Site Settings"
+        return str(_("Site Settings"))
 
     class Meta:
-        verbose_name = "Site Settings"
+        verbose_name = _("Site Settings")
 
 
 class User(AbstractUser):
@@ -72,8 +74,8 @@ class User(AbstractUser):
     )
 
     class Meta:
-        verbose_name = "User"
-        verbose_name_plural = "Users"
+        verbose_name = _("User")
+        verbose_name_plural = _("Users")
 
     def __str__(self):
         return self.username
@@ -95,8 +97,8 @@ class Tag(models.Model):
 
     class Meta:
         ordering = ("name",)
-        verbose_name = "Tag"
-        verbose_name_plural = "Tags"
+        verbose_name = _("Tag")
+        verbose_name_plural = _("Tags")
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -173,8 +175,8 @@ class Recipe(models.Model):
 
     class Meta:
         ordering = ("-created_at",)
-        verbose_name = "Recipe"
-        verbose_name_plural = "Recipes"
+        verbose_name = _("Recipe")
+        verbose_name_plural = _("Recipes")
 
     def save(self, *args, **kwargs):
         is_new = self._state.adding
@@ -265,12 +267,12 @@ class Rating(models.Model):
 
 class Order(models.Model):
     STATUS_CHOICES = (
-        ("PENDING", "Pending"),
-        ("PREPARING", "Preparing"),
-        ("MADE", "Made"),
-        ("SHIPPED", "Shipped"),
-        ("COMPLETED", "Completed"),
-        ("CANCELLED", "Cancelled"),
+        ("PENDING", _("Pending")),
+        ("PREPARING", _("Preparing")),
+        ("MADE", _("Made")),
+        ("SHIPPED", _("Shipped")),
+        ("COMPLETED", _("Completed")),
+        ("CANCELLED", _("Cancelled")),
     )
 
     user = models.ForeignKey(
@@ -279,24 +281,23 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
     completed = models.BooleanField(default=False)
     total_price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    tracking_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ("-created_at",)
-        verbose_name = "Order"
-        verbose_name_plural = "Orders"
+        verbose_name = _("Order")
+        verbose_name_plural = _("Orders")
 
     def save(self, *args, **kwargs):
-        is_new = self.pk is None
         super().save(*args, **kwargs)
-        if is_new:
-            notify_order_submitted.enqueue(order_id=self.pk)
-            send_gotify_notification.enqueue(
-                title="New Order Received",
-                message=f"Order #{self.pk} by {self.user.username}. Total: {self.total_price}€",
-                priority=6,
-            )
+
+    def get_absolute_url(self):
+        return reverse("order_detail", kwargs={"pk": self.pk})
+
+    def get_tracking_url(self):
+        return reverse("order_tracker", kwargs={"token": self.tracking_token})
 
     def __str__(self):
         return f"Order #{self.pk} - {self.user}"
@@ -311,8 +312,8 @@ class OrderItem(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
 
     class Meta:
-        verbose_name = "Order Item"
-        verbose_name_plural = "Order Items"
+        verbose_name = _("Order Item")
+        verbose_name_plural = _("Order Items")
 
     def save(self, *args, **kwargs):
         if not self.price:
@@ -351,8 +352,8 @@ class CartItem(models.Model):
 
     class Meta:
         unique_together = ("user", "recipe")
-        verbose_name = "Cart Item"
-        verbose_name_plural = "Cart Items"
+        verbose_name = _("Cart Item")
+        verbose_name_plural = _("Cart Items")
 
     def __str__(self):
         return f"{self.user.username}'s cart: {self.recipe.title} (x{self.quantity})"

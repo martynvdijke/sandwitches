@@ -78,6 +78,15 @@ def notify_order_submitted(order_id):
         [f"<li>{item.quantity}x {item.recipe.title}</li>" for item in items]
     )
 
+    base_url = "http://localhost"
+    if settings.CSRF_TRUSTED_ORIGINS:
+        for origin in settings.CSRF_TRUSTED_ORIGINS:
+            if origin:
+                base_url = origin
+                break
+    base_url = base_url.rstrip("/")
+    tracking_url = f"{base_url}{order.get_tracking_url()}"
+
     subject = _("Order Confirmation: Order #%(order_id)s") % {"order_id": order.id}
     from_email = getattr(settings, "EMAIL_FROM_ADDRESS")
 
@@ -87,6 +96,7 @@ def notify_order_submitted(order_id):
         "order_id": order.id,
         "total_price": order.total_price,
         "items_html_list": items_html_list,
+        "tracking_url": tracking_url,
     }
 
     text_content = (
@@ -96,6 +106,8 @@ def notify_order_submitted(order_id):
             "Order ID: %(order_id)s\n"
             "Items:\n%(items_summary)s\n"
             "Total Price: %(total_price)s\n\n"
+            "You can track your order status here:\n"
+            "%(tracking_url)s\n\n"
             "Thank you for ordering with Sandwitches.\n"
         )
         % context_data
@@ -112,6 +124,7 @@ def notify_order_submitted(order_id):
             "%(items_html_list)s"
             "<li>Total Price: %(total_price)s</li>"
             "</ul>"
+            "<p>You can track your order status here: <a href='%(tracking_url)s'>%(tracking_url)s</a></p>"
             "<p>Thank you for ordering with Sandwitches.</p>"
             "</div>"
         )
@@ -168,11 +181,13 @@ def send_emails(recipe_id, emails):
     from_email = getattr(settings, "EMAIL_FROM_ADDRESS")
 
     recipe_slug = recipe.get_absolute_url()
-    base_url = (
-        settings.CSRF_TRUSTED_ORIGINS[0]
-        if settings.CSRF_TRUSTED_ORIGINS
-        else "http://localhost"
-    ).rstrip("/")
+    base_url = "http://localhost"
+    if settings.CSRF_TRUSTED_ORIGINS:
+        for origin in settings.CSRF_TRUSTED_ORIGINS:
+            if origin:
+                base_url = origin
+                break
+    base_url = base_url.rstrip("/")
 
     raw_message_fmt = _("""
     Hungry? We just added <strong>%(title)s</strong> to our collection.

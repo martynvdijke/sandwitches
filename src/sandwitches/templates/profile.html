@@ -128,7 +128,8 @@
                     <th>{% trans "Date" %}</th>
                     <th>{% trans "Status" %}</th>
                     <th>{% trans "Price" %}</th>
-                    <th>{% trans "View Order" %}</th>
+                    <th>{% trans "View" %}</th>
+                    <th>{% trans "Track" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -155,8 +156,13 @@
                     </td>
                     <td>{{ order.total_price }} €</td>
                     <td>
-                        <a href="{% url 'user_order_detail' order.id %}" class="button circle transparent small">
+                        <a href="{% url 'user_order_detail' order.id %}" class="button circle transparent small" title="{% trans 'View Order' %}">
                             <i>visibility</i>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{{ order.get_tracking_url }}" class="button circle transparent small" title="{% trans 'Track Order' %}">
+                            <i>track_changes</i>
                         </a>
                     </td>
                 </tr>
