@@ -1,3 +1,10 @@
+# [2.6.0](https://github.com/martynvdijke/sandwitches/compare/v2.5.6...v2.6.0) (2026-02-05)
+
+
+### Features
+
+* complete personal order tracker with email confirmation and status tracking ([4c3df37](https://github.com/martynvdijke/sandwitches/commit/4c3df376a1ed46a8067f41586fb222af72e0fafb))
+
 ## [2.5.6](https://github.com/martynvdijke/sandwitches/compare/v2.5.5...v2.5.6) (2026-02-04)
 
 ## [2.5.5](https://github.com/martynvdijke/sandwitches/compare/v2.5.4...v2.5.5) (2026-02-03)
