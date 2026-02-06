@@ -64,3 +64,21 @@ def test_order_price_snapshot(db):
     # Order item price should remain the same
     item.refresh_from_db()
     assert item.price == 5.00
+
+
+@pytest.mark.django_db
+def test_order_tracking_token_uniqueness(db):
+    user = User.objects.create_user("testuser2", "test2@example.com", "password")
+    order1 = Order.objects.create(user=user)
+    order2 = Order.objects.create(user=user)
+
+    assert order1.tracking_token != order2.tracking_token
+    assert order1.tracking_token is not None
+    assert order2.tracking_token is not None
+
+    # Manually trying to set the same token should fail
+    from django.db.utils import IntegrityError
+
+    order2.tracking_token = order1.tracking_token
+    with pytest.raises(IntegrityError):
+        order2.save()

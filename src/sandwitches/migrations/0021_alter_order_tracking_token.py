@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("sandwitches", "0019_order_tracking_token"),
+        ("sandwitches", "0020_populate_unique_tracking_tokens"),
     ]
 
     operations = [
