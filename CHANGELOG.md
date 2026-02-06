@@ -1,3 +1,10 @@
+## [2.6.2](https://github.com/martynvdijke/sandwitches/compare/v2.6.1...v2.6.2) (2026-02-06)
+
+
+### Bug Fixes
+
+* resolve migration conflict by populating unique tracking tokens for orders ([d83cdb7](https://github.com/martynvdijke/sandwitches/commit/d83cdb76a5a125022ed73c23372a2900476750c4))
+
 ## [2.6.1](https://github.com/martynvdijke/sandwitches/compare/v2.6.0...v2.6.1) (2026-02-05)
 
 # [2.6.0](https://github.com/martynvdijke/sandwitches/compare/v2.5.6...v2.6.0) (2026-02-05)
