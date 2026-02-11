@@ -1,3 +1,10 @@
+## [2.7.3](https://github.com/martynvdijke/sandwitches/compare/v2.7.2...v2.7.3) (2026-02-11)
+
+
+### Bug Fixes
+
+* fix cropperv2 ([2f041f3](https://github.com/martynvdijke/sandwitches/commit/2f041f3503a7651a0d9da9cbdb28b614377d3277))
+
 ## [2.7.2](https://github.com/martynvdijke/sandwitches/compare/v2.7.1...v2.7.2) (2026-02-11)
 
 ## [2.7.1](https://github.com/martynvdijke/sandwitches/compare/v2.7.0...v2.7.1) (2026-02-11)
