@@ -1,12 +1,12 @@
 {% extends "admin/admin_base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block admin_title %}{{ title }}{% endblock %}
 
 {% block extra_head %}
 {{ block.super }}
-<link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<link href="{% static "dist/main.css" %}" rel="stylesheet">
+<script src="{% static "dist/main.js" %}" defer></script>
 <style>
     /* Ensure EasyMDE fits well with BeerCSS containers */
     .editor-toolbar {
@@ -184,27 +184,44 @@
     <div class="padding">
         <h5 class="bold mb-1">{% trans "Edit Image" %}</h5>
         <div class="cropper-container mb-1">
-            <img id="cropper-image" src="">
+            <cropper-canvas id="cropper-canvas" background style="height: 500px;">
+                <cropper-image id="cropper-image" src="" rotatable scalable skewable translatable></cropper-image>
+                <cropper-shade hidden></cropper-shade>
+                <cropper-handle action="select" plain></cropper-handle>
+                <cropper-selection id="cropper-selection" initial-coverage="0.5" movable resizable>
+                    <cropper-grid role="grid" covered></cropper-grid>
+                    <cropper-crosshair centered></cropper-crosshair>
+                    <cropper-handle action="move" theme-color="rgba(255, 255, 255, 0.35)"></cropper-handle>
+                    <cropper-handle action="n-resize"></cropper-handle>
+                    <cropper-handle action="e-resize"></cropper-handle>
+                    <cropper-handle action="s-resize"></cropper-handle>
+                    <cropper-handle action="w-resize"></cropper-handle>
+                    <cropper-handle action="ne-resize"></cropper-handle>
+                    <cropper-handle action="nw-resize"></cropper-handle>
+                    <cropper-handle action="se-resize"></cropper-handle>
+                    <cropper-handle action="sw-resize"></cropper-handle>
+                </cropper-selection>
+            </cropper-canvas>
         </div>
         <div class="row scroll no-space border round mb-1">
-            <button type="button" class="button transparent max" onclick="cropper.rotate(-90)" title="{% trans 'Rotate Left' %}">
+            <button type="button" class="button transparent max" onclick="rotateImage(-90)" title="{% trans 'Rotate Left' %}">
                 <i>rotate_left</i>
             </button>
-            <button type="button" class="button transparent max" onclick="cropper.rotate(90)" title="{% trans 'Rotate Right' %}">
+            <button type="button" class="button transparent max" onclick="rotateImage(90)" title="{% trans 'Rotate Right' %}">
                 <i>rotate_right</i>
             </button>
             <div class="divider vertical"></div>
-            <button type="button" class="button transparent max" onclick="cropper.scaleX(-cropper.getData().scaleX || -1)" title="{% trans 'Flip Horizontal' %}">
+            <button type="button" class="button transparent max" onclick="flipImageHorizontal()" title="{% trans 'Flip Horizontal' %}">
                 <i>flip</i>
             </button>
-            <button type="button" class="button transparent max" onclick="cropper.scaleY(-cropper.getData().scaleY || -1)" title="{% trans 'Flip Vertical' %}">
+            <button type="button" class="button transparent max" onclick="flipImageVertical()" title="{% trans 'Flip Vertical' %}">
                 <i>flip</i>
             </button>
             <div class="divider vertical"></div>
-            <button type="button" class="button transparent max" onclick="cropper.setAspectRatio(1)" title="{% trans '1:1' %}">1:1</button>
-            <button type="button" class="button transparent max" onclick="cropper.setAspectRatio(4/3)" title="{% trans '4:3' %}">4:3</button>
-            <button type="button" class="button transparent max" onclick="cropper.setAspectRatio(16/9)" title="{% trans '16:9' %}">16:9</button>
-            <button type="button" class="button transparent max" onclick="cropper.setAspectRatio(NaN)" title="{% trans 'Free' %}">
+            <button type="button" class="button transparent max" onclick="setAspectRatio(1)" title="{% trans '1:1' %}">1:1</button>
+            <button type="button" class="button transparent max" onclick="setAspectRatio(4/3)" title="{% trans '4:3' %}">4:3</button>
+            <button type="button" class="button transparent max" onclick="setAspectRatio(16/9)" title="{% trans '16:9' %}">16:9</button>
+            <button type="button" class="button transparent max" onclick="setAspectRatio(NaN)" title="{% trans 'Free' %}">
                 <i>crop_free</i>
             </button>
         </div>
@@ -218,54 +235,61 @@
 
 {% block admin_scripts %}
 <script>
-    let cropper;
     const imagePreview = document.getElementById('image-preview');
     const imagePlaceholder = document.getElementById('image-placeholder');
     const imageTools = document.getElementById('image-tools');
     const imageInput = document.getElementById('id_image');
     const imageDataInput = document.getElementById('id_image_data');
     const cropperImage = document.getElementById('cropper-image');
+    const cropperCanvas = document.getElementById('cropper-canvas');
+    const cropperSelection = document.getElementById('cropper-selection');
+    
+    let currentScaleX = 1;
+    let currentScaleY = 1;
 
     function openCropper() {
         if (!imagePreview.src || imagePreview.src === window.location.href) return;
         cropperImage.src = imagePreview.src;
         ui('#cropper-dialog');
-
-        if (cropper) {
-            cropper.destroy();
-        }
-
-        setTimeout(() => {
-            cropper = new Cropper(cropperImage, {
-                viewMode: 1,
-                autoCropArea: 1,
-                responsive: true,
-                restore: false,
-                checkCrossOrigin: true,
-                guides: true,
-                center: true,
-                highlight: false,
-                cropBoxMovable: true,
-                cropBoxResizable: true,
-                toggleDragModeOnDblclick: false,
-            });
-        }, 100);
     }
 
-    function applyCrop() {
-        const canvas = cropper.getCroppedCanvas({
-            maxWidth: 2000,
-            maxHeight: 2000,
-        });
+    function rotateImage(angle) {
+        const radians = (angle * Math.PI) / 180;
+        cropperImage.$rotate(radians);
+    }
 
-        const croppedData = canvas.toDataURL('image/jpeg', 0.9);
-        imagePreview.src = croppedData;
-        imagePreview.style.display = 'block';
-        if (imagePlaceholder) imagePlaceholder.style.display = 'none';
-        imageTools.style.display = 'flex';
-        imageDataInput.value = croppedData;
+    function flipImageHorizontal() {
+        currentScaleX = -currentScaleX;
+        cropperImage.$scale(currentScaleX, currentScaleY);
+    }
 
-        ui('#cropper-dialog');
+    function flipImageVertical() {
+        currentScaleY = -currentScaleY;
+        cropperImage.$scale(currentScaleX, currentScaleY);
+    }
+
+    function setAspectRatio(ratio) {
+        cropperSelection.aspectRatio = isNaN(ratio) ? NaN : ratio;
+    }
+
+    async function applyCrop() {
+        try {
+            const canvas = await cropperSelection.$toCanvas({
+                maxWidth: 2000,
+                maxHeight: 2000,
+            });
+
+            const croppedData = canvas.toDataURL('image/jpeg', 0.9);
+            imagePreview.src = croppedData;
+            imagePreview.style.display = 'block';
+            if (imagePlaceholder) imagePlaceholder.style.display = 'none';
+            imageTools.style.display = 'flex';
+            imageDataInput.value = croppedData;
+
+            ui('#cropper-dialog');
+        } catch (error) {
+            console.error('Error cropping image:', error);
+        }
     }
 
     imageInput.addEventListener('change', function(e) {
@@ -277,6 +301,9 @@
                 imagePreview.style.display = 'block';
                 if (imagePlaceholder) imagePlaceholder.style.display = 'none';
                 imageTools.style.display = 'flex';
+                // Reset transformation state
+                currentScaleX = 1;
+                currentScaleY = 1;
                 // Automatically open cropper for new images
                 openCropper();
             };

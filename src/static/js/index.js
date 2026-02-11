@@ -5,10 +5,12 @@ import 'beercss/dist/cdn/beer.min.js';
 import Chart from 'chart.js/auto';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.min.js';
-
+import 'easymde/dist/easymde.min.css';
+import 'easymde/dist/easymde.min.js';
+import EasyMDE from 'easymde';
 // This makes Chart available to your HTML/scripts
 window.Chart = Chart;
 window.Cropper = Cropper;
-
+window.EasyMDE = EasyMDE;
 // You can add your own custom JS here
 console.log('Webpack bundle loaded!');
