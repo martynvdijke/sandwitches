@@ -26,16 +26,34 @@
 
 ## ✨ Overview
 
-Sandwitches is a modern, recipe management platform built with **Django 6.0**.
+Sandwitches is a modern, recipe management platform built with **Django**.
 It is made as a hobby project for my girlfriend, who likes to make what I call "fancy" sandwiches (sandwiches that go beyond the Dutch normals), lucky to be me :).
-See wanted to have a way to advertise and share those sandwtiches with the family and so I started coding making it happen, in the hopes of getting more fancy sandwiches.
+Sandwiches so good you will think they are haunted !.
+See wanted to have a way to advertise and share those sandwiches with the family and so I started coding making it happen, in the hopes of getting more fancy sandwiches.
+
+![](./docs/overview.png)
+
+## 🎯 Features
+
+Sandwitches comes packed with comprehensive features for recipe management, community engagement, and ordering:
+
+- **🍞 Recipe Management** - Upload and create sandwich recipes with images, ingredients, and instructions
+- **👥 Community Page** - Discover and browse sandwiches shared by community members
+- **🛒 Ordering System** - Browse recipes and place orders with cart functionality and order tracking
+- **⭐ Ratings & Reviews** - Rate recipes on a 0-10 scale with detailed comments
+- **🔌 REST API** - Full API access for recipes, tags, ratings, orders, and user management
+- **📊 Admin Dashboard** - Comprehensive admin interface for recipe approval and site management
+- **🌍 Multi-language Support** - Internationalization for multiple languages
+- **📱 Responsive Design** - Mobile-friendly interface with BeerCSS framework
+- **🔔 Notifications** - Email and Gotify push notification integration
+- **📈 Order Tracking** - Real-time order status tracking with unique tracking tokens
 
 ## 📥 Getting Started
 
 ### Prerequisites
 
-* Python 3.12+
-* [uv](https://github.com/astral-sh/uv) (recommended) or pip
+- Python 3.12+
+- [uv](https://github.com/astral-sh/uv) (recommended) or pip
 
 ### Installation
 
@@ -70,9 +88,9 @@ See wanted to have a way to advertise and share those sandwtiches with the famil
 
 The project maintains high standards with over **80+ automated tests**.
 
-* **Run tests**: `uv run invoke tests`
-* **Linting**: `uv run invoke linting`
-* **Type checking**: `uv run invoke typecheck`
+- **Run tests**: `uv run invoke tests`
+- **Linting**: `uv run invoke linting`
+- **Type checking**: `uv run invoke typecheck`
 
 ---
 
