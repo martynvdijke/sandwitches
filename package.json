@@ -28,6 +28,7 @@
     "chart.js": "^4.5.1",
     "cropperjs": "^2.0.0",
     "css-loader": "^7.1.2",
+    "easymde": "^2.20.0",
     "htmx.org": "^2.0.8",
     "material-dynamic-colors": "^1.1.2",
     "mini-css-extract-plugin": "^2.9.4",

@@ -41,7 +41,9 @@ def user_factory(db):
         User = get_user_model()
         # Set reasonable defaults
         if "username" not in kwargs:
-            kwargs["username"] = "testuser"
+            import uuid
+
+            kwargs["username"] = f"user_{uuid.uuid4().hex[:8]}"
         if "password" not in kwargs:
             kwargs["password"] = "testpass123"
 
@@ -56,6 +58,66 @@ def staff_user(user_factory):
     Creates and returns a staff user.
     """
     return user_factory(username="staff_test", is_staff=True, email="staff@example.com")
+
+
+@pytest.fixture
+def tag_factory(db):
+    def create_tag(**kwargs):
+        from sandwitches.models import Tag
+
+        if "name" not in kwargs:
+            import uuid
+
+            kwargs["name"] = f"Tag-{uuid.uuid4().hex[:6]}"
+        return Tag.objects.create(**kwargs)
+
+    return create_tag
+
+
+@pytest.fixture
+def recipe_factory(db, user_factory):
+    def create_recipe(**kwargs):
+        from sandwitches.models import Recipe
+
+        if "uploaded_by" not in kwargs:
+            kwargs["uploaded_by"] = user_factory()
+        if "title" not in kwargs:
+            import uuid
+
+            kwargs["title"] = f"Recipe-{uuid.uuid4().hex[:6]}"
+        if "price" not in kwargs:
+            kwargs["price"] = 10.0
+        return Recipe.objects.create(**kwargs)
+
+    return create_recipe
+
+
+@pytest.fixture
+def rating_factory(db, user_factory, recipe_factory):
+    def create_rating(**kwargs):
+        from sandwitches.models import Rating
+
+        if "user" not in kwargs:
+            kwargs["user"] = user_factory()
+        if "recipe" not in kwargs:
+            kwargs["recipe"] = recipe_factory()
+        if "score" not in kwargs:
+            kwargs["score"] = 5.0
+        return Rating.objects.create(**kwargs)
+
+    return create_rating
+
+
+@pytest.fixture
+def order_factory(db, user_factory):
+    def create_order(**kwargs):
+        from sandwitches.models import Order
+
+        if "user" not in kwargs:
+            kwargs["user"] = user_factory()
+        return Order.objects.create(**kwargs)
+
+    return create_order
 
 
 @pytest.fixture(autouse=True)

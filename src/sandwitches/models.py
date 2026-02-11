@@ -317,26 +317,26 @@ class OrderItem(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.price:
-            self.price = self.recipe.price
+            self.price = self.recipe.price  # ty:ignore[possibly-missing-attribute]
 
         is_new = self.pk is None
         if is_new:
             if (
-                self.recipe.max_daily_orders is not None
-                and self.recipe.daily_orders_count + self.quantity
-                > self.recipe.max_daily_orders
+                self.recipe.max_daily_orders is not None  # ty:ignore[possibly-missing-attribute]
+                and self.recipe.daily_orders_count + self.quantity  # ty:ignore[possibly-missing-attribute]
+                > self.recipe.max_daily_orders  # ty:ignore[possibly-missing-attribute]
             ):
                 raise ValidationError(
-                    f"Daily order limit reached for {self.recipe.title}."
+                    f"Daily order limit reached for {self.recipe.title}."  # ty:ignore[possibly-missing-attribute]
                 )
 
-            self.recipe.daily_orders_count += self.quantity
-            self.recipe.save(update_fields=["daily_orders_count"])
+            self.recipe.daily_orders_count += self.quantity  # ty:ignore[possibly-missing-attribute]
+            self.recipe.save(update_fields=["daily_orders_count"])  # ty:ignore[possibly-missing-attribute]
 
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.quantity}x {self.recipe.title} in Order #{self.order.pk}"
+        return f"{self.quantity}x {self.recipe.title} in Order #{self.order.pk}"  # ty:ignore[possibly-missing-attribute]
 
 
 class CartItem(models.Model):
@@ -356,10 +356,10 @@ class CartItem(models.Model):
         verbose_name_plural = _("Cart Items")
 
     def __str__(self):
-        return f"{self.user.username}'s cart: {self.recipe.title} (x{self.quantity})"
+        return f"{self.user.username}'s cart: {self.recipe.title} (x{self.quantity})"  # ty:ignore[possibly-missing-attribute]
 
     @property
     def total_price(self):
-        if self.recipe.price:
-            return self.recipe.price * self.quantity
+        if self.recipe.price:  # ty:ignore[possibly-missing-attribute]
+            return self.recipe.price * self.quantity  # ty:ignore[possibly-missing-attribute]
         return 0

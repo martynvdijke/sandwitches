@@ -53,7 +53,7 @@ def notify_order_submitted(order_id):
             Order.objects.select_related("user")  # ty:ignore[unresolved-attribute]
             .prefetch_related("items__recipe")
             .get(pk=order_id)
-        )  # ty:ignore[unresolved-attribute]
+        )
     except Order.DoesNotExist:  # ty:ignore[unresolved-attribute]
         logging.warning(f"Order {order_id} not found. Skipping notification.")
         return
@@ -157,7 +157,7 @@ def send_gotify_notification(title, message, priority=5):
 
     try:
         response = requests.post(
-            f"{url.rstrip('/')}/message?token={token}",
+            f"{url.rstrip('/')}/message?token={token}",  # ty:ignore[possibly-missing-attribute]
             json={
                 "title": title,
                 "message": message,
