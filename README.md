@@ -16,7 +16,6 @@
     <img src="https://img.shields.io/github/license/martynvdijke/sandwitches" alt="License">
   </a>
   <img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python Version">
-  <img src="https://img.shields.io/badge/django-6.0-green.svg" alt="Django Version">
   <a href="https://github.com/astral-sh/ruff">
     <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff">
   </a>
