@@ -1,3 +1,10 @@
+## [2.7.6](https://github.com/martynvdijke/sandwitches/compare/v2.7.5...v2.7.6) (2026-02-20)
+
+
+### Bug Fixes
+
+* enable all ouput in api for get recipes ([1c1263d](https://github.com/martynvdijke/sandwitches/commit/1c1263d2a740dcbe8483c634921d7913115bc23a))
+
 ## [2.7.5](https://github.com/martynvdijke/sandwitches/compare/v2.7.4...v2.7.5) (2026-02-20)
 
 ## [2.7.4](https://github.com/martynvdijke/sandwitches/compare/v2.7.3...v2.7.4) (2026-02-19)
