@@ -74,7 +74,17 @@ class RecipeUpdateSchema(Schema):
 class UserSchema(ModelSchema):
     class Meta:
         model = User
-        exclude = ["password", "last_login", "user_permissions", "groups", "email", "is_superuser", "is_staff", "is_active", "date_joined"]
+        exclude = [
+            "password",
+            "last_login",
+            "user_permissions",
+            "groups",
+            "email",
+            "is_superuser",
+            "is_staff",
+            "is_active",
+            "date_joined",
+        ]
 
 
 class UserUpdateSchema(Schema):
