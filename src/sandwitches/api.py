@@ -35,7 +35,7 @@ class UserPublicSchema(ModelSchema):
 class TagSchema(ModelSchema):
     class Meta:
         model = Tag
-        fields = ["id", "name", "slug"]
+        fields = "__all__"
 
 
 class TagCreateSchema(Schema):
@@ -48,23 +48,7 @@ class RecipeSchema(ModelSchema):
 
     class Meta:
         model = Recipe
-        fields = [
-            "id",
-            "title",
-            "slug",
-            "description",
-            "ingredients",
-            "instructions",
-            "servings",
-            "price",
-            "uploaded_by",
-            "is_highlighted",
-            "is_approved",
-            "max_daily_orders",
-            "daily_orders_count",
-            "created_at",
-            "updated_at",
-        ]
+        fields = "__all__"
 
 
 class RecipeCreateSchema(Schema):
@@ -112,15 +96,7 @@ class RatingSchema(ModelSchema):
 
     class Meta:
         model = Rating
-        fields = [
-            "id",
-            "recipe",
-            "user",
-            "score",
-            "comment",
-            "created_at",
-            "updated_at",
-        ]
+        fields = "__all__"
 
 
 class RatingCreateSchema(Schema):
