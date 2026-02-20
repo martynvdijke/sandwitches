@@ -1,3 +1,17 @@
+# [2.8.0](https://github.com/martynvdijke/sandwitches/compare/v2.7.5...v2.8.0) (2026-02-20)
+
+
+### Bug Fixes
+
+* enable all ouput in api for get recipes ([1c1263d](https://github.com/martynvdijke/sandwitches/commit/1c1263d2a740dcbe8483c634921d7913115bc23a))
+* remove login auth ([ff2272a](https://github.com/martynvdijke/sandwitches/commit/ff2272ac690799bb30fdae78682d00f8b9a1ebe0))
+* remove login auth ([9ee1b33](https://github.com/martynvdijke/sandwitches/commit/9ee1b33d1bdb494c5f1e401150d45b720fedb5ae))
+
+
+### Features
+
+* **ci:** Refactor CodeQL workflow by cleaning up comments ([8d02c63](https://github.com/martynvdijke/sandwitches/commit/8d02c63aa3e43ea7d5bd205448c5cb14a1489c94))
+
 ## [2.7.6](https://github.com/martynvdijke/sandwitches/compare/v2.7.5...v2.7.6) (2026-02-20)
 
 
