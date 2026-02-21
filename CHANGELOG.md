@@ -1,3 +1,11 @@
+## [2.8.1](https://github.com/martynvdijke/sandwitches/compare/v2.8.0...v2.8.1) (2026-02-21)
+
+
+### Bug Fixes
+
+* **ci:** also push to ghcr ([371b042](https://github.com/martynvdijke/sandwitches/commit/371b0428a1f8e1b122bd2e0ad514c16d14a0d2fb))
+* **ci:** remove codeql ([eb38375](https://github.com/martynvdijke/sandwitches/commit/eb383752fcdbc881a20fcd2d66400731d58215fd))
+
 # [2.8.0](https://github.com/martynvdijke/sandwitches/compare/v2.7.5...v2.8.0) (2026-02-20)
 
 
