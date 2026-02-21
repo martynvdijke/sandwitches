@@ -49,6 +49,52 @@ Sandwitches comes packed with comprehensive features for recipe management, comm
 
 ## 📥 Getting Started
 
+```bash
+services:
+  sandwitches:
+    image: martynvandijke/sandwitches:latest
+    container_name: sandwitches
+    environment:
+     - ALLOWED_HOSTS=localhost,127.0.0.1,[::1]
+     - CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+     - SECRET_KEY=superdupersecretkey
+     - DATABASE_FILE=/config/db.sqlite3
+     - MEDIA_ROOT=/config/media
+    ports:
+      - 6270:6270
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6270/api/ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - /path/to/sandwitches:/config
+    restart: always
+```
+
+### Environment variables
+
+Below is a list of all supported environment variables.
+
+| **Variable**         | **Required** | **Description**                                                                       |
+| -------------------- | ------------ | ------------------------------------------------------------------------------------- |
+| ALLOWED_HOSTS        | Yes          | A list of strings representing the host/domain names that this Django site can serve. |
+| CSRF_TRUSTED_ORIGINS | Yes          | A list of trusted origins for safe cross-site requests (e.g., <https://example.com>). |
+| SECRET_KEY           | Yes          | A unique, secret value used for cryptographic signing and session security.           |
+| DATABASE_FILE        | Yes          | The file path to the SQLite database or the name of the database being used.          |
+| MEDIA_ROOT           | Yes          | The absolute filesystem path to the directory that will hold user-uploaded files.     |
+| SMTP_USE_TLS         | No           | Boolean (True/False) to enable/disable TLS encryption for outgoing emails.            |
+| SMTP_HOST            | No           | The hostname or IP address of the mail server used to send emails.                    |
+| SMTP_PORT            | No           | The port number to use for the SMTP server (usually 587 for TLS or 465 for SSL).      |
+| SMTP_FROM_NAME       | No           | The display name that appears in the "From" field of outgoing emails.                 |
+| SMTP_FROM_EMAIL      | No           | The actual email address used as the sender for system-generated messages.            |
+| SMTP_USER            | No           | The username required to authenticate with the SMTP server.                           |
+| SMTP_PASSWORD        | No           | The password required to authenticate with the SMTP server.                           |
+| GOTIFY_URL           | No           | The base URL of your Gotify server instance for push notifications.                   |
+| GOTIFY_TOKEN         | No           | The application-specific token used to authenticate with Gotify.                      |
+
+## Development setup
+
 ### Prerequisites
 
 - Python 3.12+
@@ -72,7 +118,6 @@ Sandwitches comes packed with comprehensive features for recipe management, comm
 3. **Run migrations and collect static files**:
 
     ```bash
-    uv run invoke setup-ci  # Sets up environment variables
     uv run src/manage.py migrate
     uv run src/manage.py collectstatic --noinput
     ```
@@ -85,7 +130,7 @@ Sandwitches comes packed with comprehensive features for recipe management, comm
 
 ## 🧪 Testing & Quality
 
-The project maintains high standards with over **80+ automated tests**.
+This project wraps all tests, linting and formatting in `invoke` tasks so you can run:
 
 - **Run tests**: `uv run invoke tests`
 - **Linting**: `uv run invoke linting`

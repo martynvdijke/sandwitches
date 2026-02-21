@@ -1,0 +1,20 @@
+services:
+  sandwitches:
+    image: martynvandijke/sandwitches:latest
+    container_name: sandwitches
+    environment:
+     - ALLOWED_HOSTS=localhost,127.0.0.1,[::1]
+     - CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+     - SECRET_KEY=superdupersecretkey
+     - DATABASE_FILE=/config/db.sqlite3
+     - MEDIA_ROOT=/config/media
+    ports:
+      - 6270:6270
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6270/api/ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - /path/to/sandwitches:/config
+    restart: always
