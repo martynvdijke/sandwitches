@@ -28,6 +28,14 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1, localhost").split(",
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
 DATABASE_FILE = Path(os.environ.get("DATABASE_FILE", default="/db/db.sqlite3"))
 
+# Umami Analytics Configuration
+UMAMI_HOST = os.environ.get("UMAMI_HOST")
+UMAMI_WEBSITE_ID = os.environ.get("UMAMI_WEBSITE_ID")
+
+# Gotify Push Notifications Configuration
+GOTIFY_URL = os.environ.get("GOTIFY_URL")
+GOTIFY_TOKEN = os.environ.get("GOTIFY_TOKEN")
+
 storage.is_database_readable(DATABASE_FILE)
 storage.is_database_writable(DATABASE_FILE)
 
@@ -99,6 +107,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.csrf",
                 "django.template.context_processors.i18n",
+                "sandwitches.context_processors.umami",
             ],
         },
     },

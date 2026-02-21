@@ -46,6 +46,7 @@ Sandwitches comes packed with comprehensive features for recipe management, comm
 - **📱 Responsive Design** - Mobile-friendly interface with BeerCSS framework
 - **🔔 Notifications** - Email and Gotify push notification integration
 - **📈 Order Tracking** - Real-time order status tracking with unique tracking tokens
+- **📊 Analytics** - Umami analytics integration for tracking user behavior
 
 ## 📥 Getting Started
 
@@ -92,6 +93,8 @@ Below is a list of all supported environment variables.
 | SMTP_PASSWORD        | No           | The password required to authenticate with the SMTP server.                           |
 | GOTIFY_URL           | No           | The base URL of your Gotify server instance for push notifications.                   |
 | GOTIFY_TOKEN         | No           | The application-specific token used to authenticate with Gotify.                      |
+| UMAMI_HOST           | No           | UMAMI analytics tracking host.                                                        |
+| UMAMI_WEBSITE_ID     | No           | UMAMI analytics website id.                                                           |
 
 ## Development setup
 

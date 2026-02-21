@@ -4,6 +4,9 @@
 {% block extra_head %}
 <link href="{% static "dist/main.css" %}" rel="stylesheet">
 <script src="{% static "dist/main.js" %}" defer></script>
+{% if UMAMI_HOST and UMAMI_WEBSITE_ID %}
+<script defer src="https://{{ UMAMI_HOST }}/script.js" data-website-id="{{ UMAMI_WEBSITE_ID }}"></script>
+{% endif %}
 <link rel="icon" type="image/svg+xml" href="{% static "icons/favicon.svg" %}">
 <style>
     main.container {

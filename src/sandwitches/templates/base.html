@@ -46,6 +46,9 @@
       }
     </style>
     {% block extra_head %}{% endblock %}
+    {% if UMAMI_HOST and UMAMI_WEBSITE_ID %}
+    <script defer src="https://{{ UMAMI_HOST }}/script.js" data-website-id="{{ UMAMI_WEBSITE_ID }}"></script>
+    {% endif %}
   </head>
   <body class="{% block body_class %}{% endblock %} {% if user.is_authenticated %}{{ user.theme }}{% endif %}">
     <div id="loading-sandwich" class="loading-sandwich-container">
