@@ -20,6 +20,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout Repository
         uses: actions/checkout@v6
 
@@ -49,4 +57,7 @@ jobs:
 
       - name: Push Docker image
         if: github.event_name != 'pull_request' && github.ref != 'refs/heads/main'
-        run: docker push martynvandijke/sandwitches:latest
+        run: |
+          docker tag martynvandijke/sandwitches:latest ghcr.io/martynvandijke/sandwitches:latest
+          docker push martynvandijke/sandwitches:latest
+          docker push ghcr.io/martynvandijke/sandwitches:latest
