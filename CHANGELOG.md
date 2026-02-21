@@ -1,3 +1,15 @@
+# [2.9.0](https://github.com/martynvdijke/sandwitches/compare/v2.8.2...v2.9.0) (2026-02-21)
+
+
+### Bug Fixes
+
+* **ci:** add in write packages v2 ([9e60b63](https://github.com/martynvdijke/sandwitches/commit/9e60b63f75a892fbe40947fa721230f8682959bb))
+
+
+### Features
+
+* add umami anaytlics tracking ([2d263fb](https://github.com/martynvdijke/sandwitches/commit/2d263fbc010b2040af0fa8e5e67c495752961385))
+
 ## [2.8.2](https://github.com/martynvdijke/sandwitches/compare/v2.8.1...v2.8.2) (2026-02-21)
 
 
