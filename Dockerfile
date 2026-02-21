@@ -10,6 +10,10 @@ RUN npm install && npm run build
 # Stage 2: Python application
 FROM python:3.14
 
+LABEL org.opencontainers.image.source=https://github.com/martynvdijke/sandwitches
+LABEL org.opencontainers.image.description="Sandwitches container image"
+LABEL org.opencontainers.image.licenses=MIT
+
 ARG UID=1000
 ARG GID=1000
 ARG USERNAME=app

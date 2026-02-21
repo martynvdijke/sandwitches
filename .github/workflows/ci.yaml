@@ -48,13 +48,6 @@ jobs:
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag martynvandijke/sandwitches:latest
 
-      # - name: Test Docker image
-      #   run: |
-      #     docker run -d -v $(pwd):/app/data --name test-container -e SECRET_KEY=test -e CSRF_TRUSTED_ORIGINS=http://localhost:8000 -e ALLOWED_HOSTS=localhost -e DEBUG=1 -e DATABASE_FILE=/test/db.sqlite3 -p 8000:6270 martynvandijke/sandwitches:latest
-      #     sleep 10
-      #     curl --fail -v http://localhost:8000/ || (docker logs test-container && exit 1)
-      #     docker rm -f test-container
-
       - name: Push Docker image
         if: github.event_name != 'pull_request' && github.ref != 'refs/heads/main'
         run: |
