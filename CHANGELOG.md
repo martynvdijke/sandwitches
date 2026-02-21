@@ -1,3 +1,10 @@
+## [2.8.3](https://github.com/martynvdijke/sandwitches/compare/v2.8.2...v2.8.3) (2026-02-21)
+
+
+### Bug Fixes
+
+* **ci:** add in write packages v2 ([9e60b63](https://github.com/martynvdijke/sandwitches/commit/9e60b63f75a892fbe40947fa721230f8682959bb))
+
 ## [2.8.2](https://github.com/martynvdijke/sandwitches/compare/v2.8.1...v2.8.2) (2026-02-21)
 
 
