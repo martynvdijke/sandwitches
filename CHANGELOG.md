@@ -1,3 +1,10 @@
+## [2.9.1](https://github.com/martynvdijke/sandwitches/compare/v2.9.0...v2.9.1) (2026-02-21)
+
+
+### Bug Fixes
+
+* **ci:** correct repo name ([f6f0e56](https://github.com/martynvdijke/sandwitches/commit/f6f0e569b3101f8e813e985e2c36de76e5c66d40))
+
 # [2.9.0](https://github.com/martynvdijke/sandwitches/compare/v2.8.2...v2.9.0) (2026-02-21)
 
 
