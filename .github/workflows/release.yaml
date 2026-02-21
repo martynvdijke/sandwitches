@@ -80,11 +80,11 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker tag martynvandijke/sandwitches:latest ghcr.io/martynvandijke/sandwitches:latest
+          docker tag martynvandijke/sandwitches:latest ghcr.io/martynvdijke/sandwitches:latest
           docker push martynvandijke/sandwitches:latest
-          docker push ghcr.io/martynvandijke/sandwitches:latest
+          docker push ghcr.io/martynvdijke/sandwitches:latest
           echo "Pushing versioned tag: ${{ steps.uv_version.outputs.version }}"
           docker tag martynvandijke/sandwitches:latest martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}
-          docker tag martynvandijke/sandwitches:latest ghcr.io/martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}
+          docker tag martynvandijke/sandwitches:latest ghcr.io/martynvdijke/sandwitches:${{ steps.uv_version.outputs.version }}
           docker push martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}
-          docker push ghcr.io/martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}
+          docker push ghcr.io/martynvdijke/sandwitches:${{ steps.uv_version.outputs.version }}

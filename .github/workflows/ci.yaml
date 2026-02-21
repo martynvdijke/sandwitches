@@ -51,6 +51,6 @@ jobs:
       - name: Push Docker image
         if: github.event_name != 'pull_request' && github.ref != 'refs/heads/main'
         run: |
-          docker tag martynvandijke/sandwitches:latest ghcr.io/martynvandijke/sandwitches:latest
+          docker tag martynvandijke/sandwitches:latest ghcr.io/martynvdijke/sandwitches:latest
           docker push martynvandijke/sandwitches:latest
-          docker push ghcr.io/martynvandijke/sandwitches:latest
+          docker push ghcr.io/martynvdijke/sandwitches:latest
