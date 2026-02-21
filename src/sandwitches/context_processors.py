@@ -1,4 +1,5 @@
 """Context processors for sandwitches application."""
+
 from django.conf import settings
 
 
