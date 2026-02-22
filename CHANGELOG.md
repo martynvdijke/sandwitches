@@ -1,3 +1,10 @@
+## [2.9.2](https://github.com/martynvdijke/sandwitches/compare/v2.9.1...v2.9.2) (2026-02-22)
+
+
+### Bug Fixes
+
+* **ci:** fix package write ([180a9ff](https://github.com/martynvdijke/sandwitches/commit/180a9ffb42afbbf7a29d5886b93672ee9a449918))
+
 ## [2.9.1](https://github.com/martynvdijke/sandwitches/compare/v2.9.0...v2.9.1) (2026-02-21)
 
 
