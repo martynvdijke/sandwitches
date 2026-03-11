@@ -48,9 +48,9 @@
    <p><a href="{% url 'login' %}" class="link">{% trans "Log in" %}</a> {% trans "to rate this recipe." %}</p>
 {% endif %}
 
-{% if all_ratings %}
+{% if all_ratings or recipe.instagram_comments.all %}
 <div class="space"></div>
-<h6 class="bold">{% trans "All Ratings" %}</h6>
+<h6 class="bold">{% trans "All Comments & Ratings" %}</h6>
 <div class="collection">
     {% for rating in all_ratings %}
     <div class="row">
@@ -61,6 +61,19 @@
         {% if rating.comment %}
             <p class="small-text">{{ rating.comment }}</p>
         {% endif %}
+    </div>
+    {% endfor %}
+
+    {% for comment in recipe.instagram_comments.all %}
+    <div class="row">
+        <div class="max">
+            <span class="bold">{{ comment.username }}</span>
+            <span class="ml-2 tiny-text primary-text">
+                <i class="small">chat</i> {% trans "from Instagram" %}
+            </span>
+        </div>
+        <p class="small-text">{{ comment.text }}</p>
+        <span class="tiny-text italic">{{ comment.created_at|date:"SHORT_DATETIME_FORMAT" }}</span>
     </div>
     {% endfor %}
 </div>

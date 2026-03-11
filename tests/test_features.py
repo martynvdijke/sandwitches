@@ -68,7 +68,7 @@ class FeatureTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Your rating: <b>8.5</b>")
         self.assertContains(response, "This is a great recipe!")
-        self.assertContains(response, "All Ratings")
+        self.assertContains(response, "All Comments & Ratings")
         self.assertContains(response, "user1")
         self.assertContains(response, "8.5")
 

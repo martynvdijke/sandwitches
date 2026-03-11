@@ -5,7 +5,12 @@ from .storage import HashedFilenameStorage
 from simple_history.models import HistoricalRecords
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Avg
-from .tasks import email_users, send_gotify_notification
+from .tasks import (
+    email_users,
+    send_gotify_notification,
+    upload_to_instagram,
+    sync_instagram_interactions,
+)
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 import logging
@@ -41,8 +46,50 @@ class Setting(SingletonModel):
         help_text="The application token for Gotify",
     )
 
+    instagram_username = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="The username of your Instagram account",
+    )
+    instagram_password = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="The password of your Instagram account",
+    )
+    instagram_enabled = models.BooleanField(
+        default=False,
+        help_text="Enable uploading new recipes to Instagram",
+    )
+    instagram_initial_uploaded = models.BooleanField(
+        default=False,
+        help_text="Whether the initial recipe has been uploaded to Instagram",
+    )
+
     def __str__(self):
         return str(_("Site Settings"))
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        if self.instagram_enabled and not self.instagram_initial_uploaded:
+            # We need to trigger the initial upload.
+            # We use a post-save signal or just another task to find the latest recipe.
+            # For simplicity, let's find it here and enqueue.
+            from django.apps import apps
+
+            Recipe = apps.get_model("sandwitches", "Recipe")
+            latest_recipe = Recipe.objects.order_by("-created_at").first()
+            if latest_recipe:
+                upload_to_instagram.enqueue(recipe_id=latest_recipe.pk)
+                # Update the field without triggering another save recursion if possible,
+                # but SingletonModel.save is usually fine if we don't call super() again.
+                # Actually, we can just use update() to be safe.
+                Setting.objects.filter(pk=self.pk).update(  # ty:ignore[unresolved-attribute]
+                    instagram_initial_uploaded=True
+                )
+                self.instagram_initial_uploaded = True
 
     class Meta:
         verbose_name = _("Site Settings")
@@ -165,6 +212,9 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(Tag, blank=True, related_name="recipes")
     is_highlighted = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
+    instagram_uploaded = models.BooleanField(default=False)
+    instagram_media_id = models.CharField(max_length=255, blank=True, null=True)
+    instagram_likes_count = models.PositiveIntegerField(default=0)
     max_daily_orders = models.PositiveIntegerField(
         null=True, blank=True, verbose_name="Max daily orders"
     )
@@ -208,10 +258,17 @@ class Recipe(models.Model):
                 message=f"A new recipe '{self.title}' has been uploaded by {self.uploaded_by or 'Unknown'}.",
                 priority=5,
             )
+
+            config = Setting.get_solo()
+            if config.instagram_enabled:
+                upload_to_instagram.enqueue(recipe_id=self.pk)
         else:
             logging.debug(
                 "Existing recipe saved (update); skipping email notification."
             )
+            config = Setting.get_solo()
+            if config.instagram_enabled and self.instagram_media_id:
+                sync_instagram_interactions.enqueue()
 
     def get_absolute_url(self):
         return reverse("recipe_detail", kwargs={"slug": self.slug})
@@ -263,6 +320,22 @@ class Rating(models.Model):
 
     def __str__(self):
         return f"{self.recipe} — {self.score} by {self.user}"
+
+
+class InstagramComment(models.Model):
+    recipe = models.ForeignKey(
+        Recipe, related_name="instagram_comments", on_delete=models.CASCADE
+    )
+    instagram_comment_id = models.CharField(max_length=255, unique=True)
+    username = models.CharField(max_length=255)
+    text = models.TextField()
+    created_at = models.DateTimeField()
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self):
+        return f"Instagram: {self.username} on {self.recipe.title}"  # ty:ignore[possibly-missing-attribute]
 
 
 class Order(models.Model):

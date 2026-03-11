@@ -115,12 +115,22 @@
             <div class="space"></div>
 
             <div class="row wrap">
-                {% if recipe.favorited_by.all %}
+                {% if recipe.favorited_by.all or recipe.instagram_likes_count > 0 %}
                    <span class="tiny-text">
-                       {% if recipe.favorited_by.count == 1 %}
-                           {% trans "Liked by" %} {{ recipe.favorited_by.first.username }}
-                       {% else %}
-                           {% trans "Liked by" %} {{ recipe.favorited_by.first.username }} {% trans "and" %} {{ recipe.favorited_by.count|add:"-1" }} {% trans "others" %}
+                       {% if recipe.favorited_by.all %}
+                           {% if recipe.favorited_by.count == 1 %}
+                               {% trans "Liked by" %} {{ recipe.favorited_by.first.username }}
+                           {% else %}
+                               {% trans "Liked by" %} {{ recipe.favorited_by.first.username }} {% trans "and" %} {{ recipe.favorited_by.count|add:"-1" }} {% trans "others" %}
+                           {% endif %}
+                       {% endif %}
+
+                       {% if recipe.instagram_likes_count > 0 %}
+                           {% if recipe.favorited_by.all %} {% trans "and" %} {% endif %}
+                           <span class="row align-center display-inline-flex">
+                               <i class="small ml-1">favorite</i>
+                               <span class="ml-1">{{ recipe.instagram_likes_count }} {% trans "likes from Instagram" %}</span>
+                           </span>
                        {% endif %}
                    </span>
                 {% endif %}

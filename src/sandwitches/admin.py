@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
-from .models import Recipe, Tag, Rating, Setting, Order, OrderItem
+from .models import Recipe, Tag, Rating, Setting, Order, OrderItem, InstagramComment
 from django.utils.html import format_html
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
@@ -35,6 +35,13 @@ User = get_user_model()
 @admin.register(Setting)
 class SettingAdmin(SingletonModelAdmin):
     form = SettingForm
+
+
+@admin.register(InstagramComment)
+class InstagramCommentAdmin(admin.ModelAdmin):
+    list_display = ("username", "recipe", "created_at")
+    list_filter = ("recipe", "created_at")
+    search_fields = ("username", "text", "recipe__title")
 
 
 @admin.register(User)
