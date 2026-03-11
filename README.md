@@ -21,6 +21,16 @@
   </a>
 </p>
 
+- [✨ Overview](#-overview)
+- [🎯 Features](#-features)
+  - [TRML](#trml)
+- [📥 Getting Started](#-getting-started)
+  - [Environment variables](#environment-variables)
+- [Development setup](#development-setup)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [🧪 Testing \& Quality](#-testing--quality)
+
 ---
 
 ## ✨ Overview
@@ -29,6 +39,8 @@ Sandwitches is a modern, recipe management platform built with **Django**.
 It is made as a hobby project for my girlfriend, who likes to make what I call "fancy" sandwiches (sandwiches that go beyond the Dutch normals), lucky to be me :).
 Sandwiches so good you will think they are haunted !.
 See wanted to have a way to advertise and share those sandwiches with the family and so I started coding making it happen, in the hopes of getting more fancy sandwiches.
+
+To view the live website go to [sandwitches.vandijke.xyz](https://sandwitches.vandijke.xyz)
 
 ![](./docs/overview.png)
 
@@ -47,6 +59,11 @@ Sandwitches comes packed with comprehensive features for recipe management, comm
 - **🔔 Notifications** - Email and Gotify push notification integration
 - **📈 Order Tracking** - Real-time order status tracking with unique tracking tokens
 - **📊 Analytics** - Umami analytics integration for tracking user behavior
+- **🖨️ TRML** – Official [TRML](https://trmnl.com/) plugin support.
+
+### TRML
+
+If you happen to have a TRML laying arround be sure to check out this [recipe](https://trmnl.com/recipes/247547) which is an official plugin for your TRML.
 
 ## 📥 Getting Started
 
