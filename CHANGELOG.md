@@ -1,3 +1,15 @@
+# [2.10.0](https://github.com/martynvdijke/sandwitches/compare/v2.9.10...v2.10.0) (2026-03-11)
+
+
+### Bug Fixes
+
+* **formatting:** fix formatting ([b75ea0b](https://github.com/martynvdijke/sandwitches/commit/b75ea0b46b3f19bce5322c8fb5521ab639cdae55))
+
+
+### Features
+
+* add in instagram to sync recipes images with instagram ([0226561](https://github.com/martynvdijke/sandwitches/commit/022656128c6c275a41e334346f0071666d1f8b38))
+
 ## [2.9.10](https://github.com/martynvdijke/sandwitches/compare/v2.9.9...v2.9.10) (2026-03-08)
 
 ## [2.9.9](https://github.com/martynvdijke/sandwitches/compare/v2.9.8...v2.9.9) (2026-03-08)
