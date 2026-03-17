@@ -118,7 +118,7 @@ def test_instagram_not_enqueued_if_disabled():
 
     with patch("sandwitches.models.upload_to_instagram"):
         # Create a new recipe
-        Recipe.objects.create(  # ty:ignore[unresolved-attribute]
+        Recipe.objects.create(
             title="No Insta Recipe", description="Instagram is disabled"
         )
 

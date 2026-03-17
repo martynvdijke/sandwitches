@@ -20,7 +20,7 @@ def test_admin_orders_page(page: Page, live_server, staff_user):
     User.objects.create_superuser("admin", "admin@example.com", "password")
 
     # Create some data
-    recipe = Recipe.objects.create(  # ty:ignore[unresolved-attribute]
+    recipe = Recipe.objects.create(
         title="UI Test Recipe", price=12.50, uploaded_by=staff_user
     )
     user = User.objects.create_user("customer", "cust@example.com", "password")

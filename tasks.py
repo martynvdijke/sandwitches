@@ -17,7 +17,7 @@ def linting(c):
 @task
 def typecheck(c):
     """Run ty type checks."""
-    c.run("ty check src")
+    c.run("ty check")
 
 
 @task

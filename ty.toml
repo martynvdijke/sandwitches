@@ -1,0 +1,12 @@
+# ty.toml configuration
+
+[src]
+include = ["src", "tests"]
+
+[rules]
+unresolved-import = "ignore"
+
+[[overrides]]
+include = ["tests/**"]
+[overrides.rules]
+unresolved-attribute = "ignore"
