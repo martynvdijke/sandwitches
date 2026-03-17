@@ -71,25 +71,37 @@ class Setting(SingletonModel):
         return str(_("Site Settings"))
 
     def save(self, *args, **kwargs):
+        # Fetch current values if they exist
+        old_instance = Setting.objects.filter(pk=self.pk).first()  # ty:ignore[unresolved-attribute]
         super().save(*args, **kwargs)
 
-        if self.instagram_enabled and not self.instagram_initial_uploaded:
-            # We need to trigger the initial upload.
-            # We use a post-save signal or just another task to find the latest recipe.
-            # For simplicity, let's find it here and enqueue.
-            from django.apps import apps
+        # Trigger sync if credentials changed OR enabled was toggled on
+        credentials_changed = False
+        if old_instance:
+            if (
+                self.instagram_username != old_instance.instagram_username
+                or self.instagram_password != old_instance.instagram_password
+            ):
+                credentials_changed = True
 
-            Recipe = apps.get_model("sandwitches", "Recipe")
-            latest_recipe = Recipe.objects.order_by("-created_at").first()
-            if latest_recipe:
-                upload_to_instagram.enqueue(recipe_id=latest_recipe.pk)
-                # Update the field without triggering another save recursion if possible,
-                # but SingletonModel.save is usually fine if we don't call super() again.
-                # Actually, we can just use update() to be safe.
-                Setting.objects.filter(pk=self.pk).update(  # ty:ignore[unresolved-attribute]
-                    instagram_initial_uploaded=True
-                )
-                self.instagram_initial_uploaded = True
+        # If enabled and (newly enabled OR credentials updated)
+        if self.instagram_enabled and (
+            not self.instagram_initial_uploaded or credentials_changed
+        ):
+            if self.instagram_username and self.instagram_password:
+                from django.core.management import call_command
+
+                try:
+                    call_command("sync_instagram_missing")
+                    # Update the field to avoid repeating this logic unless credentials change again
+                    Setting.objects.filter(pk=self.pk).update(  # ty:ignore[unresolved-attribute]
+                        instagram_initial_uploaded=True
+                    )
+                    self.instagram_initial_uploaded = True
+                except Exception as e:
+                    import logging
+
+                    logging.error(f"Failed to trigger initial Instagram sync: {e}")
 
     class Meta:
         verbose_name = _("Site Settings")
@@ -371,7 +383,7 @@ class Order(models.Model):
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         if is_new:
-            logging.info(f"Creating new order for user {self.user.username}")
+            logging.info(f"Creating new order for user {self.user.username}")  # ty:ignore[possibly-missing-attribute]
         else:
             logging.info(f"Updating order #{self.pk} status to {self.status}")
         super().save(*args, **kwargs)
@@ -405,7 +417,7 @@ class OrderItem(models.Model):
         is_new = self.pk is None
         if is_new:
             logging.info(
-                f"Adding {self.quantity}x {self.recipe.title} to Order #{self.order.pk}"
+                f"Adding {self.quantity}x {self.recipe.title} to Order #{self.order.pk}"  # ty:ignore[possibly-missing-attribute]
             )
             if (
                 self.recipe.max_daily_orders is not None  # ty:ignore[possibly-missing-attribute]
@@ -413,7 +425,7 @@ class OrderItem(models.Model):
                 > self.recipe.max_daily_orders  # ty:ignore[possibly-missing-attribute]
             ):
                 logging.warning(
-                    f"Order limit reached for {self.recipe.title} (Max: {self.recipe.max_daily_orders})"
+                    f"Order limit reached for {self.recipe.title} (Max: {self.recipe.max_daily_orders})"  # ty:ignore[possibly-missing-attribute]
                 )
                 raise ValidationError(
                     f"Daily order limit reached for {self.recipe.title}."  # ty:ignore[possibly-missing-attribute]
@@ -422,7 +434,7 @@ class OrderItem(models.Model):
             self.recipe.daily_orders_count += self.quantity  # ty:ignore[possibly-missing-attribute]
             self.recipe.save(update_fields=["daily_orders_count"])  # ty:ignore[possibly-missing-attribute]
             logging.debug(
-                f"Updated daily order count for {self.recipe.title}: {self.recipe.daily_orders_count}"
+                f"Updated daily order count for {self.recipe.title}: {self.recipe.daily_orders_count}"  # ty:ignore[possibly-missing-attribute]
             )
 
         super().save(*args, **kwargs)

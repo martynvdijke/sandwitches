@@ -66,14 +66,14 @@ def test_profile_order_sorting(client, user_factory):
     user = user_factory()
     client.force_login(user)
 
-    r1 = Recipe.objects.create(title="A", price=Decimal("10.00"))
-    r2 = Recipe.objects.create(title="B", price=Decimal("5.00"))
+    r1 = Recipe.objects.create(title="A", price=Decimal("10.00"))  # ty:ignore[unresolved-attribute]
+    r2 = Recipe.objects.create(title="B", price=Decimal("5.00"))  # ty:ignore[unresolved-attribute]
 
-    o1 = Order.objects.create(user=user, total_price=Decimal("10.00"))
-    OrderItem.objects.create(order=o1, recipe=r1)
+    o1 = Order.objects.create(user=user, total_price=Decimal("10.00"))  # ty:ignore[unresolved-attribute]
+    OrderItem.objects.create(order=o1, recipe=r1)  # ty:ignore[unresolved-attribute]
 
-    o2 = Order.objects.create(user=user, total_price=Decimal("5.00"))
-    OrderItem.objects.create(order=o2, recipe=r2)
+    o2 = Order.objects.create(user=user, total_price=Decimal("5.00"))  # ty:ignore[unresolved-attribute]
+    OrderItem.objects.create(order=o2, recipe=r2)  # ty:ignore[unresolved-attribute]
 
     url = reverse("user_profile")
 

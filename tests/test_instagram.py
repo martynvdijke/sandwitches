@@ -31,9 +31,11 @@ def test_new_recipe_enqueues_instagram_upload():
 
 @pytest.mark.django_db
 def test_initial_instagram_connection_enqueues_upload():
-    # Setup: Create a recipe first
+    # Setup: Create a recipe first (MUST HAVE IMAGE to be picked up by sync_instagram_missing)
     recipe = Recipe.objects.create(
-        title="Existing Recipe", description="Exists before Instagram is enabled"
+        title="Existing Recipe",
+        description="Exists before Instagram is enabled",
+        image="test.jpg",
     )
 
     config = Setting.get_solo()
@@ -41,19 +43,71 @@ def test_initial_instagram_connection_enqueues_upload():
     config.instagram_initial_uploaded = False
     config.save()
 
-    with patch("sandwitches.models.upload_to_instagram") as mock_task:
+    # We need to patch the task in the command module
+    with patch(
+        "sandwitches.management.commands.sync_instagram_missing.upload_to_instagram"
+    ) as mock_task:
         # Enable Instagram
         config.instagram_enabled = True
         config.instagram_username = "testuser"
         config.instagram_password = "testpassword"
         config.save()
 
-        # Verify enqueue was called for the latest recipe
+        # Verify enqueue was called for the existing recipe
         mock_task.enqueue.assert_called_once_with(recipe_id=recipe.pk)
 
         # Verify initial_uploaded is set to True
         config.refresh_from_db()
         assert config.instagram_initial_uploaded is True
+
+
+@pytest.mark.django_db
+def test_sync_instagram_missing_command():
+    from django.core.management import call_command
+
+    # Setup: 3 recipes, 1 already uploaded
+    Recipe.objects.create(title="R1", description="D1", image="test1.jpg")
+    Recipe.objects.create(title="R2", description="D2", image="test2.jpg")
+    Recipe.objects.create(
+        title="R3", description="D3", image="test3.jpg", instagram_uploaded=True
+    )
+
+    config = Setting.get_solo()
+    config.instagram_enabled = True
+    config.instagram_username = "u"
+    config.instagram_password = "p"
+    config.save()
+
+    with patch(
+        "sandwitches.management.commands.sync_instagram_missing.upload_to_instagram"
+    ) as mock_task:
+        call_command("sync_instagram_missing")
+        # Should be called for R1 and R2
+        assert mock_task.enqueue.call_count == 2
+
+
+@pytest.mark.django_db
+def test_sync_trigger_on_credential_change():
+    # Setup
+    config = Setting.get_solo()
+    config.instagram_enabled = True
+    config.instagram_username = "old_user"
+    config.instagram_password = "old_password"
+    config.instagram_initial_uploaded = True
+    config.save()
+
+    # Recipe that needs upload
+    Recipe.objects.create(title="Pending", description="D", image="img.jpg")
+
+    with patch(
+        "sandwitches.management.commands.sync_instagram_missing.upload_to_instagram"
+    ) as mock_task:
+        # Change username
+        config.instagram_username = "new_user"
+        config.save()
+
+        # Should trigger sync again because credentials changed
+        assert mock_task.enqueue.call_count == 1
 
 
 @pytest.mark.django_db
