@@ -39,6 +39,15 @@ def test_admin_orders_page(page: Page, live_server, staff_user):
     # Go to Dashboard
     page.goto(f"{live_server.url}/dashboard/")
 
+    # Check if charts are present
+    expect(page.locator("#recipeChart")).to_be_visible()
+    expect(page.locator("#orderChart")).to_be_visible()
+    expect(page.locator("#ratingChart")).to_be_visible()
+
+    # Check if Chart.js is loaded (should be on window from main.js)
+    is_chart_defined = page.evaluate("() => typeof Chart !== 'undefined'")
+    assert is_chart_defined is True
+
     # Navigate to Orders via URL or Menu?
     # Let's try Menu if visible, or just URL for robustness in this test
     page.goto(f"{live_server.url}/dashboard/orders/")

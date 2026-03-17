@@ -96,6 +96,7 @@ class CustomLoginView(LoginView):
 
 @staff_member_required
 def admin_dashboard(request):
+    logging.info("Loading admin dashboard")
     recipe_count = Recipe.objects.count()  # ty:ignore[unresolved-attribute]
     user_count = User.objects.count()
     tag_count = Tag.objects.count()  # ty:ignore[unresolved-attribute]
@@ -105,7 +106,7 @@ def admin_dashboard(request):
     from datetime import timedelta
     from django.utils import timezone
     from django.db.models.functions import TruncDate
-    from django.db.models import Count
+    from django.db.models import Count, Avg
 
     # Get date range from request or default to last 30 days
     end_date_str = request.GET.get("end_date")
@@ -123,50 +124,79 @@ def admin_dashboard(request):
             if start_date_str
             else end_date - timedelta(days=30)
         )
-    except (ValueError, TypeError):
+        logging.debug(f"Dashboard date range: {start_date} to {end_date}")
+    except (ValueError, TypeError) as e:
+        logging.warning(f"Invalid date format in dashboard request: {e}")
         end_date = today
         start_date = today - timedelta(days=30)
 
+    # Generate date range list
+    date_list = []
+    curr = start_date
+    while curr <= end_date:
+        date_list.append(curr)
+        curr += timedelta(days=1)
+
     # Recipes over time
-    recipe_data = (
+    recipe_qs = (
         Recipe.objects.filter(created_at__date__range=(start_date, end_date))  # ty:ignore[unresolved-attribute]
         .annotate(date=TruncDate("created_at"))
         .values("date")
         .annotate(count=Count("id"))
         .order_by("date")
     )
+    recipe_dict = {d["date"]: d["count"] for d in recipe_qs}
 
     # Ratings over time
-    rating_data = (
+    rating_qs = (
         Rating.objects.filter(created_at__date__range=(start_date, end_date))  # ty:ignore[unresolved-attribute]
         .annotate(date=TruncDate("created_at"))
         .values("date")
         .annotate(avg=Avg("score"))
         .order_by("date")
     )
+    rating_dict = {d["date"]: d["avg"] for d in rating_qs}
 
     # Orders over time
-    order_data = (
+    order_qs = (
         Order.objects.filter(created_at__date__range=(start_date, end_date))  # ty:ignore[unresolved-attribute]
         .annotate(date=TruncDate("created_at"))
         .values("date")
         .annotate(count=Count("id"))
         .order_by("date")
     )
+    order_dict = {d["date"]: d["count"] for d in order_qs}
 
-    # Prepare labels and data for JS
-    recipe_labels = [d["date"].strftime("%d/%m/%Y") for d in recipe_data]
-    recipe_counts = [d["count"] for d in recipe_data]
+    # Prepare labels and data for JS with gaps filled
+    recipe_labels = []
+    recipe_counts = []
+    rating_labels = []
+    rating_avgs = []
+    order_labels = []
+    order_counts = []
 
-    rating_labels = [d["date"].strftime("%d/%m/%Y") for d in rating_data]
-    rating_avgs = [float(d["avg"]) for d in rating_data]
+    for d in date_list:
+        label = d.strftime("%d/%m/%Y")
+        recipe_labels.append(label)
+        recipe_counts.append(recipe_dict.get(d, 0))
 
-    order_labels = [d["date"].strftime("%d/%m/%Y") for d in order_data]
-    order_counts = [d["count"] for d in order_data]
+        if d in rating_dict:
+            rating_labels.append(label)
+            rating_avgs.append(float(rating_dict[d]))
+        else:
+            # We skip days with no ratings for the rating chart as it's a bar chart
+            # Or we can put 0, but it might skew the average
+            pass
+
+        order_labels.append(label)
+        order_counts.append(order_dict.get(d, 0))
+
+    logging.debug(f"Prepared {len(recipe_labels)} data points for dashboard charts")
 
     pending_recipes = Recipe.objects.filter(  # ty:ignore[unresolved-attribute]
         is_approved=False, uploaded_by__groups__name="community"
     ).order_by("-created_at")
+
     context = {
         "recipe_count": recipe_count,
         "user_count": user_count,
@@ -185,6 +215,7 @@ def admin_dashboard(request):
     }
 
     if request.headers.get("HX-Request"):
+        logging.debug("Responding to HX-Request for dashboard charts")
         return render(request, "admin/partials/dashboard_charts.html", context)
 
     return render(

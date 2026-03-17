@@ -155,6 +155,7 @@ def email_users(context, recipe_id):
 def reset_daily_orders():
     from .models import Recipe
 
+    logging.info("Starting scheduled reset of daily order counts for all recipes")
     count = Recipe.objects.update(daily_orders_count=0)  # ty:ignore[unresolved-attribute]
     logging.info(f"Successfully reset daily order count for {count} recipes.")
     return count
@@ -164,6 +165,7 @@ def reset_daily_orders():
 def notify_order_submitted(order_id):
     from .models import Order
 
+    logging.info(f"Preparing order submission notification for Order #{order_id}")
     try:
         order = (
             Order.objects.select_related("user")  # ty:ignore[unresolved-attribute]
@@ -171,7 +173,7 @@ def notify_order_submitted(order_id):
             .get(pk=order_id)
         )
     except Order.DoesNotExist:  # ty:ignore[unresolved-attribute]
-        logging.warning(f"Order {order_id} not found. Skipping notification.")
+        logging.error(f"Order #{order_id} not found. Cannot send notification.")
         return
 
     user = order.user

@@ -230,6 +230,10 @@ class Recipe(models.Model):
 
     def save(self, *args, **kwargs):
         is_new = self._state.adding
+        if is_new:
+            logging.info(f"Creating new recipe: {self.title}")
+        else:
+            logging.info(f"Updating recipe: {self.title} (ID: {self.pk})")
 
         if not self.slug:
             base = slugify(self.title)[:240]
@@ -239,6 +243,7 @@ class Recipe(models.Model):
                 slug = f"{base}-{n}"
                 n += 1
             self.slug = slug
+            logging.debug(f"Generated slug for recipe: {self.slug}")
 
         super().save(*args, **kwargs)
 
@@ -364,6 +369,11 @@ class Order(models.Model):
         verbose_name_plural = _("Orders")
 
     def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        if is_new:
+            logging.info(f"Creating new order for user {self.user.username}")
+        else:
+            logging.info(f"Updating order #{self.pk} status to {self.status}")
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -394,17 +404,26 @@ class OrderItem(models.Model):
 
         is_new = self.pk is None
         if is_new:
+            logging.info(
+                f"Adding {self.quantity}x {self.recipe.title} to Order #{self.order.pk}"
+            )
             if (
                 self.recipe.max_daily_orders is not None  # ty:ignore[possibly-missing-attribute]
                 and self.recipe.daily_orders_count + self.quantity  # ty:ignore[possibly-missing-attribute]
                 > self.recipe.max_daily_orders  # ty:ignore[possibly-missing-attribute]
             ):
+                logging.warning(
+                    f"Order limit reached for {self.recipe.title} (Max: {self.recipe.max_daily_orders})"
+                )
                 raise ValidationError(
                     f"Daily order limit reached for {self.recipe.title}."  # ty:ignore[possibly-missing-attribute]
                 )
 
             self.recipe.daily_orders_count += self.quantity  # ty:ignore[possibly-missing-attribute]
             self.recipe.save(update_fields=["daily_orders_count"])  # ty:ignore[possibly-missing-attribute]
+            logging.debug(
+                f"Updated daily order count for {self.recipe.title}: {self.recipe.daily_orders_count}"
+            )
 
         super().save(*args, **kwargs)
 
