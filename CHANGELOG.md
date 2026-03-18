@@ -1,3 +1,17 @@
+# [2.11.0](https://github.com/martynvdijke/sandwitches/compare/v2.10.2...v2.11.0) (2026-03-18)
+
+
+### Bug Fixes
+
+* dashboard and add more logging ([f1195cd](https://github.com/martynvdijke/sandwitches/commit/f1195cd94f8185be713e805692b64a6036fb5e12))
+* instagram save ([6659a6a](https://github.com/martynvdijke/sandwitches/commit/6659a6ac56b890031a33989afbad02eb78623d60))
+* **ty:** fix ty for tests ([b900a52](https://github.com/martynvdijke/sandwitches/commit/b900a5211b25185494e5ae2065540368d889d458))
+
+
+### Features
+
+* add in recipe schema ([0ebef8b](https://github.com/martynvdijke/sandwitches/commit/0ebef8bb9afbea15a4fbeafa0d63d741df6e83a0))
+
 ## [2.10.2](https://github.com/martynvdijke/sandwitches/compare/v2.10.1...v2.10.2) (2026-03-18)
 
 ## [2.10.1](https://github.com/martynvdijke/sandwitches/compare/v2.10.0...v2.10.1) (2026-03-13)
