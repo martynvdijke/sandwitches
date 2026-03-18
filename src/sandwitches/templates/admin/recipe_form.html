@@ -82,6 +82,32 @@
                     {% if form.max_daily_orders.errors %}<span class="error">{{ form.max_daily_orders.errors|striptags }}</span>{% endif %}
                 </div>
 
+                <div class="row gap mt-1">
+                    <div class="field label border round max">
+                        {{ form.servings }}
+                        <label>{{ form.servings.label }}</label>
+                        {% if form.servings.errors %}<span class="error">{{ form.servings.errors|striptags }}</span>{% endif %}
+                    </div>
+                    <div class="field label border round max">
+                        {{ form.prep_time }}
+                        <label>{{ form.prep_time.label }}</label>
+                        {% if form.prep_time.errors %}<span class="error">{{ form.prep_time.errors|striptags }}</span>{% endif %}
+                    </div>
+                </div>
+
+                <div class="row gap mt-1">
+                    <div class="field label border round max">
+                        {{ form.cook_time }}
+                        <label>{{ form.cook_time.label }}</label>
+                        {% if form.cook_time.errors %}<span class="error">{{ form.cook_time.errors|striptags }}</span>{% endif %}
+                    </div>
+                    <div class="field label border round max">
+                        {{ form.calories }}
+                        <label>{{ form.calories.label }}</label>
+                        {% if form.calories.errors %}<span class="error">{{ form.calories.errors|striptags }}</span>{% endif %}
+                    </div>
+                </div>
+
                 <div class="field middle-align mt-1">
                     <label class="checkbox">
                         {{ form.is_highlighted }}
@@ -243,7 +269,7 @@
     const cropperImage = document.getElementById('cropper-image');
     const cropperCanvas = document.getElementById('cropper-canvas');
     const cropperSelection = document.getElementById('cropper-selection');
-    
+
     let currentScaleX = 1;
     let currentScaleY = 1;
 

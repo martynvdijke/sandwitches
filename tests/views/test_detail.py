@@ -2,6 +2,7 @@ from sandwitches.models import Recipe, Rating
 import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+import json
 
 User = get_user_model()
 
@@ -147,6 +148,54 @@ def test_detail_view_tags_are_linked(client):
 
     assert expected_link_1 in content
     assert expected_link_2 in content
+
+
+@pytest.mark.django_db
+def test_recipe_schema_markup(client, db):
+    User.objects.create_superuser("admin", "admin@example.com", "strongpassword123")
+    recipe = Recipe.objects.create(
+        title="Schema Recipe",
+        description="A recipe for testing schema markup.",
+        ingredients="1 cup sugar\n2 eggs",
+        instructions="Mix sugar and eggs.\nBake at 350F.",
+        servings=4,
+        prep_time=15,
+        cook_time=30,
+        calories=250,
+        is_approved=True,
+    )
+    recipe.set_tags_from_string("test, schema")
+
+    url = reverse("recipe_detail", kwargs={"slug": recipe.slug})
+    response = client.get(url)
+    assert response.status_code == 200
+    content = response.content.decode()
+
+    # Extract JSON-LD from the content
+    start_tag = '<script type="application/ld+json">'
+    end_tag = "</script>"
+    start_idx = content.find(start_tag) + len(start_tag)
+    end_idx = content.find(end_tag, start_idx)
+    json_str = content[start_idx:end_idx].strip()
+
+    data = json.loads(json_str)
+
+    assert data["@type"] == "Recipe"
+    assert data["name"] == "Schema Recipe"
+    assert data["recipeYield"] == "4"
+    assert data["prepTime"] == "PT15M"
+    assert data["cookTime"] == "PT30M"
+    assert data["totalTime"] == "PT45M"
+    assert data["nutrition"]["calories"] == "250 calories"
+    assert "test" in data["keywords"]
+    assert "schema" in data["keywords"]
+    assert "test" in data["recipeCategory"]
+    assert "schema" in data["recipeCategory"]
+    assert "1 cup sugar" in data["recipeIngredient"]
+    assert "2 eggs" in data["recipeIngredient"]
+    assert len(data["recipeIngredient"]) == 2
+    assert data["recipeInstructions"][0]["text"] == "Mix sugar and eggs."
+    assert data["recipeInstructions"][1]["text"] == "Bake at 350F."
 
 
 @pytest.mark.django_db

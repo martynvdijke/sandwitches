@@ -26,36 +26,52 @@
 {
   "@context": "https://schema.org",
   "@type": "Recipe",
-  "name": "{{ recipe.title }}",
-  {% if recipe.image %}
-  "image": "{{ request.scheme }}://{{ request.get_host }}{{ recipe.image_medium.url }}",
-  {% endif %}
+  "name": "{{ recipe.title }}"
+  {% if recipe.image %},
+  "image": [
+    "{{ request.scheme }}://{{ request.get_host }}{{ recipe.image_large.url }}",
+    "{{ request.scheme }}://{{ request.get_host }}{{ recipe.image_medium.url }}",
+    "{{ request.scheme }}://{{ request.get_host }}{{ recipe.image_small.url }}"
+  ]
+  {% endif %},
   "author": {
     "@type": "Person",
     "name": "{% if recipe.uploaded_by %}{{ recipe.uploaded_by.get_full_name|default:recipe.uploaded_by.username }}{% else %}Anonymous{% endif %}"
   },
-  "datePublished": "{{ recipe.created_at|date:"Y-m-d" }}",
-  "description": "{{ recipe.description|striptags|truncatechars:200 }}",
-  {% if recipe.tags.all %}
-  "recipeCategory": [{% for tag in recipe.tags.all %}"{{ tag.name }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+  "datePublished": "{{ recipe.created_at|date:"c" }}",
+  "dateModified": "{{ recipe.updated_at|date:"c" }}",
+  "description": "{{ recipe.description|striptags|truncatechars:200 }}"
+  {% if recipe.prep_time %},
+  "prepTime": "{{ recipe.prep_time|iso8601_duration }}"
   {% endif %}
+  {% if recipe.cook_time %},
+  "cookTime": "{{ recipe.cook_time|iso8601_duration }}"
+  {% endif %}
+  {% if recipe.prep_time or recipe.cook_time %},
+  "totalTime": "{{ recipe.prep_time|default:0|add:recipe.cook_time|default:0|iso8601_duration }}"
+  {% endif %},
+  "recipeYield": "{{ recipe.servings }}"
+  {% if recipe.tags.all %},
+  "recipeCategory": "{% for tag in recipe.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}",
+  "keywords": "{% for tag in recipe.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+  {% endif %}
+  {% if recipe.calories %},
+  "nutrition": {
+    "@type": "NutritionInformation",
+    "calories": "{{ recipe.calories }} calories"
+  }
+  {% endif %},
   "recipeIngredient": [
-    {% for ingredient in recipe.ingredients|linebreaksbr|striptags|split:"\n" %}
-    "{{ ingredient|escapejs }}"{% if not forloop.last %},{% endif %}
-    {% endfor %}
+    {% for line in recipe.ingredients|strip_lines %}"{{ line|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}
   ],
-  "recipeInstructions": {
-    "@type": "ItemList",
-    "itemListElement": [
-      {% for instruction in recipe.instructions|linebreaksbr|striptags|split:"\n" %}
-      {
-        "@type": "HowToStep",
-        "text": "{{ instruction|escapejs }}"
-      }{% if not forloop.last %},{% endif %}
-      {% endfor %}
-    ]
-  },
-  {% if avg_rating > 0 %}
+  "recipeInstructions": [
+    {% for line in recipe.instructions|strip_lines %}
+    {
+      "@type": "HowToStep",
+      "text": "{{ line|escapejs }}"
+    }{% if not forloop.last %},{% endif %}{% endfor %}
+  ]
+  {% if avg_rating > 0 %},
   "aggregateRating": {
     "@type": "AggregateRating",
     "ratingValue": "{{ avg_rating|floatformat:1 }}",

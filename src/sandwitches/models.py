@@ -180,7 +180,9 @@ class Recipe(models.Model):
     description = models.TextField(blank=True)
     ingredients = models.TextField(blank=True)
     instructions = models.TextField(blank=True)
-    servings = models.IntegerField(default=1, validators=[MinValueValidator(1)])
+    servings = models.IntegerField(
+        default=1, validators=[MinValueValidator(1)], blank=True
+    )
     price = models.DecimalField(
         max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Price (€)"
     )
@@ -231,6 +233,15 @@ class Recipe(models.Model):
         null=True, blank=True, verbose_name="Max daily orders"
     )
     daily_orders_count = models.PositiveIntegerField(default=0)
+    prep_time = models.PositiveIntegerField(
+        null=True, blank=True, verbose_name=_("Prep Time (mins)")
+    )
+    cook_time = models.PositiveIntegerField(
+        null=True, blank=True, verbose_name=_("Cook Time (mins)")
+    )
+    calories = models.PositiveIntegerField(
+        null=True, blank=True, verbose_name=_("Calories (kcal)")
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()

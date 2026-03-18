@@ -32,6 +32,33 @@
 </div>
 
 <div class="space"></div>
+
+<div class="row wrap gap-3">
+    {% if recipe.prep_time %}
+    <div class="row align-center">
+        <i class="small">timer</i>
+        <span class="ml-1">{% trans "Prep:" %} {{ recipe.prep_time }}m</span>
+    </div>
+    {% endif %}
+    {% if recipe.cook_time %}
+    <div class="row align-center">
+        <i class="small">cooking</i>
+        <span class="ml-1">{% trans "Cook:" %} {{ recipe.cook_time }}m</span>
+    </div>
+    {% endif %}
+    {% if recipe.calories %}
+    <div class="row align-center">
+        <i class="small">bolt</i>
+        <span class="ml-1">{{ recipe.calories }} kcal</span>
+    </div>
+    {% endif %}
+    <div class="row align-center">
+        <i class="small">group</i>
+        <span class="ml-1">{{ recipe.servings }} {% trans "servings" %}</span>
+    </div>
+</div>
+
+<div class="space"></div>
 {% if recipe.price %}
 <div class="row align-center">
     <i class="primary-text">euro_symbol</i>
