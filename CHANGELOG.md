@@ -1,3 +1,10 @@
+## [2.11.2](https://github.com/martynvdijke/sandwitches/compare/v2.11.1...v2.11.2) (2026-03-19)
+
+
+### Bug Fixes
+
+* add in sync instagram button ([f084d04](https://github.com/martynvdijke/sandwitches/commit/f084d0419cb61ebca1c1d88451ca1dd687a72608))
+
 ## [2.11.1](https://github.com/martynvdijke/sandwitches/compare/v2.11.0...v2.11.1) (2026-03-18)
 
 # [2.11.0](https://github.com/martynvdijke/sandwitches/compare/v2.10.2...v2.11.0) (2026-03-18)
