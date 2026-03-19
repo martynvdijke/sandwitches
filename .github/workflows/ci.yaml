@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
-      
+
     steps:
       - name: Login to Docker Hub
         if: github.event_name != 'pull_request'
@@ -56,3 +56,36 @@ jobs:
           docker tag martynvandijke/sandwitches:latest ghcr.io/martynvdijke/sandwitches:latest
           docker push martynvandijke/sandwitches:latest
           docker push ghcr.io/martynvdijke/sandwitches:latest
+
+  flutter-ci:
+    name: Flutter CI (Non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --set-exit-if-changed .
+        continue-on-error: true
+
+      - name: Analyze project
+        run: flutter analyze
+        continue-on-error: true
+
+      - name: Build APK (Debug)
+        run: flutter build apk --debug
+        continue-on-error: true
