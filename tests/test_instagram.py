@@ -211,3 +211,57 @@ def test_upload_to_instagram_skips_if_already_uploaded():
         result = upload_to_instagram.func(recipe.pk)
         assert result is False
         MockClient.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_admin_sync_instagram_view_requires_staff(client):
+    from django.urls import reverse
+
+    url = reverse("admin_sync_instagram")
+    response = client.post(url)
+    assert response.status_code == 302
+    assert "login" in response.url
+
+
+@pytest.mark.django_db
+def test_admin_sync_instagram_view_triggers_sync(client, staff_user):
+    from django.urls import reverse
+
+    # Setup
+    client.force_login(staff_user)
+    config = Setting.get_solo()
+    config.instagram_enabled = True
+    config.instagram_username = "user"
+    config.instagram_password = "pass"
+    config.save()
+
+    # Recipe that needs upload
+    Recipe.objects.create(title="Pending", description="D", image="img.jpg")
+
+    url = reverse("admin_sync_instagram")
+
+    with patch("django.core.management.call_command") as mock_call:
+        response = client.post(url)
+
+        # Verify call_command was called with "sync_instagram_missing"
+        mock_call.assert_called_once_with("sync_instagram_missing")
+
+        # Verify redirect
+        assert response.status_code == 302
+        assert response.url == reverse("admin_settings")
+
+
+@pytest.mark.django_db
+def test_admin_sync_instagram_view_handles_error(client, staff_user):
+    from django.urls import reverse
+
+    client.force_login(staff_user)
+    url = reverse("admin_sync_instagram")
+
+    with patch("django.core.management.call_command") as mock_call:
+        mock_call.side_effect = Exception("Test error")
+        response = client.post(url, follow=True)
+
+        assert response.status_code == 200
+        # Check if the error message is in the response messages
+        assert "Test error" in response.content.decode()

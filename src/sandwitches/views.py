@@ -547,6 +547,19 @@ def admin_settings(request):
 
 
 @staff_member_required
+def admin_sync_instagram(request):
+    if request.method == "POST":
+        from django.core.management import call_command
+
+        try:
+            call_command("sync_instagram_missing")
+            messages.success(request, _("Instagram sync triggered successfully."))
+        except Exception as e:
+            messages.error(request, _(f"Failed to trigger Instagram sync: {e}"))
+    return redirect("admin_settings")
+
+
+@staff_member_required
 def admin_order_update_status(request, pk):
     order = get_object_or_404(Order, pk=pk)
     if request.method == "POST":

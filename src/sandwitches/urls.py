@@ -119,6 +119,11 @@ urlpatterns += i18n_patterns(
         name="admin_rating_delete",
     ),
     path("dashboard/settings/", views.admin_settings, name="admin_settings"),
+    path(
+        "dashboard/settings/sync-instagram/",
+        views.admin_sync_instagram,
+        name="admin_sync_instagram",
+    ),
     path("dashboard/orders/", views.admin_order_list, name="admin_order_list"),
     path(
         "dashboard/orders/<int:pk>/status/",

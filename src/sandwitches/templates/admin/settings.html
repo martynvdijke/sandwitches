@@ -26,6 +26,19 @@
                         {% endif %}
                     </div>
                 </div>
+                {% if field.name == 'instagram_enabled' %}
+                <div class="s12">
+                    <div class="space"></div>
+                    <div class="padding">
+                        <p class="italic">{% trans "Force a synchronization of existing recipes to Instagram that haven't been uploaded yet." %}</p>
+                        <button type="submit" formaction="{% url 'admin_sync_instagram' %}" class="button border round">
+                            <i>sync</i>
+                            <span>{% trans "Sync recipes to Instagram" %}</span>
+                        </button>
+                    </div>
+                    <div class="space"></div>
+                </div>
+                {% endif %}
                 {% endfor %}
             </div>
             <div class="space"></div>
