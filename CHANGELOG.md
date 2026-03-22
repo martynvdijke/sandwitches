@@ -1,3 +1,10 @@
+## [2.11.3](https://github.com/martynvdijke/sandwitches/compare/v2.11.2...v2.11.3) (2026-03-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency intl to v0.20.2 ([368f684](https://github.com/martynvdijke/sandwitches/commit/368f684bcdbcdc60a1cc9c8fc6dc462b6fb9c020))
+
 ## [2.11.2](https://github.com/martynvdijke/sandwitches/compare/v2.11.1...v2.11.2) (2026-03-19)
 
 
