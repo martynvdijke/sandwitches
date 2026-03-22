@@ -47,11 +47,39 @@
 
         <nav class="right-align">
             <a class="button transparent border round" href="{% url 'index' %}">{% trans "Cancel" %}</a>
-            <button type="submit" class="button primary round">{% trans "Login" %}</button>
+            <button type="submit" id="login-button" class="button primary round" style="display: none;">{% trans "Login" %}</button>
         </nav>
 
       </form>
     </article>
   </div>
 </div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const usernameInput = document.getElementById('{{ form.username.id_for_label }}');
+        const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
+        const loginButton = document.getElementById('login-button');
+
+        function toggleButton() {
+            if (usernameInput.value.trim() !== '' && passwordInput.value.trim() !== '') {
+                loginButton.style.display = 'inline-flex';
+            } else {
+                loginButton.style.display = 'none';
+            }
+        }
+
+        if (usernameInput && passwordInput && loginButton) {
+            usernameInput.addEventListener('input', toggleButton);
+            passwordInput.addEventListener('input', toggleButton);
+            // Also check on change for autocomplete
+            usernameInput.addEventListener('change', toggleButton);
+            passwordInput.addEventListener('change', toggleButton);
+
+            toggleButton();
+        }
+    });
+</script>
 {% endblock %}

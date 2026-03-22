@@ -71,6 +71,12 @@ class Setting(SingletonModel):
         return str(_("Site Settings"))
 
     def save(self, *args, **kwargs):
+        # Auto-enable Instagram if credentials are provided
+        if self.instagram_username and self.instagram_password:
+            self.instagram_enabled = True
+        else:
+            self.instagram_enabled = False
+
         # Fetch current values if they exist
         old_instance = Setting.objects.filter(pk=self.pk).first()  # ty:ignore[unresolved-attribute]
         super().save(*args, **kwargs)

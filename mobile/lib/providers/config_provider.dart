@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ConfigProvider with ChangeNotifier {
-  static const String _urlKey = 'sandwitches_api_url';
-  String? _apiUrl;
+  static const String _urlKey = 'sandwitches_base_url';
+  String? _baseUrl;
   bool _isInitialized = false;
 
-  String? get apiUrl => _apiUrl;
+  String? get baseUrl => _baseUrl;
+  String? get apiUrl => _baseUrl != null ? '${_baseUrl}api/' : null;
   bool get isInitialized => _isInitialized;
 
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
-    _apiUrl = prefs.getString(_urlKey);
+    _baseUrl = prefs.getString(_urlKey);
     _isInitialized = true;
     notifyListeners();
   }
@@ -22,29 +23,22 @@ class ConfigProvider with ChangeNotifier {
     if (!normalizedUrl.endsWith('/')) {
       normalizedUrl += '/';
     }
-    // If user didn't include 'api/v1' or similar, we should ensure the trailing structure.
-    // However, the ApiService already appends 'v1/recipes'.
-    // So the base URL should probably be the instance root + 'api/'.
 
-    if (!normalizedUrl.endsWith('api/')) {
-      // Check if it ends with 'api'
-      if (normalizedUrl.endsWith('api')) {
-        normalizedUrl += '/';
-      } else {
-        normalizedUrl += 'api/';
-      }
+    // Remove 'api/' if user included it, so we have the root
+    if (normalizedUrl.endsWith('api/')) {
+      normalizedUrl = normalizedUrl.substring(0, normalizedUrl.length - 4);
     }
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_urlKey, normalizedUrl);
-    _apiUrl = normalizedUrl;
+    _baseUrl = normalizedUrl;
     notifyListeners();
   }
 
   Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_urlKey);
-    _apiUrl = null;
+    _baseUrl = null;
     notifyListeners();
   }
 }

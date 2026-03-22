@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/config_provider.dart';
 import '../providers/recipe_provider.dart';
 import '../widgets/recipe_card.dart';
 
@@ -15,8 +16,16 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RecipeProvider>().loadRecipes();
+      _checkAndLoad();
     });
+  }
+
+  void _checkAndLoad() {
+    if (!mounted) return;
+    final provider = context.read<RecipeProvider?>();
+    if (provider != null && provider.recipes.isEmpty && !provider.isLoading) {
+      provider.loadRecipes();
+    }
   }
 
   @override
@@ -25,10 +34,47 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
       appBar: AppBar(
         title: const Text('Sandwitches Recipes'),
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Settings'),
+                  content: const Text('Do you want to disconnect from this instance?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        context.read<ConfigProvider>().clear();
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Disconnect', style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
       ),
-      body: Consumer<RecipeProvider>(
+      body: Consumer<RecipeProvider?>(
         builder: (context, provider, child) {
-          if (provider.isLoading) {
+          if (provider == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // If provider became available but hasn't loaded yet
+          if (provider.recipes.isEmpty && !provider.isLoading && provider.errorMessage == null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) => _checkAndLoad());
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (provider.isLoading && provider.recipes.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
 

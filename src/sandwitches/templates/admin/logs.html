@@ -1,0 +1,26 @@
+{% extends "admin/admin_base.html" %}
+{% load i18n %}
+
+{% block admin_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row align-center max">
+    <h5 class="bold max">{% trans "System Logs" %}</h5>
+    <a href="?download=1" class="button border round">
+        <i>download</i>
+        <span>{% trans "Download Log File" %}</span>
+    </a>
+</div>
+
+<div class="space"></div>
+
+<article class="round padding surface-container-highest">
+    <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: monospace; font-size: 0.9rem; max-height: 70vh; overflow-y: auto;">
+{{ logs }}
+    </pre>
+</article>
+
+<div class="space"></div>
+<p class="italic grey-text">{% trans "Showing the last 1000 lines of the log file." %}</p>
+
+{% endblock %}

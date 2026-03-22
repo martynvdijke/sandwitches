@@ -112,6 +112,7 @@ urlpatterns += i18n_patterns(
     path(
         "dashboard/tasks/<str:pk>/", views.admin_task_detail, name="admin_task_detail"
     ),
+    path("dashboard/logs/", views.admin_logs, name="admin_logs"),
     path("dashboard/ratings/", views.admin_rating_list, name="admin_rating_list"),
     path(
         "dashboard/ratings/<int:pk>/delete/",

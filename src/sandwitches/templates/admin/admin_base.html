@@ -83,6 +83,10 @@
             <i>assignment</i>
             <span class="large-text">{% trans "Tasks" %}</span>
         </a>
+        <a href="{% url 'admin_logs' %}" class="padding {% if request.resolver_match.url_name == 'admin_logs' %}active{% endif %}">
+            <i>terminal</i>
+            <span class="large-text">{% trans "Logs" %}</span>
+        </a>
         <div class="divider"></div>
         <a href="{% url 'index' %}" class="padding">
             <i>home</i>

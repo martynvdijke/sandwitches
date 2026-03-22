@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 import '../models/recipe.dart';
+import '../providers/config_provider.dart';
 import '../screens/recipe_detail_screen.dart';
 
 class RecipeCard extends StatelessWidget {
@@ -10,12 +12,13 @@ class RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Construct full image URL if relative.
-    // In production, this base URL should be configurable.
+    final String baseUrl = context.read<ConfigProvider>().baseUrl ?? '';
     final String imageUrl = recipe.image != null
         ? (recipe.image!.startsWith('http')
             ? recipe.image!
-            : 'http://localhost:8000${recipe.image}')
+            : (baseUrl.endsWith('/') && recipe.image!.startsWith('/')
+                ? baseUrl + recipe.image!.substring(1)
+                : baseUrl + recipe.image!))
         : '';
 
     return Card(

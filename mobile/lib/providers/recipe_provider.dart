@@ -3,11 +3,15 @@ import '../models/recipe.dart';
 import '../services/api_service.dart';
 
 class RecipeProvider with ChangeNotifier {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;
   List<Recipe> _recipes = [];
   Recipe? _featuredRecipe;
   bool _isLoading = false;
   String? _errorMessage;
+
+  RecipeProvider({required ApiService apiService}) : _apiService = apiService;
+
+  ApiService get apiService => _apiService;
 
   List<Recipe> get recipes => _recipes;
   Recipe? get featuredRecipe => _featuredRecipe;

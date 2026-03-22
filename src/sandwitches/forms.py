@@ -312,7 +312,6 @@ class SettingForm(forms.ModelForm):
             "gotify_token",
             "instagram_username",
             "instagram_password",
-            "instagram_enabled",
         ]
         widgets = {
             "ai_api_key": forms.PasswordInput(render_value=True),

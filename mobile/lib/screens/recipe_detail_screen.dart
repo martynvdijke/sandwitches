@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 import '../models/recipe.dart';
+import '../providers/config_provider.dart';
 
 class RecipeDetailScreen extends StatelessWidget {
   final Recipe recipe;
@@ -9,10 +11,13 @@ class RecipeDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String baseUrl = context.read<ConfigProvider>().baseUrl ?? '';
     final String imageUrl = recipe.image != null
         ? (recipe.image!.startsWith('http')
             ? recipe.image!
-            : 'http://localhost:8000${recipe.image}')
+            : (baseUrl.endsWith('/') && recipe.image!.startsWith('/')
+                ? baseUrl + recipe.image!.substring(1)
+                : baseUrl + recipe.image!))
         : '';
 
     return Scaffold(

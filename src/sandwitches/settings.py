@@ -122,6 +122,10 @@ DATABASES = {
     }
 }
 
+# Media files (for uploaded images)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", default=BASE_DIR / "media"))
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -141,19 +145,25 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "simple",
         },
+        "file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": MEDIA_ROOT / "sandwitches.log",
+            "formatter": "verbose",
+        },
     },
     "root": {
-        "handlers": ["console"],
+        "handlers": ["console", "file"],
         "level": os.getenv("LOG_LEVEL", "INFO"),
     },
     "loggers": {
         "django": {
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": os.getenv("LOG_LEVEL", "INFO"),
             "propagate": False,
         },
         "sandwitches": {
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": os.getenv("LOG_LEVEL", "INFO"),
             "propagate": False,
         },
@@ -185,10 +195,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Media files (for uploaded images)
-MEDIA_URL = "/media/"
-MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", default=BASE_DIR / "media"))
 
 # Static (for CSS etc)
 STATIC_URL = "/static/"

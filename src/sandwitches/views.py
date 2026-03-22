@@ -95,6 +95,42 @@ class CustomLoginView(LoginView):
 
 
 @staff_member_required
+def admin_logs(request):
+    log_file = settings.MEDIA_ROOT / "sandwitches.log"
+
+    if request.GET.get("download") == "1":
+        if log_file.exists():
+            return FileResponse(
+                open(log_file, "rb"), as_attachment=True, filename="sandwitches.log"
+            )
+        else:
+            messages.error(request, _("Log file not found."))
+            return redirect("admin_logs")
+
+    logs = ""
+    if log_file.exists():
+        try:
+            with open(log_file, "r") as f:
+                # Get last 1000 lines
+                lines = f.readlines()
+                logs = "".join(lines[-1000:])
+        except Exception as e:
+            logs = f"Error reading logs: {e}"
+    else:
+        logs = _("No logs found yet.")
+
+    return render(
+        request,
+        "admin/logs.html",
+        {
+            "logs": logs,
+            "title": _("System Logs"),
+            "version": sandwitches_version,
+        },
+    )
+
+
+@staff_member_required
 def admin_dashboard(request):
     logging.info("Loading admin dashboard")
     recipe_count = Recipe.objects.count()  # ty:ignore[unresolved-attribute]

@@ -95,11 +95,38 @@
 
         <nav class="right-align">
             <a class="button transparent border round" href="{% url 'index' %}">{% trans "Cancel" %}</a>
-            <button type="submit" class="button primary round">{% trans "Create admin" %}</button>
+            <button type="submit" id="setup-button" class="button primary round" style="display: none;">{% trans "Create admin" %}</button>
         </nav>
 
       </form>
     </article>
   </div>
 </div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const usernameInput = document.getElementById('{{ form.username.id_for_label }}');
+        const passwordInput = document.getElementById('{{ form.password1.id_for_label }}');
+        const setupButton = document.getElementById('setup-button');
+
+        function toggleButton() {
+            if (usernameInput.value.trim() !== '' && passwordInput.value.trim() !== '') {
+                setupButton.style.display = 'inline-flex';
+            } else {
+                setupButton.style.display = 'none';
+            }
+        }
+
+        if (usernameInput && passwordInput && setupButton) {
+            usernameInput.addEventListener('input', toggleButton);
+            passwordInput.addEventListener('input', toggleButton);
+            usernameInput.addEventListener('change', toggleButton);
+            passwordInput.addEventListener('change', toggleButton);
+
+            toggleButton();
+        }
+    });
+</script>
 {% endblock %}
