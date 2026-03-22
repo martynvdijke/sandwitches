@@ -1,3 +1,10 @@
+## [2.11.4](https://github.com/martynvdijke/sandwitches/compare/v2.11.3...v2.11.4) (2026-03-22)
+
+
+### Bug Fixes
+
+* instagram + mobile fixes ([0fb3c80](https://github.com/martynvdijke/sandwitches/commit/0fb3c8002a6fc657aeb694a1fecc6ceafba519d7))
+
 ## [2.11.3](https://github.com/martynvdijke/sandwitches/compare/v2.11.2...v2.11.3) (2026-03-22)
 
 
