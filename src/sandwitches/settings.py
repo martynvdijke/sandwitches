@@ -16,7 +16,10 @@ import os
 from django.core.exceptions import ImproperlyConfigured
 from . import storage
 
-DEBUG = bool(os.environ.get("DEBUG", default=0))
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "t", "y", "yes")
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 if not SECRET_KEY:
@@ -26,7 +29,7 @@ if not SECRET_KEY:
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1, localhost").split(",")
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
-DATABASE_FILE = Path(os.environ.get("DATABASE_FILE", default="/db/db.sqlite3"))
+DATABASE_FILE = Path(os.environ.get("DATABASE_FILE", default=BASE_DIR / "db.sqlite3"))
 
 # Umami Analytics Configuration
 UMAMI_HOST = os.environ.get("UMAMI_HOST")
@@ -38,10 +41,6 @@ GOTIFY_TOKEN = os.environ.get("GOTIFY_TOKEN")
 
 storage.is_database_readable(DATABASE_FILE)
 storage.is_database_writable(DATABASE_FILE)
-
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 TASKS = {
@@ -125,6 +124,8 @@ DATABASES = {
 # Media files (for uploaded images)
 MEDIA_URL = "/media/"
 MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", default=BASE_DIR / "media"))
+# Ensure MEDIA_ROOT exists for logging
+MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
 
 LOGGING = {
     "version": 1,
