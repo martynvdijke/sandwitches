@@ -35,9 +35,14 @@ class Command(BaseCommand):
             f"Found {recipes.count()} recipes to enqueue for Instagram upload."
         )
 
-        for recipe in recipes:
+        from datetime import timedelta
+        from django.utils import timezone
+
+        for i, recipe in enumerate(recipes):
             self.stdout.write(f"Enqueuing upload for: {recipe.title} (ID: {recipe.pk})")
-            upload_to_instagram.enqueue(recipe_id=recipe.pk)
+            upload_to_instagram.using(
+                run_after=timezone.now() + timedelta(hours=i)
+            ).enqueue(recipe_id=recipe.pk)
 
         self.stdout.write(
             self.style.SUCCESS(f"Successfully enqueued {recipes.count()} tasks.")

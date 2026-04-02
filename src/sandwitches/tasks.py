@@ -12,6 +12,9 @@ from django.utils.translation import gettext as _
 
 import textwrap
 import os
+from datetime import timedelta
+from django.utils import timezone
+from django.db import transaction
 
 
 @task(priority=3)
@@ -19,14 +22,31 @@ def upload_to_instagram(recipe_id):
     from .models import Recipe, Setting
     from instagrapi import Client
 
-    config = Setting.get_solo()
-    if (
-        not config.instagram_enabled
-        or not config.instagram_username
-        or not config.instagram_password
-    ):
-        logging.debug("Instagram upload disabled or credentials missing.")
-        return False
+    # Use a transaction to ensure we don't have multiple tasks running at once
+    with transaction.atomic():
+        config = Setting.objects.select_for_update().get()  # ty:ignore[unresolved-attribute]
+        if (
+            not config.instagram_enabled
+            or not config.instagram_username
+            or not config.instagram_password
+        ):
+            logging.debug("Instagram upload disabled or credentials missing.")
+            return False
+
+        # Throttling: only 1 image per hour
+        if config.instagram_last_sync:
+            time_since_last = timezone.now() - config.instagram_last_sync
+            if time_since_last < timedelta(hours=1):
+                wait_time = timedelta(hours=1) - time_since_last
+                logging.info(
+                    f"Throttling Instagram upload for recipe {recipe_id}. "
+                    f"Retrying in {wait_time}."
+                )
+                # Reschedule the task
+                upload_to_instagram.using(run_after=timezone.now() + wait_time).enqueue(
+                    recipe_id=recipe_id
+                )
+                return False
 
     try:
         recipe = Recipe.objects.get(pk=recipe_id)  # ty:ignore[unresolved-attribute]
@@ -48,7 +68,7 @@ def upload_to_instagram(recipe_id):
 
         cl = Client()
         # You can also handle session caching here for better performance
-        cl.login(config.instagram_username, config.instagram_password)  # ty:ignore[invalid-argument-type]
+        cl.login(config.instagram_username, config.instagram_password)
 
         base_url = "http://localhost"
         if settings.CSRF_TRUSTED_ORIGINS:
@@ -69,6 +89,11 @@ def upload_to_instagram(recipe_id):
         recipe.save(update_fields=["instagram_uploaded", "instagram_media_id"])
 
         logging.info(f"Successfully uploaded recipe '{recipe.title}' to Instagram.")
+
+        # Update last sync timestamp
+        config.instagram_last_sync = timezone.now()
+        config.save(update_fields=["instagram_last_sync"])
+
         return True
     except Exception as e:
         logging.error(f"Failed to upload to Instagram: {e}")

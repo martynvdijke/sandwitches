@@ -53,8 +53,11 @@ def test_initial_instagram_connection_enqueues_upload():
         config.instagram_password = "testpassword"
         config.save()
 
-        # Verify enqueue was called for the existing recipe
-        mock_task.enqueue.assert_called_once_with(recipe_id=recipe.pk)
+        # Verify enqueue was called for the existing recipe with run_after
+        mock_task.using.assert_called_once()
+        mock_task.using.return_value.enqueue.assert_called_once_with(
+            recipe_id=recipe.pk
+        )
 
         # Verify initial_uploaded is set to True
         config.refresh_from_db()
@@ -83,7 +86,14 @@ def test_sync_instagram_missing_command():
     ) as mock_task:
         call_command("sync_instagram_missing")
         # Should be called for R1 and R2
-        assert mock_task.enqueue.call_count == 2
+        assert mock_task.using.call_count == 2
+        assert mock_task.using.return_value.enqueue.call_count == 2
+
+        # Check that they were called with increasing run_after
+        calls = mock_task.using.call_args_list
+        # run_after should be close to now and now + 1 hour
+        assert calls[0].kwargs["run_after"] is not None
+        assert calls[1].kwargs["run_after"] is not None
 
 
 @pytest.mark.django_db
@@ -107,7 +117,8 @@ def test_sync_trigger_on_credential_change():
         config.save()
 
         # Should trigger sync again because credentials changed
-        assert mock_task.enqueue.call_count == 1
+        assert mock_task.using.call_count == 1
+        assert mock_task.using.return_value.enqueue.call_count == 1
 
 
 @pytest.mark.django_db
@@ -265,3 +276,53 @@ def test_admin_sync_instagram_view_handles_error(client, staff_user):
         assert response.status_code == 200
         # Check if the error message is in the response messages
         assert "Test error" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_upload_to_instagram_throttling():
+    from datetime import timedelta
+    from django.utils import timezone
+    from django_tasks.backends.database.models import DBTaskResult
+
+    # Clear any existing tasks from other tests or signals
+    DBTaskResult.objects.all().delete()
+
+    # Setup
+    config = Setting.get_solo()
+    config.instagram_enabled = True
+    config.instagram_username = "user"
+    config.instagram_password = "pass"
+
+    # Set last sync to 30 minutes ago
+    config.instagram_last_sync = timezone.now() - timedelta(minutes=30)
+    config.save()
+
+    recipe = Recipe.objects.create(title="Throttled Recipe", image="img.jpg")
+
+    from sandwitches.tasks import upload_to_instagram
+    from django_tasks.backends.database.models import DBTaskResult
+
+    # Check that it returns False and enqueues a new task in DB
+    initial_task_ids = list(
+        DBTaskResult.objects.filter(
+            task_path="sandwitches.tasks.upload_to_instagram"
+        ).values_list("id", flat=True)
+    )
+
+    result = upload_to_instagram.func(recipe.pk)
+
+    # Should return False (throttled)
+    assert result is False
+
+    # A new task should be enqueued in the database
+    new_tasks = DBTaskResult.objects.filter(
+        task_path="sandwitches.tasks.upload_to_instagram"
+    ).exclude(id__in=initial_task_ids)
+    assert new_tasks.exists()
+
+    new_task = new_tasks.order_by("-id").first()
+    assert new_task.run_after is not None
+
+    # run_after should be in the future and within the next hour
+    assert new_task.run_after > timezone.now()
+    assert new_task.run_after <= timezone.now() + timedelta(hours=1)

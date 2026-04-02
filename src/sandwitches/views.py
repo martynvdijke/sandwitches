@@ -589,7 +589,7 @@ def admin_sync_instagram(request):
 
         try:
             call_command("sync_instagram_missing")
-            messages.success(request, _("Instagram sync triggered successfully."))
+            messages.success(request, _("syncing has begun"))
         except Exception as e:
             messages.error(request, _(f"Failed to trigger Instagram sync: {e}"))
     return redirect("admin_settings")
