@@ -66,6 +66,11 @@ class Setting(SingletonModel):
         default=False,
         help_text="Whether the initial recipe has been uploaded to Instagram",
     )
+    instagram_last_sync = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="The last time a recipe was successfully uploaded to Instagram",
+    )
 
     def __str__(self):
         return str(_("Site Settings"))

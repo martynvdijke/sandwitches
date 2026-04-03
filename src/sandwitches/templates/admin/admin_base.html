@@ -10,7 +10,7 @@
 <link rel="icon" type="image/svg+xml" href="{% static "icons/favicon.svg" %}">
 <style>
     main.container {
-        padding-top: 2rem;
+        padding-top: 5rem;
         padding-bottom: 2rem;
         padding-left: 5%;
         padding-right: 5%;
@@ -24,20 +24,22 @@
 {% endblock %}
 
 {% block navbar %}
-<nav class="top primary-container">
-  <button class="circle transparent" data-ui="#admin-menu">
+<nav class="fixed top primary-container">
+  <button class="circle transparent large" data-ui="#admin-menu">
     <i>menu</i>
   </button>
   <a href="{% url 'admin_dashboard' %}" class="row align-center">
-    <img src="{% static 'icons/icon.svg' %}" class="circle">
+    <img src="{% static 'icons/icon.svg' %}" class="circle small">
   </a>
   <div class="max"></div>
 
-  {% if user.avatar %}
-  <img src="{{ user.avatar.url }}" class="circle" data-ui="#user-menu">
-  {% else %}
-  <img src="https://www.w3schools.com/howto/img_avatar.png" class="circle" data-ui="#user-menu">
-  {% endif %}
+  <button class="circle transparent" data-ui="#user-menu">
+    {% if user.avatar %}
+    <img src="{{ user.avatar.url }}" class="circle">
+    {% else %}
+    <img src="https://www.w3schools.com/howto/img_avatar.png" class="circle">
+    {% endif %}
+  </button>
 </nav>
 
 <dialog id="admin-menu" class="left">
@@ -96,20 +98,9 @@
 </dialog>
 
 {% if user.is_authenticated %}
-<menu id="user-menu" class="left">
+<menu id="user-menu" class="no-wrap">
   <a href="{% url 'admin:logout' %}" class="row"><i>logout</i>{% trans "Logout" %}</a>
 </menu>
-{% endif %}
-
-{% if messages %}
-<div class="padding">
-    {% for message in messages %}
-    <div class="snackbar active {% if message.tags == 'error' %}error{% else %}primary{% endif %}">
-        <i>{% if message.tags == 'error' %}error{% else %}info{% endif %}</i>
-        <span>{{ message }}</span>
-    </div>
-    {% endfor %}
-</div>
 {% endif %}
 {% endblock %}
 
