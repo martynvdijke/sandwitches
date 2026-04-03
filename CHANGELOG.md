@@ -1,3 +1,15 @@
+# [2.12.0](https://github.com/martynvdijke/sandwitches/compare/v2.11.9...v2.12.0) (2026-04-03)
+
+
+### Bug Fixes
+
+* **ui:** bugs in admin interface ([8134e06](https://github.com/martynvdijke/sandwitches/commit/8134e061cca5b736a456f7bb907ccab42e0d22f4))
+
+
+### Features
+
+* add throttling to instagram upload and update success message ([cd4a8de](https://github.com/martynvdijke/sandwitches/commit/cd4a8de21cb3422783293fe1509b76ad4f556b49))
+
 ## [2.11.9](https://github.com/martynvdijke/sandwitches/compare/v2.11.8...v2.11.9) (2026-04-03)
 
 ## [2.11.8](https://github.com/martynvdijke/sandwitches/compare/v2.11.7...v2.11.8) (2026-03-30)
