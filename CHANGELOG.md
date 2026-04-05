@@ -1,3 +1,11 @@
+## [2.12.1](https://github.com/martynvdijke/sandwitches/compare/v2.12.0...v2.12.1) (2026-04-05)
+
+
+### Bug Fixes
+
+* dart build ([715bc5d](https://github.com/martynvdijke/sandwitches/commit/715bc5db6e9dbcb85cf87e58674813a3ee8dc0cb))
+* **mobile:** fix RefreshIndicator error and format code ([a282003](https://github.com/martynvdijke/sandwitches/commit/a2820033add3cd1d0ee56013b3fb83f925dbe648))
+
 # [2.12.0](https://github.com/martynvdijke/sandwitches/compare/v2.11.9...v2.12.0) (2026-04-03)
 
 
