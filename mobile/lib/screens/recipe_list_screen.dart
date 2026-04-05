@@ -42,7 +42,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text('Settings'),
-                  content: const Text('Do you want to disconnect from this instance?'),
+                  content: const Text(
+                      'Do you want to disconnect from this instance?'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
@@ -53,7 +54,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                         context.read<ConfigProvider>().clear();
                         Navigator.pop(context);
                       },
-                      child: const Text('Disconnect', style: TextStyle(color: Colors.red)),
+                      child: const Text('Disconnect',
+                          style: TextStyle(color: Colors.red)),
                     ),
                   ],
                 ),
@@ -69,8 +71,11 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
           }
 
           // If provider became available but hasn't loaded yet
-          if (provider.recipes.isEmpty && !provider.isLoading && provider.errorMessage == null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) => _checkAndLoad());
+          if (provider.recipes.isEmpty &&
+              !provider.isLoading &&
+              provider.errorMessage == null) {
+            WidgetsBinding.instance
+                .addPostFrameCallback((_) => _checkAndLoad());
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -99,7 +104,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
           }
 
           return RefreshIndicator(
-            onPressed: () => provider.loadRecipes(),
+            onRefresh: () => provider.loadRecipes(),
             child: ListView.builder(
               itemCount: provider.recipes.length,
               itemBuilder: (context, index) {

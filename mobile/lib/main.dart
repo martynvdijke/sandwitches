@@ -19,7 +19,8 @@ void main() async {
           create: (context) => null,
           update: (context, config, previous) {
             if (config.apiUrl == null) return null;
-            if (previous != null && previous.apiService.baseUrl == config.apiUrl) return previous;
+            if (previous != null &&
+                previous.apiService.baseUrl == config.apiUrl) return previous;
             return RecipeProvider(
               apiService: ApiService(baseUrl: config.apiUrl!),
             );
@@ -51,7 +52,9 @@ class SandwitchesApp extends StatelessWidget {
           foregroundColor: Colors.white,
         ),
       ),
-      home: config.apiUrl == null ? const SetupScreen() : const RecipeListScreen(),
+      home: config.apiUrl == null
+          ? const SetupScreen()
+          : const RecipeListScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
