@@ -1,3 +1,10 @@
+## [2.12.2](https://github.com/martynvdijke/sandwitches/compare/v2.12.1...v2.12.2) (2026-04-05)
+
+
+### Bug Fixes
+
+* **ci:** mobile build ([5bb93df](https://github.com/martynvdijke/sandwitches/commit/5bb93df1d759079699a1cccce03c685854f5cd81))
+
 ## [2.12.1](https://github.com/martynvdijke/sandwitches/compare/v2.12.0...v2.12.1) (2026-04-05)
 
 
