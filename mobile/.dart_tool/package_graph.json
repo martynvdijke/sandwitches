@@ -21,7 +21,7 @@
     },
     {
       "name": "flutter_lints",
-      "version": "6.0.0",
+      "version": "5.0.0",
       "dependencies": [
         "lints"
       ]
@@ -107,11 +107,6 @@
         "sky_engine",
         "vector_math"
       ]
-    },
-    {
-      "name": "lints",
-      "version": "6.1.0",
-      "dependencies": []
     },
     {
       "name": "stream_channel",
@@ -663,6 +658,11 @@
         "source_span",
         "string_scanner"
       ]
+    },
+    {
+      "name": "lints",
+      "version": "5.1.1",
+      "dependencies": []
     }
   ],
   "configVersion": 1

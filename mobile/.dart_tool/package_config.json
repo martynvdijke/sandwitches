@@ -99,9 +99,9 @@
     },
     {
       "name": "flutter_lints",
-      "rootUri": "file:///root/.pub-cache/hosted/pub.dev/flutter_lints-6.0.0",
+      "rootUri": "file:///root/.pub-cache/hosted/pub.dev/flutter_lints-5.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.5"
     },
     {
       "name": "flutter_test",
@@ -165,9 +165,9 @@
     },
     {
       "name": "lints",
-      "rootUri": "file:///root/.pub-cache/hosted/pub.dev/lints-6.1.0",
+      "rootUri": "file:///root/.pub-cache/hosted/pub.dev/lints-5.1.1",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.6"
     },
     {
       "name": "logging",
