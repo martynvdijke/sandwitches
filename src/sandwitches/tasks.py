@@ -16,6 +16,8 @@ from datetime import timedelta
 from django.utils import timezone
 from django.db import transaction
 
+logger = logging.getLogger("sandwitches")
+
 
 @task(priority=3)
 def upload_to_instagram(recipe_id):
@@ -30,7 +32,7 @@ def upload_to_instagram(recipe_id):
             or not config.instagram_username
             or not config.instagram_password
         ):
-            logging.debug("Instagram upload disabled or credentials missing.")
+            logger.debug("Instagram upload disabled or credentials missing.")
             return False
 
         # Throttling: only 1 image per hour
@@ -38,7 +40,7 @@ def upload_to_instagram(recipe_id):
             time_since_last = timezone.now() - config.instagram_last_sync
             if time_since_last < timedelta(hours=1):
                 wait_time = timedelta(hours=1) - time_since_last
-                logging.info(
+                logger.info(
                     f"Throttling Instagram upload for recipe {recipe_id}. "
                     f"Retrying in {wait_time}."
                 )
@@ -51,11 +53,11 @@ def upload_to_instagram(recipe_id):
     try:
         recipe = Recipe.objects.get(pk=recipe_id)  # ty:ignore[unresolved-attribute]
         if recipe.instagram_uploaded:
-            logging.debug(f"Recipe {recipe.title} already uploaded to Instagram.")
+            logger.debug(f"Recipe {recipe.title} already uploaded to Instagram.")
             return False
 
         if not recipe.image:
-            logging.warning(
+            logger.warning(
                 f"Recipe {recipe.title} has no image. Skipping Instagram upload."
             )
             return False
@@ -63,7 +65,7 @@ def upload_to_instagram(recipe_id):
         # instagrapi expects a file path.
         image_path = recipe.image.path
         if not os.path.exists(image_path):
-            logging.error(f"Image path {image_path} does not exist.")
+            logger.error(f"Image path {image_path} does not exist.")
             return False
 
         cl = Client()
@@ -81,14 +83,14 @@ def upload_to_instagram(recipe_id):
 
         caption = f"{recipe.title}\n\n{recipe.description[:100]}...\n\nFull recipe: {recipe_url}"
 
-        logging.info(f"Uploading recipe '{recipe.title}' to Instagram...")
+        logger.info(f"Uploading recipe '{recipe.title}' to Instagram...")
         media = cl.photo_upload(image_path, caption)
         recipe.instagram_media_id = media.pk
 
         recipe.instagram_uploaded = True
         recipe.save(update_fields=["instagram_uploaded", "instagram_media_id"])
 
-        logging.info(f"Successfully uploaded recipe '{recipe.title}' to Instagram.")
+        logger.info(f"Successfully uploaded recipe '{recipe.title}' to Instagram.")
 
         # Update last sync timestamp
         config.instagram_last_sync = timezone.now()
@@ -96,7 +98,7 @@ def upload_to_instagram(recipe_id):
 
         return True
     except Exception as e:
-        logging.error(f"Failed to upload to Instagram: {e}")
+        logger.error(f"Failed to upload to Instagram: {e}")
         return False
 
 
@@ -114,7 +116,7 @@ def sync_instagram_interactions():
         or not config.instagram_username
         or not config.instagram_password
     ):
-        logging.debug("Instagram sync disabled or credentials missing.")
+        logger.debug("Instagram sync disabled or credentials missing.")
         return False
 
     try:
@@ -144,19 +146,19 @@ def sync_instagram_interactions():
                         },
                     )
             except Exception as e:
-                logging.error(
+                logger.error(
                     f"Failed to sync interactions for recipe {recipe.title}: {e}"
                 )
 
         return True
     except Exception as e:
-        logging.error(f"Failed to sync Instagram interactions: {e}")
+        logger.error(f"Failed to sync Instagram interactions: {e}")
         return False
 
 
 @task(takes_context=True, priority=2, queue_name="emails")
 def email_users(context, recipe_id):
-    logging.debug(
+    logger.debug(
         f"Attempt {context.attempt} to send users an email. Task result id: {context.task_result.id}."
     )
 
@@ -168,7 +170,7 @@ def email_users(context, recipe_id):
     )
 
     if not emails:
-        logging.warning("No users with valid emails found.")
+        logger.warning("No users with valid emails found.")
         return 0
 
     send_emails(recipe_id, emails)
@@ -180,9 +182,9 @@ def email_users(context, recipe_id):
 def reset_daily_orders():
     from .models import Recipe
 
-    logging.info("Starting scheduled reset of daily order counts for all recipes")
+    logger.info("Starting scheduled reset of daily order counts for all recipes")
     count = Recipe.objects.update(daily_orders_count=0)  # ty:ignore[unresolved-attribute]
-    logging.info(f"Successfully reset daily order count for {count} recipes.")
+    logger.info(f"Successfully reset daily order count for {count} recipes.")
     return count
 
 
@@ -190,7 +192,7 @@ def reset_daily_orders():
 def notify_order_submitted(order_id):
     from .models import Order
 
-    logging.info(f"Preparing order submission notification for Order #{order_id}")
+    logger.info(f"Preparing order submission notification for Order #{order_id}")
     try:
         order = (
             Order.objects.select_related("user")  # ty:ignore[unresolved-attribute]
@@ -198,17 +200,17 @@ def notify_order_submitted(order_id):
             .get(pk=order_id)
         )
     except Order.DoesNotExist:  # ty:ignore[unresolved-attribute]
-        logging.error(f"Order #{order_id} not found. Cannot send notification.")
+        logger.error(f"Order #{order_id} not found. Cannot send notification.")
         return
 
     user = order.user
     if not user.email:
-        logging.warning(f"User {user.username} has no email. Skipping notification.")
+        logger.warning(f"User {user.username} has no email. Skipping notification.")
         return
 
     items = order.items.all()
     if not items:
-        logging.warning(f"Order {order_id} has no items. Skipping notification.")
+        logger.warning(f"Order {order_id} has no items. Skipping notification.")
         return
 
     # Construct item list string
@@ -283,7 +285,7 @@ def notify_order_submitted(order_id):
     msg.attach_alternative(html_content, "text/html")
     msg.send()
 
-    logging.info(f"Order confirmation email sent to {user.email} for order {order.id}")
+    logger.info(f"Order confirmation email sent to {user.email} for order {order.id}")
 
 
 @task(priority=1, queue_name="emails")
@@ -295,7 +297,7 @@ def send_gotify_notification(title, message, priority=5):
     token = config.gotify_token
 
     if not url or not token:
-        logging.debug("Gotify URL or Token not configured. Skipping notification.")
+        logger.debug("Gotify URL or Token not configured. Skipping notification.")
         return False
 
     try:
@@ -309,17 +311,18 @@ def send_gotify_notification(title, message, priority=5):
             timeout=10,
         )
         response.raise_for_status()
-        logging.info(f"Gotify notification sent: {title}")
+        logger.info(f"Gotify notification sent: {title}")
         return True
     except Exception as e:
-        logging.error(f"Failed to send Gotify notification: {e}")
+        logger.error(f"Failed to send Gotify notification: {e}")
         return False
 
 
 def send_emails(recipe_id, emails):
     from .models import Recipe
 
-    logging.debug(f"Preparing to send email to: {emails}")
+    logger.debug(f"Preparing to send email to: {emails}")
+
     recipe = Recipe.objects.get(pk=recipe_id)  # ty:ignore[unresolved-attribute]
     from_email = getattr(settings, "EMAIL_FROM_ADDRESS")
 

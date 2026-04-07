@@ -6,6 +6,8 @@ from pathlib import Path
 from django.conf import settings
 import logging
 
+logger = logging.getLogger("sandwitches")
+
 
 class HashedFilenameStorage(FileSystemStorage):
     """
@@ -45,19 +47,19 @@ def is_database_readable(path=None) -> bool:
         return False
 
     p = Path(path)
-    logging.debug(f"Checking database file readability at: {p}")
+    logger.debug(f"Checking database file readability at: {p}")
     try:
         if p.is_file():
             with open(p, "r"):  # Removed 'as f'
                 # If we can open it, it's readable. No need to read content.
                 pass
-            logging.debug(f"Database file at {p} is readable.")
+            logger.debug(f"Database file at {p} is readable.")
             return True
         else:
-            logging.error(f"Database file at {p} does not exist.")
+            logger.error(f"Database file at {p} does not exist.")
             return False
     except IOError:
-        logging.error(
+        logger.error(
             f"Database file at {p} is not readable due to permission or other IO error."
         )
         return False
@@ -80,13 +82,13 @@ def is_database_writable(path=None) -> bool:
         return False
 
     p = Path(path)
-    logging.debug(f"Checking database file writability at: {p}")
+    logger.debug(f"Checking database file writability at: {p}")
     try:
         # If the file exists, try to open it for appending
         if p.is_file():
             with open(p, "a"):  # Removed 'as f'
                 pass
-            logging.debug(f"Database file at {p} is writable.")
+            logger.debug(f"Database file at {p} is writable.")
             return True
         else:
             # If file does not exist, check if its parent directory is writable
@@ -96,19 +98,19 @@ def is_database_writable(path=None) -> bool:
                 try:
                     dummy_file.touch()
                     dummy_file.unlink()
-                    logging.debug(f"Database path at {p.parent} is writable.")
+                    logger.debug(f"Database path at {p.parent} is writable.")
                     return True
                 except IOError:
-                    logging.error(f"Cannot create dummy file in {p.parent}.")
+                    logger.error(f"Cannot create dummy file in {p.parent}.")
                     return False
             else:
-                logging.error(
+                logger.error(
                     f"Parent directory {p.parent} is not writable or does not exist."
                 )
                 return False
 
     except IOError:
-        logging.error(
+        logger.error(
             f"Database file at {p} is not writable due to permission or other IO error."
         )
         return False

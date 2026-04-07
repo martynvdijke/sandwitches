@@ -6,6 +6,22 @@
 {% block content %}
 <div class="row align-center max">
     <h5 class="bold max">{% trans "System Logs" %}</h5>
+
+    <form method="POST" class="row align-center padding border round surface-container" style="gap: 1rem;">
+        {% csrf_token %}
+        <label for="log_level" class="bold">{% trans "Log Level:" %}</label>
+        <div class="field suffix border round small">
+            <select name="log_level" id="log_level" onchange="this.form.submit()">
+                {% for choice_val, choice_label in log_level_choices %}
+                    <option value="{{ choice_val }}" {% if choice_val == current_log_level %}selected{% endif %}>
+                        {{ choice_label }}
+                    </option>
+                {% endfor %}
+            </select>
+            <i>arrow_drop_down</i>
+        </div>
+    </form>
+
     <a href="?download=1" class="button border round">
         <i>download</i>
         <span>{% trans "Download Log File" %}</span>

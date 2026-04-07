@@ -1,4 +1,6 @@
 import logging
+
+logger = logging.getLogger("sandwitches")
 from django.core.exceptions import ValidationError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -96,6 +98,22 @@ class CustomLoginView(LoginView):
 
 @staff_member_required
 def admin_logs(request):
+    from .utils import set_logging_level
+    from .models import Setting
+
+    config = Setting.get_solo()
+
+    if request.method == "POST":
+        level = request.POST.get("log_level")
+        if level in [choice[0] for choice in Setting.LOG_LEVEL_CHOICES]:
+            config.log_level = level
+            config.save()
+            set_logging_level(level)
+            messages.success(request, _(f"Logging level updated to {level}"))
+        else:
+            messages.error(request, _("Invalid logging level selected."))
+        return redirect("admin_logs")
+
     log_file = settings.MEDIA_ROOT / "sandwitches.log"
 
     if request.GET.get("download") == "1":
@@ -126,13 +144,15 @@ def admin_logs(request):
             "logs": logs,
             "title": _("System Logs"),
             "version": sandwitches_version,
+            "current_log_level": config.log_level,
+            "log_level_choices": Setting.LOG_LEVEL_CHOICES,
         },
     )
 
 
 @staff_member_required
 def admin_dashboard(request):
-    logging.info("Loading admin dashboard")
+    logger.info("Loading admin dashboard")
     recipe_count = Recipe.objects.count()  # ty:ignore[unresolved-attribute]
     user_count = User.objects.count()
     tag_count = Tag.objects.count()  # ty:ignore[unresolved-attribute]

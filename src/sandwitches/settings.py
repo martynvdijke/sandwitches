@@ -28,7 +28,7 @@ if not SECRET_KEY:
     )
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1, localhost").split(",")
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
+CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
 DATABASE_FILE = Path(os.environ.get("DATABASE_FILE", default=BASE_DIR / "db.sqlite3"))
 
 # Umami Analytics Configuration
@@ -68,7 +68,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "sandwitches",
+    "sandwitches.apps.SandwitchesConfig",
     "django_tasks",
     "django_tasks.backends.database",
     "debug_toolbar",

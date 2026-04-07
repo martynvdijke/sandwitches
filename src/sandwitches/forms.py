@@ -308,6 +308,7 @@ class SettingForm(forms.ModelForm):
             "ai_connection_point",
             "ai_model",
             "ai_api_key",
+            "log_level",
             "gotify_url",
             "gotify_token",
             "instagram_username",

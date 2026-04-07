@@ -1,4 +1,6 @@
 import logging
+
+logger = logging.getLogger("sandwitches")
 from ninja import NinjaAPI
 from .models import Recipe, Tag, Setting, Rating, Order, OrderItem, CartItem
 from django.contrib.auth import get_user_model
@@ -181,18 +183,19 @@ def ping(request):
 
 @api.get("v1/settings", response=SettingSchema)
 def get_settings(request):
-    logging.debug("Fetching site settings")
+    logger.debug("Fetching site settings")
     return Setting.objects.get()  # ty:ignore[unresolved-attribute]
 
 
 @api.post("v1/settings", auth=django_auth, response={200: SettingSchema, 403: Error})
 def update_settings(request, payload: SettingSchema):
     if not request.user.is_staff:
-        logging.warning(
+        logger.warning(
             f"Unauthorized settings update attempt by user {request.user.username}"
         )
+
         return 403, {"message": "You are not authorized to perform this action"}
-    logging.info(f"User {request.user.username} is updating site settings")
+    logger.info(f"User {request.user.username} is updating site settings")
     settings = Setting.objects.get()  # ty:ignore[unresolved-attribute]
     for attr, value in payload.dict().items():
         setattr(settings, attr, value)
@@ -204,25 +207,25 @@ def update_settings(request, payload: SettingSchema):
 def me(request):
     if not request.user.is_authenticated:
         return 403, {"message": "Please sign in first"}
-    logging.debug(f"User {request.user.username} requested their own profile")
+    logger.debug(f"User {request.user.username} requested their own profile")
     return request.user
 
 
 @api.get("v1/users", response=list[UserSchema])
 def users(request):
-    logging.debug("Listing all users via API")
+    logger.debug("Listing all users via API")
     return User.objects.all()
 
 
 @api.get("v1/recipes", response=list[RecipeSchema])
 def get_recipes(request):
-    logging.debug("Listing all recipes via API")
+    logger.debug("Listing all recipes via API")
     return Recipe.objects.all().prefetch_related("favorited_by")  # ty:ignore[unresolved-attribute]
 
 
 @api.post("v1/recipes", auth=django_auth, response={201: RecipeSchema, 403: Error})
 def create_recipe(request, payload: RecipeCreateSchema):
-    logging.info(
+    logger.info(
         f"User {request.user.username} is creating a new recipe: {payload.title}"
     )
     data = payload.dict()
@@ -237,7 +240,7 @@ def create_recipe(request, payload: RecipeCreateSchema):
 
 @api.get("v1/recipes/{recipe_id}", response=RecipeSchema)
 def get_recipe(request, recipe_id: int):
-    logging.debug(f"Fetching recipe {recipe_id}")
+    logger.debug(f"Fetching recipe {recipe_id}")
     recipe = get_object_or_404(
         Recipe.objects.prefetch_related("favorited_by"),  # ty:ignore[unresolved-attribute]
         id=recipe_id,
@@ -251,12 +254,12 @@ def get_recipe(request, recipe_id: int):
 def update_recipe(request, recipe_id: int, payload: RecipeUpdateSchema):
     recipe = get_object_or_404(Recipe, id=recipe_id)
     if not request.user.is_staff and recipe.uploaded_by != request.user:
-        logging.warning(
+        logger.warning(
             f"Unauthorized recipe update attempt for ID {recipe_id} by user {request.user.username}"
         )
         return 403, {"message": "You are not authorized to edit this recipe"}
 
-    logging.info(
+    logger.info(
         f"User {request.user.username} is updating recipe {recipe_id} ({recipe.title})"
     )
     for attr, value in payload.dict(exclude_unset=True).items():
@@ -326,7 +329,7 @@ def scale_recipe_ingredients(request, recipe_id: int, target_servings: int):
                     name=line,
                 )
             )
-            logging.warning(f"Failed to scale ingredient line '{line}': {e}")
+            logger.warning(f"Failed to scale ingredient line '{line}': {e}")
 
     return scaled_ingredients_output
 

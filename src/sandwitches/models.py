@@ -24,15 +24,31 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 
 hashed_storage = HashedFilenameStorage()
+logger = logging.getLogger("sandwitches")
 
 
 class Setting(SingletonModel):
+    LOG_LEVEL_CHOICES = [
+        ("DEBUG", _("Debug")),
+        ("INFO", _("Info")),
+        ("WARNING", _("Warning")),
+        ("ERROR", _("Error")),
+        ("CRITICAL", _("Critical")),
+    ]
+
     site_name = models.CharField(max_length=255, default="Sandwitches")
     site_description = models.TextField(blank=True, null=True)
     email = models.EmailField(blank=True, null=True, validators=[EmailValidator()])
     ai_connection_point = models.URLField(blank=True, null=True)
     ai_model = models.CharField(max_length=255, blank=True, null=True)
     ai_api_key = models.CharField(max_length=255, blank=True, null=True)
+
+    log_level = models.CharField(
+        max_length=10,
+        choices=LOG_LEVEL_CHOICES,
+        default="INFO",
+        help_text="The minimum logging level to record",
+    )
 
     gotify_url = models.URLField(
         blank=True,
@@ -112,7 +128,7 @@ class Setting(SingletonModel):
                 except Exception as e:
                     import logging
 
-                    logging.error(f"Failed to trigger initial Instagram sync: {e}")
+                    logger.error(f"Failed to trigger initial Instagram sync: {e}")
 
     class Meta:
         verbose_name = _("Site Settings")
@@ -265,9 +281,9 @@ class Recipe(models.Model):
     def save(self, *args, **kwargs):
         is_new = self._state.adding
         if is_new:
-            logging.info(f"Creating new recipe: {self.title}")
+            logger.info(f"Creating new recipe: {self.title}")
         else:
-            logging.info(f"Updating recipe: {self.title} (ID: {self.pk})")
+            logger.info(f"Updating recipe: {self.title} (ID: {self.pk})")
 
         if not self.slug:
             base = slugify(self.title)[:240]
@@ -277,18 +293,18 @@ class Recipe(models.Model):
                 slug = f"{base}-{n}"
                 n += 1
             self.slug = slug
-            logging.debug(f"Generated slug for recipe: {self.slug}")
+            logger.debug(f"Generated slug for recipe: {self.slug}")
 
         super().save(*args, **kwargs)
 
         send_email = getattr(settings, "SEND_EMAIL")
-        logging.debug(f"SEND_EMAIL is set to {send_email}")
+        logger.debug(f"SEND_EMAIL is set to {send_email}")
 
         if is_new or settings.DEBUG:
             if send_email:
                 email_users.enqueue(recipe_id=self.pk)
             else:
-                logging.warning(
+                logger.warning(
                     "Email sending is disabled; not sending email notification, make sure SEND_EMAIL is set to True in settings."
                 )
 
@@ -302,7 +318,7 @@ class Recipe(models.Model):
             if config.instagram_enabled:
                 upload_to_instagram.enqueue(recipe_id=self.pk)
         else:
-            logging.debug(
+            logger.debug(
                 "Existing recipe saved (update); skipping email notification."
             )
             config = Setting.get_solo()
@@ -405,9 +421,9 @@ class Order(models.Model):
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         if is_new:
-            logging.info(f"Creating new order for user {self.user.username}")  # ty:ignore[possibly-missing-attribute]
+            logger.info(f"Creating new order for user {self.user.username}")  # ty:ignore[possibly-missing-attribute]
         else:
-            logging.info(f"Updating order #{self.pk} status to {self.status}")
+            logger.info(f"Updating order #{self.pk} status to {self.status}")
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -438,7 +454,7 @@ class OrderItem(models.Model):
 
         is_new = self.pk is None
         if is_new:
-            logging.info(
+            logger.info(
                 f"Adding {self.quantity}x {self.recipe.title} to Order #{self.order.pk}"  # ty:ignore[possibly-missing-attribute]
             )
             if (
@@ -446,7 +462,7 @@ class OrderItem(models.Model):
                 and self.recipe.daily_orders_count + self.quantity  # ty:ignore[possibly-missing-attribute]
                 > self.recipe.max_daily_orders  # ty:ignore[possibly-missing-attribute]
             ):
-                logging.warning(
+                logger.warning(
                     f"Order limit reached for {self.recipe.title} (Max: {self.recipe.max_daily_orders})"  # ty:ignore[possibly-missing-attribute]
                 )
                 raise ValidationError(
@@ -455,7 +471,7 @@ class OrderItem(models.Model):
 
             self.recipe.daily_orders_count += self.quantity  # ty:ignore[possibly-missing-attribute]
             self.recipe.save(update_fields=["daily_orders_count"])  # ty:ignore[possibly-missing-attribute]
-            logging.debug(
+            logger.debug(
                 f"Updated daily order count for {self.recipe.title}: {self.recipe.daily_orders_count}"  # ty:ignore[possibly-missing-attribute]
             )
 

@@ -55,6 +55,21 @@ COMMON_UNITS = {
 ORDER_DB = {}
 
 
+def set_logging_level(level_name):
+    """
+    Sets the logging level for 'sandwitches', 'django', and the root logger.
+    """
+    import logging
+
+    if not level_name:
+        return
+
+    level = getattr(logging, level_name.upper(), logging.INFO)
+    logging.getLogger("sandwitches").setLevel(level)
+    logging.getLogger("django").setLevel(level)
+    logging.getLogger().setLevel(level)
+
+
 def parse_ingredient_line(line):
     """
     Parses a single ingredient line to extract quantity, unit, and ingredient name.
