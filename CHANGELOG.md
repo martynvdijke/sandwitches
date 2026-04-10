@@ -1,3 +1,12 @@
+## [2.12.4](https://github.com/martynvdijke/sandwitches/compare/v2.12.3...v2.12.4) (2026-04-10)
+
+
+### Bug Fixes
+
+* **chore:** formatting & testing issues ([bfb99e7](https://github.com/martynvdijke/sandwitches/commit/bfb99e7543a29bfa99ad3e0022b5e3c832dbda03))
+* **chore:** formatting issues ([cd44921](https://github.com/martynvdijke/sandwitches/commit/cd44921cb0e9654f0c39493d0fd0b05f9bf71f91))
+* instgram sync and logging ([21888c8](https://github.com/martynvdijke/sandwitches/commit/21888c8a26dd320788bb26a2be5887f4ae227e4c))
+
 ## [2.12.3](https://github.com/martynvdijke/sandwitches/compare/v2.12.2...v2.12.3) (2026-04-06)
 
 ## [2.12.2](https://github.com/martynvdijke/sandwitches/compare/v2.12.1...v2.12.2) (2026-04-05)
