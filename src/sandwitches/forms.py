@@ -2,7 +2,8 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import gettext_lazy as _
-from .models import Recipe, Tag, Setting
+
+from .models import Recipe, Setting, Tag
 
 User = get_user_model()
 
@@ -95,6 +96,7 @@ class UserProfileForm(forms.ModelForm):
         image_data = self.cleaned_data.get("image_data")
         if image_data and image_data.startswith("data:image"):
             import base64
+
             from django.core.files.base import ContentFile
 
             format, imgstr = image_data.split(";base64,")
@@ -138,6 +140,7 @@ class UserEditForm(forms.ModelForm):
         image_data = self.cleaned_data.get("image_data")
         if image_data and image_data.startswith("data:image"):
             import base64
+
             from django.core.files.base import ContentFile
 
             format, imgstr = image_data.split(";base64,")
@@ -200,6 +203,7 @@ class RecipeForm(forms.ModelForm):
         image_data = self.cleaned_data.get("image_data")
         if image_data and image_data.startswith("data:image"):
             import base64
+
             from django.core.files.base import ContentFile
 
             format, imgstr = image_data.split(";base64,")
@@ -263,6 +267,7 @@ class UserRecipeSubmissionForm(forms.ModelForm):
         image_data = self.cleaned_data.get("image_data")
         if image_data and image_data.startswith("data:image"):
             import base64
+
             from django.core.files.base import ContentFile
 
             format, imgstr = image_data.split(";base64,")

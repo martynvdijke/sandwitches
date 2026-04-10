@@ -1,5 +1,6 @@
 import pytest
-from sandwitches.models import Recipe, Rating
+
+from sandwitches.models import Rating, Recipe
 
 
 @pytest.mark.django_db

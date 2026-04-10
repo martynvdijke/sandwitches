@@ -1,28 +1,27 @@
 import logging
+import os
+import textwrap
+from datetime import timedelta
+
 import requests
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core.mail import EmailMultiAlternatives
+from django.db import transaction
+from django.utils import timezone
+from django.utils.translation import gettext as _
 
 # from django.core.mail import send_mail
 from django_tasks import task
-from django.contrib.auth import get_user_model
-
-from django.core.mail import EmailMultiAlternatives
-from django.conf import settings
-from django.utils.translation import gettext as _
-
-
-import textwrap
-import os
-from datetime import timedelta
-from django.utils import timezone
-from django.db import transaction
 
 logger = logging.getLogger("sandwitches")
 
 
 @task(priority=3)
 def upload_to_instagram(recipe_id):
-    from .models import Recipe, Setting
     from instagrapi import Client
+
+    from .models import Recipe, Setting
 
     # Use a transaction to ensure we don't have multiple tasks running at once
     with transaction.atomic():
@@ -107,8 +106,9 @@ def sync_instagram_interactions():
     """
     Sync likes and comments for all recipes that have been uploaded to Instagram.
     """
-    from .models import Recipe, Setting, InstagramComment
     from instagrapi import Client
+
+    from .models import InstagramComment, Recipe, Setting
 
     config = Setting.get_solo()
     if (

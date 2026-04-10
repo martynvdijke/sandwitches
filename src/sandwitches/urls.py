@@ -15,18 +15,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from django.contrib import admin
-from django.urls import path, include
-from . import views
-from .api import api
-from django.conf.urls.i18n import i18n_patterns
-from .feeds import LatestRecipesFeed  # Import the feed class
-from django.contrib.auth.views import LogoutView  # Import LogoutView
-
-
 import os
 import sys
 
+from django.conf.urls.i18n import i18n_patterns
+from django.contrib import admin
+from django.contrib.auth.views import LogoutView  # Import LogoutView
+from django.urls import include, path
+
+from . import views
+from .api import api
+from .feeds import LatestRecipesFeed  # Import the feed class
 
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),

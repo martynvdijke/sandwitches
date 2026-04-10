@@ -5,7 +5,6 @@ os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 import pytest
 
-
 # @pytest.fixture()
 # def setup_environment():
 #     """Set up environment variables for testing."""

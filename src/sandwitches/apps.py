@@ -1,5 +1,6 @@
-from django.apps import AppConfig
 import logging
+
+from django.apps import AppConfig
 
 
 class SandwitchesConfig(AppConfig):
@@ -9,12 +10,13 @@ class SandwitchesConfig(AppConfig):
     def ready(self):
         # Apply the logging level from settings at startup
         try:
-            from .models import Setting
-            from .utils import set_logging_level
-            from django.db import connection
-
             # Check if we are running in a context where database is available
             import sys
+
+            from django.db import connection
+
+            from .models import Setting
+            from .utils import set_logging_level
 
             if "manage.py" in sys.argv and any(
                 arg in sys.argv

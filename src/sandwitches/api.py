@@ -1,26 +1,23 @@
 import logging
-
-logger = logging.getLogger("sandwitches")
-from ninja import NinjaAPI
-from .models import Recipe, Tag, Setting, Rating, Order, OrderItem, CartItem
-from django.contrib.auth import get_user_model
-from .utils import (
-    parse_ingredient_line,
-    scale_ingredient,
-    format_scaled_ingredient,
-)  # Import utility functions
-
-from ninja import ModelSchema
-from ninja import Schema
-from django.shortcuts import get_object_or_404
-from datetime import date
 import random
-from typing import List, Optional  # Import typing hints
-from django.core.exceptions import ValidationError
+from datetime import date
+from typing import List, Optional
 
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
+from ninja import ModelSchema, NinjaAPI, Schema
 from ninja.security import django_auth
 
 from . import __version__
+from .models import CartItem, Order, OrderItem, Rating, Recipe, Setting, Tag
+from .utils import (
+    format_scaled_ingredient,
+    parse_ingredient_line,
+    scale_ingredient,
+)
+
+logger = logging.getLogger("sandwitches")
 
 # Get the custom User model
 User = get_user_model()
@@ -417,8 +414,9 @@ def get_orders(request):
 
 @api.post("v1/orders", auth=django_auth, response={201: OrderSchema, 400: Error})
 def create_order(request, payload: CreateOrderSchema):
-    from .models import OrderItem
     from django.db import transaction
+
+    from .models import OrderItem
     from .tasks import notify_order_submitted, send_gotify_notification
 
     recipe = get_object_or_404(Recipe, id=payload.recipe_id)

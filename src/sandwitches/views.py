@@ -1,47 +1,43 @@
 import logging
+import mimetypes
+from pathlib import Path
 
-logger = logging.getLogger("sandwitches")
-from django.core.exceptions import ValidationError
-from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse
+from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import login
-from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.utils.translation import gettext as _
+from django.contrib.auth import get_user_model, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
+from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
+from django.db.models import Avg, Q
+from django.http import FileResponse, Http404, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import translation
-from .models import Recipe, Rating, Tag, Order, CartItem, Setting, OrderItem
-from .tasks import (
-    notify_order_submitted,
-    send_gotify_notification,
-)
-from .utils import ORDER_DB
+from django.utils.translation import gettext as _
+from django_tasks.backends.database.models import DBTaskResult
+from PIL import Image
+
+from sandwitches import __version__ as sandwitches_version
+
 from .forms import (
-    RecipeForm,
     AdminSetupForm,
-    UserSignupForm,
     RatingForm,
-    UserEditForm,
+    RecipeForm,
+    SettingForm,
     TagForm,
+    UserEditForm,
     UserProfileForm,
     UserRecipeSubmissionForm,
     UserSettingsForm,
-    SettingForm,
+    UserSignupForm,
 )
-from django.http import HttpResponseBadRequest, Http404
-from django.conf import settings
-from django.http import FileResponse
-from pathlib import Path
-import mimetypes
-from PIL import Image
-from django.db.models import Q, Avg
-from django_tasks.backends.database.models import DBTaskResult
-from django.contrib.auth.views import LoginView
-from django.core.paginator import Paginator
+from .models import CartItem, Order, OrderItem, Rating, Recipe, Setting, Tag
+from .tasks import notify_order_submitted, send_gotify_notification
+from .utils import ORDER_DB
 
-
-from sandwitches import __version__ as sandwitches_version
+logger = logging.getLogger("sandwitches")
 
 User = get_user_model()
 
@@ -98,8 +94,8 @@ class CustomLoginView(LoginView):
 
 @staff_member_required
 def admin_logs(request):
-    from .utils import set_logging_level
     from .models import Setting
+    from .utils import set_logging_level
 
     config = Setting.get_solo()
 
@@ -160,9 +156,10 @@ def admin_dashboard(request):
 
     # Data for charts
     from datetime import timedelta
-    from django.utils import timezone
+
+    from django.db.models import Avg, Count
     from django.db.models.functions import TruncDate
-    from django.db.models import Count, Avg
+    from django.utils import timezone
 
     # Get date range from request or default to last 30 days
     end_date_str = request.GET.get("end_date")
@@ -732,6 +729,7 @@ def order_recipe(request, pk):
     Create an order for the given recipe by the logged-in user.
     """
     from django.db import transaction
+
     from .models import OrderItem
 
     recipe = get_object_or_404(Recipe, pk=pk)

@@ -1,8 +1,10 @@
-import pytest
 import re
-from playwright.sync_api import Page, expect
-from sandwitches.models import User, Recipe
+
+import pytest
 from django.contrib.auth.models import Group
+from playwright.sync_api import Page, expect
+
+from sandwitches.models import Recipe, User
 
 
 @pytest.fixture

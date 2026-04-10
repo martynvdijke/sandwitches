@@ -1,10 +1,11 @@
-import pytest
-from unittest.mock import patch, MagicMock
-from sandwitches.models import Recipe, Setting
-from django.core.files.uploadedfile import SimpleUploadedFile
-from sandwitches.tasks import upload_to_instagram, sync_instagram_interactions
-from sandwitches.models import InstagramComment
 from datetime import datetime, timezone
+from unittest.mock import MagicMock, patch
+
+import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
+
+from sandwitches.models import InstagramComment, Recipe, Setting
+from sandwitches.tasks import sync_instagram_interactions, upload_to_instagram
 
 
 @pytest.mark.django_db
@@ -281,6 +282,7 @@ def test_admin_sync_instagram_view_handles_error(client, staff_user):
 @pytest.mark.django_db
 def test_upload_to_instagram_throttling():
     from datetime import timedelta
+
     from django.utils import timezone
     from django_tasks.backends.database.models import DBTaskResult
 
@@ -299,8 +301,9 @@ def test_upload_to_instagram_throttling():
 
     recipe = Recipe.objects.create(title="Throttled Recipe", image="img.jpg")
 
-    from sandwitches.tasks import upload_to_instagram
     from django_tasks.backends.database.models import DBTaskResult
+
+    from sandwitches.tasks import upload_to_instagram
 
     # Check that it returns False and enqueues a new task in DB
     initial_task_ids = list(

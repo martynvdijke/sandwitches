@@ -1,12 +1,13 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
-from .models import Recipe, Tag, Rating, Setting, Order, OrderItem, InstagramComment
 from django.utils.html import format_html
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from solo.admin import SingletonModelAdmin
+
 from .forms import SettingForm
+from .models import InstagramComment, Order, OrderItem, Rating, Recipe, Setting, Tag
 
 
 class RecipeResource(resources.ModelResource):

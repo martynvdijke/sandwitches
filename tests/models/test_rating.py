@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
-from sandwitches.models import Recipe, Rating
+
+from sandwitches.models import Rating, Recipe
 
 User = get_user_model()
 

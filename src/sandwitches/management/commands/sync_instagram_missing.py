@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+
 from sandwitches.models import Recipe, Setting
 from sandwitches.tasks import upload_to_instagram
 
@@ -36,6 +37,7 @@ class Command(BaseCommand):
         )
 
         from datetime import timedelta
+
         from django.utils import timezone
 
         for i, recipe in enumerate(recipes):

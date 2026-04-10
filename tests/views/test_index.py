@@ -1,8 +1,9 @@
-from sandwitches.models import Recipe
 import pytest
-from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from django.urls import reverse
+
+from sandwitches.models import Recipe
 
 User = get_user_model()
 

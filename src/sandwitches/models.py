@@ -1,27 +1,27 @@
-from django.db import models
-from django.utils.text import slugify
+import logging
 import uuid
-from .storage import HashedFilenameStorage
-from simple_history.models import HistoricalRecords
+
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from django.core.validators import EmailValidator, MaxValueValidator, MinValueValidator
+from django.db import models
 from django.db.models import Avg
+from django.urls import reverse
+from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill
+from simple_history.models import HistoricalRecords
+from solo.models import SingletonModel
+
+from .storage import HashedFilenameStorage
 from .tasks import (
     email_users,
     send_gotify_notification,
-    upload_to_instagram,
     sync_instagram_interactions,
+    upload_to_instagram,
 )
-from django.conf import settings
-from django.core.validators import MinValueValidator, MaxValueValidator
-import logging
-from django.urls import reverse
-from solo.models import SingletonModel
-from django.core.exceptions import ValidationError
-from django.core.validators import EmailValidator
-from django.utils.translation import gettext_lazy as _
-
-from imagekit.models import ImageSpecField
-from imagekit.processors import ResizeToFill
 
 hashed_storage = HashedFilenameStorage()
 logger = logging.getLogger("sandwitches")
@@ -126,8 +126,6 @@ class Setting(SingletonModel):
                     )
                     self.instagram_initial_uploaded = True
                 except Exception as e:
-                    import logging
-
                     logger.error(f"Failed to trigger initial Instagram sync: {e}")
 
     class Meta:
@@ -318,9 +316,7 @@ class Recipe(models.Model):
             if config.instagram_enabled:
                 upload_to_instagram.enqueue(recipe_id=self.pk)
         else:
-            logger.debug(
-                "Existing recipe saved (update); skipping email notification."
-            )
+            logger.debug("Existing recipe saved (update); skipping email notification.")
             config = Setting.get_solo()
             if config.instagram_enabled and self.instagram_media_id:
                 sync_instagram_interactions.enqueue()

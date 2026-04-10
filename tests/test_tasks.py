@@ -1,9 +1,11 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
-from sandwitches.tasks import email_users, send_emails
-from sandwitches.models import Recipe
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+
+from sandwitches.models import Recipe
+from sandwitches.tasks import email_users, send_emails
 
 User = get_user_model()
 

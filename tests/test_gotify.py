@@ -1,8 +1,10 @@
+from unittest.mock import ANY, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, ANY
-from sandwitches.tasks import send_gotify_notification
-from sandwitches.models import Setting, Recipe, User
 from django.urls import reverse
+
+from sandwitches.models import Recipe, Setting, User
+from sandwitches.tasks import send_gotify_notification
 
 
 @pytest.mark.django_db

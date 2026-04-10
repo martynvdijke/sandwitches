@@ -1,8 +1,9 @@
 import pytest
-from django.urls import reverse
 from django.contrib.auth import get_user_model
-from sandwitches.models import Recipe, Tag
 from django.contrib.auth.models import Group
+from django.urls import reverse
+
+from sandwitches.models import Recipe, Tag
 
 User = get_user_model()
 
@@ -52,8 +53,9 @@ def test_admin_dashboard_date_range_and_gaps(client):
     url = reverse("admin_dashboard")
 
     # Create a recipe today and one 5 days ago
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
 
     today = timezone.now()
     five_days_ago = today - timedelta(days=5)
@@ -99,9 +101,11 @@ def test_admin_dashboard_ratings_avg(client):
 
     # Create a recipe and ratings
     r = Recipe.objects.create(title="Rating Recipe", description="Desc")
-    from sandwitches.models import Rating
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
+
+    from sandwitches.models import Rating
 
     today = timezone.now()
 

@@ -1,10 +1,11 @@
 import hashlib
+import logging
 import os
+from pathlib import Path
+
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
-from pathlib import Path
-from django.conf import settings
-import logging
 
 logger = logging.getLogger("sandwitches")
 

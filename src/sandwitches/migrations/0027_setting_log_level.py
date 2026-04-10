@@ -4,15 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('sandwitches', '0026_setting_instagram_last_sync'),
+        ("sandwitches", "0026_setting_instagram_last_sync"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='setting',
-            name='log_level',
-            field=models.CharField(choices=[('DEBUG', 'Debug'), ('INFO', 'Info'), ('WARNING', 'Warning'), ('ERROR', 'Error'), ('CRITICAL', 'Critical')], default='INFO', help_text='The minimum logging level to record', max_length=10),
+            model_name="setting",
+            name="log_level",
+            field=models.CharField(
+                choices=[
+                    ("DEBUG", "Debug"),
+                    ("INFO", "Info"),
+                    ("WARNING", "Warning"),
+                    ("ERROR", "Error"),
+                    ("CRITICAL", "Critical"),
+                ],
+                default="INFO",
+                help_text="The minimum logging level to record",
+                max_length=10,
+            ),
         ),
     ]

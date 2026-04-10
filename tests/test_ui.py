@@ -1,7 +1,9 @@
-import pytest
 import re
+
+import pytest
 from playwright.sync_api import Page, expect
-from sandwitches.models import User, Recipe, Order, OrderItem
+
+from sandwitches.models import Order, OrderItem, Recipe, User
 
 
 @pytest.fixture

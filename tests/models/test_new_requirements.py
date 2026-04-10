@@ -1,7 +1,9 @@
+from decimal import Decimal
+
 import pytest
 from django.core.exceptions import ValidationError
-from sandwitches.models import User, Order, Recipe
-from decimal import Decimal
+
+from sandwitches.models import Order, Recipe, User
 
 
 @pytest.mark.django_db

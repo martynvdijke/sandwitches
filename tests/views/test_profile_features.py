@@ -1,9 +1,11 @@
+import datetime
+from decimal import Decimal
+
 import pytest
 from django.urls import reverse
-from sandwitches.models import Recipe, Order, OrderItem
-from decimal import Decimal
-import datetime
 from django.utils import timezone
+
+from sandwitches.models import Order, OrderItem, Recipe
 
 
 @pytest.mark.django_db

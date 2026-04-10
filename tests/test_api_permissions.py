@@ -1,5 +1,6 @@
 import pytest
-from sandwitches.models import Recipe, Tag, Rating, Order, CartItem
+
+from sandwitches.models import CartItem, Order, Rating, Recipe, Tag
 
 
 @pytest.mark.django_db

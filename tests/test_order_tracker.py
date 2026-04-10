@@ -1,7 +1,8 @@
 import pytest
-from django.urls import reverse
-from sandwitches.models import Order, Recipe, OrderItem
 from django.contrib.auth import get_user_model
+from django.urls import reverse
+
+from sandwitches.models import Order, OrderItem, Recipe
 
 User = get_user_model()
 

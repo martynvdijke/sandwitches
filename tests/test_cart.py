@@ -1,7 +1,8 @@
 import pytest
-from django.urls import reverse
-from sandwitches.models import Recipe, CartItem, Order, User
 from django.contrib.auth.models import Group
+from django.urls import reverse
+
+from sandwitches.models import CartItem, Order, Recipe, User
 
 
 @pytest.mark.django_db
