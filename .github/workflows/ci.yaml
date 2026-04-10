@@ -58,9 +58,8 @@ jobs:
           docker push ghcr.io/martynvdijke/sandwitches:latest
 
   flutter-ci:
-    name: Flutter CI (Non-blocking)
+    name: Flutter CI
     runs-on: ubuntu-latest
-    continue-on-error: true
     defaults:
       run:
         working-directory: mobile
