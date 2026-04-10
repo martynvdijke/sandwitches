@@ -217,10 +217,10 @@ class RecipeForm(forms.ModelForm):
             try:
                 from PIL import Image as PILImage
 
-                img = PILImage.open(recipe.image.path)
+                img = PILImage.open(recipe.image.path)  # ty:ignore[unresolved-attribute]
                 # PIL rotates counter-clockwise by default, our 'rotation' is clockwise
                 img = img.rotate(-rotation, expand=True)
-                img.save(recipe.image.path)
+                img.save(recipe.image.path)  # ty:ignore[unresolved-attribute]
             except Exception as e:
                 print(f"Error rotating image: {e}")
 

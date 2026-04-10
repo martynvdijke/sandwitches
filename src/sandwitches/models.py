@@ -325,7 +325,7 @@ class Recipe(models.Model):
         return reverse("recipe_detail", kwargs={"slug": self.slug})
 
     def tag_list(self):
-        return list(self.tags.values_list("name", flat=True))  # ty:ignore[possibly-missing-attribute]
+        return list(self.tags.values_list("name", flat=True))  # ty:ignore[unresolved-attribute]
 
     def set_tags_from_string(self, tag_string):
         """
@@ -339,8 +339,8 @@ class Recipe(models.Model):
             if not tag:
                 tag = Tag.objects.create(name=name)  # ty:ignore[unresolved-attribute]
             tags.append(tag)
-        self.tags.set(tags)  # ty:ignore[possibly-missing-attribute]
-        return self.tags.all()  # ty:ignore[possibly-missing-attribute]
+        self.tags.set(tags)  # ty:ignore[unresolved-attribute]
+        return self.tags.all()  # ty:ignore[unresolved-attribute]
 
     def average_rating(self):
         agg = self.ratings.aggregate(avg=Avg("score"))  # ty:ignore[unresolved-attribute]
@@ -386,7 +386,7 @@ class InstagramComment(models.Model):
         ordering = ("-created_at",)
 
     def __str__(self):
-        return f"Instagram: {self.username} on {self.recipe.title}"  # ty:ignore[possibly-missing-attribute]
+        return f"Instagram: {self.username} on {self.recipe.title}"  # ty:ignore[unresolved-attribute]
 
 
 class Order(models.Model):
@@ -417,7 +417,7 @@ class Order(models.Model):
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         if is_new:
-            logger.info(f"Creating new order for user {self.user.username}")  # ty:ignore[possibly-missing-attribute]
+            logger.info(f"Creating new order for user {self.user.username}")  # ty:ignore[unresolved-attribute]
         else:
             logger.info(f"Updating order #{self.pk} status to {self.status}")
         super().save(*args, **kwargs)
@@ -446,35 +446,35 @@ class OrderItem(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.price:
-            self.price = self.recipe.price  # ty:ignore[possibly-missing-attribute]
+            self.price = self.recipe.price  # ty:ignore[unresolved-attribute]
 
         is_new = self.pk is None
         if is_new:
             logger.info(
-                f"Adding {self.quantity}x {self.recipe.title} to Order #{self.order.pk}"  # ty:ignore[possibly-missing-attribute]
+                f"Adding {self.quantity}x {self.recipe.title} to Order #{self.order.pk}"  # ty:ignore[unresolved-attribute]
             )
             if (
-                self.recipe.max_daily_orders is not None  # ty:ignore[possibly-missing-attribute]
-                and self.recipe.daily_orders_count + self.quantity  # ty:ignore[possibly-missing-attribute]
-                > self.recipe.max_daily_orders  # ty:ignore[possibly-missing-attribute]
+                self.recipe.max_daily_orders is not None  # ty:ignore[unresolved-attribute]
+                and self.recipe.daily_orders_count + self.quantity  # ty:ignore[unresolved-attribute]
+                > self.recipe.max_daily_orders  # ty:ignore[unresolved-attribute]
             ):
                 logger.warning(
-                    f"Order limit reached for {self.recipe.title} (Max: {self.recipe.max_daily_orders})"  # ty:ignore[possibly-missing-attribute]
+                    f"Order limit reached for {self.recipe.title} (Max: {self.recipe.max_daily_orders})"  # ty:ignore[unresolved-attribute]
                 )
                 raise ValidationError(
-                    f"Daily order limit reached for {self.recipe.title}."  # ty:ignore[possibly-missing-attribute]
+                    f"Daily order limit reached for {self.recipe.title}."  # ty:ignore[unresolved-attribute]
                 )
 
-            self.recipe.daily_orders_count += self.quantity  # ty:ignore[possibly-missing-attribute]
-            self.recipe.save(update_fields=["daily_orders_count"])  # ty:ignore[possibly-missing-attribute]
+            self.recipe.daily_orders_count += self.quantity  # ty:ignore[unresolved-attribute]
+            self.recipe.save(update_fields=["daily_orders_count"])  # ty:ignore[unresolved-attribute]
             logger.debug(
-                f"Updated daily order count for {self.recipe.title}: {self.recipe.daily_orders_count}"  # ty:ignore[possibly-missing-attribute]
+                f"Updated daily order count for {self.recipe.title}: {self.recipe.daily_orders_count}"  # ty:ignore[unresolved-attribute]
             )
 
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.quantity}x {self.recipe.title} in Order #{self.order.pk}"  # ty:ignore[possibly-missing-attribute]
+        return f"{self.quantity}x {self.recipe.title} in Order #{self.order.pk}"  # ty:ignore[unresolved-attribute]
 
 
 class CartItem(models.Model):
@@ -494,10 +494,10 @@ class CartItem(models.Model):
         verbose_name_plural = _("Cart Items")
 
     def __str__(self):
-        return f"{self.user.username}'s cart: {self.recipe.title} (x{self.quantity})"  # ty:ignore[possibly-missing-attribute]
+        return f"{self.user.username}'s cart: {self.recipe.title} (x{self.quantity})"  # ty:ignore[unresolved-attribute]
 
     @property
     def total_price(self):
-        if self.recipe.price:  # ty:ignore[possibly-missing-attribute]
-            return self.recipe.price * self.quantity  # ty:ignore[possibly-missing-attribute]
+        if self.recipe.price:  # ty:ignore[unresolved-attribute]
+            return self.recipe.price * self.quantity  # ty:ignore[unresolved-attribute]
         return 0

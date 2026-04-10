@@ -302,7 +302,7 @@ def send_gotify_notification(title, message, priority=5):
 
     try:
         response = requests.post(
-            f"{url.rstrip('/')}/message?token={token}",  # ty:ignore[possibly-missing-attribute]
+            f"{url.rstrip('/')}/message?token={token}",  # ty:ignore[unresolved-attribute]
             json={
                 "title": title,
                 "message": message,

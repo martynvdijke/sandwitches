@@ -22,7 +22,7 @@ def test_email_users_task_no_users():
 
     with patch("sandwitches.tasks.send_emails") as mock_send:
         # call the underlying function
-        result = email_users.func(context=context, recipe_id=1)
+        result = email_users.func(context=context, recipe_id=1)  # ty:ignore[unknown-argument]
         assert result == 0
         mock_send.assert_not_called()
 
@@ -38,7 +38,7 @@ def test_email_users_task_with_users():
     User.objects.create_user("u3", "", "p3")  # No email
 
     with patch("sandwitches.tasks.send_emails") as mock_send:
-        result = email_users.func(context=context, recipe_id=99)
+        result = email_users.func(context=context, recipe_id=99)  # ty:ignore[unknown-argument]
         assert result is True
 
         args, _ = mock_send.call_args

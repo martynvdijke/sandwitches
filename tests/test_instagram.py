@@ -284,7 +284,7 @@ def test_upload_to_instagram_throttling():
     from datetime import timedelta
 
     from django.utils import timezone
-    from django_tasks.backends.database.models import DBTaskResult
+    from django_tasks_db.models import DBTaskResult
 
     # Clear any existing tasks from other tests or signals
     DBTaskResult.objects.all().delete()
@@ -301,7 +301,7 @@ def test_upload_to_instagram_throttling():
 
     recipe = Recipe.objects.create(title="Throttled Recipe", image="img.jpg")
 
-    from django_tasks.backends.database.models import DBTaskResult
+    from django_tasks_db.models import DBTaskResult
 
     from sandwitches.tasks import upload_to_instagram
 

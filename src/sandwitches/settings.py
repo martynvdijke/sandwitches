@@ -48,7 +48,7 @@ storage.is_database_writable(DATABASE_FILE)
 
 TASKS = {
     "default": {
-        "BACKEND": "django_tasks.backends.database.DatabaseBackend",
+        "BACKEND": "django_tasks_db.DatabaseBackend",
         "QUEUES": ["default", "emails"],
         "OPTIONS": {
             "queues": {
@@ -73,7 +73,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "sandwitches.apps.SandwitchesConfig",
     "django_tasks",
-    "django_tasks.backends.database",
+    "django_tasks_db",
     "debug_toolbar",
     "imagekit",
     "import_export",

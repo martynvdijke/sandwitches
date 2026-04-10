@@ -494,7 +494,7 @@ def test_admin_task_detail(client):
 
     client.force_login(staff)
 
-    from django_tasks.backends.database.models import DBTaskResult
+    from django_tasks_db.models import DBTaskResult
 
     task = DBTaskResult.objects.create(
         task_path="sandwitches.tasks.email_users",
@@ -619,7 +619,7 @@ def test_admin_task_detail_with_error(client):
     staff = User.objects.create_user(username="staff_err", password="pw", is_staff=True)
     client.force_login(staff)
 
-    from django_tasks.backends.database.models import DBTaskResult
+    from django_tasks_db.models import DBTaskResult
 
     task = DBTaskResult.objects.create(
         task_path="sandwitches.tasks.fail",

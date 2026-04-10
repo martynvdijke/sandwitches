@@ -1,6 +1,6 @@
 import pytest
 from django.core import mail
-from django_tasks.backends.database.models import DBTaskResult
+from django_tasks_db.models import DBTaskResult
 
 from sandwitches.models import Order, OrderItem, Recipe
 from sandwitches.tasks import notify_order_submitted, reset_daily_orders
