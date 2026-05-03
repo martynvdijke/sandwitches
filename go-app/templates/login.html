@@ -1,0 +1,30 @@
+{{ template "head" . }}
+{{ template "navbar" . }}
+
+<div class="space"></div>
+<div style="max-width:500px;margin:0 auto">
+  <article class="round elevate">
+    <div class="padding">
+      <h4 class="center-align">Login to your account</h4>
+      <p class="center-align">Welcome back!</p>
+    </div>
+    <form method="post">
+      <input type="hidden" name="next" value="{{ .next }}">
+      <div class="field label border round">
+        <input type="text" name="username" required>
+        <label>Username</label>
+      </div>
+      <div class="field label border round">
+        <input type="password" name="password" required>
+        <label>Password</label>
+      </div>
+      <div class="space"></div>
+      <nav class="right-align">
+        <a class="button transparent border round" href="/">Cancel</a>
+        <button type="submit" class="button primary round">Login</button>
+      </nav>
+    </form>
+  </article>
+</div>
+
+{{ template "tail" . }}

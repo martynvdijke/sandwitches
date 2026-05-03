@@ -1,0 +1,18 @@
+{{ template "head" . }}
+<div style="max-width:500px;margin:4rem auto 0">
+  <article class="round elevate">
+    <div class="padding">
+      <h4 class="center-align">Setup Admin Account</h4>
+      <p>Create the first superuser account.</p>
+    </div>
+    <form method="post">
+      <div class="field label border round"><input type="text" name="username" required><label>Username</label></div>
+      <div class="field label border round"><input type="email" name="email"><label>Email</label></div>
+      <div class="field label border round"><input type="password" name="password1" required><label>Password</label></div>
+      <div class="field label border round"><input type="password" name="password2" required><label>Confirm</label></div>
+      <div class="space"></div>
+      <button type="submit" class="button primary round">Create Account</button>
+    </form>
+  </article>
+</div>
+{{ template "tail" . }}

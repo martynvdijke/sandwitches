@@ -1,0 +1,60 @@
+{{ template "head" . }}
+{{ template "navbar" . }}
+
+<div class="space"></div>
+<article class="round secondary">
+  <div style="display:flex;align-items:center;padding:1rem">
+    <div style="flex:1">
+      <h4 class="upper">Sandwitches</h4>
+      <p>Sandwiches so good, they haunt you!</p>
+    </div>
+  </div>
+</article>
+
+<div class="space"></div>
+
+{{ if .highlighted_recipes }}
+<h4 class="upper center-align">Highlights</h4>
+<div class="row scroll" style="gap:20px;overflow-x:auto;padding:1rem">
+{{ range .highlighted_recipes }}
+<a href="/recipes/{{ .Slug }}">
+  <article class="round no-padding elevate" style="min-width:300px;width:300px">
+    {{ if .Image }}
+    <img src="{{ .Image }}" class="responsive top-round" style="height:200px;object-fit:cover" alt="{{ .Title }}">
+    {{ else }}
+    <div style="height:200px;background:var(--md-sys-color-primary-container);display:flex;align-items:center;justify-content:center">
+      <i class="extra">lunch_dining</i>
+    </div>
+    {{ end }}
+    <div class="padding"><h5>{{ .Title }}</h5></div>
+  </article>
+</a>
+{{ end }}
+</div>
+{{ end }}
+
+<div class="space"></div><div class="divider"></div><div class="space"></div>
+
+<div class="grid">
+{{ range .recipes }}
+<div class="s12 m6 l4">
+  <a href="/recipes/{{ .Slug }}">
+    <article class="round elevate no-padding">
+      {{ if .Image }}
+      <img src="{{ .Image }}" class="responsive top-round" style="height:180px;object-fit:cover" alt="{{ .Title }}">
+      {{ else }}
+      <div style="height:180px;background:var(--md-sys-color-surface-variant);display:flex;align-items:center;justify-content:center">
+        <i class="extra">lunch_dining</i>
+      </div>
+      {{ end }}
+      <div class="padding">
+        <h6>{{ .Title }}</h6>
+        {{ if .Price }}<p><b>{{ printf "%.2f" .Price }} &euro;</b></p>{{ end }}
+      </div>
+    </article>
+  </a>
+</div>
+{{ end }}
+</div>
+
+{{ template "tail" . }}

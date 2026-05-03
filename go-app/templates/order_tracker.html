@@ -1,0 +1,1 @@
+{{ template "head" . }}{{ template "navbar" . }}<div class="space"></div><h4>Order #{{ .order.ID }}</h4><p>Status: <b>{{ .order.Status }}</b></p><p>Total: {{ printf "%.2f" .order.TotalPrice }} &euro;</p>{{ range .order.Items }}<p>{{ .Quantity }}x {{ .Recipe.Title }} ({{ printf "%.2f" .Price }} &euro;)</p>{{ end }}{{ template "tail" . }}

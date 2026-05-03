@@ -1,0 +1,21 @@
+{{ define "navbar" }}
+<nav style="display:flex;align-items:center;padding:0.5rem 1rem;background:var(--md-sys-color-primary-container);gap:0.75rem">
+    <a href="/"><img src="/static/icons/icon.svg" style="width:36px;height:36px;border-radius:50%"></a>
+    <div style="flex:1"></div>
+    {{ if .user }}
+    <a href="/cart" class="button circle transparent"><i>shopping_cart</i></a>
+    <a href="/profile">
+        {{ if .user.Avatar }}
+        <img src="{{ .user.Avatar }}" style="width:40px;height:40px;border-radius:50%">
+        {{ else }}
+        <div class="chip circle large primary-container">{{ first .user.Username }}</div>
+        {{ end }}
+    </a>
+    <a href="/settings"><i>account_circle</i></a>
+    <a href="/logout"><i>logout</i></a>
+    {{ else }}
+    <a href="/login"><button class="chip transparent border">Login</button></a>
+    <a href="/signup"><button class="chip primary">Sign up</button></a>
+    {{ end }}
+</nav>
+{{ end }}

@@ -1,0 +1,51 @@
+{{ template "head" . }}
+{{ template "navbar" . }}
+
+<div class="space"></div>
+<div style="max-width:500px;margin:0 auto">
+  <article class="round elevate">
+    <div class="padding">
+      <h4 class="center-align">Create your account</h4>
+      <p class="center-align">Join the Sandwitches community!</p>
+    </div>
+    <form method="post">
+      <div class="grid">
+        <div class="s12 m6">
+          <div class="field label border round">
+            <input type="text" name="first_name" value="{{ .form.FirstName }}">
+            <label>First name</label>
+          </div>
+        </div>
+        <div class="s12 m6">
+          <div class="field label border round">
+            <input type="text" name="last_name" value="{{ .form.LastName }}">
+            <label>Last name</label>
+          </div>
+        </div>
+      </div>
+      <div class="field label border round">
+        <input type="text" name="username" required value="{{ .form.Username }}">
+        <label>Username</label>
+      </div>
+      <div class="field label border round">
+        <input type="email" name="email" value="{{ .form.Email }}">
+        <label>Email</label>
+      </div>
+      <div class="field label border round">
+        <input type="password" name="password1" required>
+        <label>Password</label>
+      </div>
+      <div class="field label border round">
+        <input type="password" name="password2" required>
+        <label>Confirm password</label>
+      </div>
+      <div class="space"></div>
+      <nav class="right-align">
+        <a class="button transparent border round" href="/">Cancel</a>
+        <button type="submit" class="button primary round">Sign Up</button>
+      </nav>
+    </form>
+  </article>
+</div>
+
+{{ template "tail" . }}
