@@ -44,9 +44,10 @@
 
     {{ if .user }}
     <form method="post" action="/recipes/rate/{{ .recipe.ID }}" style="padding:1rem">
+      {{ .csrf_token }}
       <div class="field label">
         <input type="range" name="score" min="0" max="10" step="0.1" value="5.0">
-        <label>Your rating</label>
+        <label>Your rating (0-10)</label>
       </div>
       <div class="field textarea label border round">
         <textarea name="comment" placeholder="Add a comment (optional)"></textarea>
@@ -63,6 +64,7 @@
     <a href="/recipes/favorite/{{ .recipe.ID }}" class="button border round">
       <i>favorite</i> <span>{{ if .user }}{{ .user.Username }}{{ end }}</span>
     </a>
+    <a href="/cart/add/{{ .recipe.ID }}" class="button primary round"><i>add_shopping_cart</i> Add to Cart</a>
     {{ end }}
   </div>
 </article>

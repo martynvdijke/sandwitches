@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
+	"github.com/martynvdijke/sandwitches-go/internal/utils"
 )
 
 func UserProfile(c *gin.Context) {
@@ -15,6 +16,7 @@ func UserProfile(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/login")
 		return
 	}
+	td := utils.NewTemplateData(c)
 
 	if c.Request.Method == "POST" {
 		user.FirstName = c.PostForm("first_name")
@@ -22,6 +24,7 @@ func UserProfile(c *gin.Context) {
 		user.Email = c.PostForm("email")
 		user.Bio = c.PostForm("bio")
 		database.DB.Save(user)
+		utils.AddFlash(c, "success", "Profile updated")
 		c.Redirect(http.StatusFound, "/profile")
 		return
 	}
@@ -47,13 +50,11 @@ func UserProfile(c *gin.Context) {
 
 	query.Find(&orders)
 
-	c.HTML(http.StatusOK, "profile.html", gin.H{
-		"user":           user,
-		"orders":         orders,
-		"current_status": status,
-		"current_sort":   c.Query("sort"),
-		"status_choices": OrderStatusChoices,
-	})
+	c.HTML(http.StatusOK, "profile.html", td.With("orders", orders).
+		With("current_status", status).
+		With("current_sort", c.Query("sort")).
+		With("status_choices", OrderStatusChoices).
+		ToGinH())
 }
 
 func UserSettings(c *gin.Context) {
@@ -62,19 +63,18 @@ func UserSettings(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/login")
 		return
 	}
+	td := utils.NewTemplateData(c)
 
 	if c.Request.Method == "POST" {
 		user.Language = c.PostForm("language")
 		user.Theme = c.PostForm("theme")
 		database.DB.Save(user)
+		utils.AddFlash(c, "success", "Settings saved")
 		c.Redirect(http.StatusFound, "/settings")
 		return
 	}
 
-	c.HTML(http.StatusOK, "settings.html", gin.H{
-		"user":    user,
-		"version": "2.12.15", // TODO: version from build
-	})
+	c.HTML(http.StatusOK, "settings.html", td.With("user", user).ToGinH())
 }
 
 func UserOrderDetail(c *gin.Context) {
@@ -83,6 +83,7 @@ func UserOrderDetail(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/login")
 		return
 	}
+	td := utils.NewTemplateData(c)
 
 	id, _ := strconv.Atoi(c.Param("id"))
 	var order database.Order
@@ -91,10 +92,7 @@ func UserOrderDetail(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "order_detail.html", gin.H{
-		"order": order,
-		"user":  user,
-	})
+	c.HTML(http.StatusOK, "order_detail.html", td.With("order", order).ToGinH())
 }
 
 var OrderStatusChoices = []struct {

@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/smtp"
+	"os"
 	"time"
 
 	"github.com/martynvdijke/sandwitches-go/internal/config"
@@ -178,5 +179,9 @@ func sendHTMLEmail(to, subject, textBody, htmlBody string) {
 }
 
 func baseURL() string {
-	return "http://localhost"
+	url := os.Getenv("BASE_URL")
+	if url == "" {
+		url = "http://localhost"
+	}
+	return url
 }

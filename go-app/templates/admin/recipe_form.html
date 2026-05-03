@@ -1,1 +1,27 @@
-{{ template "head" . }}{{ template "navbar" . }}<div class="space"></div><h4>{{ .title }}</h4><form method="post"><div class="field label border round"><input type="text" name="title" value="{{ .recipe.Title }}" required><label>Title</label></div><div class="field textarea label border round"><textarea name="description">{{ .recipe.Description }}</textarea><label>Description</label></div><div class="field textarea label border round"><textarea name="ingredients">{{ .recipe.Ingredients }}</textarea><label>Ingredients</label></div><div class="field textarea label border round"><textarea name="instructions">{{ .recipe.Instructions }}</textarea><label>Instructions</label></div><div class="grid"><div class="s12 m6"><div class="field label border round"><input type="number" name="servings" value="{{ .recipe.Servings }}" min="1"><label>Servings</label></div></div><div class="s12 m6"><div class="field label border round"><input type="number" name="price" step="0.01" value="{{ printf "%.2f" .recipe.Price }}"><label>Price</label></div></div></div><div class="field middle-align"><label><input type="checkbox" name="is_highlighted" {{ if .recipe.IsHighlighted }}checked{{ end }}> Highlighted</label></div><div class="field middle-align"><label><input type="checkbox" name="is_approved" {{ if .recipe.IsApproved }}checked{{ end }}> Approved</label></div><div class="space"></div><button type="submit" class="button primary round">Save</button></form>{{ template "tail" . }}
+{{ template "head" . }}{{ template "navbar" . }}
+<div class="space"></div>
+<h4>{{ .title }}</h4>
+<form method="post" enctype="multipart/form-data">
+{{ .csrf_token }}
+<div class="field label border round"><input type="text" name="title" value="{{ .recipe.Title }}" required><label>Title</label></div>
+<div class="field textarea label border round"><textarea name="description">{{ .recipe.Description }}</textarea><label>Description</label></div>
+<div class="field textarea label border round"><textarea name="ingredients">{{ .recipe.Ingredients }}</textarea><label>Ingredients</label></div>
+<div class="field textarea label border round"><textarea name="instructions">{{ .recipe.Instructions }}</textarea><label>Instructions</label></div>
+<div class="field label border round"><input type="text" name="tags_string" value="{{ .tag_names }}"><label>Tags (comma separated)</label></div>
+<div class="grid">
+  <div class="s12 m3"><div class="field label border round"><input type="number" name="servings" value="{{ .recipe.Servings }}" min="1"><label>Servings</label></div></div>
+  <div class="s12 m3"><div class="field label border round"><input type="number" name="prep_time" value="{{ if .recipe.PrepTime }}{{ .recipe.PrepTime }}{{ end }}"><label>Prep (min)</label></div></div>
+  <div class="s12 m3"><div class="field label border round"><input type="number" name="cook_time" value="{{ if .recipe.CookTime }}{{ .recipe.CookTime }}{{ end }}"><label>Cook (min)</label></div></div>
+  <div class="s12 m3"><div class="field label border round"><input type="number" name="calories" value="{{ if .recipe.Calories }}{{ .recipe.Calories }}{{ end }}"><label>Calories</label></div></div>
+</div>
+<div class="grid">
+  <div class="s12 m4"><div class="field label border round"><input type="number" name="price" step="0.01" value="{{ if .recipe.Price }}{{ printf "%.2f" .recipe.Price }}{{ end }}"><label>Price</label></div></div>
+  <div class="s12 m4"><div class="field label border round"><input type="number" name="max_daily_orders" value="{{ if .recipe.MaxDailyOrders }}{{ .recipe.MaxDailyOrders }}{{ end }}"><label>Max Daily Orders</label></div></div>
+  <div class="s12 m4"><div class="field file label border round"><input type="file" name="image" accept="image/*"><label>Recipe Image</label></div></div>
+</div>
+<div class="field middle-align"><label><input type="checkbox" name="is_highlighted" {{ if .recipe.IsHighlighted }}checked{{ end }}> Highlighted</label></div>
+<div class="field middle-align"><label><input type="checkbox" name="is_approved" {{ if .recipe.IsApproved }}checked{{ end }}> Approved</label></div>
+<div class="space"></div>
+<button type="submit" class="button primary round">Save</button>
+</form>
+{{ template "tail" . }}

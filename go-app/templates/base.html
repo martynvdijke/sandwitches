@@ -33,6 +33,41 @@
             visibility: visible;
             opacity: 1;
         }
+        .flash-messages {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 10000;
+            max-width: 400px;
+        }
+        .flash-messages .snackbar {
+            margin-bottom: 8px;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            padding: 1rem 0;
+            flex-wrap: wrap;
+        }
+        .pagination a, .pagination span {
+            padding: 6px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+        .pagination .active {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
     </style>
     {{ block "extra_head" . }}{{ end }}
 </head>
@@ -54,6 +89,23 @@
             <span>{{ .error }}</span>
         </div>
     </div>
+    {{ end }}
+
+    {{ if .flashes }}
+    <div class="flash-messages" id="flash-messages">
+    {{ range .flashes }}
+        <div class="snackbar active {{ if eq .Type "error" }}error{{ else }}success{{ end }}">
+            <i>{{ if eq .Type "error" }}error{{ else }}check{{ end }}</i>
+            <span>{{ .Message }}</span>
+        </div>
+    {{ end }}
+    </div>
+    <script>
+        setTimeout(() => {
+            const container = document.getElementById('flash-messages');
+            if (container) container.style.display = 'none';
+        }, 5000);
+    </script>
     {{ end }}
 
     <main class="container" role="main">

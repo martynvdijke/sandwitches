@@ -13,6 +13,12 @@
         main.container { flex: 1; padding: 2rem 1rem; max-width: 1200px; margin: 0 auto; }
         @media only screen and (min-width: 992px) { main.container { padding-left: 10%; padding-right: 10%; } }
         .snackbar { margin-bottom: 0.5rem; }
+        .flash-messages { position: fixed; top: 16px; right: 16px; z-index: 10000; max-width: 400px; }
+        .flash-messages .snackbar { margin-bottom: 8px; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .pagination { display: flex; justify-content: center; gap: 4px; padding: 1rem 0; flex-wrap: wrap; }
+        .pagination a, .pagination span { padding: 6px 12px; border-radius: 8px; text-decoration: none; }
+        .pagination .active { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
     </style>
 </head>
 <body class="{{ if .user }}{{ .user.Theme }}{{ end }}">
@@ -20,6 +26,24 @@
     <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1.5s linear infinite"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><path d="M12 9v6"/><path d="M10 12h4"/></svg>
 </div>
 <style>@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}</style>
+
+{{ if .flashes }}
+<div class="flash-messages" id="flash-messages">
+{{ range .flashes }}
+<div class="snackbar active {{ if eq .Type "error" }}error{{ else }}success{{ end }}">
+    <i>{{ if eq .Type "error" }}error{{ else }}check{{ end }}</i>
+    <span>{{ .Message }}</span>
+</div>
+{{ end }}
+</div>
+<script>
+setTimeout(function(){
+    var c=document.getElementById('flash-messages');
+    if(c)c.style.display='none';
+},5000);
+</script>
+{{ end }}
+
 {{ if .error }}
 <div style="padding:0.5rem"><div class="snackbar active error"><i>error</i><span>{{ .error }}</span></div></div>
 {{ end }}

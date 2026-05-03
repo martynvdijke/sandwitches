@@ -12,8 +12,16 @@
 </article>
 
 <div class="space"></div>
+<form method="get" class="grid" style="gap:8px">
+  <div class="s12 m4"><div class="field label border round small"><input type="search" name="q" value="{{ .q }}"><label>Search</label></div></div>
+  <div class="s12 m3"><div class="field label border round small"><select name="sort"><option value="">Newest</option><option value="date_asc" {{ if eq "date_asc" .sort }}selected{{ end }}>Oldest</option><option value="rating" {{ if eq "rating" .sort }}selected{{ end }}>Top Rated</option></select><label>Sort</label></div></div>
+  <div class="s12 m2"><div class="field label border round small"><input type="date" name="date_start" value="{{ .date_start }}"><label>From</label></div></div>
+  <div class="s12 m2"><div class="field label border round small"><input type="date" name="date_end" value="{{ .date_end }}"><label>To</label></div></div>
+  <div class="s12 m1"><button type="submit" class="button circle primary"><i>search</i></button></div>
+</form>
 
 {{ if .highlighted_recipes }}
+<div class="space"></div>
 <h4 class="upper center-align">Highlights</h4>
 <div class="row scroll" style="gap:20px;overflow-x:auto;padding:1rem">
 {{ range .highlighted_recipes }}
@@ -35,26 +43,18 @@
 
 <div class="space"></div><div class="divider"></div><div class="space"></div>
 
-<div class="grid">
-{{ range .recipes }}
-<div class="s12 m6 l4">
-  <a href="/recipes/{{ .Slug }}">
-    <article class="round elevate no-padding">
-      {{ if .Image }}
-      <img src="{{ .Image }}" class="responsive top-round" style="height:180px;object-fit:cover" alt="{{ .Title }}">
-      {{ else }}
-      <div style="height:180px;background:var(--md-sys-color-surface-variant);display:flex;align-items:center;justify-content:center">
-        <i class="extra">lunch_dining</i>
-      </div>
-      {{ end }}
-      <div class="padding">
-        <h6>{{ .Title }}</h6>
-        {{ if .Price }}<p><b>{{ printf "%.2f" .Price }} &euro;</b></p>{{ end }}
-      </div>
-    </article>
-  </a>
+<div class="grid" id="recipe-grid">
+{{ template "partials/recipe_list.html" dict "recipes" .recipes }}
+</div>
+
+{{ if .pagination }}
+<div class="pagination">
+  {{ if .pagination.HasPrev }}<a href="?page={{ .pagination.PrevPage }}&q={{ .q }}&sort={{ .sort }}">&laquo; Prev</a>{{ end }}
+  {{ range .pagination.Pages }}
+    {{ if eq . $.pagination.Page }}<span class="active">{{ . }}</span>{{ else }}<a href="?page={{ . }}&q={{ .q }}&sort={{ .sort }}">{{ . }}</a>{{ end }}
+  {{ end }}
+  {{ if .pagination.HasNext }}<a href="?page={{ .pagination.NextPage }}&q={{ .q }}&sort={{ .sort }}">Next &raquo;</a>{{ end }}
 </div>
 {{ end }}
-</div>
 
 {{ template "tail" . }}

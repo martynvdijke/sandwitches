@@ -1,1 +1,10 @@
-{{ template "head" . }}{{ template "navbar" . }}<div class="space"></div><h4>{{ .title }}</h4><form method="post"><div class="field label border round"><input type="text" name="name" value="{{ .tag.Name }}" required><label>Name</label></div><div class="space"></div><button type="submit" class="button primary round">Save</button></form>{{ template "tail" . }}
+{{ template "head" . }}{{ template "navbar" . }}
+<div class="space"></div>
+<h4>{{ .title }}</h4>
+<form method="post">
+{{ .csrf_token }}
+<div class="field label border round"><input type="text" name="name" value="{{ .tag.Name }}"><label>Name</label></div>
+<div class="space"></div>
+<button type="submit" class="button primary round">Save</button>
+</form>
+{{ template "tail" . }}

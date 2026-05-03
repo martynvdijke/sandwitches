@@ -1,6 +1,8 @@
 {{ define "navbar" }}
 <nav style="display:flex;align-items:center;padding:0.5rem 1rem;background:var(--md-sys-color-primary-container);gap:0.75rem">
     <a href="/"><img src="/static/icons/icon.svg" style="width:36px;height:36px;border-radius:50%"></a>
+    <a href="/" class="button small transparent">Home</a>
+    <a href="/community" class="button small transparent">Community</a>
     <div style="flex:1"></div>
     {{ if .user }}
     <a href="/cart" class="button circle transparent"><i>shopping_cart</i></a>
@@ -11,6 +13,7 @@
         <div class="chip circle large primary-container">{{ first .user.Username }}</div>
         {{ end }}
     </a>
+    {{ if .user.IsStaff }}<a href="/dashboard" class="button small transparent">Admin</a>{{ end }}
     <a href="/settings"><i>account_circle</i></a>
     <a href="/logout"><i>logout</i></a>
     {{ else }}

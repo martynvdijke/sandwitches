@@ -5,15 +5,18 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
+	"github.com/martynvdijke/sandwitches-go/internal/tasks"
+	"github.com/martynvdijke/sandwitches-go/internal/utils"
 	"gorm.io/gorm"
 )
 
 func Index(c *gin.Context) {
-	user := middleware.GetUser(c)
+	td := utils.NewTemplateData(c)
 
 	var recipes []database.Recipe
 	query := database.DB.Preload("FavoritedBy").Preload("Tags").
@@ -31,6 +34,16 @@ func Index(c *gin.Context) {
 	if tags := c.QueryArray("tag"); len(tags) > 0 {
 		query = query.Where("recipes.id IN (SELECT recipe_id FROM recipe_tags JOIN tags ON recipe_tags.tag_id = tags.id WHERE tags.name IN ?)", tags)
 	}
+	if ds := c.Query("date_start"); ds != "" {
+		if t, err := time.Parse("2006-01-02", ds); err == nil {
+			query = query.Where("recipes.created_at >= ?", t)
+		}
+	}
+	if de := c.Query("date_end"); de != "" {
+		if t, err := time.Parse("2006-01-02", de); err == nil {
+			query = query.Where("recipes.created_at <= ?", t.Add(24*time.Hour))
+		}
+	}
 
 	sort := c.Query("sort")
 	switch sort {
@@ -42,7 +55,12 @@ func Index(c *gin.Context) {
 		query = query.Order("recipes.created_at DESC")
 	}
 
-	query.Find(&recipes)
+	page, perPage, offset := utils.GetPagination(c, 12)
+	var total int64
+	query.Session(&gorm.Session{}).Count(&total)
+	pagination := utils.NewPagination(page, perPage, total)
+
+	query.Limit(perPage).Offset(offset).Find(&recipes)
 
 	var highlighted []database.Recipe
 	database.DB.Preload("FavoritedBy").Where("is_highlighted = ?", true).Find(&highlighted)
@@ -55,19 +73,19 @@ func Index(c *gin.Context) {
 	var allTags []database.Tag
 	database.DB.Find(&allTags)
 
-	c.HTML(http.StatusOK, "index.html", gin.H{
-		"recipes":             recipes,
-		"highlighted_recipes": highlighted,
-		"uploaders":           uploaders,
-		"tags":                allTags,
-		"selected_tags":       c.QueryArray("tag"),
-		"user":                user,
-	})
+	c.HTML(http.StatusOK, "index.html", td.With("recipes", recipes).
+		With("highlighted_recipes", highlighted).
+		With("uploaders", uploaders).
+		With("tags", allTags).
+		With("selected_tags", c.QueryArray("tag")).
+		With("pagination", pagination).
+		ToGinH())
 }
 
 func RecipeDetail(c *gin.Context) {
 	slug := c.Param("slug")
 	user := middleware.GetUser(c)
+	td := utils.NewTemplateData(c)
 
 	var recipe database.Recipe
 	if err := database.DB.Preload("Tags").Preload("FavoritedBy").Preload("UploadedBy").
@@ -87,14 +105,12 @@ func RecipeDetail(c *gin.Context) {
 		database.DB.Where("recipe_id = ? AND user_id = ?", recipe.ID, user.ID).First(&userRating)
 	}
 
-	c.HTML(http.StatusOK, "detail.html", gin.H{
-		"recipe":       recipe,
-		"avg_rating":   math.Round(avgRating*10) / 10,
-		"rating_count": ratingCount,
-		"user_rating":  userRating,
-		"all_ratings":  recipe.Ratings,
-		"user":         user,
-	})
+	c.HTML(http.StatusOK, "detail.html", td.With("recipe", recipe).
+		With("avg_rating", math.Round(avgRating*10)/10).
+		With("rating_count", ratingCount).
+		With("user_rating", userRating).
+		With("all_ratings", recipe.Ratings).
+		ToGinH())
 }
 
 func ToggleFavorite(c *gin.Context) {
@@ -143,6 +159,11 @@ func RecipeRate(c *gin.Context) {
 	}
 
 	score, _ := strconv.ParseFloat(c.PostForm("score"), 64)
+	if score < 0 || score > 10 {
+		utils.AddFlash(c, "error", "Rating must be between 0 and 10")
+		c.Redirect(http.StatusFound, "/recipes/"+recipe.Slug)
+		return
+	}
 	comment := c.PostForm("comment")
 
 	var rating database.Rating
@@ -155,6 +176,7 @@ func RecipeRate(c *gin.Context) {
 
 	database.DB.Save(&rating)
 
+	utils.AddFlash(c, "success", "Rating saved")
 	c.Redirect(http.StatusFound, "/recipes/"+recipe.Slug)
 }
 
@@ -164,6 +186,7 @@ func Favorites(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/login")
 		return
 	}
+	td := utils.NewTemplateData(c)
 
 	var recipes []database.Recipe
 	query := database.DB.Preload("FavoritedBy").Preload("Tags").
@@ -172,6 +195,16 @@ func Favorites(c *gin.Context) {
 
 	if q := c.Query("q"); q != "" {
 		query = query.Where("recipes.title LIKE ?", "%"+q+"%")
+	}
+	if ds := c.Query("date_start"); ds != "" {
+		if t, err := time.Parse("2006-01-02", ds); err == nil {
+			query = query.Where("recipes.created_at >= ?", t)
+		}
+	}
+	if de := c.Query("date_end"); de != "" {
+		if t, err := time.Parse("2006-01-02", de); err == nil {
+			query = query.Where("recipes.created_at <= ?", t.Add(24*time.Hour))
+		}
 	}
 
 	sort := c.Query("sort")
@@ -182,23 +215,21 @@ func Favorites(c *gin.Context) {
 		query = query.Order("recipes.created_at DESC")
 	}
 
-	query.Find(&recipes)
+	page, perPage, offset := utils.GetPagination(c, 12)
+	var total int64
+	query.Session(&gorm.Session{}).Count(&total)
+	pagination := utils.NewPagination(page, perPage, total)
 
-	c.HTML(http.StatusOK, "favorites.html", gin.H{
-		"recipes": recipes,
-		"user":    user,
-	})
+	query.Limit(perPage).Offset(offset).Find(&recipes)
+
+	c.HTML(http.StatusOK, "favorites.html", td.With("recipes", recipes).
+		With("pagination", pagination).
+		ToGinH())
 }
 
 func Community(c *gin.Context) {
 	user := middleware.GetUser(c)
-
-	var recipes []database.Recipe
-	database.DB.Preload("FavoritedBy").Preload("UploadedBy").Preload("Tags").
-		Joins("JOIN user_groups ON recipes.uploaded_by_id = user_groups.user_id").
-		Joins("JOIN groups ON user_groups.group_id = groups.id").
-		Where("groups.name = ?", "community").
-		Order("recipes.created_at DESC").Find(&recipes)
+	td := utils.NewTemplateData(c)
 
 	if c.Request.Method == "POST" {
 		recipe := database.Recipe{
@@ -219,6 +250,10 @@ func Community(c *gin.Context) {
 			recipe.Price = &p
 		}
 
+		if recipe.Slug == "" {
+			recipe.Slug = database.Slugify(recipe.Title)
+		}
+
 		database.DB.Create(&recipe)
 
 		tagStr := c.PostForm("tags_string")
@@ -234,21 +269,32 @@ func Community(c *gin.Context) {
 			}
 		}
 
+		utils.AddFlash(c, "success", "Recipe submitted for approval")
 		c.Redirect(http.StatusFound, "/profile")
 		return
 	}
+
+	var recipes []database.Recipe
+	query := database.DB.Preload("FavoritedBy").Preload("UploadedBy").Preload("Tags").
+		Joins("JOIN user_groups ON recipes.uploaded_by_id = user_groups.user_id").
+		Joins("JOIN groups ON user_groups.group_id = groups.id").
+		Where("groups.name = ?", "community")
+	if user == nil {
+		query = query.Where("recipes.is_approved = ?", true)
+	} else {
+		query = query.Where("(recipes.is_approved = ? OR recipes.uploaded_by_id = ?)", true, user.ID)
+	}
+	query.Order("recipes.created_at DESC").Find(&recipes)
 
 	var uploaders []string
 	database.DB.Model(&database.User{}).Distinct("username").Pluck("username", &uploaders)
 	var allTags []database.Tag
 	database.DB.Find(&allTags)
 
-	c.HTML(http.StatusOK, "community.html", gin.H{
-		"recipes":   recipes,
-		"user":      user,
-		"tags":      allTags,
-		"uploaders": uploaders,
-	})
+	c.HTML(http.StatusOK, "community.html", td.With("recipes", recipes).
+		With("tags", allTags).
+		With("uploaders", uploaders).
+		ToGinH())
 }
 
 func OrderTracker(c *gin.Context) {
@@ -262,45 +308,13 @@ func OrderTracker(c *gin.Context) {
 	c.HTML(http.StatusOK, "order_tracker.html", gin.H{"order": order})
 }
 
-func OrderRecipe(c *gin.Context) {
-	user := middleware.GetUser(c)
-	if user == nil {
-		c.Redirect(http.StatusFound, "/login")
-		return
-	}
-
-	id, _ := strconv.Atoi(c.Param("id"))
-	var recipe database.Recipe
-	if err := database.DB.First(&recipe, id).Error; err != nil {
-		c.Redirect(http.StatusFound, "/")
-		return
-	}
-
-	order := database.Order{
-		UserID: user.ID,
-		Status: "PENDING",
-	}
-	if recipe.Price != nil {
-		order.TotalPrice = *recipe.Price
-	}
-	database.DB.Create(&order)
-
-	database.DB.Create(&database.OrderItem{
-		OrderID:  order.ID,
-		RecipeID: recipe.ID,
-		Quantity: 1,
-		Price:    *recipe.Price,
-	})
-
-	c.Redirect(http.StatusFound, "/recipes/"+recipe.Slug)
-}
-
 func ViewCart(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil {
 		c.Redirect(http.StatusFound, "/login")
 		return
 	}
+	td := utils.NewTemplateData(c)
 
 	var items []database.CartItem
 	database.DB.Preload("Recipe").Preload("Recipe.FavoritedBy").Preload("Recipe.Tags").
@@ -313,11 +327,9 @@ func ViewCart(c *gin.Context) {
 		}
 	}
 
-	c.HTML(http.StatusOK, "cart.html", gin.H{
-		"cart_items": items,
-		"total":      total,
-		"user":       user,
-	})
+	c.HTML(http.StatusOK, "cart.html", td.With("cart_items", items).
+		With("total", total).
+		ToGinH())
 }
 
 func AddToCart(c *gin.Context) {
@@ -391,6 +403,16 @@ func Checkout(c *gin.Context) {
 		return
 	}
 
+	for _, item := range items {
+		if item.Recipe.MaxDailyOrders != nil && *item.Recipe.MaxDailyOrders > 0 {
+			if item.Recipe.DailyOrdersCount+item.Quantity > *item.Recipe.MaxDailyOrders {
+				utils.AddFlash(c, "error", item.Recipe.Title+" has reached its daily order limit")
+				c.Redirect(http.StatusFound, "/cart")
+				return
+			}
+		}
+	}
+
 	tx := database.DB.Begin()
 
 	order := database.Order{UserID: user.ID, Status: "PENDING"}
@@ -414,10 +436,15 @@ func Checkout(c *gin.Context) {
 			Quantity: item.Quantity,
 			Price:    price,
 		})
+
+		tx.Model(&database.Recipe{}).Where("id = ?", item.RecipeID).
+			UpdateColumn("daily_orders_count", gorm.Expr("daily_orders_count + ?", item.Quantity))
 	}
 	tx.Model(&order).Update("total_price", total)
 	tx.Where("user_id = ?", user.ID).Delete(&database.CartItem{})
 	tx.Commit()
 
+	tasks.EnqueueNotifyOrder(order.ID)
+	utils.AddFlash(c, "success", "Order placed successfully!")
 	c.Redirect(http.StatusFound, "/profile")
 }

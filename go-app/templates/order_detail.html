@@ -1,0 +1,37 @@
+{{ template "head" . }}{{ template "navbar" . }}
+<div class="space"></div>
+<nav>
+  <a href="/profile" class="button transparent circle"><i>arrow_back</i></a>
+  <h5 class="max">Order #{{ .order.ID }}</h5>
+</nav>
+<div class="space"></div>
+<article class="round border padding">
+  <div class="grid">
+    <div class="s12 m6">
+      <p><strong>Status:</strong> <span class="chip">{{ .order.Status }}</span></p>
+      <p><strong>Date:</strong> {{ .order.CreatedAt.Format "02/01/2006 15:04" }}</p>
+      <p><strong>Total:</strong> {{ printf "%.2f" .order.TotalPrice }} &euro;</p>
+    </div>
+    <div class="s12 m6">
+      <p><strong>Tracking:</strong> <a href="/orders/track/{{ .order.TrackingToken }}">{{ .order.TrackingToken }}</a></p>
+    </div>
+  </div>
+</article>
+<div class="space"></div>
+<h5>Items</h5>
+<table class="border striped">
+  <thead>
+    <tr><th>Recipe</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+  </thead>
+  <tbody>
+  {{ range .order.Items }}
+    <tr>
+      <td><a href="/recipes/{{ .Recipe.Slug }}">{{ .Recipe.Title }}</a></td>
+      <td>{{ .Quantity }}</td>
+      <td>{{ printf "%.2f" .Price }} &euro;</td>
+      <td>{{ printf "%.2f" (mul .Quantity .Price) }} &euro;</td>
+    </tr>
+  {{ end }}
+  </tbody>
+</table>
+{{ template "tail" . }}

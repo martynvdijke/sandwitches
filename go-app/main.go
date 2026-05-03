@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -21,6 +20,8 @@ import (
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
 	"github.com/martynvdijke/sandwitches-go/internal/tasks"
 )
+
+var Version = "dev"
 
 func main() {
 	cfg := config.Load()
@@ -43,6 +44,8 @@ func main() {
 			log.Printf("Django migration skipped: %v", err)
 		}
 	}
+
+	handlers.SetMediaRoot(cfg.MediaRoot)
 
 	router := setupRouter(cfg)
 
@@ -118,19 +121,28 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 		"iso8601_duration": func(minutes interface{}) string {
 			m := 0
 			switch v := minutes.(type) {
-			case int: m = v
-			case *int: if v != nil { m = *v }
+			case int:
+				m = v
+			case *int:
+				if v != nil {
+					m = *v
+				}
 			}
 			return fmt.Sprintf("PT%dM", m)
 		},
 		"floatformat": func(precision int, val interface{}) string {
 			f := 0.0
 			switch v := val.(type) {
-			case float64: f = v
-			case *float64: if v != nil { f = *v }
+			case float64:
+				f = v
+			case *float64:
+				if v != nil {
+					f = *v
+				}
 			}
 			return fmt.Sprintf("%."+fmt.Sprint(precision)+"f", f)
 		},
+		"version": func() string { return Version },
 	})
 
 	templatesDir := "templates"
@@ -155,74 +167,79 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 
 	router.GET("/logout", handlers.Logout)
 
-	api.RegisterRoutes(router.Group("/api"))
-
-	router.GET("/recipes/:slug", handlers.RecipeDetail)
-	router.GET("/orders/track/:token", handlers.OrderTracker)
-
-	router.GET("/favorites", middleware.AuthRequired(), handlers.Favorites)
-	router.GET("/community", middleware.AuthRequired(), handlers.Community)
-	router.POST("/community", middleware.AuthRequired(), handlers.Community)
-
-	router.GET("/profile", middleware.AuthRequired(), handlers.UserProfile)
-	router.POST("/profile", middleware.AuthRequired(), handlers.UserProfile)
-
-	router.GET("/settings", middleware.AuthRequired(), handlers.UserSettings)
-	router.POST("/settings", middleware.AuthRequired(), handlers.UserSettings)
-
-	router.GET("/orders/:id", middleware.AuthRequired(), handlers.UserOrderDetail)
-
-	router.GET("/cart", middleware.AuthRequired(), handlers.ViewCart)
-	router.GET("/cart/add/:id", middleware.AuthRequired(), handlers.AddToCart)
-	router.GET("/cart/remove/:id", middleware.AuthRequired(), handlers.RemoveFromCart)
-	router.POST("/cart/update/:id", middleware.AuthRequired(), handlers.UpdateCartQuantity)
-	router.POST("/cart/checkout", middleware.AuthRequired(), handlers.Checkout)
-
-	router.GET("/recipes/rate/:id", middleware.AuthRequired(), handlers.RecipeRate)
-	router.POST("/recipes/rate/:id", middleware.AuthRequired(), handlers.RecipeRate)
-	router.GET("/recipes/favorite/:id", middleware.AuthRequired(), handlers.ToggleFavorite)
-
-	admin := router.Group("/dashboard", middleware.StaffRequired())
+	web := router.Group("/")
+	web.Use(middleware.CSRFMiddleware())
 	{
-		admin.GET("", handlers.AdminDashboard)
+		web.GET("/recipes/:slug", handlers.RecipeDetail)
+		web.GET("/orders/track/:token", handlers.OrderTracker)
 
-		admin.GET("/recipes", handlers.AdminRecipeList)
-		admin.GET("/recipes/add", handlers.AdminRecipeAdd)
-		admin.POST("/recipes/add", handlers.AdminRecipeAdd)
-		admin.GET("/recipes/:id/edit", handlers.AdminRecipeEdit)
-		admin.POST("/recipes/:id/edit", handlers.AdminRecipeEdit)
-		admin.GET("/recipes/:id/delete", handlers.AdminRecipeDelete)
-		admin.POST("/recipes/:id/delete", handlers.AdminRecipeDelete)
-		admin.GET("/recipes/:id/approve", handlers.AdminRecipeApprove)
+		web.GET("/favorites", middleware.AuthRequired(), handlers.Favorites)
+		web.GET("/community", middleware.AuthRequired(), handlers.Community)
+		web.POST("/community", middleware.AuthRequired(), handlers.Community)
 
-		admin.GET("/approvals", handlers.AdminRecipeApprovalList)
+		web.GET("/profile", middleware.AuthRequired(), handlers.UserProfile)
+		web.POST("/profile", middleware.AuthRequired(), handlers.UserProfile)
 
-		admin.GET("/users", handlers.AdminUserList)
-		admin.GET("/users/:id/edit", handlers.AdminUserEdit)
-		admin.POST("/users/:id/edit", handlers.AdminUserEdit)
-		admin.GET("/users/:id/delete", handlers.AdminUserDelete)
-		admin.POST("/users/:id/delete", handlers.AdminUserDelete)
+		web.GET("/settings", middleware.AuthRequired(), handlers.UserSettings)
+		web.POST("/settings", middleware.AuthRequired(), handlers.UserSettings)
 
-		admin.GET("/tags", handlers.AdminTagList)
-		admin.GET("/tags/add", handlers.AdminTagAdd)
-		admin.POST("/tags/add", handlers.AdminTagAdd)
-		admin.GET("/tags/:id/edit", handlers.AdminTagEdit)
-		admin.POST("/tags/:id/edit", handlers.AdminTagEdit)
-		admin.GET("/tags/:id/delete", handlers.AdminTagDelete)
-		admin.POST("/tags/:id/delete", handlers.AdminTagDelete)
+		web.GET("/orders/:id", middleware.AuthRequired(), handlers.UserOrderDetail)
 
-		admin.GET("/orders", handlers.AdminOrderList)
-		admin.POST("/orders/:id/status", handlers.AdminOrderUpdateStatus)
+		web.GET("/cart", middleware.AuthRequired(), handlers.ViewCart)
+		web.GET("/cart/add/:id", middleware.AuthRequired(), handlers.AddToCart)
+		web.GET("/cart/remove/:id", middleware.AuthRequired(), handlers.RemoveFromCart)
+		web.POST("/cart/update/:id", middleware.AuthRequired(), handlers.UpdateCartQuantity)
+		web.POST("/cart/checkout", middleware.AuthRequired(), handlers.Checkout)
 
-		admin.GET("/ratings", handlers.AdminRatingList)
-		admin.GET("/ratings/:id/delete", handlers.AdminRatingDelete)
-		admin.POST("/ratings/:id/delete", handlers.AdminRatingDelete)
+		web.GET("/recipes/rate/:id", middleware.AuthRequired(), handlers.RecipeRate)
+		web.POST("/recipes/rate/:id", middleware.AuthRequired(), handlers.RecipeRate)
+		web.GET("/recipes/favorite/:id", middleware.AuthRequired(), handlers.ToggleFavorite)
 
-		admin.GET("/settings", handlers.AdminSettings)
-		admin.POST("/settings", handlers.AdminSettings)
+		admin := web.Group("/dashboard", middleware.StaffRequired())
+		{
+			admin.GET("", handlers.AdminDashboard)
+
+			admin.GET("/recipes", handlers.AdminRecipeList)
+			admin.GET("/recipes/add", handlers.AdminRecipeAdd)
+			admin.POST("/recipes/add", handlers.AdminRecipeAdd)
+			admin.GET("/recipes/:id/edit", handlers.AdminRecipeEdit)
+			admin.POST("/recipes/:id/edit", handlers.AdminRecipeEdit)
+			admin.GET("/recipes/:id/delete", handlers.AdminRecipeDelete)
+			admin.POST("/recipes/:id/delete", handlers.AdminRecipeDelete)
+			admin.GET("/recipes/:id/approve", handlers.AdminRecipeApprove)
+
+			admin.GET("/approvals", handlers.AdminRecipeApprovalList)
+
+			admin.GET("/users", handlers.AdminUserList)
+			admin.GET("/users/:id/edit", handlers.AdminUserEdit)
+			admin.POST("/users/:id/edit", handlers.AdminUserEdit)
+			admin.GET("/users/:id/delete", handlers.AdminUserDelete)
+			admin.POST("/users/:id/delete", handlers.AdminUserDelete)
+
+			admin.GET("/tags", handlers.AdminTagList)
+			admin.GET("/tags/add", handlers.AdminTagAdd)
+			admin.POST("/tags/add", handlers.AdminTagAdd)
+			admin.GET("/tags/:id/edit", handlers.AdminTagEdit)
+			admin.POST("/tags/:id/edit", handlers.AdminTagEdit)
+			admin.GET("/tags/:id/delete", handlers.AdminTagDelete)
+			admin.POST("/tags/:id/delete", handlers.AdminTagDelete)
+
+			admin.GET("/orders", handlers.AdminOrderList)
+			admin.POST("/orders/:id/status", handlers.AdminOrderUpdateStatus)
+
+			admin.GET("/ratings", handlers.AdminRatingList)
+			admin.GET("/ratings/:id/delete", handlers.AdminRatingDelete)
+			admin.POST("/ratings/:id/delete", handlers.AdminRatingDelete)
+
+			admin.GET("/settings", handlers.AdminSettings)
+			admin.POST("/settings", handlers.AdminSettings)
+
+			admin.GET("/logs", handlers.AdminLogs)
+			admin.GET("/tasks", handlers.AdminTasks)
+		}
 	}
 
-	_ = io.Discard
+	api.RegisterRoutes(router.Group("/api"))
 
 	return router
 }

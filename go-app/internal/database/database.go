@@ -5,6 +5,7 @@ import (
 	"log"
 	"regexp"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/martynvdijke/sandwitches-go/internal/config"
@@ -66,7 +67,7 @@ func Init(cfg *config.Config) {
 	fmt.Println("Database initialized")
 }
 
-func slugify(s string) string {
+func Slugify(s string) string {
 	s = strings.ToLower(s)
 	re := regexp.MustCompile(`[^a-z0-9]+`)
 	s = re.ReplaceAllString(s, "-")
@@ -77,4 +78,48 @@ func slugify(s string) string {
 		s = string(runes[:60])
 	}
 	return strings.TrimFunc(s, func(r rune) bool { return !unicode.IsLetter(r) && !unicode.IsDigit(r) })
+}
+
+func UniqueSlug(base string, existingID *uint) string {
+	slug := Slugify(base)
+	if slug == "" {
+		slug = "untitled"
+	}
+	if existingID != nil && *existingID > 0 {
+		var count int64
+		DB.Model(&Recipe{}).Where("slug = ? AND id != ?", slug, *existingID).Count(&count)
+		if count == 0 {
+			return slug
+		}
+	} else {
+		var count int64
+		DB.Model(&Recipe{}).Where("slug = ?", slug).Count(&count)
+		if count == 0 {
+			return slug
+		}
+	}
+	for i := 1; i <= 100; i++ {
+		candidate := fmt.Sprintf("%s-%d", slug, i)
+		var count int64
+		query := DB.Model(&Recipe{}).Where("slug = ?", candidate)
+		if existingID != nil && *existingID > 0 {
+			query = query.Where("id != ?", *existingID)
+		}
+		query.Count(&count)
+		if count == 0 {
+			return candidate
+		}
+	}
+	return slug + fmt.Sprintf("-%d", time.Now().Unix())
+}
+
+func RecordRecipeHistory(tx *gorm.DB, recipeID uint, changedByID *uint, fieldName, oldValue, newValue string) {
+	tx.Create(&RecipeHistory{
+		RecipeID:    recipeID,
+		ChangedByID: changedByID,
+		FieldName:   fieldName,
+		OldValue:    oldValue,
+		NewValue:    newValue,
+		ChangedAt:   time.Now(),
+	})
 }

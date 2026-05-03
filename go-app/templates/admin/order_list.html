@@ -1,1 +1,30 @@
-{{ template "head" . }}{{ template "navbar" . }}<div class="space"></div><h4>Orders</h4><table class="border striped"><thead><tr><th>ID</th><th>User</th><th>Status</th><th>Total</th><th>Date</th><th>Update Status</th></tr></thead><tbody>{{ range .orders }}<tr><td>{{ .ID }}</td><td>{{ .User.Username }}</td><td><span class="chip">{{ .Status }}</span></td><td>{{ printf "%.2f" .TotalPrice }} &euro;</td><td>{{ .CreatedAt.Format "02/01/2006" }}</td><td><form method="post" action="/dashboard/orders/{{ .ID }}/status"><select name="status" onchange="this.form.submit()">{{ range $.status_choices }}<option value="{{ .Code }}">{{ .Label }}</option>{{ end }}</select></form></td></tr>{{ end }}</tbody></table>{{ template "tail" . }}
+{{ template "head" . }}{{ template "navbar" . }}
+<div class="space"></div>
+<h4>Orders</h4>
+<div class="grid" style="gap:8px">
+  <div class="s12 m3"><a href="?sort=date_asc" class="button small round {{ if eq "date_asc" .sort }}primary{{ end }}">Oldest</a></div>
+  <div class="s12 m3"><a href="?sort=status" class="button small round {{ if eq "status" .sort }}primary{{ end }}">By Status</a></div>
+  <div class="s12 m3"><a href="?sort=price_desc" class="button small round {{ if eq "price_desc" .sort }}primary{{ end }}">Price High</a></div>
+  <div class="s12 m3"><a href="?sort=price_asc" class="button small round {{ if eq "price_asc" .sort }}primary{{ end }}">Price Low</a></div>
+</div>
+<table class="border striped">
+<thead><tr><th>ID</th><th>User</th><th>Status</th><th>Total</th><th>Date</th><th>Update Status</th></tr></thead>
+<tbody>{{ range .orders }}<tr>
+<td>{{ .ID }}</td>
+<td>{{ .User.Username }}</td>
+<td><span class="chip">{{ .Status }}</span></td>
+<td>{{ printf "%.2f" .TotalPrice }} &euro;</td>
+<td>{{ .CreatedAt.Format "02/01/2006" }}</td>
+<td>
+<form method="post" action="/dashboard/orders/{{ .ID }}/status" style="display:inline">{{ $.csrf_token }}<select name="status" onchange="this.form.submit()">{{ range $.status_choices }}<option value="{{ .Code }}" {{ if eq .Code $.order.Status }}selected{{ end }}>{{ .Label }}</option>{{ end }}</select></form>
+</td>
+</tr>{{ end }}</tbody>
+</table>
+{{ if .pagination }}
+<div class="pagination">
+  {{ if .pagination.HasPrev }}<a href="?page={{ .pagination.PrevPage }}&sort={{ .sort }}">&laquo; Prev</a>{{ end }}
+  {{ range .pagination.Pages }}{{ if eq . $.pagination.Page }}<span class="active">{{ . }}</span>{{ else }}<a href="?page={{ . }}&sort={{ $.sort }}">{{ . }}</a>{{ end }}{{ end }}
+  {{ if .pagination.HasNext }}<a href="?page={{ .pagination.NextPage }}&sort={{ .sort }}">Next &raquo;</a>{{ end }}
+</div>
+{{ end }}
+{{ template "tail" . }}

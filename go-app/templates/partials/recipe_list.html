@@ -1,0 +1,22 @@
+{{ range .recipes }}
+<div class="s12 m6 l4">
+  <a href="/recipes/{{ .Slug }}">
+    <article class="round elevate no-padding">
+      {{ if .Image }}
+      <img src="{{ .Image }}" class="responsive top-round" style="height:180px;object-fit:cover" alt="{{ .Title }}">
+      {{ else }}
+      <div style="height:180px;background:var(--md-sys-color-surface-variant);display:flex;align-items:center;justify-content:center">
+        <i class="extra">lunch_dining</i>
+      </div>
+      {{ end }}
+      <div class="padding">
+        <h6>{{ .Title }}</h6>
+        {{ if .Price }}<p><b>{{ printf "%.2f" .Price }} &euro;</b></p>{{ end }}
+        <div class="row wrap small-text">
+        {{ range .Tags }}<span class="chip small">{{ .Name }}</span>{{ end }}
+        </div>
+      </div>
+    </article>
+  </a>
+</div>
+{{ end }}

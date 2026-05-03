@@ -1,0 +1,12 @@
+{{ template "head" . }}{{ template "navbar" . }}
+<div class="space"></div>
+<nav>
+  <a href="/dashboard" class="button transparent circle"><i>arrow_back</i></a>
+  <h5 class="max">Server Logs</h5>
+  <a href="/dashboard/logs?tail=50" class="button small round">Last 50</a>
+  <a href="/dashboard/logs?tail=200" class="button small round">Last 200</a>
+  <a href="/dashboard/logs?tail=500" class="button small round">Last 500</a>
+</nav>
+<div class="space"></div>
+<pre style="max-height:70vh;overflow-y:auto;background:var(--md-sys-color-surface-variant);padding:1rem;border-radius:8px;font-size:0.85rem;line-height:1.4;white-space:pre-wrap;font-family:monospace">{{ .logs }}</pre>
+{{ template "tail" . }}

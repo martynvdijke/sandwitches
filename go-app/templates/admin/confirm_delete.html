@@ -1,1 +1,13 @@
-{{ template "head" . }}{{ template "navbar" . }}<div class="space"></div><h4>Delete {{ .type }}</h4><p>Are you sure you want to delete this?</p><form method="post"><button type="submit" class="button error round">Yes, delete</button><a href="#" onclick="history.back()" class="button">Cancel</a></form>{{ template "tail" . }}
+{{ template "head" . }}{{ template "navbar" . }}
+<div class="space"></div>
+<h4>Confirm Delete</h4>
+<p>Are you sure you want to delete this {{ .type }}?</p>
+<article class="round border padding">
+{{ if eq .type "recipe" }}<h5>{{ .object.Title }}</h5>{{ end }}
+{{ if eq .type "user" }}<p>{{ .object.Username }}</p>{{ end }}
+{{ if eq .type "tag" }}<p>{{ .object.Name }}</p>{{ end }}
+{{ if eq .type "rating" }}<p>{{ .object.Recipe.Title }} - {{ .object.User.Username }} ({{ printf "%.1f" .object.Score }})</p>{{ end }}
+</article>
+<form method="post" style="display:inline">{{ $.csrf_token }}<button type="submit" class="button error round">Delete</button></form>
+<a href="javascript:history.back()" class="button round">Cancel</a>
+{{ template "tail" . }}

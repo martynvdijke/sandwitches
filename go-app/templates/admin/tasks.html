@@ -1,0 +1,9 @@
+{{ template "head" . }}{{ template "navbar" . }}
+<div class="space"></div>
+<nav>
+  <a href="/dashboard" class="button transparent circle"><i>arrow_back</i></a>
+  <h5 class="max">Running Processes</h5>
+</nav>
+<div class="space"></div>
+<pre style="max-height:70vh;overflow-y:auto;background:var(--md-sys-color-surface-variant);padding:1rem;border-radius:8px;font-size:0.85rem;line-height:1.4;white-space:pre-wrap;font-family:monospace">{{ .processes }}</pre>
+{{ template "tail" . }}

@@ -3,8 +3,10 @@ package database
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -64,7 +66,7 @@ type Tag struct {
 
 func (t *Tag) BeforeSave(tx *gorm.DB) error {
 	if t.Slug == "" {
-		t.Slug = slugify(t.Name)
+		t.Slug = Slugify(t.Name)
 	}
 	return nil
 }
@@ -101,7 +103,23 @@ type Recipe struct {
 
 func (r *Recipe) BeforeSave(tx *gorm.DB) error {
 	if r.Slug == "" {
-		r.Slug = slugify(r.Title)
+		slug := Slugify(r.Title)
+		if slug == "" {
+			slug = "untitled"
+		}
+		var count int64
+		tx.Model(&Recipe{}).Where("slug = ?", slug).Count(&count)
+		if count > 0 {
+			for i := 1; i <= 100; i++ {
+				candidate := slug + "-" + strings.ReplaceAll(strings.SplitN(time.Now().String(), " ", 2)[0], ":", "") + fmt.Sprintf("-%d", i)
+				tx.Model(&Recipe{}).Where("slug = ?", candidate).Count(&count)
+				if count == 0 {
+					slug = candidate
+					break
+				}
+			}
+		}
+		r.Slug = slug
 	}
 	return nil
 }
