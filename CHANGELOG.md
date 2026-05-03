@@ -1,3 +1,14 @@
+## [2.12.16](https://github.com/martynvdijke/sandwitches/compare/v2.12.15...v2.12.16) (2026-05-03)
+
+
+### Bug Fixes
+
+* invoke ci linting, typecheck, tests all passing ([ddc388f](https://github.com/martynvdijke/sandwitches/commit/ddc388ff2e20a971194f44e4c52a24a2c0be62be))
+* lock file ([077465f](https://github.com/martynvdijke/sandwitches/commit/077465fe29da080b47e851a41aad9921da96f68a))
+* playwright UI tests check profile link instead of img ([b1e7726](https://github.com/martynvdijke/sandwitches/commit/b1e7726ef9667b816b10d6687cb40524cb83ebb3))
+* remove Instagram integration, improve UI with beercss, optimize Docker image ([86f555f](https://github.com/martynvdijke/sandwitches/commit/86f555fda7ff2856d6ec2ac934f7b850fa0e9a54))
+* revert Dockerfile and .dockerignore to pre-Instagram-removal state ([5a536ba](https://github.com/martynvdijke/sandwitches/commit/5a536ba4897a0d5173d451298fb46282fcf1d2f3))
+
 ## [2.12.15](https://github.com/martynvdijke/sandwitches/compare/v2.12.14...v2.12.15) (2026-05-02)
 
 ## [2.12.14](https://github.com/martynvdijke/sandwitches/compare/v2.12.13...v2.12.14) (2026-04-29)
