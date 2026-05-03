@@ -14,16 +14,19 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/martynvdijke/sandwitches-go/internal/api"
 	"github.com/martynvdijke/sandwitches-go/internal/config"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/handlers"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
+	"github.com/martynvdijke/sandwitches-go/internal/tasks"
 )
 
 func main() {
 	cfg := config.Load()
 
 	database.Init(cfg)
+	tasks.Init(cfg)
 
 	router := setupRouter(cfg)
 
@@ -118,6 +121,7 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	router.LoadHTMLGlob(filepath.Join(templatesDir, "**/*.html"))
 
 	router.StaticFS("/static", http.Dir("static"))
+	router.StaticFS("/media", http.Dir(cfg.MediaRoot))
 	router.StaticFile("/favicon.ico", "static/icons/favicon.svg")
 
 	router.Use(middleware.OptionalAuth())
@@ -134,6 +138,8 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	router.POST("/login", handlers.Login)
 
 	router.GET("/logout", handlers.Logout)
+
+	api.RegisterRoutes(router.Group("/api"))
 
 	router.GET("/recipes/:slug", handlers.RecipeDetail)
 	router.GET("/orders/track/:token", handlers.OrderTracker)
