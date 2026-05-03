@@ -28,6 +28,22 @@ func main() {
 	database.Init(cfg)
 	tasks.Init(cfg)
 
+	djangoDB := os.Getenv("Django_DB_PATH")
+	if djangoDB == "" {
+		for _, p := range []string{"../src/db.sqlite3", "db.sqlite3", "/config/db.sqlite3"} {
+			if _, err := os.Stat(p); err == nil {
+				djangoDB = p
+				break
+			}
+		}
+	}
+	if djangoDB != "" {
+		log.Printf("Checking for Django database at: %s", djangoDB)
+		if err := database.MigrateFromDjango(djangoDB); err != nil {
+			log.Printf("Django migration skipped: %v", err)
+		}
+	}
+
 	router := setupRouter(cfg)
 
 	port := "6270"
@@ -162,9 +178,9 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	router.POST("/cart/update/:id", middleware.AuthRequired(), handlers.UpdateCartQuantity)
 	router.POST("/cart/checkout", middleware.AuthRequired(), handlers.Checkout)
 
-	router.GET("/recipes/:id/rate", middleware.AuthRequired(), handlers.RecipeRate)
-	router.POST("/recipes/:id/rate", middleware.AuthRequired(), handlers.RecipeRate)
-	router.GET("/recipes/:id/favorite", middleware.AuthRequired(), handlers.ToggleFavorite)
+	router.GET("/recipes/rate/:id", middleware.AuthRequired(), handlers.RecipeRate)
+	router.POST("/recipes/rate/:id", middleware.AuthRequired(), handlers.RecipeRate)
+	router.GET("/recipes/favorite/:id", middleware.AuthRequired(), handlers.ToggleFavorite)
 
 	admin := router.Group("/dashboard", middleware.StaffRequired())
 	{

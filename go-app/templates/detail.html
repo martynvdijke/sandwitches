@@ -43,7 +43,7 @@
     </div>
 
     {{ if .user }}
-    <form method="post" action="/recipes/{{ .recipe.ID }}/rate" style="padding:1rem">
+    <form method="post" action="/recipes/rate/{{ .recipe.ID }}" style="padding:1rem">
       <div class="field label">
         <input type="range" name="score" min="0" max="10" step="0.1" value="5.0">
         <label>Your rating</label>
@@ -60,7 +60,7 @@
 
     {{ if .recipe.Price }}
     <div class="space"></div>
-    <a href="/recipes/{{ .recipe.ID }}/favorite" class="button border round">
+    <a href="/recipes/favorite/{{ .recipe.ID }}" class="button border round">
       <i>favorite</i> <span>{{ if .user }}{{ .user.Username }}{{ end }}</span>
     </a>
     {{ end }}
