@@ -1,159 +1,17 @@
 import logging
 import os
 import textwrap
-from datetime import timedelta
 
 import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMultiAlternatives
-from django.db import transaction
-from django.utils import timezone
 from django.utils.translation import gettext as _
 
 # from django.core.mail import send_mail
 from django_tasks import task
 
 logger = logging.getLogger("sandwitches")
-
-
-@task(priority=3)
-def upload_to_instagram(recipe_id):
-    from instagrapi import Client
-
-    from .models import Recipe, Setting
-
-    # Use a transaction to ensure we don't have multiple tasks running at once
-    with transaction.atomic():
-        config = Setting.objects.select_for_update().get()  # ty:ignore[unresolved-attribute]
-        if (
-            not config.instagram_enabled
-            or not config.instagram_username
-            or not config.instagram_password
-        ):
-            logger.debug("Instagram upload disabled or credentials missing.")
-            return False
-
-        # Throttling: only 1 image per hour
-        if config.instagram_last_sync:
-            time_since_last = timezone.now() - config.instagram_last_sync
-            if time_since_last < timedelta(hours=1):
-                wait_time = timedelta(hours=1) - time_since_last
-                logger.info(
-                    f"Throttling Instagram upload for recipe {recipe_id}. "
-                    f"Retrying in {wait_time}."
-                )
-                # Reschedule the task
-                upload_to_instagram.using(run_after=timezone.now() + wait_time).enqueue(
-                    recipe_id=recipe_id
-                )
-                return False
-
-    try:
-        recipe = Recipe.objects.get(pk=recipe_id)  # ty:ignore[unresolved-attribute]
-        if recipe.instagram_uploaded:
-            logger.debug(f"Recipe {recipe.title} already uploaded to Instagram.")
-            return False
-
-        if not recipe.image:
-            logger.warning(
-                f"Recipe {recipe.title} has no image. Skipping Instagram upload."
-            )
-            return False
-
-        # instagrapi expects a file path.
-        image_path = recipe.image.path
-        if not os.path.exists(image_path):
-            logger.error(f"Image path {image_path} does not exist.")
-            return False
-
-        cl = Client()
-        # You can also handle session caching here for better performance
-        cl.login(config.instagram_username, config.instagram_password)
-
-        base_url = "http://localhost"
-        if settings.CSRF_TRUSTED_ORIGINS:
-            for origin in settings.CSRF_TRUSTED_ORIGINS:
-                if origin:
-                    base_url = origin
-                    break
-        base_url = base_url.rstrip("/")
-        recipe_url = f"{base_url}{recipe.get_absolute_url()}"
-
-        caption = f"{recipe.title}\n\n{recipe.description[:100]}...\n\nFull recipe: {recipe_url}"
-
-        logger.info(f"Uploading recipe '{recipe.title}' to Instagram...")
-        media = cl.photo_upload(image_path, caption)
-        recipe.instagram_media_id = media.pk
-
-        recipe.instagram_uploaded = True
-        recipe.save(update_fields=["instagram_uploaded", "instagram_media_id"])
-
-        logger.info(f"Successfully uploaded recipe '{recipe.title}' to Instagram.")
-
-        # Update last sync timestamp
-        config.instagram_last_sync = timezone.now()
-        config.save(update_fields=["instagram_last_sync"])
-
-        return True
-    except Exception as e:
-        logger.error(f"Failed to upload to Instagram: {e}")
-        return False
-
-
-@task(priority=10)
-def sync_instagram_interactions():
-    """
-    Sync likes and comments for all recipes that have been uploaded to Instagram.
-    """
-    from instagrapi import Client
-
-    from .models import InstagramComment, Recipe, Setting
-
-    config = Setting.get_solo()
-    if (
-        not config.instagram_enabled
-        or not config.instagram_username
-        or not config.instagram_password
-    ):
-        logger.debug("Instagram sync disabled or credentials missing.")
-        return False
-
-    try:
-        cl = Client()
-        cl.login(config.instagram_username, config.instagram_password)  # ty:ignore[invalid-argument-type]
-
-        recipes = Recipe.objects.exclude(instagram_media_id__isnull=True).exclude(  # ty:ignore[unresolved-attribute]
-            instagram_media_id=""
-        )
-        for recipe in recipes:
-            try:
-                # Fetch media info for likes
-                media_info = cl.media_info(recipe.instagram_media_id)
-                recipe.instagram_likes_count = media_info.like_count
-                recipe.save(update_fields=["instagram_likes_count"])
-
-                # Fetch comments
-                comments = cl.media_comments(recipe.instagram_media_id)
-                for comment in comments:
-                    InstagramComment.objects.get_or_create(  # ty:ignore[unresolved-attribute]
-                        instagram_comment_id=comment.pk,
-                        recipe=recipe,
-                        defaults={
-                            "username": comment.user.username,
-                            "text": comment.text,
-                            "created_at": comment.created_at,  # ty:ignore[unresolved-attribute]
-                        },
-                    )
-            except Exception as e:
-                logger.error(
-                    f"Failed to sync interactions for recipe {recipe.title}: {e}"
-                )
-
-        return True
-    except Exception as e:
-        logger.error(f"Failed to sync Instagram interactions: {e}")
-        return False
 
 
 @task(takes_context=True, priority=2, queue_name="emails")

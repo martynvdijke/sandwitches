@@ -2,30 +2,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
-from sandwitches.models import Setting
-
 User = get_user_model()
-
-
-@pytest.mark.django_db
-def test_instagram_enabled_auto_toggle():
-    config = Setting.get_solo()
-
-    # 1. Credentials provided -> should be enabled
-    config.instagram_username = "user"
-    config.instagram_password = "password"
-    config.save()
-    assert config.instagram_enabled is True
-
-    # 2. Credentials removed -> should be disabled
-    config.instagram_username = ""
-    config.save()
-    assert config.instagram_enabled is False
-
-    # 3. Restored credentials -> re-enabled
-    config.instagram_username = "user"
-    config.save()
-    assert config.instagram_enabled is True
 
 
 @pytest.mark.django_db

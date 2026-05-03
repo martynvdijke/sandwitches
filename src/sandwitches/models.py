@@ -19,8 +19,6 @@ from .storage import HashedFilenameStorage
 from .tasks import (
     email_users,
     send_gotify_notification,
-    sync_instagram_interactions,
-    upload_to_instagram,
 )
 
 hashed_storage = HashedFilenameStorage()
@@ -62,71 +60,8 @@ class Setting(SingletonModel):
         help_text="The application token for Gotify",
     )
 
-    instagram_username = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True,
-        help_text="The username of your Instagram account",
-    )
-    instagram_password = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True,
-        help_text="The password of your Instagram account",
-    )
-    instagram_enabled = models.BooleanField(
-        default=False,
-        help_text="Enable uploading new recipes to Instagram",
-    )
-    instagram_initial_uploaded = models.BooleanField(
-        default=False,
-        help_text="Whether the initial recipe has been uploaded to Instagram",
-    )
-    instagram_last_sync = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="The last time a recipe was successfully uploaded to Instagram",
-    )
-
     def __str__(self):
         return str(_("Site Settings"))
-
-    def save(self, *args, **kwargs):
-        # Auto-enable Instagram if credentials are provided
-        if self.instagram_username and self.instagram_password:
-            self.instagram_enabled = True
-        else:
-            self.instagram_enabled = False
-
-        # Fetch current values if they exist
-        old_instance = Setting.objects.filter(pk=self.pk).first()  # ty:ignore[unresolved-attribute]
-        super().save(*args, **kwargs)
-
-        # Trigger sync if credentials changed OR enabled was toggled on
-        credentials_changed = False
-        if old_instance:
-            if (
-                self.instagram_username != old_instance.instagram_username
-                or self.instagram_password != old_instance.instagram_password
-            ):
-                credentials_changed = True
-
-        # If enabled and (newly enabled OR credentials updated)
-        if self.instagram_enabled and (
-            not self.instagram_initial_uploaded or credentials_changed
-        ):
-            if self.instagram_username and self.instagram_password:
-                from django.core.management import call_command
-
-                try:
-                    call_command("sync_instagram_missing")
-                    # Update the field to avoid repeating this logic unless credentials change again
-                    Setting.objects.filter(pk=self.pk).update(  # ty:ignore[unresolved-attribute]
-                        instagram_initial_uploaded=True
-                    )
-                    self.instagram_initial_uploaded = True
-                except Exception as e:
-                    logger.error(f"Failed to trigger initial Instagram sync: {e}")
 
     class Meta:
         verbose_name = _("Site Settings")
@@ -251,9 +186,6 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(Tag, blank=True, related_name="recipes")
     is_highlighted = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
-    instagram_uploaded = models.BooleanField(default=False)
-    instagram_media_id = models.CharField(max_length=255, blank=True, null=True)
-    instagram_likes_count = models.PositiveIntegerField(default=0)
     max_daily_orders = models.PositiveIntegerField(
         null=True, blank=True, verbose_name="Max daily orders"
     )
@@ -312,14 +244,8 @@ class Recipe(models.Model):
                 priority=5,
             )
 
-            config = Setting.get_solo()
-            if config.instagram_enabled:
-                upload_to_instagram.enqueue(recipe_id=self.pk)
         else:
             logger.debug("Existing recipe saved (update); skipping email notification.")
-            config = Setting.get_solo()
-            if config.instagram_enabled and self.instagram_media_id:
-                sync_instagram_interactions.enqueue()
 
     def get_absolute_url(self):
         return reverse("recipe_detail", kwargs={"slug": self.slug})
@@ -372,21 +298,6 @@ class Rating(models.Model):
     def __str__(self):
         return f"{self.recipe} — {self.score} by {self.user}"
 
-
-class InstagramComment(models.Model):
-    recipe = models.ForeignKey(
-        Recipe, related_name="instagram_comments", on_delete=models.CASCADE
-    )
-    instagram_comment_id = models.CharField(max_length=255, unique=True)
-    username = models.CharField(max_length=255)
-    text = models.TextField()
-    created_at = models.DateTimeField()
-
-    class Meta:
-        ordering = ("-created_at",)
-
-    def __str__(self):
-        return f"Instagram: {self.username} on {self.recipe.title}"  # ty:ignore[unresolved-attribute]
 
 
 class Order(models.Model):

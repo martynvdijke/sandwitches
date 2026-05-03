@@ -7,7 +7,7 @@ from import_export.admin import ImportExportModelAdmin
 from solo.admin import SingletonModelAdmin
 
 from .forms import SettingForm
-from .models import InstagramComment, Order, OrderItem, Rating, Recipe, Setting, Tag
+from .models import Order, OrderItem, Rating, Recipe, Setting, Tag
 
 
 class RecipeResource(resources.ModelResource):
@@ -36,13 +36,6 @@ User = get_user_model()
 @admin.register(Setting)
 class SettingAdmin(SingletonModelAdmin):
     form = SettingForm
-
-
-@admin.register(InstagramComment)
-class InstagramCommentAdmin(admin.ModelAdmin):
-    list_display = ("username", "recipe", "created_at")
-    list_filter = ("recipe", "created_at")
-    search_fields = ("username", "text", "recipe__title")
 
 
 @admin.register(User)

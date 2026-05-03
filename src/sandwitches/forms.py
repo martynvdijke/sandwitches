@@ -316,11 +316,8 @@ class SettingForm(forms.ModelForm):
             "log_level",
             "gotify_url",
             "gotify_token",
-            "instagram_username",
-            "instagram_password",
         ]
         widgets = {
             "ai_api_key": forms.PasswordInput(render_value=True),
             "gotify_token": forms.PasswordInput(render_value=True),
-            "instagram_password": forms.PasswordInput(render_value=True),
         }
