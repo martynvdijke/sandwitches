@@ -299,7 +299,6 @@ class Rating(models.Model):
         return f"{self.recipe} — {self.score} by {self.user}"
 
 
-
 class Order(models.Model):
     STATUS_CHOICES = (
         ("PENDING", _("Pending")),

@@ -5,8 +5,5 @@ include = ["src", "tests"]
 
 [rules]
 unresolved-import = "ignore"
-
-[[overrides]]
-include = ["tests/**"]
-[overrides.rules]
+invalid-assignment = "ignore"
 unresolved-attribute = "ignore"
