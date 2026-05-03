@@ -1,5 +1,5 @@
 # Stage 1: Build static assets with Node.js
-FROM node:24-alpine AS builder
+FROM node:24 AS builder
 
 WORKDIR /build
 COPY package.json package-lock.json ./
@@ -8,7 +8,7 @@ COPY src/static/ ./src/static/
 RUN npm install && npm run build
 
 # Stage 2: Python application
-FROM python:3.14-slim
+FROM python:3.14
 
 LABEL org.opencontainers.image.source=https://github.com/martynvdijke/sandwitches
 LABEL org.opencontainers.image.description="Sandwitches container image"
@@ -21,32 +21,34 @@ ARG GROUPNAME=app
 
 RUN groupadd -g ${GID} ${USERNAME} && \
     useradd -m -u ${UID} -g ${GID} ${GROUPNAME} -s /bin/bash && \
-    apt-get update && apt-get install -y supervisor --no-install-recommends && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    apt-get update && apt-get install -y supervisor && \
     mkdir /app
-
 WORKDIR /app
 
+# Set environment variables
+# Prevents Python from writing pyc files to disk
 ENV PYTHONDONTWRITEBYTECODE=1
+# Prevents Python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED=1
 ENV PATH="/app/.venv/bin:$PATH"
+# Tunables for Gunicorn
 ENV GUNICORN_WORKERS=3
 ENV GUNICORN_THREADS=2
 
-RUN pip install --upgrade pip --no-cache-dir && pip install uv --no-cache-dir
-
-COPY uv.lock pyproject.toml /app/
-RUN uv sync --locked --no-dev --no-cache
-
+RUN pip install --upgrade pip && pip install uv
+COPY uv.lock  /app/
+COPY pyproject.toml  /app/
 COPY . /app/
 COPY --from=builder /build/src/static/dist/ /app/src/static/dist/
 COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh && chown -R root:app /app
+RUN chmod +x /app/entrypoint.sh
+RUN uv sync --locked --no-dev
 
+RUN chown -R root:app /app
 ENTRYPOINT ["/app/entrypoint.sh"]
 
 EXPOSE 6270
 
 USER app
 
-CMD ["/bin/sh", "-c", "python src/manage.py collectstatic --noinput --clear && python src/manage.py makemigrations sandwitches && python src/manage.py migrate && supervisord "]
+CMD ["/bin/sh", "-c", "python src/manage.py collectstatic --noinput && python src/manage.py makemigrations sandwitches && python src/manage.py migrate && python src/manage.py collectstatic --noinput --clear && supervisord "]
