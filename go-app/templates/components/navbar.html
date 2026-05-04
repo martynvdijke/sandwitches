@@ -1,21 +1,23 @@
 {{ define "navbar" }}
-<nav style="display:flex;align-items:center;padding:0.5rem 1rem;background:var(--md-sys-color-primary-container);gap:0.75rem">
-    <a href="/"><img src="/static/icons/icon.svg" style="width:36px;height:36px;border-radius:50%"></a>
-    <a href="/" class="button small transparent">Home</a>
-    <a href="/community" class="button small transparent">Community</a>
-    <div style="flex:1"></div>
+<nav class="top primary-container">
+    <button class="circle transparent large" onclick="ui('#menu')">
+        <i>menu</i>
+    </button>
+    <a href="/" class="row align-center">
+        <img src="/static/icons/icon.svg" class="circle small">
+    </a>
+    <div class="max"></div>
     {{ if .user }}
-    <a href="/cart" class="button circle transparent"><i>shopping_cart</i></a>
-    <a href="/profile">
+    <a href="/cart" class="button circle transparent">
+        <i>shopping_cart</i>
+    </a>
+    <button class="circle transparent" onclick="ui('#user-menu')">
         {{ if .user.Avatar }}
-        <img src="{{ .user.Avatar }}" style="width:40px;height:40px;border-radius:50%">
+        <img src="{{ .user.Avatar }}" class="circle">
         {{ else }}
         <div class="chip circle large primary-container">{{ first .user.Username }}</div>
         {{ end }}
-    </a>
-    {{ if .user.IsStaff }}<a href="/dashboard" class="button small transparent">Admin</a>{{ end }}
-    <a href="/settings"><i>account_circle</i></a>
-    <a href="/logout"><i>logout</i></a>
+    </button>
     {{ else }}
     <a href="/login"><button class="chip transparent border">Login</button></a>
     <a href="/signup"><button class="chip primary">Sign up</button></a>

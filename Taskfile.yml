@@ -1,0 +1,100 @@
+version: "3"
+
+vars:
+  GO_APP_DIR: go-app
+  PORT: "6270"
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmd: task --list
+
+  # ── Setup ─────────────────────────────────────────────
+
+  setup:
+    desc: Install all dependencies (npm + Go modules)
+    deps: [setup:npm, setup:go]
+
+  setup:npm:
+    desc: Install Node.js dependencies
+    cmd: npm install
+
+  setup:go:
+    desc: Install Go module dependencies
+    cmd: go mod download
+    dir: "{{.GO_APP_DIR}}"
+
+  # ── Build ──────────────────────────────────────────────
+
+  build:
+    desc: Build everything (frontend + Go binary)
+    deps: [build:frontend, build:go]
+
+  build:frontend:
+    desc: Build frontend assets with webpack
+    cmd: npm run build
+    sources:
+      - src/static/js/**/*.js
+      - webpack.config.js
+      - package.json
+    generates:
+      - "{{.GO_APP_DIR}}/static/dist/main.js"
+      - "{{.GO_APP_DIR}}/static/dist/main.css"
+
+  build:go:
+    desc: Build Go binary
+    cmd: go build -o main .
+    dir: "{{.GO_APP_DIR}}"
+    sources:
+      - "{{.GO_APP_DIR}}/**/*.go"
+      - "{{.GO_APP_DIR}}/go.mod"
+      - "{{.GO_APP_DIR}}/go.sum"
+    generates:
+      - "{{.GO_APP_DIR}}/main"
+
+  # ── Development (hot reload) ──────────────────────────
+
+  dev:
+    desc: Run everything with hot reload (Go + frontend)
+    deps: [dev:go, dev:frontend]
+
+  dev:go:
+    desc: Run Go server with hot reload via air
+    cmd: air
+    dir: "{{.GO_APP_DIR}}"
+
+  dev:frontend:
+    desc: Watch and rebuild frontend assets on change
+    cmd: npm run dev
+
+  # ── Run (no hot reload) ──────────────────────────────
+
+  run:
+    desc: Build and run Go server
+    deps: [build:frontend]
+    cmd: go run .
+    dir: "{{.GO_APP_DIR}}"
+
+  # ── Test ──────────────────────────────────────────────
+
+  test:
+    desc: Run Go tests
+    cmd: go test ./...
+    dir: "{{.GO_APP_DIR}}"
+
+  # ── Clean ─────────────────────────────────────────────
+
+  clean:
+    desc: Remove all build artifacts
+    deps: [clean:go, clean:frontend]
+
+  clean:go:
+    desc: Remove Go binary and air tmp dir
+    cmds:
+      - rm -f main
+      - rm -rf tmp
+    dir: "{{.GO_APP_DIR}}"
+
+  clean:frontend:
+    desc: Remove built frontend assets
+    cmd: rm -rf {{.GO_APP_DIR}}/static/dist/*

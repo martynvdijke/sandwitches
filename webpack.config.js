@@ -5,7 +5,7 @@ module.exports = {
   mode: 'development', // Set to 'production' for production builds
   entry: './src/static/js/index.js',
   output: {
-    path: path.resolve(__dirname, 'src/static/dist'),
+    path: path.resolve(__dirname, 'go-app/static/dist'),
     filename: 'main.js',
     publicPath: '/static/dist/', // Public path for the bundled assets
   },

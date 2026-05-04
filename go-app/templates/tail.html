@@ -1,9 +1,8 @@
 {{ define "tail" }}
 </main>
-<footer style="text-align:right;padding:0.5rem 1rem;font-size:0.8em;color:#888">
-    <span>Sandwitches</span>
-    <a href="https://github.com/martynvdijke/sandwitches" target="_blank" class="circle transparent"><i>code</i></a>
-</footer>
+{{ template "footer" . }}
+{{ template "side_menu" . }}
+{{ template "user_menu" . }}
 <script>
 (function(){
     var l=document.getElementById('loading-wrap');

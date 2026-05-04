@@ -146,7 +146,29 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	})
 
 	templatesDir := "templates"
-	router.LoadHTMLGlob(filepath.Join(templatesDir, "**/*.html"))
+	tmpl := template.New("").Funcs(router.FuncMap)
+	filepath.Walk(templatesDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() || !strings.HasSuffix(path, ".html") {
+			return nil
+		}
+		relPath, _ := filepath.Rel(templatesDir, path)
+		relPath = filepath.ToSlash(relPath)
+		b, err := os.ReadFile(path)
+		if err != nil {
+			log.Fatalf("Failed to read template %s: %v", path, err)
+		}
+		content := string(b)
+		if strings.Contains(content, "{{ define ") || strings.Contains(content, "{{ block ") {
+			tmpl = template.Must(tmpl.Parse(content))
+		} else {
+			tmpl = template.Must(tmpl.Parse(`{{ define "` + relPath + `" }}` + content + `{{ end }}`))
+		}
+		return nil
+	})
+	router.SetHTMLTemplate(tmpl)
 
 	router.StaticFS("/static", http.Dir("static"))
 	router.StaticFS("/media", http.Dir(cfg.MediaRoot))
