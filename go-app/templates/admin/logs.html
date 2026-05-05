@@ -1,12 +1,1 @@
-{{ template "head" . }}{{ template "navbar" . }}
-<div class="space"></div>
-<nav>
-  <a href="/dashboard" class="button transparent circle"><i>arrow_back</i></a>
-  <h5 class="max">Server Logs</h5>
-  <a href="/dashboard/logs?tail=50" class="button small round">Last 50</a>
-  <a href="/dashboard/logs?tail=200" class="button small round">Last 200</a>
-  <a href="/dashboard/logs?tail=500" class="button small round">Last 500</a>
-</nav>
-<div class="space"></div>
-<pre style="max-height:70vh;overflow-y:auto;background:var(--md-sys-color-surface-variant);padding:1rem;border-radius:8px;font-size:0.85rem;line-height:1.4;white-space:pre-wrap;font-family:monospace">{{ .logs }}</pre>
-{{ template "tail" . }}
+{{ template "admin_head" . }}{{ template "admin_nav" . }}<main class="responsive"><div class="large-space"></div><h4>System Logs</h4><div class="row"><form method="post"><div class="field label border round"><select name="log_level" onchange="this.form.submit()">{{ range .log_level_choices }}<option value="{{ . }}" {{ if eq $.current_log_level . }}selected{{ end }}>{{ . }}</option>{{ end }}</select><label>Log Level</label></div></form><div class="max"></div><a href="?download=1" class="button border round"><i>download</i> Download</a></div><div class="space"></div><pre style="background:var(--md-sys-color-surface-variant);padding:1rem;border-radius:0.5rem;max-height:70vh;overflow:auto;font-size:0.75em;white-space:pre-wrap">{{ .logs }}</pre></main>{{ template "admin_tail" . }}

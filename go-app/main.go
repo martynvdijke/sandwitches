@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -117,7 +118,10 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 			md = strings.ReplaceAll(md, "__", "<em>")
 			return template.HTML(md)
 		},
-		"to_json": func(v interface{}) string { return fmt.Sprintf("%v", v) },
+		"to_json": func(v interface{}) string {
+			b, _ := json.Marshal(v)
+			return string(b)
+		},
 		"iso8601_duration": func(minutes interface{}) string {
 			m := 0
 			switch v := minutes.(type) {

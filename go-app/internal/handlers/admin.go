@@ -606,7 +606,9 @@ func AdminSettings(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "admin/settings.html", td.With("setting", setting).ToGinH())
+	c.HTML(http.StatusOK, "admin/settings.html", td.With("setting", setting).
+		With("log_level_choices", logLevelChoices).
+		ToGinH())
 }
 
 func AdminRatingList(c *gin.Context) {

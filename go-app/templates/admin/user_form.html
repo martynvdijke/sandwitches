@@ -1,15 +1,1 @@
-{{ template "head" . }}{{ template "navbar" . }}
-<div class="space"></div>
-<h4>Edit User: {{ .user_obj.Username }}</h4>
-<form method="post">
-{{ .csrf_token }}
-<div class="field label border round"><input type="text" name="username" value="{{ .user_obj.Username }}"><label>Username</label></div>
-<div class="field label border round"><input type="email" name="email" value="{{ .user_obj.Email }}"><label>Email</label></div>
-<div class="grid"><div class="s12 m6"><div class="field label border round"><input type="text" name="first_name" value="{{ .user_obj.FirstName }}"><label>First name</label></div></div><div class="s12 m6"><div class="field label border round"><input type="text" name="last_name" value="{{ .user_obj.LastName }}"><label>Last name</label></div></div></div>
-<div class="field textarea label border round"><textarea name="bio">{{ .user_obj.Bio }}</textarea><label>Bio</label></div>
-<div class="field middle-align"><label><input type="checkbox" name="is_staff" {{ if .user_obj.IsStaff }}checked{{ end }}> Staff</label></div>
-<div class="field middle-align"><label><input type="checkbox" name="is_active" {{ if .user_obj.IsActive }}checked{{ end }}> Active</label></div>
-<div class="space"></div>
-<button type="submit" class="button primary round">Save</button>
-</form>
-{{ template "tail" . }}
+{{ template "admin_head" . }}{{ template "admin_nav" . }}<main class="responsive"><div class="large-space"></div><article class="round padding surface-container"><h4>Edit User</h4><div class="space"></div><form method="post"><div class="grid"><div class="s12 m6"><div class="field label border round"><input type="text" name="username" value="{{ .user_obj.Username }}" required><label>Username</label></div></div><div class="s12 m6"><div class="field label border round"><input type="email" name="email" value="{{ .user_obj.Email }}"><label>Email</label></div></div><div class="s12 m6"><div class="field label border round"><input type="text" name="first_name" value="{{ .user_obj.FirstName }}"><label>First Name</label></div></div><div class="s12 m6"><div class="field label border round"><input type="text" name="last_name" value="{{ .user_obj.LastName }}"><label>Last Name</label></div></div><div class="s12"><div class="field textarea label border round"><textarea name="bio">{{ .user_obj.Bio }}</textarea><label>Bio</label></div></div><div class="s12"><div class="field middle-align"><label><input type="checkbox" name="is_staff" {{ if .user_obj.IsStaff }}checked{{ end }}> Staff</label></div><div class="field middle-align"><label><input type="checkbox" name="is_active" {{ if .user_obj.IsActive }}checked{{ end }}> Active</label></div></div></div><div class="space"></div><nav class="right-align"><a href="/dashboard/users" class="button transparent border round">Cancel</a><button type="submit" class="button primary round"><i>save</i> Save</button></nav></form></article></main>{{ template "admin_tail" . }}

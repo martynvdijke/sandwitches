@@ -1,13 +1,1 @@
-{{ template "head" . }}{{ template "navbar" . }}
-<div class="space"></div>
-<h4>Pending Approvals</h4>
-{{ range .recipes }}
-<article class="round border padding">
-<h6>{{ .Title }}</h6>
-{{ if .UploadedBy }}<p>By: {{ .UploadedBy.Username }}</p>{{ end }}
-<a href="/dashboard/recipes/{{ .ID }}/approve" class="button primary round">Approve</a>
-<a href="/dashboard/recipes/{{ .ID }}/edit" class="button">Edit</a>
-</article>
-<div class="space"></div>
-{{ end }}
-{{ template "tail" . }}
+{{ template "admin_head" . }}{{ template "admin_nav" . }}<main class="responsive"><div class="large-space"></div><h4>Pending Approvals</h4><div class="space"></div>{{ range .recipes }}<article class="round padding border surface-container"><div class="row align-center"><div class="max"><h6>{{ .Title }}</h6><p>{{ if .UploadedBy }}Submitted by {{ .UploadedBy.Username }}{{ end }}</p><p class="small-text">{{ .Description }}</p></div><nav><a href="/dashboard/recipes/{{ .ID }}/edit" class="button border round">Edit</a><a href="/dashboard/recipes/{{ .ID }}/approve" class="button primary round">Approve</a></nav></div></article><div class="small-space"></div>{{ else }}<p class="center-align">No pending approvals.</p>{{ end }}</main>{{ template "admin_tail" . }}

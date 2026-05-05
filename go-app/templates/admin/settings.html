@@ -1,15 +1,1 @@
-{{ template "head" . }}{{ template "navbar" . }}
-<div class="space"></div>
-<h4>Site Settings</h4>
-<form method="post">
-{{ .csrf_token }}
-<div class="field label border round"><input type="text" name="site_name" value="{{ .setting.SiteName }}"><label>Site Name</label></div>
-<div class="field textarea label border round"><textarea name="site_description">{{ .setting.SiteDescription }}</textarea><label>Site Description</label></div>
-<div class="field label border round"><input type="email" name="email" value="{{ .setting.Email }}"><label>Email</label></div>
-<div class="field label border round"><select name="log_level"><option value="DEBUG" {{ if eq .setting.LogLevel "DEBUG" }}selected{{ end }}>Debug</option><option value="INFO" {{ if eq .setting.LogLevel "INFO" }}selected{{ end }}>Info</option><option value="WARNING" {{ if eq .setting.LogLevel "WARNING" }}selected{{ end }}>Warning</option><option value="ERROR" {{ if eq .setting.LogLevel "ERROR" }}selected{{ end }}>Error</option></select><label>Log Level</label></div>
-<div class="field label border round"><input type="text" name="gotify_url" value="{{ .setting.GotifyURL }}"><label>Gotify URL</label></div>
-<div class="field label border round"><input type="text" name="gotify_token" value="{{ .setting.GotifyToken }}"><label>Gotify Token</label></div>
-<div class="space"></div>
-<button type="submit" class="button primary round">Save Settings</button>
-</form>
-{{ template "tail" . }}
+{{ template "admin_head" . }}{{ template "admin_nav" . }}<main class="responsive"><div class="large-space"></div><article class="round padding surface-container"><h4>Site Settings</h4><div class="space"></div><form method="post"><div class="grid"><div class="s12 m6"><div class="field label border round"><input type="text" name="site_name" value="{{ .setting.SiteName }}"><label>Site Name</label></div></div><div class="s12 m6"><div class="field label border round"><input type="email" name="email" value="{{ .setting.Email }}"><label>Site Email</label></div></div><div class="s12"><div class="field textarea label border round"><textarea name="site_description">{{ .setting.SiteDescription }}</textarea><label>Site Description</label></div></div><div class="s12 m6"><div class="field label border round"><select name="log_level">{{ range .log_level_choices }}<option value="{{ . }}" {{ if eq $.setting.LogLevel . }}selected{{ end }}>{{ . }}</option>{{ end }}</select><label>Log Level</label></div></div><div class="s12 m6"><div class="field label border round"><input type="text" name="gotify_url" value="{{ .setting.GotifyURL }}"><label>Gotify URL</label></div></div><div class="s12 m6"><div class="field label border round"><input type="text" name="gotify_token" value="{{ .setting.GotifyToken }}"><label>Gotify Token</label></div></div></div><div class="space"></div><nav class="right-align"><button type="submit" class="button primary round"><i>save</i> Save Settings</button></nav></form></article></main>{{ template "admin_tail" . }}

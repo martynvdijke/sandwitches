@@ -1,27 +1,135 @@
-{{ template "head" . }}{{ template "navbar" . }}
-<div class="space"></div>
-<h4>{{ .title }}</h4>
-<form method="post" enctype="multipart/form-data">
-{{ .csrf_token }}
-<div class="field label border round"><input type="text" name="title" value="{{ .recipe.Title }}" required><label>Title</label></div>
-<div class="field textarea label border round"><textarea name="description">{{ .recipe.Description }}</textarea><label>Description</label></div>
-<div class="field textarea label border round"><textarea name="ingredients">{{ .recipe.Ingredients }}</textarea><label>Ingredients</label></div>
-<div class="field textarea label border round"><textarea name="instructions">{{ .recipe.Instructions }}</textarea><label>Instructions</label></div>
-<div class="field label border round"><input type="text" name="tags_string" value="{{ .tag_names }}"><label>Tags (comma separated)</label></div>
-<div class="grid">
-  <div class="s12 m3"><div class="field label border round"><input type="number" name="servings" value="{{ .recipe.Servings }}" min="1"><label>Servings</label></div></div>
-  <div class="s12 m3"><div class="field label border round"><input type="number" name="prep_time" value="{{ if .recipe.PrepTime }}{{ .recipe.PrepTime }}{{ end }}"><label>Prep (min)</label></div></div>
-  <div class="s12 m3"><div class="field label border round"><input type="number" name="cook_time" value="{{ if .recipe.CookTime }}{{ .recipe.CookTime }}{{ end }}"><label>Cook (min)</label></div></div>
-  <div class="s12 m3"><div class="field label border round"><input type="number" name="calories" value="{{ if .recipe.Calories }}{{ .recipe.Calories }}{{ end }}"><label>Calories</label></div></div>
-</div>
-<div class="grid">
-  <div class="s12 m4"><div class="field label border round"><input type="number" name="price" step="0.01" value="{{ if .recipe.Price }}{{ printf "%.2f" .recipe.Price }}{{ end }}"><label>Price</label></div></div>
-  <div class="s12 m4"><div class="field label border round"><input type="number" name="max_daily_orders" value="{{ if .recipe.MaxDailyOrders }}{{ .recipe.MaxDailyOrders }}{{ end }}"><label>Max Daily Orders</label></div></div>
-  <div class="s12 m4"><div class="field file label border round"><input type="file" name="image" accept="image/*"><label>Recipe Image</label></div></div>
-</div>
-<div class="field middle-align"><label><input type="checkbox" name="is_highlighted" {{ if .recipe.IsHighlighted }}checked{{ end }}> Highlighted</label></div>
-<div class="field middle-align"><label><input type="checkbox" name="is_approved" {{ if .recipe.IsApproved }}checked{{ end }}> Approved</label></div>
-<div class="space"></div>
-<button type="submit" class="button primary round">Save</button>
-</form>
-{{ template "tail" . }}
+{{ template "admin_head" . }}
+{{ template "admin_nav" . }}
+<main class="responsive">
+<div class="large-space"></div>
+
+<article class="round padding surface-container">
+    <h4>{{ .title }}</h4>
+    <div class="space"></div>
+
+    <form method="post" enctype="multipart/form-data">
+        <div class="grid">
+            <div class="s12">
+                <div class="field label border round">
+                    <input type="text" name="title" value="{{ if .recipe }}{{ .recipe.Title }}{{ end }}" required>
+                    <label>Title</label>
+                </div>
+            </div>
+
+            <div class="s12">
+                <div class="field textarea label border round">
+                    <textarea name="description" rows="4">{{ if .recipe }}{{ .recipe.Description }}{{ end }}</textarea>
+                    <label>Description</label>
+                </div>
+            </div>
+
+            <div class="s12 m6">
+                <div class="field textarea label border round">
+                    <textarea name="ingredients" rows="6">{{ if .recipe }}{{ .recipe.Ingredients }}{{ end }}</textarea>
+                    <label>Ingredients (one per line)</label>
+                </div>
+            </div>
+
+            <div class="s12 m6">
+                <div class="field textarea label border round">
+                    <textarea name="instructions" rows="6">{{ if .recipe }}{{ .recipe.Instructions }}{{ end }}</textarea>
+                    <label>Instructions (one per line)</label>
+                </div>
+            </div>
+
+            <div class="s12 m6">
+                <div class="field label border round">
+                    <input type="number" name="servings" value="{{ if .recipe }}{{ .recipe.Servings }}{{ else }}1{{ end }}" min="1">
+                    <label>Servings</label>
+                </div>
+            </div>
+
+            <div class="s12 m6">
+                <div class="field label border round">
+                    <input type="number" name="price" step="0.01" min="0" value="{{ if .recipe.Price }}{{ printf "%.2f" .recipe.Price }}{{ end }}">
+                    <label>Price (EUR)</label>
+                </div>
+            </div>
+
+            <div class="s12 m4">
+                <div class="field label border round">
+                    <input type="number" name="prep_time" min="0" value="{{ if .recipe.PrepTime }}{{ .recipe.PrepTime }}{{ end }}">
+                    <label>Prep Time (mins)</label>
+                </div>
+            </div>
+
+            <div class="s12 m4">
+                <div class="field label border round">
+                    <input type="number" name="cook_time" min="0" value="{{ if .recipe.CookTime }}{{ .recipe.CookTime }}{{ end }}">
+                    <label>Cook Time (mins)</label>
+                </div>
+            </div>
+
+            <div class="s12 m4">
+                <div class="field label border round">
+                    <input type="number" name="calories" min="0" value="{{ if .recipe.Calories }}{{ .recipe.Calories }}{{ end }}">
+                    <label>Calories (kcal)</label>
+                </div>
+            </div>
+
+            <div class="s12 m6">
+                <div class="field file label border round">
+                    <input type="text" readonly>
+                    <input type="file" name="image" accept="image/*">
+                    <label>Image</label>
+                    <i>publish</i>
+                </div>
+            </div>
+
+            <div class="s12 m6 center-align">
+                {{ if and .recipe .recipe.Image }}
+                <img src="{{ .recipe.Image }}" class="responsive round" style="max-height:200px" alt="Preview">
+                <div class="small-space"></div>
+                <a href="/dashboard/recipes/{{ .recipe.ID }}/rotate?direction=cw" class="button small round" title="Rotate Clockwise"><i>rotate_right</i></a>
+                <a href="/dashboard/recipes/{{ .recipe.ID }}/rotate?direction=ccw" class="button small round" title="Rotate Counter-Clockwise"><i>rotate_left</i></a>
+                {{ end }}
+            </div>
+
+            <div class="s12 m6">
+                <div class="field label border round">
+                    <input type="text" name="tags_string" placeholder="spicy, vegan, quick" value="{{ if .tag_names }}{{ .tag_names }}{{ end }}">
+                    <label>Tags (comma separated)</label>
+                </div>
+            </div>
+
+            <div class="s12 m6">
+                <div class="field label border round">
+                    <input type="number" name="max_daily_orders" min="0" value="{{ if .recipe.MaxDailyOrders }}{{ .recipe.MaxDailyOrders }}{{ end }}">
+                    <label>Max Daily Orders</label>
+                </div>
+            </div>
+
+            <div class="s12 m6">
+                <div class="field middle-align"><label><input type="checkbox" name="is_highlighted" {{ if .recipe.IsHighlighted }}checked{{ end }}> Highlighted</label></div>
+                <div class="field middle-align"><label><input type="checkbox" name="is_approved" {{ if .recipe.IsApproved }}checked{{ end }}> Approved</label></div>
+            </div>
+
+            {{ if .recipe }}
+            <div class="s12 m6">
+                <div class="field middle-align">
+                    <label>Uploaded by: {{ if .recipe.UploadedBy }}{{ .recipe.UploadedBy.Username }}{{ else }}—{{ end }}</label>
+                </div>
+                <div class="field middle-align">
+                    <label>Created: {{ .recipe.CreatedAt.Format "02/01/2006 15:04" }}</label>
+                </div>
+                <div class="field middle-align">
+                    <label>Orders today: {{ .recipe.DailyOrdersCount }}{{ if .recipe.MaxDailyOrders }} / {{ .recipe.MaxDailyOrders }}{{ end }}</label>
+                </div>
+            </div>
+            {{ end }}
+        </div>
+
+        <div class="space"></div>
+        <nav class="right-align">
+            <a href="/dashboard/recipes" class="button transparent border round">Cancel</a>
+            <button type="submit" class="button primary round"><i>save</i> Save</button>
+        </nav>
+    </form>
+</article>
+</main>
+{{ template "admin_tail" . }}
