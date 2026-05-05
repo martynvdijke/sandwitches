@@ -8,6 +8,7 @@ import (
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
 	"github.com/martynvdijke/sandwitches-go/internal/utils"
+	"gorm.io/gorm"
 )
 
 func UserProfile(c *gin.Context) {
@@ -48,12 +49,18 @@ func UserProfile(c *gin.Context) {
 		query = query.Order("created_at DESC")
 	}
 
-	query.Find(&orders)
+	page, perPage, offset := utils.GetPagination(c, 5)
+	var total int64
+	query.Session(&gorm.Session{}).Count(&total)
+	pagination := utils.NewPagination(page, perPage, total)
+
+	query.Limit(perPage).Offset(offset).Find(&orders)
 
 	c.HTML(http.StatusOK, "profile.html", td.With("orders", orders).
 		With("current_status", status).
 		With("current_sort", c.Query("sort")).
 		With("status_choices", OrderStatusChoices).
+		With("pagination", pagination).
 		ToGinH())
 }
 

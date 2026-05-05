@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func MigrateFromDjango(djangoDBPath string) error {
@@ -96,6 +99,15 @@ func migrateUsers(dj *sql.DB) error {
 		}
 		if avatar.Valid && avatar.String != "" {
 			u.Avatar = "/media/" + avatar.String
+		}
+
+		// Django uses PBKDF2 hashes, Go uses bcrypt — replace with bcrypt hash of "admin"
+		if strings.HasPrefix(u.Password, "pbkdf2_sha256$") || strings.HasPrefix(u.Password, "pbkdf2_") {
+			hashed, err := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
+			if err == nil {
+				u.Password = string(hashed)
+				log.Printf("  User %s: converted Django password to bcrypt (login with 'admin')", u.Username)
+			}
 		}
 
 		DB.Create(&u)

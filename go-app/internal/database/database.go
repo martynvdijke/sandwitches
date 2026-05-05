@@ -16,16 +16,36 @@ import (
 
 var DB *gorm.DB
 
+type customLogger struct{}
+
+func (l customLogger) Printf(format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	if strings.Contains(msg, "record not found") {
+		return
+	}
+	if strings.Contains(msg, "UNIQUE constraint failed") {
+		return
+	}
+	log.Printf(format, args...)
+}
+
 func Init(cfg *config.Config) {
 	var err error
 
-	logLevel := logger.Warn
-	if cfg.Debug {
-		logLevel = logger.Info
+	logLevel := logger.Info
+	if !cfg.Debug {
+		logLevel = logger.Warn
+	}
+
+	logCfg := logger.Config{
+		SlowThreshold:             200 * time.Millisecond,
+		LogLevel:                  logLevel,
+		IgnoreRecordNotFoundError: false,
+		Colorful:                  true,
 	}
 
 	DB, err = gorm.Open(sqlite.Open(cfg.DatabaseFile), &gorm.Config{
-		Logger: logger.Default.LogMode(logLevel),
+		Logger: logger.New(customLogger{}, logCfg),
 	})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)

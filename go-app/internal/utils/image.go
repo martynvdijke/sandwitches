@@ -5,6 +5,11 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
+	"image/jpeg"
+	"image/png"
 	"io"
 	"mime/multipart"
 	"os"
@@ -65,4 +70,58 @@ func SaveBytes(data []byte, uploadDir, prefix, ext string) (string, error) {
 
 	relativePath := filepath.Join(prefix, filename)
 	return "/media/" + relativePath, nil
+}
+
+func RotateImage(filePath string, clockwise bool) error {
+	f, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	img, format, err := image.Decode(f)
+	if err != nil {
+		return err
+	}
+	f.Close()
+
+	bounds := img.Bounds()
+	srcW := bounds.Dx()
+	srcH := bounds.Dy()
+
+	dstW := srcH
+	dstH := srcW
+
+	dst := image.NewRGBA(image.Rect(0, 0, dstW, dstH))
+
+	for y := 0; y < srcH; y++ {
+		for x := 0; x < srcW; x++ {
+			if clockwise {
+				dst.Set(dstW-1-y, x, img.At(bounds.Min.X+x, bounds.Min.Y+y))
+			} else {
+				dst.Set(y, dstH-1-x, img.At(bounds.Min.X+x, bounds.Min.Y+y))
+			}
+		}
+	}
+
+	outFile, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer outFile.Close()
+
+	switch format {
+	case "jpeg", "jpg":
+		return jpeg.Encode(outFile, dst, &jpeg.Options{Quality: 90})
+	case "png":
+		return png.Encode(outFile, dst)
+	default:
+		return fmt.Errorf("unsupported image format: %s", format)
+	}
+}
+
+func init() {
+	_ = image.NewRGBA
+	_ = draw.Draw
+	_ = color.RGBA{}
 }

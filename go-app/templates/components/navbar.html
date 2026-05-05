@@ -11,15 +11,18 @@
     <a href="/cart" class="button circle transparent">
         <i>shopping_cart</i>
     </a>
-    <button class="circle transparent" onclick="ui('#user-menu')">
+    <a href="/profile">
         {{ if .user.Avatar }}
         <img src="{{ .user.Avatar }}" class="circle">
         {{ else }}
         <div class="chip circle large primary-container">{{ first .user.Username }}</div>
         {{ end }}
-    </button>
+    </a>
+    <a href="/settings">
+        <i>account_circle</i>
+    </a>
     {{ else }}
-    <a href="/login"><button class="chip transparent border">Login</button></a>
+    <a href="/login"><button class="chip transparent border white-text">Login</button></a>
     <a href="/signup"><button class="chip primary">Sign up</button></a>
     {{ end }}
 </nav>

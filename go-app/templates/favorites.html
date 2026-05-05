@@ -2,12 +2,13 @@
 <div class="space"></div>
 <h4 class="upper center-align">Your Favorites</h4>
 <div class="space"></div>
-<div class="grid" id="recipe-grid">{{ template "partials/recipe_list.html" dict "recipes" .recipes }}</div>
+<div class="grid" id="recipe-grid">{{ template "partials/recipe_list.html" dict "recipes" .recipes "user" .user }}</div>
 {{ if .pagination }}
+{{ $q := .q }}{{ $sort := .sort }}{{ $date_start := .date_start }}{{ $date_end := .date_end }}{{ $uploader := .uploader }}
 <div class="pagination">
-  {{ if .pagination.HasPrev }}<a href="?page={{ .pagination.PrevPage }}">&laquo; Prev</a>{{ end }}
-  {{ range .pagination.Pages }}{{ if eq . $.pagination.Page }}<span class="active">{{ . }}</span>{{ else }}<a href="?page={{ . }}">{{ . }}</a>{{ end }}{{ end }}
-  {{ if .pagination.HasNext }}<a href="?page={{ .pagination.NextPage }}">Next &raquo;</a>{{ end }}
+  {{ if .pagination.HasPrev }}<a href="?page={{ .pagination.PrevPage }}&q={{ $q }}&sort={{ $sort }}&date_start={{ $date_start }}&date_end={{ $date_end }}&uploader={{ $uploader }}">&laquo; Prev</a>{{ end }}
+  {{ range .pagination.Pages }}{{ if eq . $.pagination.Page }}<span class="active">{{ . }}</span>{{ else }}<a href="?page={{ . }}&q={{ $q }}&sort={{ $sort }}&date_start={{ $date_start }}&date_end={{ $date_end }}&uploader={{ $uploader }}">{{ . }}</a>{{ end }}{{ end }}
+  {{ if .pagination.HasNext }}<a href="?page={{ .pagination.NextPage }}&q={{ $q }}&sort={{ $sort }}&date_start={{ $date_start }}&date_end={{ $date_end }}&uploader={{ $uploader }}">Next &raquo;</a>{{ end }}
 </div>
 {{ end }}
 {{ template "tail" . }}

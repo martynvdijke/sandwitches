@@ -177,6 +177,7 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	router.Use(middleware.OptionalAuth())
 
 	router.GET("/", handlers.Index)
+	router.GET("/feeds/latest", handlers.LatestRecipesFeed)
 
 	router.GET("/setup", handlers.SetupPage)
 	router.POST("/setup", handlers.Setup)
@@ -229,6 +230,7 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 			admin.GET("/recipes/:id/delete", handlers.AdminRecipeDelete)
 			admin.POST("/recipes/:id/delete", handlers.AdminRecipeDelete)
 			admin.GET("/recipes/:id/approve", handlers.AdminRecipeApprove)
+			admin.GET("/recipes/:id/rotate", handlers.AdminRecipeRotate)
 
 			admin.GET("/approvals", handlers.AdminRecipeApprovalList)
 
@@ -257,6 +259,7 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 			admin.POST("/settings", handlers.AdminSettings)
 
 			admin.GET("/logs", handlers.AdminLogs)
+			admin.POST("/logs", handlers.AdminLogs)
 			admin.GET("/tasks", handlers.AdminTasks)
 		}
 	}

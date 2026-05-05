@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
@@ -38,13 +39,112 @@ func AdminDashboard(c *gin.Context) {
 	var recentOrders []database.Order
 	database.DB.Preload("User").Preload("Items.Recipe").Order("created_at DESC").Limit(5).Find(&recentOrders)
 
-	c.HTML(http.StatusOK, "admin/dashboard.html", td.With("recipe_count", recipeCount).
+	now := time.Now().Truncate(24 * time.Hour)
+	endDate := now
+	startDate := now.AddDate(0, 0, -30)
+
+	if ds := c.Query("start_date"); ds != "" {
+		if t, err := time.Parse("2006-01-02", ds); err == nil {
+			startDate = t
+		}
+	}
+	if de := c.Query("end_date"); de != "" {
+		if t, err := time.Parse("2006-01-02", de); err == nil {
+			endDate = t
+		}
+	}
+
+	var dateList []time.Time
+	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
+		dateList = append(dateList, d)
+	}
+
+	type dateCount struct {
+		Date  string
+		Count int
+	}
+	type dateAvg struct {
+		Date string
+		Avg  float64
+	}
+
+	var recipeAgg []dateCount
+	database.DB.Model(&database.Recipe{}).
+		Select("DATE(created_at) as date, COUNT(*) as count").
+		Where("created_at >= ? AND created_at <= ?", startDate, endDate.Add(24*time.Hour)).
+		Group("DATE(created_at)").
+		Order("date ASC").
+		Find(&recipeAgg)
+	recipeMap := make(map[string]int)
+	for _, r := range recipeAgg {
+		recipeMap[r.Date] = r.Count
+	}
+
+	var ratingAgg []dateAvg
+	database.DB.Model(&database.Rating{}).
+		Select("DATE(created_at) as date, AVG(score) as avg").
+		Where("created_at >= ? AND created_at <= ?", startDate, endDate.Add(24*time.Hour)).
+		Group("DATE(created_at)").
+		Order("date ASC").
+		Find(&ratingAgg)
+	ratingMap := make(map[string]float64)
+	for _, r := range ratingAgg {
+		ratingMap[r.Date] = r.Avg
+	}
+
+	var orderAgg []dateCount
+	database.DB.Model(&database.Order{}).
+		Select("DATE(created_at) as date, COUNT(*) as count").
+		Where("created_at >= ? AND created_at <= ?", startDate, endDate.Add(24*time.Hour)).
+		Group("DATE(created_at)").
+		Order("date ASC").
+		Find(&orderAgg)
+	orderMap := make(map[string]int)
+	for _, o := range orderAgg {
+		orderMap[o.Date] = o.Count
+	}
+
+	var recipeLabels, ratingLabels, orderLabels []string
+	var recipeCounts []int
+	var ratingAvgs []float64
+	var orderCounts []int
+
+	for _, d := range dateList {
+		label := d.Format("02/01/2006")
+		recipeLabels = append(recipeLabels, label)
+		recipeCounts = append(recipeCounts, recipeMap[d.Format("2006-01-02")])
+
+		v, ok := ratingMap[d.Format("2006-01-02")]
+		if ok {
+			ratingLabels = append(ratingLabels, label)
+			ratingAvgs = append(ratingAvgs, v)
+		}
+
+		orderLabels = append(orderLabels, label)
+		orderCounts = append(orderCounts, orderMap[d.Format("2006-01-02")])
+	}
+
+	td = td.With("recipe_count", recipeCount).
 		With("user_count", userCount).
 		With("tag_count", tagCount).
 		With("recent_recipes", recentRecipes).
 		With("pending_recipes", pendingRecipes).
 		With("recent_orders", recentOrders).
-		ToGinH())
+		With("recipe_labels", recipeLabels).
+		With("recipe_counts", recipeCounts).
+		With("rating_labels", ratingLabels).
+		With("rating_avgs", ratingAvgs).
+		With("order_labels", orderLabels).
+		With("order_counts", orderCounts).
+		With("start_date", startDate.Format("2006-01-02")).
+		With("end_date", endDate.Format("2006-01-02"))
+
+	if c.GetHeader("HX-Request") != "" {
+		c.HTML(http.StatusOK, "admin/partials/dashboard_charts.html", td.ToGinH())
+		return
+	}
+
+	c.HTML(http.StatusOK, "admin/dashboard.html", td.ToGinH())
 }
 
 func AdminRecipeList(c *gin.Context) {
@@ -263,6 +363,36 @@ func AdminRecipeApprove(c *gin.Context) {
 	database.DB.Model(&database.Recipe{}).Where("id = ?", id).Update("is_approved", true)
 	utils.AddFlash(c, "success", "Recipe approved")
 	c.Redirect(http.StatusFound, "/dashboard/approvals")
+}
+
+func AdminRecipeRotate(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var recipe database.Recipe
+	if err := database.DB.First(&recipe, id).Error; err != nil {
+		utils.AddFlash(c, "error", "Recipe not found")
+		c.Redirect(http.StatusFound, "/dashboard/recipes")
+		return
+	}
+
+	if recipe.Image == "" {
+		utils.AddFlash(c, "error", "No image to rotate")
+		c.Redirect(http.StatusFound, "/dashboard/recipes/"+c.Param("id")+"/edit")
+		return
+	}
+
+	direction := c.Query("direction")
+	clockwise := direction != "ccw"
+
+	imagePath := strings.TrimPrefix(recipe.Image, "/media/")
+	fullPath := filepath.Join(mediaRoot, imagePath)
+
+	if err := utils.RotateImage(fullPath, clockwise); err != nil {
+		utils.AddFlash(c, "error", "Error rotating image: "+err.Error())
+	} else {
+		utils.AddFlash(c, "success", "Image rotated successfully")
+	}
+
+	c.Redirect(http.StatusFound, "/dashboard/recipes/"+c.Param("id")+"/edit")
 }
 
 func AdminRecipeDelete(c *gin.Context) {
@@ -531,33 +661,64 @@ func SetMediaRoot(root string) {
 	mediaRoot = root
 }
 
+var logLevelChoices = []string{"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
+
 func AdminLogs(c *gin.Context) {
 	td := utils.NewTemplateData(c)
-	logFile := "sandwitches.log"
-	if _, err := os.Stat(logFile); os.IsNotExist(err) {
-		c.HTML(http.StatusOK, "admin/logs.html", td.With("logs", "No log file found").ToGinH())
+
+	if c.Request.Method == "POST" {
+		level := c.PostForm("log_level")
+		valid := false
+		for _, l := range logLevelChoices {
+			if l == level {
+				valid = true
+				break
+			}
+		}
+		if valid {
+			var setting database.Setting
+			database.DB.First(&setting)
+			setting.LogLevel = level
+			database.DB.Save(&setting)
+			utils.AddFlash(c, "success", "Logging level updated to "+level)
+		} else {
+			utils.AddFlash(c, "error", "Invalid logging level")
+		}
+		c.Redirect(http.StatusFound, "/dashboard/logs")
 		return
 	}
 
-	data, err := os.ReadFile(logFile)
-	if err != nil {
-		c.HTML(http.StatusOK, "admin/logs.html", td.With("logs", "Error reading log file").ToGinH())
+	if c.Query("download") == "1" {
+		logFile := filepath.Join(mediaRoot, "sandwitches.log")
+		if _, err := os.Stat(logFile); os.IsNotExist(err) {
+			utils.AddFlash(c, "error", "Log file not found")
+			c.Redirect(http.StatusFound, "/dashboard/logs")
+			return
+		}
+		c.FileAttachment(logFile, "sandwitches.log")
 		return
 	}
 
-	lines := strings.Split(string(data), "\n")
-	tail := c.Query("tail")
-	n := 100
-	if tail != "" {
-		if v, err := strconv.Atoi(tail); err == nil && v > 0 {
-			n = v
+	var setting database.Setting
+	database.DB.First(&setting)
+
+	logFile := filepath.Join(mediaRoot, "sandwitches.log")
+	logs := "No logs found yet."
+	if _, err := os.Stat(logFile); err == nil {
+		data, err := os.ReadFile(logFile)
+		if err == nil {
+			lines := strings.Split(string(data), "\n")
+			if len(lines) > 1000 {
+				lines = lines[len(lines)-1000:]
+			}
+			logs = strings.Join(lines, "\n")
 		}
 	}
-	if len(lines) > n {
-		lines = lines[len(lines)-n:]
-	}
 
-	c.HTML(http.StatusOK, "admin/logs.html", td.With("logs", strings.Join(lines, "\n")).ToGinH())
+	c.HTML(http.StatusOK, "admin/logs.html", td.With("logs", logs).
+		With("current_log_level", setting.LogLevel).
+		With("log_level_choices", logLevelChoices).
+		ToGinH())
 }
 
 func AdminTasks(c *gin.Context) {

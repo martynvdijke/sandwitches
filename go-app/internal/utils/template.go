@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"html/template"
+
 	"github.com/gin-gonic/gin"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
@@ -10,7 +12,7 @@ type TemplateData struct {
 	User       *database.User
 	Flashes    []FlashMessage
 	CSRFToken  string
-	CSRFHidden string
+	CSRFHidden template.HTML
 	Error      string
 	Data       gin.H
 }
@@ -25,7 +27,7 @@ func NewTemplateData(c *gin.Context) *TemplateData {
 	}
 	if tok, exists := c.Get("csrf_token"); exists {
 		td.CSRFToken = tok.(string)
-		td.CSRFHidden = `<input type="hidden" name="csrf_token" value="` + tok.(string) + `">`
+		td.CSRFHidden = template.HTML(`<input type="hidden" name="csrf_token" value="` + tok.(string) + `">`)
 	}
 	return td
 }
@@ -42,6 +44,7 @@ func (td *TemplateData) ToGinH() gin.H {
 	}
 	if td.CSRFHidden != "" {
 		h["csrf_token"] = td.CSRFHidden
+		h["csrf_token_value"] = td.CSRFToken
 	}
 	if td.Error != "" {
 		h["error"] = td.Error

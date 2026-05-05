@@ -17,16 +17,24 @@ import (
 
 func Index(c *gin.Context) {
 	td := utils.NewTemplateData(c)
+	user := middleware.GetUser(c)
+
+	var superuserCount int64
+	database.DB.Model(&database.User{}).Where("is_superuser = ?", true).Count(&superuserCount)
+	if superuserCount == 0 {
+		c.Redirect(http.StatusFound, "/setup")
+		return
+	}
 
 	var recipes []database.Recipe
-	query := database.DB.Preload("FavoritedBy").Preload("Tags").
+	query := database.DB.Preload("FavoritedBy").Preload("Tags").Preload("UploadedBy").
 		Joins("JOIN user_groups ON recipes.uploaded_by_id = user_groups.user_id").
 		Joins("JOIN groups ON user_groups.group_id = groups.id").
 		Where("groups.name = ?", "admin").
 		Where("recipes.is_approved = ?", true)
 
 	if q := c.Query("q"); q != "" {
-		query = query.Where("recipes.title LIKE ? OR tags.name LIKE ?", "%"+q+"%", "%"+q+"%")
+		query = query.Where("recipes.title LIKE ? OR recipes.id IN (SELECT recipe_id FROM recipe_tags JOIN tags ON recipe_tags.tag_id = tags.id WHERE tags.name LIKE ?)", "%"+q+"%", "%"+q+"%")
 	}
 	if uploader := c.Query("uploader"); uploader != "" {
 		query = query.Where("uploaded_by_id IN (SELECT id FROM users WHERE username = ?)", uploader)
@@ -43,6 +51,9 @@ func Index(c *gin.Context) {
 		if t, err := time.Parse("2006-01-02", de); err == nil {
 			query = query.Where("recipes.created_at <= ?", t.Add(24*time.Hour))
 		}
+	}
+	if user != nil && c.Query("favorites") == "on" {
+		query = query.Where("recipes.id IN (SELECT recipe_id FROM user_favorites WHERE user_id = ?)", user.ID)
 	}
 
 	sort := c.Query("sort")
@@ -79,6 +90,12 @@ func Index(c *gin.Context) {
 		With("tags", allTags).
 		With("selected_tags", c.QueryArray("tag")).
 		With("pagination", pagination).
+		With("q", c.Query("q")).
+		With("sort", sort).
+		With("date_start", c.Query("date_start")).
+		With("date_end", c.Query("date_end")).
+		With("uploader", c.Query("uploader")).
+		With("favorites", c.Query("favorites")).
 		ToGinH())
 }
 
@@ -92,6 +109,24 @@ func RecipeDetail(c *gin.Context) {
 		Preload("Ratings.User").Where("slug = ?", slug).First(&recipe).Error; err != nil {
 		c.HTML(http.StatusNotFound, "error.html", gin.H{"error": "Recipe not found"})
 		return
+	}
+
+	if recipe.UploadedBy != nil {
+		var communityGroup database.Group
+		if err := database.DB.Where("name = ?", "community").First(&communityGroup).Error; err == nil {
+			var count int64
+			database.DB.Table("user_groups").Where("user_id = ? AND group_id = ?", recipe.UploadedBy.ID, communityGroup.ID).Count(&count)
+			isCommunity := count > 0
+
+			if isCommunity && !recipe.IsApproved {
+				isOwner := user != nil && recipe.UploadedByID != nil && *recipe.UploadedByID == user.ID
+				isStaff := user != nil && user.IsStaff
+				if !isOwner && !isStaff {
+					c.HTML(http.StatusNotFound, "error.html", gin.H{"error": "Recipe not found"})
+					return
+				}
+			}
+		}
 	}
 
 	var avgRating float64
@@ -189,7 +224,7 @@ func Favorites(c *gin.Context) {
 	td := utils.NewTemplateData(c)
 
 	var recipes []database.Recipe
-	query := database.DB.Preload("FavoritedBy").Preload("Tags").
+	query := database.DB.Preload("FavoritedBy").Preload("Tags").Preload("UploadedBy").
 		Joins("JOIN user_favorites ON user_favorites.recipe_id = recipes.id").
 		Where("user_favorites.user_id = ?", user.ID)
 
@@ -206,11 +241,21 @@ func Favorites(c *gin.Context) {
 			query = query.Where("recipes.created_at <= ?", t.Add(24*time.Hour))
 		}
 	}
+	if uploader := c.Query("uploader"); uploader != "" {
+		query = query.Where("uploaded_by_id IN (SELECT id FROM users WHERE username = ?)", uploader)
+	}
+	if tags := c.QueryArray("tag"); len(tags) > 0 {
+		query = query.Where("recipes.id IN (SELECT recipe_id FROM recipe_tags JOIN tags ON recipe_tags.tag_id = tags.id WHERE tags.name IN ?)", tags)
+	}
 
 	sort := c.Query("sort")
 	switch sort {
 	case "date_asc":
 		query = query.Order("recipes.created_at ASC")
+	case "rating":
+		query = query.Order("(SELECT COALESCE(AVG(score), 0) FROM ratings WHERE ratings.recipe_id = recipes.id) DESC, recipes.created_at DESC")
+	case "user":
+		query = query.Order("(SELECT username FROM users WHERE users.id = recipes.uploaded_by_id) ASC, recipes.created_at DESC")
 	default:
 		query = query.Order("recipes.created_at DESC")
 	}
@@ -222,8 +267,31 @@ func Favorites(c *gin.Context) {
 
 	query.Limit(perPage).Offset(offset).Find(&recipes)
 
+	var uploaders []string
+	database.DB.Model(&database.User{}).
+		Joins("JOIN recipes ON recipes.uploaded_by_id = users.id").
+		Joins("JOIN user_favorites ON user_favorites.recipe_id = recipes.id").
+		Where("user_favorites.user_id = ?", user.ID).
+		Distinct("username").Pluck("username", &uploaders)
+
+	var allTags []database.Tag
+	database.DB.Table("tags").
+		Joins("JOIN recipe_tags ON recipe_tags.tag_id = tags.id").
+		Joins("JOIN user_favorites ON user_favorites.recipe_id = recipe_tags.recipe_id").
+		Where("user_favorites.user_id = ?", user.ID).
+		Group("tags.id").
+		Find(&allTags)
+
 	c.HTML(http.StatusOK, "favorites.html", td.With("recipes", recipes).
 		With("pagination", pagination).
+		With("uploaders", uploaders).
+		With("tags", allTags).
+		With("selected_tags", c.QueryArray("tag")).
+		With("q", c.Query("q")).
+		With("sort", sort).
+		With("date_start", c.Query("date_start")).
+		With("date_end", c.Query("date_end")).
+		With("uploader", c.Query("uploader")).
 		ToGinH())
 }
 
@@ -281,6 +349,8 @@ func Community(c *gin.Context) {
 		Where("groups.name = ?", "community")
 	if user == nil {
 		query = query.Where("recipes.is_approved = ?", true)
+	} else if user.IsStaff {
+		// Staff see all community recipes
 	} else {
 		query = query.Where("(recipes.is_approved = ? OR recipes.uploaded_by_id = ?)", true, user.ID)
 	}
