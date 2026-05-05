@@ -136,4 +136,4 @@ dist
 src/static/dist/*
 setup.sh
 main
-db.*
+db.*go-app/sandwitches-go
