@@ -11,8 +11,6 @@ GO_BINARY = os.path.join(os.path.dirname(__file__), "..", "go-app", "sandwitches
 
 
 class GoServer:
-    """Manages a Go sandwitches server process for testing."""
-
     def __init__(self):
         self.process = None
         self.db_file = None
@@ -70,7 +68,6 @@ class GoServer:
 
 
 def _reset_db(server):
-    """Tear down and restart the server with a fresh database."""
     server.stop()
     if os.path.exists(server.db_file):
         os.remove(server.db_file)
@@ -82,7 +79,6 @@ def _reset_db(server):
 
 @pytest.fixture(scope="session")
 def go_server():
-    """Session-scoped Go server fixture."""
     if not os.path.exists(GO_BINARY):
         pytest.skip(f"Go binary not found at {GO_BINARY}")
     server = GoServer()
@@ -93,13 +89,11 @@ def go_server():
 
 @pytest.fixture(autouse=True)
 def fresh_db(go_server):
-    """Reset the database before each test for isolation."""
     _reset_db(go_server)
     yield
 
 
 def create_admin(go_server, username="admin", password="adminpass123"):
-    """Create the initial admin via the setup page."""
     import http.client
     from urllib.parse import urlencode
     parsed = urllib.request.urlparse(go_server.url)
@@ -113,24 +107,20 @@ def create_admin(go_server, username="admin", password="adminpass123"):
     conn.request("POST", "/setup", body=data, headers={"Content-Type": "application/x-www-form-urlencoded"})
     resp = conn.getresponse()
     resp.read()
-    # Setup redirects to /dashboard/ after success (302)
     return resp.status == 302
 
 
 def login_session(page, go_server, username, password):
-    """Log in through the UI and return the page after redirect."""
-    page.goto(f"{go_server.url}/login")
+    page.goto(f"{go_server.url}/login", wait_until="commit", timeout=15000)
+    page.wait_for_selector("input[name='password']", timeout=10000)
     page.fill("input[name='username']", username)
     page.fill("input[name='password']", password)
-    page.press("input[name='password']", "Enter")
-    # Wait for redirect to / 
-    page.wait_for_url(go_server.url + "/", timeout=5000)
+    page.locator("button[type='submit']").click(no_wait_after=True, timeout=5000)
+    page.wait_for_url(go_server.url + "/", wait_until="commit", timeout=10000)
 
 
 def create_recipe_via_ui(page, go_server, title, description, ingredients, instructions, servings=2, price=None):
-    """Create a recipe via the admin dashboard (requires logged-in admin)."""
     page.goto(f"{go_server.url}/dashboard/recipes/add")
-    # Wait for the form title heading
     page.wait_for_selector("h4", timeout=10000)
     page.fill("input[name='title']", title)
     page.fill("textarea[name='description']", description)
@@ -139,10 +129,14 @@ def create_recipe_via_ui(page, go_server, title, description, ingredients, instr
     page.fill("input[name='servings']", str(servings))
     if price is not None:
         page.fill("input[name='price']", price)
-    # Enable is_approved checkbox for admin-added recipes
     checkbox = page.locator("input[name='is_approved']")
     if checkbox.count():
         checkbox.check()
     page.locator("button[type='submit']").click()
-    # Should redirect to recipe list
     page.wait_for_url(f"{go_server.url}/dashboard/recipes", timeout=5000)
+
+
+def get_slug_from_admin_list(page, go_server):
+    page.goto(f"{go_server.url}/dashboard/recipes")
+    href = page.locator("tbody td a").first.get_attribute("href") or ""
+    return href.rstrip("/").rsplit("/", 1)[-1]
