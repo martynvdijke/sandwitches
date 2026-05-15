@@ -106,8 +106,8 @@ jobs:
         with:
           gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
           gotify_app_token: ${{ secrets.GOTIFY_APP_TOKEN }}
-          notification_title: 'Release Published - ${{ needs.release.outputs.new_release_version }}'
-          notification_message: 'Version ${{ needs.release.outputs.new_release_version }} was successfully released.'
+          notification_title: '${{ github.repository }} Release Published - ${{ needs.release.outputs.new_release_version }}'
+          notification_message: '${{ github.repository }}: Version ${{ needs.release.outputs.new_release_version }} was successfully released.'
 
       - name: Failure Notification
         if: needs.ci.result == 'failure' || needs.release.result == 'failure'
