@@ -96,11 +96,11 @@ jobs:
 
   notify:
     needs: [ci, release]
-    if: ${{ !cancelled() }}
+    if: ${{ always() }}
     name: Gotify Notification
     runs-on: ubuntu-latest
     steps:
-      - name: Success Notification
+      - name: Release Published Notification
         if: needs.ci.result == 'success' && needs.release.result == 'success' && needs.release.outputs.new_release_published == 'true'
         uses: eikendev/gotify-action@master
         with:
@@ -109,8 +109,17 @@ jobs:
           notification_title: '${{ github.repository }} Release Published - ${{ needs.release.outputs.new_release_version }}'
           notification_message: '${{ github.repository }}: Version ${{ needs.release.outputs.new_release_version }} was successfully released.'
 
+      - name: No Release Needed Notification
+        if: needs.ci.result == 'success' && needs.release.result == 'success' && needs.release.outputs.new_release_published != 'true'
+        uses: eikendev/gotify-action@master
+        with:
+          gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
+          gotify_app_token: ${{ secrets.GOTIFY_APP_TOKEN }}
+          notification_title: '${{ github.repository }} Release - Up to Date'
+          notification_message: 'Workflow passed but no new release was published.'
+
       - name: Failure Notification
-        if: needs.ci.result == 'failure' || needs.release.result == 'failure'
+        if: needs.ci.result != 'success' || needs.release.result != 'success'
         uses: eikendev/gotify-action@master
         with:
           gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
