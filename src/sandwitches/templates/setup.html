@@ -37,7 +37,7 @@
         <div class="grid">
             <div class="s12 m6">
                 <div class="field label border round {% if form.first_name.errors %}error{% endif %}">
-                    <input type="text" name="{{ form.first_name.name }}" id="{{ form.first_name.id_for_label }}" value="{{ form.first_name.value|default:'' }}">
+                    <input type="text" name="{{ form.first_name.name }}" id="{{ form.first_name.id_for_label }}" value="{{ form.first_name.value|default:'' }}" autocomplete="given-name">
                     <label>{% trans "First name" %}</label>
                     {% if form.first_name.errors %}
                         <span class="helper error-text">{{ form.first_name.errors.0 }}</span>
@@ -46,7 +46,7 @@
             </div>
              <div class="s12 m6">
                 <div class="field label border round {% if form.last_name.errors %}error{% endif %}">
-                    <input type="text" name="{{ form.last_name.name }}" id="{{ form.last_name.id_for_label }}" value="{{ form.last_name.value|default:'' }}">
+                    <input type="text" name="{{ form.last_name.name }}" id="{{ form.last_name.id_for_label }}" value="{{ form.last_name.value|default:'' }}" autocomplete="family-name">
                     <label>{% trans "Last name" %}</label>
                      {% if form.last_name.errors %}
                         <span class="helper error-text">{{ form.last_name.errors.0 }}</span>
@@ -64,7 +64,7 @@
         </div>
 
         <div class="field label border round {% if form.email.errors %}error{% endif %}">
-            <input type="email" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" value="{{ form.email.value|default:'' }}">
+            <input type="email" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" value="{{ form.email.value|default:'' }}" autocomplete="email">
             <label>{% trans "Email (optional)" %}</label>
             {% if form.email.errors %}
                 <span class="helper error-text">{{ form.email.errors.0 }}</span>
@@ -76,7 +76,7 @@
         <div class="space"></div>
 
         <div class="field label border round {% if form.password1.errors %}error{% endif %}">
-            <input type="password" name="{{ form.password1.name }}" id="{{ form.password1.id_for_label }}">
+            <input type="password" name="{{ form.password1.name }}" id="{{ form.password1.id_for_label }}" autocomplete="new-password">
             <label>{% trans "Password" %}</label>
             {% if form.password1.errors %}
                 <span class="helper error-text">{{ form.password1.errors.0 }}</span>
@@ -84,7 +84,7 @@
         </div>
 
         <div class="field label border round {% if form.password2.errors %}error{% endif %}">
-             <input type="password" name="{{ form.password2.name }}" id="{{ form.password2.id_for_label }}">
+             <input type="password" name="{{ form.password2.name }}" id="{{ form.password2.id_for_label }}" autocomplete="new-password">
             <label>{% trans "Confirm password" %}</label>
              {% if form.password2.errors %}
                 <span class="helper error-text">{{ form.password2.errors.0 }}</span>
