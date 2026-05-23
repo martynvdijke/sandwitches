@@ -15,7 +15,7 @@
   "platformAutomerge": true,
   "prCreation": "immediate",
   "prHourlyLimit": 10,
-  "rebaseWhen": "conflicted",
+  "rebaseWhen": "behind-base-branch",
   "configMigration": true,
   "repositories": ["martynvdijke/sandwitches"],
   "timezone": "UTC+1",
@@ -24,7 +24,7 @@
   },
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "matchUpdateTypes": ["major", "minor", "patch", "pin", "digest"],
       "matchCurrentVersion": "!/^0/",
       "automerge": true
     }
