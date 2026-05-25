@@ -52,5 +52,4 @@
   "npm": {
     "enabled": true
   },
-  "stalePr": true
 }
