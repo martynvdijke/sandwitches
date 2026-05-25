@@ -26,7 +26,7 @@
   "repositories": [
     "martynvdijke/sandwitches"
   ],
-  "timezone": "UTC+1",
+  "timezone": "Europe/Amsterdam",
   "lockFileMaintenance": {
     "enabled": true
   },
