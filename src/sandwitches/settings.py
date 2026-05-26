@@ -258,4 +258,21 @@ SEND_EMAIL = all(
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
+# OpenTelemetry
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.django import DjangoInstrumentor
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+OTEL_ENDPOINT = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT")
+if OTEL_ENDPOINT:
+    otlp_exporter = OTLPSpanExporter(endpoint=OTEL_ENDPOINT)
+    span_processor = BatchSpanProcessor(otlp_exporter)
+    provider = TracerProvider()
+    provider.add_span_processor(span_processor)
+    trace.set_tracer_provider(provider)
+
+DjangoInstrumentor().instrument()
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

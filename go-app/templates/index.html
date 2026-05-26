@@ -1,0 +1,76 @@
+{{ template "head" . }}
+{{ template "navbar" . }}
+
+<div class="large-space"></div>
+<article class="round secondary s12 m12 l12">
+  <div class="row align-center">
+    <div class="max">
+      <h4 class="upper">Sandwitches</h4>
+      <p class="large-text">Sandwiches so good, they haunt you!</p>
+    </div>
+  </div>
+</article>
+
+<div class="space"></div>
+<form method="get" class="grid" style="gap:8px">
+  <div class="s12 m4"><div class="field label border round small"><input type="search" name="q" id="search" value="{{ .q }}"><label>Search</label></div></div>
+  <div class="s12 m3"><div class="field label border round small"><select name="sort"><option value="">Newest</option><option value="date_asc" {{ if eq "date_asc" .sort }}selected{{ end }}>Oldest</option><option value="rating" {{ if eq "rating" .sort }}selected{{ end }}>Top Rated</option></select><label>Sort</label></div></div>
+  <div class="s12 m2"><div class="field label border round small"><input type="date" name="date_start" value="{{ .date_start }}"><label>From</label></div></div>
+  <div class="s12 m2"><div class="field label border round small"><input type="date" name="date_end" value="{{ .date_end }}"><label>To</label></div></div>
+  <div class="s12 m1"><button type="submit" class="button circle primary"><i>search</i></button></div>
+</form>
+
+{{ if .highlighted_recipes }}
+<div class="large-space"></div>
+<h4 class="upper center-align">Highlights</h4>
+<div class="small-space"></div>
+<div class="relative">
+    <div class="row scroll snap no-scrollbar large-padding" id="highlighted-carousel" style="gap: 20px; flex-wrap: nowrap;">
+        {{ range .highlighted_recipes }}
+        <a href="/recipes/{{ .Slug }}">
+        <article class="round no-padding elevate tertiary-container" style="min-width: 300px; width: 300px; flex-shrink: 0; scroll-snap-align: start;">
+                {{ if .Image }}
+                <img src="{{ .Image }}" class="responsive top-round" alt="{{ .Title }}" style="height: 200px; object-fit: cover;">
+                {{ else }}
+                <div class="primary medium-height top-round middle-align center-align" style="height:200px;">
+                    <i class="extra">lunch_dining</i>
+                </div>
+                {{ end }}
+            <div class="padding">
+                <h5>{{ .Title }}</h5>
+            </div>
+        </article>
+        </a>
+        {{ end }}
+    </div>
+    <button class="circle surface absolute left middle-align elevate" onclick="scrollCarousel(-1)" style="top: 50%; transform: translateY(-50%); left: -20px; z-index: 10;">
+        <i>chevron_left</i>
+    </button>
+    <button class="circle surface absolute right middle-align elevate" onclick="scrollCarousel(1)" style="top: 50%; transform: translateY(-50%); right: -20px; z-index: 10;">
+        <i>chevron_right</i>
+    </button>
+</div>
+<script>
+function scrollCarousel(dir) {
+    var el = document.getElementById('highlighted-carousel');
+    if (el) el.scrollBy({ left: el.offsetWidth * dir * 0.8, behavior: 'smooth' });
+}
+</script>
+{{ end }}
+
+<div class="large-space"></div>
+
+{{ template "partials/recipe_list.html" dict "recipes" .recipes "user" .user }}
+
+{{ if .pagination }}
+{{ $q := .q }}{{ $sort := .sort }}{{ $date_start := .date_start }}{{ $date_end := .date_end }}{{ $uploader := .uploader }}{{ $favorites := .favorites }}
+<div class="pagination">
+  {{ if .pagination.HasPrev }}<a href="?page={{ .pagination.PrevPage }}&q={{ $q }}&sort={{ $sort }}&date_start={{ $date_start }}&date_end={{ $date_end }}&uploader={{ $uploader }}&favorites={{ $favorites }}">&laquo; Prev</a>{{ end }}
+  {{ range .pagination.Pages }}
+    {{ if eq . $.pagination.Page }}<span class="active">{{ . }}</span>{{ else }}<a href="?page={{ . }}&q={{ $q }}&sort={{ $sort }}&date_start={{ $date_start }}&date_end={{ $date_end }}&uploader={{ $uploader }}&favorites={{ $favorites }}">{{ . }}</a>{{ end }}
+  {{ end }}
+  {{ if .pagination.HasNext }}<a href="?page={{ .pagination.NextPage }}&q={{ $q }}&sort={{ $sort }}&date_start={{ $date_start }}&date_end={{ $date_end }}&uploader={{ $uploader }}&favorites={{ $favorites }}">Next &raquo;</a>{{ end }}
+</div>
+{{ end }}
+
+{{ template "tail" . }}

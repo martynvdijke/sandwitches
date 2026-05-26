@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>{{ block "title" . }}Sandwitches{{ end }}</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main.container {
+            flex: 1;
+            padding-bottom: 80px;
+        }
+        .loading-sandwich-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s linear;
+        }
+        .loading-sandwich-container.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        .flash-messages {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 10000;
+            max-width: 400px;
+        }
+        .flash-messages .snackbar {
+            margin-bottom: 8px;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            padding: 1rem 0;
+            flex-wrap: wrap;
+        }
+        .pagination a, .pagination span {
+            padding: 6px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+        .pagination .active {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+    </style>
+    {{ block "extra_head" . }}{{ end }}
+</head>
+<body class="{{ if .user }}{{ .user.Theme }}{{ end }}">
+    <div id="loading-sandwich" class="loading-sandwich-container">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1.5s linear infinite;">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+            <path d="M12 9v6" />
+            <path d="M10 12h4" />
+        </svg>
+    </div>
+
+    {{ block "navbar" . }}{{ end }}
+
+    {{ if .error }}
+    <div class="padding no-margin">
+        <div class="snackbar active error">
+            <i>error</i>
+            <span>{{ .error }}</span>
+        </div>
+    </div>
+    {{ end }}
+
+    {{ if .flashes }}
+    <div class="flash-messages" id="flash-messages">
+    {{ range .flashes }}
+        <div class="snackbar active {{ if eq .Type "error" }}error{{ else }}success{{ end }}">
+            <i>{{ if eq .Type "error" }}error{{ else }}check{{ end }}</i>
+            <span>{{ .Message }}</span>
+        </div>
+    {{ end }}
+    </div>
+    <script>
+        setTimeout(() => {
+            const container = document.getElementById('flash-messages');
+            if (container) container.style.display = 'none';
+        }, 5000);
+    </script>
+    {{ end }}
+
+    <main class="container" role="main">
+        {{ template "content" . }}
+    </main>
+
+    {{ block "footer" . }}{{ end }}
+
+    <script>
+        const loadingSandwich = document.getElementById('loading-sandwich');
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', () => loadingSandwich.classList.add('show'));
+        });
+        window.addEventListener('load', () => loadingSandwich.classList.remove('show'));
+    </script>
+    {{ block "extra_scripts" . }}{{ end }}
+</body>
+</html>

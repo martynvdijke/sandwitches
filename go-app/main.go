@@ -1,0 +1,274 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"html/template"
+	"log"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-gonic/gin"
+	"github.com/martynvdijke/sandwitches-go/internal/api"
+	"github.com/martynvdijke/sandwitches-go/internal/config"
+	"github.com/martynvdijke/sandwitches-go/internal/database"
+	"github.com/martynvdijke/sandwitches-go/internal/handlers"
+	"github.com/martynvdijke/sandwitches-go/internal/middleware"
+	"github.com/martynvdijke/sandwitches-go/internal/tasks"
+)
+
+var Version = "dev"
+
+func main() {
+	cfg := config.Load()
+
+	database.Init(cfg)
+	tasks.Init(cfg)
+
+	djangoDB := os.Getenv("Django_DB_PATH")
+	if djangoDB == "" {
+		for _, p := range []string{"../src/db.sqlite3", "db.sqlite3", "/config/db.sqlite3"} {
+			if _, err := os.Stat(p); err == nil {
+				djangoDB = p
+				break
+			}
+		}
+	}
+	if djangoDB != "" {
+		log.Printf("Checking for Django database at: %s", djangoDB)
+		if err := database.MigrateFromDjango(djangoDB); err != nil {
+			log.Printf("Django migration skipped: %v", err)
+		}
+	}
+
+	handlers.SetMediaRoot(cfg.MediaRoot)
+
+	router := setupRouter(cfg)
+
+	port := "6270"
+	if p := os.Getenv("PORT"); p != "" {
+		port = p
+	}
+
+	log.Printf("Starting server on :%s", port)
+	if err := router.Run(":" + port); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
+}
+
+func setupRouter(cfg *config.Config) *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
+	if cfg.Debug {
+		gin.SetMode(gin.DebugMode)
+	}
+
+	router := gin.New()
+	router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
+		return fmt.Sprintf("[%s] %s %s %d %s\n",
+			param.TimeStamp.Format("2006-01-02 15:04:05"),
+			param.Method,
+			param.Path,
+			param.StatusCode,
+			param.Latency,
+		)
+	}))
+	router.Use(gin.Recovery())
+
+	store := cookie.NewStore([]byte(cfg.SecretKey))
+	store.Options(sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 30,
+		HttpOnly: true,
+		Secure:   !cfg.Debug,
+	})
+	router.Use(sessions.Sessions("sandwitches_session", store))
+
+	router.SetFuncMap(template.FuncMap{
+		"add":        func(a, b int) int { return a + b },
+		"sub":        func(a, b int) int { return a - b },
+		"lower":      strings.ToLower,
+		"upper":      strings.ToUpper,
+		"title":      strings.Title,
+		"contains":   strings.Contains,
+		"join":       func(sep string, s []string) string { return strings.Join(s, sep) },
+		"split":      func(sep, s string) []string { return strings.Split(s, sep) },
+		"now":        func() time.Time { return time.Now() },
+		"div":        func(a, b int) int { return a / b },
+		"mul":        func(a, b int) int { return a * b },
+		"mod":        func(a, b int) int { return a % b },
+		"seq":        func(n int) []int { s := make([]int, n); for i := range s { s[i] = i }; return s },
+		"dict":       func(values ...interface{}) map[string]interface{} { m := make(map[string]interface{}); for i := 0; i < len(values); i += 2 { m[fmt.Sprint(values[i])] = values[i+1] }; return m },
+		"default":    func(def, val interface{}) interface{} { if val == nil || val == "" { return def }; return val },
+		"first":      func(s string) string { if len(s) > 0 { return string(s[0]) } else { return "" } },
+		"urlencode":  func(s string) string { return strings.ReplaceAll(s, " ", "+") },
+		"floatmul":   func(a float64, b int) float64 { return a * float64(b) },
+		"striptags":  func(s string) string { return strings.Map(func(r rune) rune { if r == '<' || r == '>' { return -1 }; return r }, s) },
+		"truncatechars": func(n int, s string) string { runes := []rune(s); if len(runes) > n { return string(runes[:n]) + "..." }; return s },
+		"safe":       func(s string) template.HTML { return template.HTML(s) },
+		"convert_markdown": func(s string) template.HTML {
+			md := s
+			md = strings.ReplaceAll(md, "\n\n", "</p><p>")
+			md = "<p>" + md + "</p>"
+			md = strings.ReplaceAll(md, "**", "<strong>")
+			md = strings.ReplaceAll(md, "__", "<em>")
+			return template.HTML(md)
+		},
+		"to_json": func(v interface{}) string {
+			b, _ := json.Marshal(v)
+			return string(b)
+		},
+		"iso8601_duration": func(minutes interface{}) string {
+			m := 0
+			switch v := minutes.(type) {
+			case int:
+				m = v
+			case *int:
+				if v != nil {
+					m = *v
+				}
+			}
+			return fmt.Sprintf("PT%dM", m)
+		},
+		"floatformat": func(precision int, val interface{}) string {
+			f := 0.0
+			switch v := val.(type) {
+			case float64:
+				f = v
+			case *float64:
+				if v != nil {
+					f = *v
+				}
+			}
+			return fmt.Sprintf("%."+fmt.Sprint(precision)+"f", f)
+		},
+		"version": func() string { return Version },
+	})
+
+	templatesDir := "templates"
+	tmpl := template.New("").Funcs(router.FuncMap)
+	filepath.Walk(templatesDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() || !strings.HasSuffix(path, ".html") {
+			return nil
+		}
+		relPath, _ := filepath.Rel(templatesDir, path)
+		relPath = filepath.ToSlash(relPath)
+		b, err := os.ReadFile(path)
+		if err != nil {
+			log.Fatalf("Failed to read template %s: %v", path, err)
+		}
+		content := string(b)
+		if strings.Contains(content, "{{ define ") || strings.Contains(content, "{{ block ") {
+			tmpl = template.Must(tmpl.Parse(content))
+		} else {
+			tmpl = template.Must(tmpl.Parse(`{{ define "` + relPath + `" }}` + content + `{{ end }}`))
+		}
+		return nil
+	})
+	router.SetHTMLTemplate(tmpl)
+
+	router.StaticFS("/static", http.Dir("static"))
+	router.StaticFS("/media", http.Dir(cfg.MediaRoot))
+	router.StaticFile("/favicon.ico", "static/icons/favicon.svg")
+
+	router.Use(middleware.OptionalAuth())
+
+	router.GET("/", handlers.Index)
+	router.GET("/feeds/latest", handlers.LatestRecipesFeed)
+
+	router.GET("/setup", handlers.SetupPage)
+	router.POST("/setup", handlers.Setup)
+
+	router.GET("/signup", handlers.SignupPage)
+	router.POST("/signup", handlers.Signup)
+
+	router.GET("/login", handlers.LoginPage)
+	router.POST("/login", handlers.Login)
+
+	router.GET("/logout", handlers.Logout)
+
+	web := router.Group("/")
+	web.Use(middleware.CSRFMiddleware())
+	{
+		web.GET("/recipes/:slug", handlers.RecipeDetail)
+		web.GET("/orders/track/:token", handlers.OrderTracker)
+
+		web.GET("/favorites", middleware.AuthRequired(), handlers.Favorites)
+		web.GET("/community", middleware.AuthRequired(), handlers.Community)
+		web.POST("/community", middleware.AuthRequired(), handlers.Community)
+
+		web.GET("/profile", middleware.AuthRequired(), handlers.UserProfile)
+		web.POST("/profile", middleware.AuthRequired(), handlers.UserProfile)
+
+		web.GET("/settings", middleware.AuthRequired(), handlers.UserSettings)
+		web.POST("/settings", middleware.AuthRequired(), handlers.UserSettings)
+
+		web.GET("/orders/:id", middleware.AuthRequired(), handlers.UserOrderDetail)
+
+		web.GET("/cart", middleware.AuthRequired(), handlers.ViewCart)
+		web.GET("/cart/add/:id", middleware.AuthRequired(), handlers.AddToCart)
+		web.GET("/cart/remove/:id", middleware.AuthRequired(), handlers.RemoveFromCart)
+		web.POST("/cart/update/:id", middleware.AuthRequired(), handlers.UpdateCartQuantity)
+		web.POST("/cart/checkout", middleware.AuthRequired(), handlers.Checkout)
+
+		web.GET("/recipes/rate/:id", middleware.AuthRequired(), handlers.RecipeRate)
+		web.POST("/recipes/rate/:id", middleware.AuthRequired(), handlers.RecipeRate)
+		web.GET("/recipes/favorite/:id", middleware.AuthRequired(), handlers.ToggleFavorite)
+
+		admin := web.Group("/dashboard", middleware.StaffRequired())
+		{
+			admin.GET("", handlers.AdminDashboard)
+
+			admin.GET("/recipes", handlers.AdminRecipeList)
+			admin.GET("/recipes/add", handlers.AdminRecipeAdd)
+			admin.POST("/recipes/add", handlers.AdminRecipeAdd)
+			admin.GET("/recipes/:id/edit", handlers.AdminRecipeEdit)
+			admin.POST("/recipes/:id/edit", handlers.AdminRecipeEdit)
+			admin.GET("/recipes/:id/delete", handlers.AdminRecipeDelete)
+			admin.POST("/recipes/:id/delete", handlers.AdminRecipeDelete)
+			admin.GET("/recipes/:id/approve", handlers.AdminRecipeApprove)
+			admin.GET("/recipes/:id/rotate", handlers.AdminRecipeRotate)
+
+			admin.GET("/approvals", handlers.AdminRecipeApprovalList)
+
+			admin.GET("/users", handlers.AdminUserList)
+			admin.GET("/users/:id/edit", handlers.AdminUserEdit)
+			admin.POST("/users/:id/edit", handlers.AdminUserEdit)
+			admin.GET("/users/:id/delete", handlers.AdminUserDelete)
+			admin.POST("/users/:id/delete", handlers.AdminUserDelete)
+
+			admin.GET("/tags", handlers.AdminTagList)
+			admin.GET("/tags/add", handlers.AdminTagAdd)
+			admin.POST("/tags/add", handlers.AdminTagAdd)
+			admin.GET("/tags/:id/edit", handlers.AdminTagEdit)
+			admin.POST("/tags/:id/edit", handlers.AdminTagEdit)
+			admin.GET("/tags/:id/delete", handlers.AdminTagDelete)
+			admin.POST("/tags/:id/delete", handlers.AdminTagDelete)
+
+			admin.GET("/orders", handlers.AdminOrderList)
+			admin.POST("/orders/:id/status", handlers.AdminOrderUpdateStatus)
+
+			admin.GET("/ratings", handlers.AdminRatingList)
+			admin.GET("/ratings/:id/delete", handlers.AdminRatingDelete)
+			admin.POST("/ratings/:id/delete", handlers.AdminRatingDelete)
+
+			admin.GET("/settings", handlers.AdminSettings)
+			admin.POST("/settings", handlers.AdminSettings)
+
+			admin.GET("/logs", handlers.AdminLogs)
+			admin.POST("/logs", handlers.AdminLogs)
+			admin.GET("/tasks", handlers.AdminTasks)
+		}
+	}
+
+	api.RegisterRoutes(router.Group("/api"))
+
+	return router
+}

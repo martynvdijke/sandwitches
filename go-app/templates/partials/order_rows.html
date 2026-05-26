@@ -1,0 +1,19 @@
+{{ range .orders }}
+<tr>
+  <td>{{ .ID }}</td>
+  <td>{{ .User.Username }}</td>
+  <td><span class="chip">{{ .Status }}</span></td>
+  <td>{{ printf "%.2f" .TotalPrice }} &euro;</td>
+  <td>{{ .CreatedAt.Format "02/01/2006" }}</td>
+  <td>
+    <form method="post" action="/dashboard/orders/{{ .ID }}/status" style="display:inline">
+      <input type="hidden" name="csrf_token" value="{{ $.csrf_token }}">
+      <select name="status" onchange="this.form.submit()">
+      {{ range $.status_choices }}
+        <option value="{{ .Code }}" {{ if eq .Code $.order.Status }}selected{{ end }}>{{ .Label }}</option>
+      {{ end }}
+      </select>
+    </form>
+  </td>
+</tr>
+{{ end }}

@@ -1,0 +1,88 @@
+{{ template "head" . }}
+{{ template "navbar" . }}
+
+<div class="space"></div>
+<nav>
+  <a href="/" class="button transparent circle"><i>arrow_back</i></a>
+  <h5 class="max">Back to all</h5>
+</nav>
+
+<div class="space"></div>
+
+<article class="round no-padding elevate">
+  {{ if .recipe.Image }}
+  <img src="{{ .recipe.Image }}" class="responsive top-round" alt="{{ .recipe.Title }}" style="max-height:400px;object-fit:cover;width:100%">
+  {{ else }}
+  <div style="height:300px;display:flex;align-items:center;justify-content:center;background:var(--md-sys-color-primary-container)">
+    <i class="extra">lunch_dining</i>
+  </div>
+  {{ end }}
+  <div class="padding">
+    <h4>{{ .recipe.Title }}</h4>
+    <p>{{ .recipe.Description }}</p>
+
+    <div class="divider"></div>
+    <h6>Tags</h6>
+    <div class="row wrap">
+    {{ range .recipe.Tags }}
+      <a href="/?tag={{ .Name }}" class="chip round surface">{{ .Name }}</a>
+    {{ end }}
+    </div>
+
+    <div class="divider"></div>
+    {{ if .recipe.PrepTime }}<span>Prep: {{ .recipe.PrepTime }}min</span> {{ end }}
+    {{ if .recipe.CookTime }}<span>Cook: {{ .recipe.CookTime }}min</span> {{ end }}
+    {{ if .recipe.Calories }}<span>{{ .recipe.Calories }} kcal</span> {{ end }}
+
+    <div class="space"></div>
+    <h6>Rating</h6>
+    <div style="display:flex;align-items:center;gap:0.5rem">
+      <i>star</i>
+      <span>{{ printf "%.1f" .avg_rating }}</span>
+      <span>({{ .rating_count }} vote{{ if ne .rating_count 1 }}s{{ end }})</span>
+    </div>
+
+    {{ if .user }}
+    <form method="post" action="/recipes/rate/{{ .recipe.ID }}" style="padding:1rem">
+      {{ .csrf_token }}
+      <div class="field label">
+        <input type="range" name="score" min="0" max="10" step="0.1" value="5.0">
+        <label>Your rating (0-10)</label>
+      </div>
+      <div class="field textarea label border round">
+        <textarea name="comment" placeholder="Add a comment (optional)"></textarea>
+        <label>Comment</label>
+      </div>
+      <button type="submit" class="button primary round">Submit Rating</button>
+    </form>
+    {{ else }}
+    <p><a href="/login">Log in</a> to rate this recipe.</p>
+    {{ end }}
+
+    {{ if .recipe.Price }}
+    <div class="space"></div>
+    <a href="/recipes/favorite/{{ .recipe.ID }}" class="button border round">
+      <i>favorite</i> <span>{{ if .user }}{{ .user.Username }}{{ end }}</span>
+    </a>
+    <a href="/cart/add/{{ .recipe.ID }}" class="button primary round"><i>add_shopping_cart</i> Add to Cart</a>
+    {{ end }}
+  </div>
+</article>
+
+<h5>Ingredients</h5>
+<pre style="white-space:pre-wrap">{{ .recipe.Ingredients }}</pre>
+
+<h5>Instructions</h5>
+<pre style="white-space:pre-wrap">{{ .recipe.Instructions }}</pre>
+
+<div class="space"></div>
+<h6>All Ratings</h6>
+{{ range .all_ratings }}
+<div style="display:flex;align-items:center;gap:0.5rem;padding:0.25rem 0">
+  <b>{{ .User.Username }}</b>
+  <span>{{ printf "%.1f" .Score }} <i class="small">star</i></span>
+  {{ if .Comment }}<p>{{ .Comment }}</p>{{ end }}
+</div>
+{{ end }}
+
+{{ template "tail" . }}

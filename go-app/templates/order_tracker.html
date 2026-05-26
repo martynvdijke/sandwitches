@@ -1,0 +1,19 @@
+{{ template "head" . }}{{ template "navbar" . }}
+<div class="space"></div>
+<article class="round elevate padding" style="max-width:600px;margin:auto">
+<h4>Order Tracking</h4>
+<div class="space"></div>
+<div class="grid">
+  <div class="s12 m6"><p><strong>Order ID:</strong> {{ .order.ID }}</p></div>
+  <div class="s12 m6"><p><strong>Status:</strong> <span class="chip large">{{ .order.Status }}</span></p></div>
+  <div class="s12 m6"><p><strong>Date:</strong> {{ .order.CreatedAt.Format "02/01/2006 15:04" }}</p></div>
+  <div class="s12 m6"><p><strong>Total:</strong> {{ printf "%.2f" .order.TotalPrice }} &euro;</p></div>
+</div>
+<div class="divider"></div>
+<h5>Items</h5>
+<table class="border striped">
+<thead><tr><th>Recipe</th><th>Qty</th><th>Price</th></tr></thead>
+<tbody>{{ range .order.Items }}<tr><td><a href="/recipes/{{ .Recipe.Slug }}">{{ .Recipe.Title }}</a></td><td>{{ .Quantity }}</td><td>{{ printf "%.2f" .Price }} &euro;</td></tr>{{ end }}</tbody>
+</table>
+</article>
+{{ template "tail" . }}

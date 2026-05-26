@@ -1,0 +1,15 @@
+{{ define "tail" }}
+</main>
+{{ template "footer" . }}
+{{ template "side_menu" . }}
+{{ template "user_menu" . }}
+<script>
+(function(){
+    var l=document.getElementById('loading-wrap');
+    document.querySelectorAll('form').forEach(function(f){f.addEventListener('submit',function(){l.style.display='flex'})});
+    window.addEventListener('load',function(){l.style.display='none'});
+})();
+</script>
+</body>
+</html>
+{{ end }}

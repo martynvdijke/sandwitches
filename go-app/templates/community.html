@@ -1,0 +1,22 @@
+{{ template "head" . }}{{ template "navbar" . }}
+<div class="space"></div>
+<article class="round elevate">
+<div class="padding">
+<h4 class="center-align">Submit a Recipe</h4>
+<form method="post">
+{{ .csrf_token }}
+<div class="field label border round"><input type="text" name="title" required><label>Title</label></div>
+<div class="field textarea label border round"><textarea name="description"></textarea><label>Description</label></div>
+<div class="field textarea label border round"><textarea name="ingredients"></textarea><label>Ingredients</label></div>
+<div class="field textarea label border round"><textarea name="instructions"></textarea><label>Instructions</label></div>
+<div class="field label border round"><input type="text" name="tags_string" placeholder="spicy, vegan, quick"><label>Tags (comma separated)</label></div>
+<div class="grid"><div class="s12 m6"><div class="field label border round"><input type="number" name="servings" value="1" min="1"><label>Servings</label></div></div><div class="s12 m6"><div class="field label border round"><input type="number" name="price" step="0.01"><label>Price</label></div></div></div>
+<div class="space"></div>
+<button type="submit" class="button primary round"><i>save</i><span>Submit Recipe</span></button>
+</form>
+</div>
+</article>
+<div class="space"></div>
+<h4>Community Recipes</h4>
+<div class="grid">{{ range .recipes }}<div class="s12 m6 l4"><a href="/recipes/{{ .Slug }}"><article class="round elevate no-padding">{{ if .Image }}<img src="{{ .Image }}" class="responsive top-round" style="height:180px;object-fit:cover" alt="{{ .Title }}">{{ end }}<div class="padding"><h6>{{ .Title }}{{ if not .IsApproved }} <span class="chip small">Pending</span>{{ end }}</h6></div></article></a></div>{{ end }}</div>
+{{ template "tail" . }}

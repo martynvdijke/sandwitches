@@ -26,6 +26,10 @@ jobs:
       attestations: write
       id-token: write
 
+    outputs:
+      new_release_published: ${{ steps.semantic.outputs.new_release_published }}
+      new_release_version: ${{ steps.semantic.outputs.new_release_version }}
+
     steps:
       - name: Login to Docker Hub
         uses: docker/login-action@v4
@@ -52,6 +56,7 @@ jobs:
         uses: astral-sh/setup-uv@v8.1.0
 
       - name: Semantic Release
+        id: semantic
         uses: cycjimmy/semantic-release-action@v6
         with:
           extra_plugins: |
@@ -88,3 +93,37 @@ jobs:
           docker tag martynvandijke/sandwitches:latest ghcr.io/martynvdijke/sandwitches:${{ steps.uv_version.outputs.version }}
           docker push martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}
           docker push ghcr.io/martynvdijke/sandwitches:${{ steps.uv_version.outputs.version }}
+
+  notify:
+    needs: [ci, release]
+    if: ${{ always() }}
+    name: Gotify Notification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release Published Notification
+        if: needs.ci.result == 'success' && needs.release.result == 'success' && needs.release.outputs.new_release_published == 'true'
+        uses: eikendev/gotify-action@master
+        with:
+          gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
+          gotify_app_token: ${{ secrets.GOTIFY_APP_TOKEN }}
+          notification_title: '${{ github.repository }} Release Published - ${{ needs.release.outputs.new_release_version }}'
+          notification_message: '${{ github.repository }}: Version ${{ needs.release.outputs.new_release_version }} was successfully released.'
+
+      - name: No Release Needed Notification
+        if: needs.ci.result == 'success' && needs.release.result == 'success' && needs.release.outputs.new_release_published != 'true'
+        uses: eikendev/gotify-action@master
+        with:
+          gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
+          gotify_app_token: ${{ secrets.GOTIFY_APP_TOKEN }}
+          notification_title: '${{ github.repository }} Release - Up to Date'
+          notification_message: 'Workflow passed but no new release was published.'
+
+      - name: Failure Notification
+        if: needs.ci.result != 'success' || needs.release.result != 'success'
+        uses: eikendev/gotify-action@master
+        with:
+          gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
+          gotify_app_token: ${{ secrets.GOTIFY_APP_TOKEN }}
+          notification_title: 'Release Failed'
+          notification_message: 'The release workflow has failed. ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          notification_priority: 5
