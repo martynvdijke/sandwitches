@@ -895,7 +895,7 @@ wheels = [
 
 [[package]]
 name = "sandwitches"
-version = "2.12.22"
+version = "2.12.23"
 source = { editable = "." }
 dependencies = [
     { name = "django" },
