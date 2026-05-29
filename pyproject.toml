@@ -1,6 +1,6 @@
 [project]
 name = "sandwitches"
-version = "2.12.23"
+version = "2.12.24"
 description = "Add your description here"
 readme = "README.md"
 authors = [
