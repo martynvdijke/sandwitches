@@ -606,6 +606,8 @@ func AdminSettings(c *gin.Context) {
 		setting.LogLevel = c.PostForm("log_level")
 		setting.GotifyURL = c.PostForm("gotify_url")
 		setting.GotifyToken = c.PostForm("gotify_token")
+		setting.OTelEndpoint = c.PostForm("otel_endpoint")
+		setting.OTelEnabled = c.PostForm("otel_enabled") == "on"
 		database.DB.Save(&setting)
 		utils.AddFlash(c, "success", "Settings saved")
 		c.Redirect(http.StatusFound, "/dashboard/settings")

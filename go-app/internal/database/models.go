@@ -25,6 +25,8 @@ type Setting struct {
 	LogLevel         string `gorm:"size:10;default:INFO"`
 	GotifyURL        string
 	GotifyToken      string
+	OTelEndpoint     string `gorm:"size:255"`
+	OTelEnabled      bool   `gorm:"default:false"`
 }
 
 func (Setting) TableName() string { return "settings" }
