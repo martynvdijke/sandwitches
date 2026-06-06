@@ -2,6 +2,18 @@
 <div class="space"></div>
 <h4 class="upper center-align">Your Favorites</h4>
 <div class="space"></div>
+<form method="get" class="grid" style="gap:8px" id="filter-form"
+      hx-get="/favorites" hx-target="#recipe-grid" hx-trigger="change delay:300ms, submit" hx-swap="outerHTML" hx-push-url="true">
+  <div class="s12 m3"><div class="field label border round small"><input type="search" name="q" value="{{ .q }}"><label>Search</label></div></div>
+  <div class="s12 m3"><div class="field label border round small"><select name="sort"><option value="">Newest</option><option value="date_asc" {{ if eq "date_asc" .sort }}selected{{ end }}>Oldest</option><option value="rating" {{ if eq "rating" .sort }}selected{{ end }}>Top Rated</option><option value="user" {{ if eq "user" .sort }}selected{{ end }}>Uploader A-Z</option></select><label>Sort</label></div></div>
+  <div class="s12 m2"><div class="field label border round small"><input type="date" name="date_start" value="{{ .date_start }}"><label>From</label></div></div>
+  <div class="s12 m2"><div class="field label border round small"><input type="date" name="date_end" value="{{ .date_end }}"><label>To</label></div></div>
+  {{ if .uploaders }}
+  <div class="s12 m2"><div class="field label border round small"><select name="uploader"><option value="">All Uploaders</option>{{ range .uploaders }}<option value="{{ . }}" {{ if eq $.uploader . }}selected{{ end }}>{{ . }}</option>{{ end }}</select><label>Uploader</label></div></div>
+  {{ end }}
+  <div class="s12 m2"><div class="field label border round small"><select name="tag" multiple><option value="">All Tags</option>{{ range .tags }}<option value="{{ .Name }}" {{ if has .Name $.selected_tags }}selected{{ end }}>{{ .Name }}</option>{{ end }}</select><label>Tags</label></div></div>
+  <div class="s12 m1"><button type="submit" class="button circle primary"><i>search</i></button></div>
+</form>
 <div class="grid" id="recipe-grid">{{ template "partials/recipe_list.html" dict "recipes" .recipes "user" .user }}</div>
 {{ if .pagination }}
 {{ $q := .q }}{{ $sort := .sort }}{{ $date_start := .date_start }}{{ $date_end := .date_end }}{{ $uploader := .uploader }}

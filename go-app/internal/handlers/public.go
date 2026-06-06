@@ -62,6 +62,8 @@ func Index(c *gin.Context) {
 		query = query.Order("recipes.created_at ASC")
 	case "rating":
 		query = query.Order("(SELECT COALESCE(AVG(score), 0) FROM ratings WHERE ratings.recipe_id = recipes.id) DESC, recipes.created_at DESC")
+	case "user":
+		query = query.Order("(SELECT username FROM users WHERE users.id = recipes.uploaded_by_id) ASC, recipes.created_at DESC")
 	default:
 		query = query.Order("recipes.created_at DESC")
 	}
@@ -83,6 +85,21 @@ func Index(c *gin.Context) {
 
 	var allTags []database.Tag
 	database.DB.Find(&allTags)
+
+	if c.GetHeader("HX-Request") != "" {
+		c.HTML(http.StatusOK, "partials/recipe_list.html", gin.H{
+			"recipes":    recipes,
+			"user":       user,
+			"pagination": pagination,
+			"q":          c.Query("q"),
+			"sort":       sort,
+			"date_start": c.Query("date_start"),
+			"date_end":   c.Query("date_end"),
+			"uploader":   c.Query("uploader"),
+			"favorites":  c.Query("favorites"),
+		})
+		return
+	}
 
 	c.HTML(http.StatusOK, "index.html", td.With("recipes", recipes).
 		With("highlighted_recipes", highlighted).
@@ -282,6 +299,15 @@ func Favorites(c *gin.Context) {
 		Group("tags.id").
 		Find(&allTags)
 
+	if c.GetHeader("HX-Request") != "" {
+		c.HTML(http.StatusOK, "partials/recipe_list.html", gin.H{
+			"recipes":    recipes,
+			"user":       user,
+			"pagination": pagination,
+		})
+		return
+	}
+
 	c.HTML(http.StatusOK, "favorites.html", td.With("recipes", recipes).
 		With("pagination", pagination).
 		With("uploaders", uploaders).
@@ -416,6 +442,12 @@ func AddToCart(c *gin.Context) {
 		return
 	}
 
+	if recipe.Price == nil {
+		utils.AddFlash(c, "error", "This recipe cannot be ordered because it has no price.")
+		c.Redirect(http.StatusFound, "/recipes/"+recipe.Slug)
+		return
+	}
+
 	var item database.CartItem
 	if err := database.DB.Where("user_id = ? AND recipe_id = ?", user.ID, recipe.ID).First(&item).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -457,6 +489,54 @@ func UpdateCartQuantity(c *gin.Context) {
 		database.DB.Model(&database.CartItem{}).Where("id = ? AND user_id = ?", id, user.ID).Update("quantity", qty)
 	}
 	c.Redirect(http.StatusFound, "/cart")
+}
+
+func OrderRecipe(c *gin.Context) {
+	user := middleware.GetUser(c)
+	if user == nil {
+		c.Redirect(http.StatusFound, "/login")
+		return
+	}
+
+	id, _ := strconv.Atoi(c.Param("id"))
+	var recipe database.Recipe
+	if err := database.DB.First(&recipe, id).Error; err != nil {
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+
+	if recipe.Price == nil {
+		utils.AddFlash(c, "error", "This recipe cannot be ordered because it has no price.")
+		c.Redirect(http.StatusFound, "/recipes/"+recipe.Slug)
+		return
+	}
+
+	tx := database.DB.Begin()
+	order := database.Order{UserID: user.ID, Status: "PENDING"}
+	if recipe.Price != nil {
+		order.TotalPrice = *recipe.Price
+	}
+	if err := tx.Create(&order).Error; err != nil {
+		tx.Rollback()
+		utils.AddFlash(c, "error", "Could not create order")
+		c.Redirect(http.StatusFound, "/recipes/"+recipe.Slug)
+		return
+	}
+
+	tx.Create(&database.OrderItem{
+		OrderID:  order.ID,
+		RecipeID: recipe.ID,
+		Quantity: 1,
+		Price:    *recipe.Price,
+	})
+
+	tx.Model(&database.Recipe{}).Where("id = ?", recipe.ID).
+		UpdateColumn("daily_orders_count", gorm.Expr("daily_orders_count + 1"))
+	tx.Commit()
+
+	tasks.EnqueueNotifyOrder(order.ID)
+	utils.AddFlash(c, "success", "Order placed successfully!")
+	c.Redirect(http.StatusFound, "/profile")
 }
 
 func Checkout(c *gin.Context) {

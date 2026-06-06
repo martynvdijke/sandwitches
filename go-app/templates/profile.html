@@ -11,10 +11,44 @@
 </form>
 <div class="space"></div>
 <h4>Order History</h4>
+<form method="get" class="grid" style="gap:8px">
+  <div class="s12 m4">
+    <div class="field label border round small">
+      <select name="status">
+        <option value="">All Statuses</option>
+        {{ range .status_choices }}
+        <option value="{{ .Code }}" {{ if eq $.current_status .Code }}selected{{ end }}>{{ .Label }}</option>
+        {{ end }}
+      </select>
+      <label>Filter by Status</label>
+    </div>
+  </div>
+  <div class="s12 m4">
+    <div class="field label border round small">
+      <select name="sort">
+        <option value="" {{ if eq "" .current_sort }}selected{{ end }}>Newest First</option>
+        <option value="date_asc" {{ if eq "date_asc" .current_sort }}selected{{ end }}>Oldest First</option>
+        <option value="price_asc" {{ if eq "price_asc" .current_sort }}selected{{ end }}>Price Low-High</option>
+        <option value="price_desc" {{ if eq "price_desc" .current_sort }}selected{{ end }}>Price High-Low</option>
+      </select>
+      <label>Sort by</label>
+    </div>
+  </div>
+  <div class="s12 m2">
+    <button type="submit" class="button primary round">Filter</button>
+  </div>
+</form>
 {{ if .orders }}
 <table class="border striped">
 <thead><tr><th>ID</th><th>Date</th><th>Status</th><th>Price</th><th></th></tr></thead>
 <tbody>{{ range .orders }}<tr><td>{{ .ID }}</td><td>{{ .CreatedAt.Format "02/01/2006" }}</td><td><span class="chip">{{ .Status }}</span></td><td>{{ printf "%.2f" .TotalPrice }} &euro;</td><td><a href="/orders/{{ .ID }}">View</a></td></tr>{{ end }}</tbody>
 </table>
+{{ if .pagination }}
+<div class="pagination">
+  {{ if .pagination.HasPrev }}<a href="?page={{ .pagination.PrevPage }}&status={{ .current_status }}&sort={{ .current_sort }}">&laquo; Prev</a>{{ end }}
+  {{ range .pagination.Pages }}{{ if eq . $.pagination.Page }}<span class="active">{{ . }}</span>{{ else }}<a href="?page={{ . }}&status={{ $.current_status }}&sort={{ $.current_sort }}">{{ . }}</a>{{ end }}{{ end }}
+  {{ if .pagination.HasNext }}<a href="?page={{ .pagination.NextPage }}&status={{ .current_status }}&sort={{ .current_sort }}">Next &raquo;</a>{{ end }}
+</div>
+{{ end }}
 {{ else }}<p>No orders found.</p>{{ end }}
 {{ template "tail" . }}

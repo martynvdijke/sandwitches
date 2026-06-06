@@ -447,8 +447,14 @@ func AdminUserEdit(c *gin.Context) {
 
 func AdminUserDelete(c *gin.Context) {
 	td := utils.NewTemplateData(c)
+	currentUser := middleware.GetUser(c)
 	id, _ := strconv.Atoi(c.Param("id"))
 	if c.Request.Method == "POST" {
+		if currentUser != nil && currentUser.ID == uint(id) {
+			utils.AddFlash(c, "error", "You cannot delete yourself.")
+			c.Redirect(http.StatusFound, "/dashboard/users")
+			return
+		}
 		database.DB.Delete(&database.User{}, id)
 		utils.AddFlash(c, "success", "User deleted")
 		c.Redirect(http.StatusFound, "/dashboard/users")

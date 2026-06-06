@@ -106,6 +106,7 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 		"default":    func(def, val interface{}) interface{} { if val == nil || val == "" { return def }; return val },
 		"first":      func(s string) string { if len(s) > 0 { return string(s[0]) } else { return "" } },
 		"urlencode":  func(s string) string { return strings.ReplaceAll(s, " ", "+") },
+		"has": func(s string, list []string) bool { for _, v := range list { if v == s { return true }; }; return false },
 		"floatmul":   func(a float64, b int) float64 { return a * float64(b) },
 		"striptags":  func(s string) string { return strings.Map(func(r rune) rune { if r == '<' || r == '>' { return -1 }; return r }, s) },
 		"truncatechars": func(n int, s string) string { runes := []rune(s); if len(runes) > n { return string(runes[:n]) + "..." }; return s },
@@ -217,6 +218,8 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 		web.GET("/cart/remove/:id", middleware.AuthRequired(), handlers.RemoveFromCart)
 		web.POST("/cart/update/:id", middleware.AuthRequired(), handlers.UpdateCartQuantity)
 		web.POST("/cart/checkout", middleware.AuthRequired(), handlers.Checkout)
+
+		web.POST("/recipes/order/:id", middleware.AuthRequired(), handlers.OrderRecipe)
 
 		web.GET("/recipes/rate/:id", middleware.AuthRequired(), handlers.RecipeRate)
 		web.POST("/recipes/rate/:id", middleware.AuthRequired(), handlers.RecipeRate)
