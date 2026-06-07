@@ -33,3 +33,20 @@ jobs:
       - run: go mod download
       - run: go vet ./...
       - run: go test -v ./...
+  otel:
+    permissions:
+      contents: read # Required. To access the private repository
+      actions: read # Required. To read workflow runs
+      pull-requests: read # Optional. To read PR labels
+      checks: read # Optional. To read run annotations
+    if: always()
+    name: OpenTelemetry Export Trace
+    runs-on: ubuntu-latest
+    needs: [test-python, test-go]
+    steps:
+      - name: Export workflow
+        uses: corentinmusard/otel-cicd-action@v4
+        with:
+          otlpEndpoint: ${{ secrets.OTLP_ENDPOINT }}
+          otlpHeaders: ${{ secrets.OTLP_HEADERS }}
+          otelToken: ${{ secrets.OTEL_TOKEN }}
