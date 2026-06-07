@@ -34,4 +34,5 @@ jobs:
         with:
           otlpEndpoint: ${{ secrets.OTLP_ENDPOINT }}
           otlpHeaders: ${{ secrets.OTLP_HEADERS }}
+          otlpAuthorization: ${{ secrets.OTLP_AUTH_TOKEN }}
           otelToken: ${{ secrets.OTEL_TOKEN }}
