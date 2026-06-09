@@ -351,7 +351,10 @@ func TestIndexPage(t *testing.T) {
 	communityUser := createTestUser(t, "community_i", "password123", false, false, "community")
 	createTestRecipe(t, "CommunityRecipe", communityUser, true)
 
-	resp, _ := newClient().Get(srv.URL + "/")
+	resp, err := newClient().Get(srv.URL + "/")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
@@ -369,7 +372,10 @@ func TestIndexPageRedirectsToSetup(t *testing.T) {
 		t.Skip("superuser already exists")
 	}
 
-	resp, _ := newClient().Get(srv.URL + "/")
+	resp, err := newClient().Get(srv.URL + "/")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusFound {
@@ -385,7 +391,10 @@ func TestIndexPageFiltering(t *testing.T) {
 	createTestRecipe(t, "PastaCarbonara", adminUser, true)
 	createTestRecipe(t, "SushiRolls", adminUser, true)
 
-	resp, _ := newClient().Get(srv.URL + "/?q=Pasta")
+	resp, err := newClient().Get(srv.URL + "/?q=Pasta")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
@@ -405,7 +414,10 @@ func TestIndexSorting(t *testing.T) {
 	r2.CreatedAt = time.Now()
 	database.DB.Save(r2)
 
-	resp, _ := newClient().Get(srv.URL + "/?sort=date_asc")
+	resp, err := newClient().Get(srv.URL + "/?sort=date_asc")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
@@ -420,7 +432,10 @@ func TestRecipeDetail(t *testing.T) {
 	adminUser := createTestUser(t, "detail_user", "password123", true, true, "admin")
 	recipe := createTestRecipe(t, "SpecialBrownie", adminUser, true)
 
-	resp, _ := newClient().Get(srv.URL + "/recipes/" + recipe.Slug)
+	resp, err := newClient().Get(srv.URL + "/recipes/" + recipe.Slug)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
@@ -435,7 +450,10 @@ func TestCommunityRecipeDetailHidden(t *testing.T) {
 	communityUser := createTestUser(t, "community_det", "password123", false, false, "community")
 	recipe := createTestRecipe(t, "HiddenRecipe", communityUser, false)
 
-	resp, _ := newClient().Get(srv.URL + "/recipes/" + recipe.Slug)
+	resp, err := newClient().Get(srv.URL + "/recipes/" + recipe.Slug)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusNotFound {
@@ -447,7 +465,10 @@ func TestSetupPage(t *testing.T) {
 	srv, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	resp, _ := newClient().Get(srv.URL + "/setup")
+	resp, err := newClient().Get(srv.URL + "/setup")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
@@ -491,7 +512,10 @@ func TestSetupRedirectWhenSuperuserExists(t *testing.T) {
 
 	createTestUser(t, "existing_admin", "password123", true, true, "admin")
 
-	resp, _ := newClient().Get(srv.URL + "/setup")
+	resp, err := newClient().Get(srv.URL + "/setup")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusFound {
@@ -646,7 +670,10 @@ func TestFavoritesRequiresAuth(t *testing.T) {
 	srv, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	resp, _ := newClient().Get(srv.URL + "/favorites")
+	resp, err := newClient().Get(srv.URL + "/favorites")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusFound {
@@ -809,7 +836,10 @@ func TestOrderTracker(t *testing.T) {
 	order := database.Order{UserID: user.ID, Status: "PENDING"}
 	database.DB.Create(&order)
 
-	resp, _ := newClient().Get(srv.URL + "/orders/track/" + order.TrackingToken)
+	resp, err := newClient().Get(srv.URL + "/orders/track/" + order.TrackingToken)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
@@ -821,7 +851,10 @@ func TestOrderTrackerInvalidToken(t *testing.T) {
 	srv, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	resp, _ := newClient().Get(srv.URL + "/orders/track/nonexistent-token")
+	resp, err := newClient().Get(srv.URL + "/orders/track/nonexistent-token")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusNotFound {
@@ -921,7 +954,10 @@ func TestRSSFeed(t *testing.T) {
 	adminUser := createTestUser(t, "rss_admin", "password123", true, true, "admin")
 	createTestRecipe(t, "RSSRecipe", adminUser, true)
 
-	resp, _ := newClient().Get(srv.URL + "/feeds/latest")
+	resp, err := newClient().Get(srv.URL + "/feeds/latest")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
