@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/martynvdijke/sandwitches#readme",
   "dependencies": {
-    "@babel/preset-env": "^7.28.6",
+    "@babel/preset-env": "^8.0.0",
     "babel-loader": "^10.0.0",
     "beercss": "^4.0.0",
     "chart.js": "^4.5.1",
