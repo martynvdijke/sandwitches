@@ -49,7 +49,7 @@ jobs:
           python-version: "3.14"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v8.3.1
+        uses: astral-sh/setup-uv@v8.3.2
 
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v6
