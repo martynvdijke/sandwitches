@@ -1,3 +1,18 @@
+# [2.13.0](https://github.com/martynvdijke/sandwitches/compare/v2.12.26...v2.13.0) (2026-07-12)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([f2e07b2](https://github.com/martynvdijke/sandwitches/commit/f2e07b299b9fe5f1c4e1182af956ee9539692cea))
+* **deps:** update babel monorepo to v8 ([8afd9eb](https://github.com/martynvdijke/sandwitches/commit/8afd9eb172d6ed998f58657b0c7e25cc72df4240))
+* remove duplicate Umami script tag in admin base template ([98b093b](https://github.com/martynvdijke/sandwitches/commit/98b093ba94a7eb53ac5ed02541cbc933449d89a0))
+
+
+### Features
+
+* add e-ink mode with high-contrast CSS, cooking mode, and toggle ([2b3c49b](https://github.com/martynvdijke/sandwitches/commit/2b3c49b58feb2d505d33af735cfd71e96596e24f)), closes [hi#contrast](https://github.com/hi/issues/contrast) [hi#contrast](https://github.com/hi/issues/contrast)
+* remove experimental Flutter mobile app and its CI job ([a3f5c8d](https://github.com/martynvdijke/sandwitches/commit/a3f5c8d69843c12b6a1d7309df10904fcf3cdb90))
+
 ## [2.12.26](https://github.com/martynvdijke/sandwitches/compare/v2.12.25...v2.12.26) (2026-06-09)
 
 ## [2.12.25](https://github.com/martynvdijke/sandwitches/compare/v2.12.24...v2.12.25) (2026-06-04)
