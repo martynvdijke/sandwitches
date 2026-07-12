@@ -1,0 +1,6 @@
+schema: spec-driven
+context: |
+  Tech stack: Django (Python), PostgreSQL, Webpack, jQuery/Bootstrap frontend
+  Architecture: Django monolith with webpack-compiled JS/CSS assets
+  Frontend: Bootstrap-based responsive UI with jQuery
+  Domain: Personal recipe management — browsing, searching, rating, meal planning

@@ -1,0 +1,61 @@
+{% extends "base_beer.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Cooking" %}: {{ recipe.title }} — Sandwitch{% endblock %}
+
+{% block body_class %}eink-mode{% endblock %}
+
+{% block content %}
+<div class="cooking-mode">
+    <div class="cooking-header">
+        <h2>{{ recipe.title }}</h2>
+    </div>
+
+    <div class="cooking-content">
+        {% if ingredients %}
+        <div class="cooking-ingredients">
+            <h3>{% trans "Ingredients" %}</h3>
+            <ul>
+                {% for item in ingredients %}
+                <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if steps %}
+        <div class="cooking-step-number">
+            {% trans "Step" %} {{ current_step }} {% trans "of" %} {{ total_steps }}
+        </div>
+
+        <div class="cooking-step-text">
+            {{ steps|slice:current_step|last }}
+        </div>
+
+        <input type="hidden" id="cooking-step-input" value="{{ current_step }}" data-total-steps="{{ total_steps }}">
+        {% else %}
+        <div class="cooking-step-text">
+            <p>{% trans "No instructions available for this recipe." %}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="cooking-nav">
+        <button onclick="prevStep()" {% if current_step <= 1 %}disabled{% endif %}>
+            <i>chevron_left</i> {% trans "Previous" %}
+        </button>
+        <button onclick="nextStep()" {% if current_step >= total_steps %}disabled{% endif %}>
+            {% trans "Next" %} <i>chevron_right</i>
+        </button>
+    </div>
+
+    <div class="cooking-actions">
+        <a href="{{ recipe.get_absolute_url }}{% if eink_mode %}?eink=1{% endif %}">
+            {% trans "Show All Steps" %}
+        </a>
+        <a href="{% url 'index' %}{% if eink_mode %}?eink=1{% endif %}">
+            {% trans "Back to Recipes" %}
+        </a>
+    </div>
+</div>
+{% endblock %}

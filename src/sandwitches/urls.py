@@ -54,6 +54,7 @@ urlpatterns = [
 
 urlpatterns += i18n_patterns(
     path("recipes/<slug:slug>/", views.recipe_detail, name="recipe_detail"),
+    path("recipes/<slug:slug>/cooking/", views.recipe_cooking, name="recipe_cooking"),
     path("setup/", views.setup, name="setup"),
     path("recipes/<int:pk>/rate/", views.recipe_rate, name="recipe_rate"),
     path("recipes/<int:pk>/order/", views.order_recipe, name="order_recipe"),

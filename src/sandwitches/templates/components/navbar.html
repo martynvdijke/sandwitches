@@ -22,6 +22,9 @@
       <div class="chip circle large primary-container">{{ user.first_name|first|default:user.username|first|upper }}</div>
       {% endif %}
     </a>
+    <a href="#" onclick="toggleEinkMode(); return false;" class="button circle transparent" title="{% trans 'Toggle E-Ink Mode' %}">
+      <i>{% if eink_mode %}light_mode{% else %}dark_mode{% endif %}</i>
+    </a>
     <a href="{% url 'user_settings' %}" class="{% if request.resolver_match.url_name == 'user_settings' %}active{% endif %}">
       <i>account_circle</i>
     </a>
