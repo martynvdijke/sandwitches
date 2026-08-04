@@ -1,3 +1,10 @@
+## [2.13.8](https://github.com/martynvdijke/sandwitches/compare/v2.13.7...v2.13.8) (2026-08-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency beercss to v5 ([be011f3](https://github.com/martynvdijke/sandwitches/commit/be011f3722579196e4dbb5f2b8afcc00caa85d86))
+
 ## [2.13.7](https://github.com/martynvdijke/sandwitches/compare/v2.13.6...v2.13.7) (2026-07-26)
 
 ## [2.13.6](https://github.com/martynvdijke/sandwitches/compare/v2.13.5...v2.13.6) (2026-07-26)
