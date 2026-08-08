@@ -110,6 +110,7 @@ TEMPLATES = [
                 "django.template.context_processors.csrf",
                 "django.template.context_processors.i18n",
                 "sandwitches.context_processors.umami",
+                "sandwitches.context_processors.eink_mode",
             ],
         },
     },

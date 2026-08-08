@@ -85,7 +85,7 @@ class User(AbstractUser):
     )
     theme = models.CharField(
         max_length=10,
-        choices=[("light", "Light"), ("dark", "Dark")],
+        choices=[("light", "Light"), ("dark", "Dark"), ("eink", "E-Ink")],
         default="light",
     )
     favorites = models.ManyToManyField(

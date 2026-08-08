@@ -153,6 +153,13 @@
                 <span>{% trans "Edit Recipe" %}</span>
             </a>
             {% endif %}
+            {% if eink_mode %}
+            <div class="space"></div>
+            <a href="{% url 'recipe_cooking' recipe.slug %}?step=1" class="button primary border round width-100 center-align">
+                <i>play_arrow</i>
+                <span>{% trans "Cooking Mode" %}</span>
+            </a>
+            {% endif %}
         </div>
      </article>
   </aside>

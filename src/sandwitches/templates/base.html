@@ -50,7 +50,7 @@
     <script defer src="https://{{ UMAMI_HOST }}/script.js" data-website-id="{{ UMAMI_WEBSITE_ID }}"></script>
     {% endif %}
   </head>
-  <body class="{% block body_class %}{% endblock %} {% if user.is_authenticated %}{{ user.theme }}{% endif %}">
+  <body class="{% block body_class %}{% endblock %} {% if user.is_authenticated %}{{ user.theme }}{% endif %} {% if eink_mode %}eink-mode{% endif %}">
     <div id="loading-sandwich" class="loading-sandwich-container">
         <svg class="loading-sandwich-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />

@@ -1,10 +1,13 @@
 name: CI
 
 on:
+  workflow_call:
   push:
-    branches: [master, main]
+    branches-ignore:
+      - 'main'
   pull_request:
-    branches: [master, main]
+    branches:
+      - "**"
 
 jobs:
   test-python:
@@ -17,8 +20,18 @@ jobs:
       - uses: astral-sh/setup-uv@v8
         with:
           version: "latest"
-      - run: uv sync --dev
-      - run: uv run pytest
+      - uses: actions/setup-go@v6
+        with:
+          go-version: stable
+      - name: Build Go binary for UI tests
+        working-directory: go-app
+        run: go build -o sandwitches-go .
+      - name: Install Python dependencies
+        run: uv sync --dev
+      - name: Install Playwright browsers
+        run: uv run playwright install --with-deps chromium
+      - name: Run tests
+        run: uv run pytest
         env:
           SECRET_KEY: test-secret-key
 
@@ -35,12 +48,13 @@ jobs:
       - run: go mod download
       - run: go vet ./...
       - run: go test -v ./...
+
   otel:
     permissions:
-      contents: read # Required. To access the private repository
-      actions: read # Required. To read workflow runs
-      pull-requests: read # Optional. To read PR labels
-      checks: read # Optional. To read run annotations
+      contents: read
+      actions: read
+      pull-requests: read
+      checks: read
     if: always()
     name: OpenTelemetry Export Trace
     runs-on: ubuntu-latest

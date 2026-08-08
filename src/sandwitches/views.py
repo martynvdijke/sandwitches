@@ -1105,6 +1105,40 @@ def order_tracker(request, token):
     )
 
 
+def recipe_cooking(request, slug):
+    """E-ink cooking mode: step-by-step recipe view."""
+    recipe = get_object_or_404(Recipe, slug=slug)
+
+    # Parse instructions into steps
+    raw_steps = recipe.instructions.strip().split("\n")
+    steps = [s.strip() for s in raw_steps if s.strip()]
+    # Filter out markdown list markers
+    steps = [
+        s.lstrip("- ").lstrip("* ").lstrip("1. ").lstrip("0. ").strip() for s in steps
+    ]
+
+    # Parse ingredients into a list
+    raw_ingredients = recipe.ingredients.strip().split("\n")
+    ingredients = [i.strip() for i in raw_ingredients if i.strip()]
+    ingredients = [i.lstrip("- ").lstrip("* ").strip() for i in ingredients]
+
+    current_step = int(request.GET.get("step", 1))
+    current_step = max(1, min(current_step, len(steps)))
+
+    return render(
+        request,
+        "cooking.html",
+        {
+            "recipe": recipe,
+            "steps": steps,
+            "ingredients": ingredients,
+            "current_step": current_step,
+            "total_steps": len(steps),
+            "version": sandwitches_version,
+        },
+    )
+
+
 @login_required
 def view_cart(request):
     cart_items = CartItem.objects.filter(user=request.user).select_related("recipe")  # ty:ignore[unresolved-attribute]
