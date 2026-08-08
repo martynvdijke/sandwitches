@@ -134,6 +134,10 @@ dist
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
 
 src/static/dist/*
+go-app/static/dist/*
 setup.sh
 main
-db.*go-app/sandwitches-go
+db.*
+go-app/sandwitches
+go-app/sandwitches-go
+go-app/tmp/

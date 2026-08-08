@@ -7,7 +7,20 @@ import urllib.request
 
 import pytest
 
-GO_BINARY = os.path.join(os.path.dirname(__file__), "..", "go-app", "sandwitches-go")
+GO_APP_DIR = os.path.join(os.path.dirname(__file__), "..", "go-app")
+GO_BINARY = os.path.join(
+    os.environ.get("GO_BINARY", os.path.join(GO_APP_DIR, "sandwitches-go"))
+)
+
+
+def _build_binary():
+    """Build the Go binary from source so tests always run against current code."""
+    subprocess.run(
+        ["go", "build", "-o", GO_BINARY, "."],
+        cwd=GO_APP_DIR,
+        check=True,
+        capture_output=True,
+    )
 
 
 class GoServer:
@@ -31,7 +44,7 @@ class GoServer:
         self.process = subprocess.Popen(
             [GO_BINARY],
             env=env,
-            cwd=os.path.join(os.path.dirname(__file__), "..", "go-app"),
+            cwd=GO_APP_DIR,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -80,7 +93,7 @@ def _reset_db(server):
 @pytest.fixture(scope="session")
 def go_server():
     if not os.path.exists(GO_BINARY):
-        pytest.skip(f"Go binary not found at {GO_BINARY}")
+        _build_binary()
     server = GoServer()
     server.start()
     yield server
