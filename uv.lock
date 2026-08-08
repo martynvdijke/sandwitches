@@ -1,11 +1,6 @@
 version = 1
 revision = 3
 requires-python = ">=3.12"
-resolution-markers = [
-    "python_full_version >= '3.14'",
-    "python_full_version == '3.13.*'",
-    "python_full_version < '3.13'",
-]
 
 [[package]]
 name = "certifi"
@@ -294,31 +289,8 @@ wheels = [
 
 [[package]]
 name = "sandwitches"
-<<<<<<< HEAD
-version = "2.13.8"
-source = { virtual = "." }
-=======
 version = "2.13.9"
-source = { editable = "." }
-dependencies = [
-    { name = "django" },
-    { name = "django-debug-toolbar" },
-    { name = "django-filter" },
-    { name = "django-imagekit" },
-    { name = "django-import-export" },
-    { name = "django-ninja" },
-    { name = "django-simple-history" },
-    { name = "django-solo" },
-    { name = "django-tasks" },
-    { name = "django-tasks-db" },
-    { name = "gunicorn" },
-    { name = "markdown" },
-    { name = "pillow" },
-    { name = "requests" },
-    { name = "uvicorn" },
-    { name = "whitenoise", extra = ["brotli"] },
-]
->>>>>>> origin/main
+source = { virtual = "." }
 
 [package.dev-dependencies]
 dev = [
