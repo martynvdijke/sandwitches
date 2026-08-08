@@ -1,54 +1,33 @@
 # Stage 1: Build static assets with Node.js
-FROM node:24 AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /build
 COPY package.json package-lock.json ./
 COPY webpack.config.js babel.config.json ./
-COPY src/static/ ./src/static/
+COPY go-app/static/ ./go-app/static/
 RUN npm install && npm run build
 
-# Stage 2: Python application
-FROM python:3.14
+# Stage 2: Build Go binary
+FROM golang:1.26-alpine AS go-builder
+RUN apk add --no-cache gcc musl-dev
+WORKDIR /build
+COPY go-app/go.mod go-app/go.sum ./
+RUN go mod download
+COPY go-app/ ./
+RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o /sandwitches .
 
-LABEL org.opencontainers.image.source=https://github.com/martynvdijke/sandwitches
-LABEL org.opencontainers.image.description="Sandwitches container image"
-LABEL org.opencontainers.image.licenses=MIT
-
-ARG UID=1000
-ARG GID=1000
-ARG USERNAME=app
-ARG GROUPNAME=app
-
-RUN groupadd -g ${GID} ${USERNAME} && \
-    useradd -m -u ${UID} -g ${GID} ${GROUPNAME} -s /bin/bash && \
-    apt-get update && apt-get install -y supervisor && \
-    mkdir /app
-WORKDIR /app
-
-# Set environment variables
-# Prevents Python from writing pyc files to disk
-ENV PYTHONDONTWRITEBYTECODE=1
-# Prevents Python from buffering stdout and stderr
-ENV PYTHONUNBUFFERED=1
-ENV PATH="/app/.venv/bin:$PATH"
-# Tunables for Gunicorn
-ENV GUNICORN_WORKERS=3
-ENV GUNICORN_THREADS=2
-
-RUN pip install --upgrade pip && pip install uv
-COPY uv.lock  /app/
-COPY pyproject.toml  /app/
-COPY . /app/
-COPY --from=builder /build/src/static/dist/ /app/src/static/dist/
+# Stage 3: Minimal runtime
+FROM alpine:3.22
+RUN apk add --no-cache ca-certificates supervisor
+COPY --from=go-builder /sandwitches /app/sandwitches
+COPY --from=builder /build/go-app/static/dist/ /app/static/dist/
+COPY go-app/static/ /app/static/
+COPY go-app/templates/ /app/templates/
+COPY go-app/locale/ /app/locale/
+COPY go-app/supervisord.conf /etc/supervisord.conf
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
-RUN uv sync --locked --no-dev
-
-RUN chown -R root:app /app
 ENTRYPOINT ["/app/entrypoint.sh"]
-
+WORKDIR /app
 EXPOSE 6270
-
-USER app
-
-CMD ["/bin/sh", "-c", "python src/manage.py collectstatic --noinput && python src/manage.py makemigrations sandwitches && python src/manage.py migrate && python src/manage.py collectstatic --noinput --clear && supervisord "]
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]

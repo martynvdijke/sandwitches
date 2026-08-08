@@ -3,7 +3,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: 'development', // Set to 'production' for production builds
-  entry: './src/static/js/index.js',
+  entry: './go-app/static/js/index.js',
   output: {
     path: path.resolve(__dirname, 'go-app/static/dist'),
     filename: 'main.js',

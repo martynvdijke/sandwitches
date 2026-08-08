@@ -34,7 +34,7 @@ tasks:
     desc: Build frontend assets with webpack
     cmd: npm run build
     sources:
-      - src/static/js/**/*.js
+      - go-app/static/js/**/*.js
       - webpack.config.js
       - package.json
     generates:

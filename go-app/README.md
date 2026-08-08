@@ -75,6 +75,7 @@ A full-featured recipe management platform with user accounts, shopping cart, or
 ### Docker (Recommended)
 
 ```bash
+# From the repository root
 docker build -t sandwitches-go .
 docker run -p 6270:6270 \
   -e SECRET_KEY=your-secret-key \
@@ -177,11 +178,11 @@ go-app/
 ├── static/                    # Static assets
 ├── locale/                    # i18n translation files
 ├── migrations/                # Database migrations
-├── Dockerfile                 # Multi-stage Docker build
 ├── supervisord.conf           # Supervisor process manager config
-├── webpack.config.js          # Webpack asset bundling config
 └── go.mod / go.sum            # Go module dependencies
 ```
+
+(The multi-stage Docker build lives in the repository root `Dockerfile`; build from the repo root with `docker build -t sandwitches-go .`.)
 
 ## API Endpoints
 

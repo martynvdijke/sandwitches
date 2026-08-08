@@ -1,6 +1,5 @@
-#!/usr/bin/env bash
-set -euo pipefail
-shopt -s nocasematch
+#!/bin/sh
+set -eu
 
 
 # SECRET_KEY must be set in production
@@ -17,9 +16,11 @@ fi
 
 # Validate CSRF_TRUSTED_ORIGINS entries (must start with http:// or https://)
 if [ -n "${CSRF_TRUSTED_ORIGINS:-}" ]; then
-  IFS=',' read -ra _origins <<< "$CSRF_TRUSTED_ORIGINS"
-  bad=()
-  for o in "${_origins[@]}"; do
+  bad=""
+  old_ifs="$IFS"
+  IFS=','
+  for o in ${CSRF_TRUSTED_ORIGINS}; do
+    IFS="$old_ifs"
     # trim whitespace
     origin="$(echo "$o" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
     if [ -z "$origin" ]; then
@@ -27,13 +28,12 @@ if [ -n "${CSRF_TRUSTED_ORIGINS:-}" ]; then
     fi
     case "$origin" in
       http://*|https://*) ;;
-      *)
-        bad+=("$origin")
-        ;;
+      *) bad="${bad} ${origin}" ;;
     esac
   done
-  if [ "${#bad[@]}" -ne 0 ]; then
-    echo "ERROR: Invalid CSRF_TRUSTED_ORIGINS entries (must start with http:// or https://): ${bad[*]}" >&2
+  IFS="$old_ifs"
+  if [ -n "$bad" ]; then
+    echo "ERROR: Invalid CSRF_TRUSTED_ORIGINS entries (must start with http:// or https://):${bad}" >&2
     exit 1
   fi
 else
