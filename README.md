@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/static/icons/banner.svg" alt="Sandwitches Banner" width="600px">
+  <img src="go-app/static/icons/banner.svg" alt="Sandwitches Banner" width="600px">
 </p>
 
 <h1 align="center">🥪 Sandwitches</h1>
@@ -15,30 +15,28 @@
   <a href="https://github.com/martynvdijke/sandwitches/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/martynvdijke/sandwitches" alt="License">
   </a>
-  <img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python Version">
-  <a href="https://github.com/astral-sh/ruff">
-    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff">
-  </a>
+  <img src="https://img.shields.io/badge/go-1.26+-blue.svg" alt="Go Version">
+  <img src="https://img.shields.io/badge/gin-gonic-green.svg" alt="Gin">
 </p>
 
 - [✨ Overview](#-overview)
 - [🎯 Features](#-features)
-  - [TRML](#trml)
+  - [TRMNL](#trmnl)
 - [📥 Getting Started](#-getting-started)
   - [Environment variables](#environment-variables)
 - [Development setup](#development-setup)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
-- [🧪 Testing \& Quality](#-testing--quality)
+- [🧪 Testing & Quality](#-testing--quality)
 
 ---
 
 ## ✨ Overview
 
-Sandwitches is a modern, recipe management platform built with **Django**.
+Sandwitches is a modern, recipe management platform built with **Go** (Gin, GORM, SQLite, HTMX).
 It is made as a hobby project for my girlfriend, who likes to make what I call "fancy" sandwiches (sandwiches that go beyond the Dutch normals), lucky to be me :).
 Sandwiches so good you will think they are haunted !.
-See wanted to have a way to advertise and share those sandwiches with the family and so I started coding making it happen, in the hopes of getting more fancy sandwiches.
+She wanted to have a way to advertise and share those sandwiches with the family and so I started coding making it happen, in the hopes of getting more fancy sandwiches.
 
 To view the live website go to [sandwitches.vandijke.xyz](https://sandwitches.vandijke.xyz)
 
@@ -51,19 +49,20 @@ Sandwitches comes packed with comprehensive features for recipe management, comm
 - **🍞 Recipe Management** - Upload and create sandwich recipes with images, ingredients, and instructions
 - **👥 Community Page** - Discover and browse sandwiches shared by community members
 - **🛒 Ordering System** - Browse recipes and place orders with cart functionality and order tracking
-- **⭐ Ratings & Reviews** - Rate recipes on a 0-10 scale with detailed comments
+- **⭐ Ratings & Reviews** - Rate recipes on a 1-5 scale with detailed comments
 - **🔌 REST API** - Full API access for recipes, tags, ratings, orders, and user management
 - **📊 Admin Dashboard** - Comprehensive admin interface for recipe approval and site management
 - **🌍 Multi-language Support** - Internationalization for multiple languages
 - **📱 Responsive Design** - Mobile-friendly interface with BeerCSS framework
+- **🖨️ E-Ink Mode** - High-contrast theme plus a step-by-step cooking mode for e-ink displays
 - **🔔 Notifications** - Email and Gotify push notification integration
 - **📈 Order Tracking** - Real-time order status tracking with unique tracking tokens
 - **📊 Analytics** - Umami analytics integration for tracking user behavior
-- **🖨️ TRML** – Official [TRML](https://trmnl.com/) plugin support.
+- **🖨️ TRMNL** - Official [TRMNL](https://trmnl.com/) plugin support (templates in `trmnl/`)
 
-### TRML
+### TRMNL
 
-If you happen to have a TRML laying arround be sure to check out this [recipe](https://trmnl.com/recipes/247547) which is an official plugin for your TRML.
+If you happen to have a TRMNL lying around be sure to check out this [recipe](https://trmnl.com/recipes/247547) which is an official plugin for your TRMNL. The Liquid templates live in the [`trmnl/`](./trmnl/) directory and poll the `/api/v1/recipe-of-the-day` and `/api/v1/users` endpoints.
 
 ## 📥 Getting Started
 
@@ -74,14 +73,14 @@ services:
     container_name: sandwitches
     environment:
      - ALLOWED_HOSTS=localhost,127.0.0.1,[::1]
-     - CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+     - CSRF_TRUSTED_ORIGINS=http://localhost:6270,http://127.0.0.1:6270
      - SECRET_KEY=superdupersecretkey
      - DATABASE_FILE=/config/db.sqlite3
      - MEDIA_ROOT=/config/media
     ports:
       - 6270:6270
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6270/api/ping"]
+      test: ["CMD", "curl", "-f", "http://localhost:6270/api/v1/ping"]
       interval: 5s
       timeout: 10s
       retries: 3
@@ -96,11 +95,16 @@ Below is a list of all supported environment variables.
 
 | **Variable**         | **Required** | **Description**                                                                       |
 | -------------------- | ------------ | ------------------------------------------------------------------------------------- |
-| ALLOWED_HOSTS        | Yes          | A list of strings representing the host/domain names that this Django site can serve. |
-| CSRF_TRUSTED_ORIGINS | Yes          | A list of trusted origins for safe cross-site requests (e.g., <https://example.com>). |
 | SECRET_KEY           | Yes          | A unique, secret value used for cryptographic signing and session security.           |
-| DATABASE_FILE        | Yes          | The file path to the SQLite database or the name of the database being used.          |
-| MEDIA_ROOT           | Yes          | The absolute filesystem path to the directory that will hold user-uploaded files.     |
+| ALLOWED_HOSTS        | Yes          | A list of strings representing the host/domain names that this server can serve.      |
+| CSRF_TRUSTED_ORIGINS | Yes          | A list of trusted origins for safe cross-site requests (e.g., <https://example.com>). |
+| DATABASE_FILE        | No           | The file path to the SQLite database (default `db.sqlite3`).                          |
+| MEDIA_ROOT           | No           | The filesystem path to the directory that holds user-uploaded files (default `media`).|
+| DEBUG                | No           | Boolean to enable debug mode (default `false`).                                       |
+| PORT                 | No           | The port the server listens on (default `6270`).                                      |
+| LANGUAGE_CODE        | No           | Default language code (default `en`).                                                 |
+| Django_DB_PATH       | No           | Path to an existing Django SQLite DB to auto-migrate data from on first boot.         |
+| SEND_EMAIL           | No           | Boolean to enable email notifications.                                                |
 | SMTP_USE_TLS         | No           | Boolean (True/False) to enable/disable TLS encryption for outgoing emails.            |
 | SMTP_HOST            | No           | The hostname or IP address of the mail server used to send emails.                    |
 | SMTP_PORT            | No           | The port number to use for the SMTP server (usually 587 for TLS or 465 for SSL).      |
@@ -117,8 +121,10 @@ Below is a list of all supported environment variables.
 
 ### Prerequisites
 
-- Python 3.12+
-- [uv](https://github.com/astral-sh/uv) (recommended) or pip
+- Go 1.26+
+- Node.js 24+ (for the webpack frontend build)
+- Python 3.13+ with [uv](https://github.com/astral-sh/uv) (for the Playwright UI test suite)
+- [Task](https://taskfile.dev/) (optional, wraps common commands)
 
 ### Installation
 
@@ -129,32 +135,29 @@ Below is a list of all supported environment variables.
     cd sandwitches
     ```
 
-2. **Sync dependencies**:
+2. **Install dependencies and build the frontend**:
 
     ```bash
-    uv sync
+    cd go-app
+    go mod download
+    cd .. && npm install
+    npm run build   # builds static assets into go-app/static/dist
     ```
 
-3. **Run migrations and collect static files**:
+3. **Run the server**:
 
     ```bash
-    uv run src/manage.py migrate
-    uv run src/manage.py collectstatic --noinput
+    cd go-app
+    go run .        # or: task dev (hot reload via air)
     ```
 
-4. **Start the development server**:
-
-    ```bash
-    uv run src/manage.py runserver
-    ```
+The server listens on port 6270 and the first visit to `/setup` bootstraps the admin account.
 
 ## 🧪 Testing & Quality
 
-This project wraps all tests, linting and formatting in `invoke` tasks so you can run:
-
-- **Run tests**: `uv run invoke tests`
-- **Linting**: `uv run invoke linting`
-- **Type checking**: `uv run invoke typecheck`
+- **Go unit tests**: `cd go-app && go test ./...`
+- **Go linting**: `cd go-app && go vet ./...`
+- **UI tests (Playwright)**: `uv sync --dev && uv run playwright install chromium && uv run pytest tests_go`
 
 ---
 
