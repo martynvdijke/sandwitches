@@ -1,7 +1,12 @@
 {
   "name": "sandwitches",
+<<<<<<< HEAD
   "version": "2.13.8",
   "description": "<p align=\"center\">   <img src=\"go-app/static/icons/banner.svg\" alt=\"Sandwitches Banner\" width=\"600px\"> </p>",
+=======
+  "version": "2.13.9",
+  "description": "<p align=\"center\">   <img src=\"src/static/icons/banner.svg\" alt=\"Sandwitches Banner\" width=\"600px\"> </p>",
+>>>>>>> origin/main
   "main": "index.js",
   "directories": {
     "test": "tests"
