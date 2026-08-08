@@ -1,0 +1,11 @@
+{{ define "admin_nav" }}
+<nav style="display:flex;align-items:center;padding:0.5rem 1rem;background:var(--md-sys-color-primary-container);gap:0.75rem">
+    <a href="/dashboard" class="row align-center"><h6 class="small">Admin</h6></a>
+    <div style="flex:1"></div>
+    <a href="/"><i>home</i></a>
+    {{ if .user }}
+    <a href="/profile">{{ .user.Username }}</a>
+    <a href="/logout"><i>logout</i></a>
+    {{ end }}
+</nav>
+{{ end }}

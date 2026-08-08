@@ -1,0 +1,13 @@
+{{ template "head" . }}{{ template "navbar" . }}
+<div class="space"></div>
+<article class="round elevate padding" style="max-width:400px;margin:auto">
+<h4>Login</h4>
+<form method="post" action="/login">
+<div class="field label border round"><input type="text" name="username" required autocomplete="username"><label>Username</label></div>
+<div class="field label border round"><input type="password" name="password" required autocomplete="current-password"><label>Password</label></div>
+<div class="space"></div>
+<button type="submit" class="button primary round">Login</button>
+</form>
+<p>Don't have an account? <a href="/signup">Sign up</a></p>
+</article>
+{{ template "tail" . }}

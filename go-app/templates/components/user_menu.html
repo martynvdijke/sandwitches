@@ -1,0 +1,12 @@
+{{ define "user_menu" }}
+{{ if .user }}
+<menu id="user-menu" class="no-wrap left">
+    <a href="/settings" class="row"><i>settings</i>Settings</a>
+    {{ if .user.IsStaff }}
+    <a href="/dashboard" class="row"><i>admin_panel_settings</i>Admin</a>
+    <div class="divider"></div>
+    {{ end }}
+    <a href="/logout" class="row"><i>logout</i>Logout</a>
+</menu>
+{{ end }}
+{{ end }}

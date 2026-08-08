@@ -1,0 +1,40 @@
+<article class="round padding surface-container">
+    <div class="row">
+        <h6 class="max">Recipes Over Time</h6>
+        <div class="field label border round small no-margin" style="width:150px">
+            <input type="date" id="chart-start" value="{{ .start_date }}" onchange="updateChartParams()">
+            <label>Start</label>
+        </div>
+        <div class="field label border round small no-margin" style="width:150px">
+            <input type="date" id="chart-end" value="{{ .end_date }}" onchange="updateChartParams()">
+            <label>End</label>
+        </div>
+    </div>
+    <canvas id="recipes-chart"></canvas>
+</article>
+<script>
+(function(){
+    var ctx = document.getElementById('recipes-chart');
+    if (ctx && window.Chart) {
+        var existing = Chart.getChart('recipes-chart');
+        if (existing) existing.destroy();
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ to_json .recipe_labels }},
+                datasets: [{
+                    label: 'Recipes',
+                    data: {{ to_json .recipe_counts }},
+                    borderColor: '#f57c00',
+                    tension: 0.3,
+                    fill: true,
+                    backgroundColor: 'rgba(245,124,0,0.1)'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+})();
+</script>

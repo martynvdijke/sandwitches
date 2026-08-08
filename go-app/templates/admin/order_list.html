@@ -1,0 +1,55 @@
+{{ template "admin_head" . }}
+{{ template "admin_nav" . }}
+<main class="responsive">
+<div class="large-space"></div>
+<div class="row align-center">
+    <h4 class="max">Orders</h4>
+</div>
+<div class="space"></div>
+<div class="row wrap">
+    <a href="?sort=date_desc" class="chip round surface">Newest</a>
+    <a href="?sort=date_asc" class="chip round surface">Oldest</a>
+    <a href="?sort=price_desc" class="chip round surface">Price High</a>
+    <a href="?sort=price_asc" class="chip round surface">Price Low</a>
+    <a href="?sort=status" class="chip round surface">By Status</a>
+</div>
+<div class="space"></div>
+<table class="border striped">
+    <thead><tr><th>ID</th><th>User</th><th>Items</th><th>Status</th><th>Total</th><th>Date</th><th>Update</th></tr></thead>
+    <tbody>
+    {{ range .orders }}
+    <tr>
+        <td>#{{ .ID }}</td>
+        <td>{{ .User.Username }}</td>
+        <td class="small-text">{{ range .Items }}{{ .Quantity }}x {{ .Recipe.Title }}{{ if not (eq (len $.orders) 0) }}, {{ end }}{{ end }}</td>
+        <td><span class="chip {{ if eq .Status "COMPLETED" }}primary{{ else if eq .Status "CANCELLED" }}error{{ else if eq .Status "PREPARING" }}secondary{{ else if eq .Status "SHIPPED" }}tertiary{{ else }}surface-variant{{ end }}">{{ .Status }}</span></td>
+        <td>{{ printf "%.2f" .TotalPrice }} &euro;</td>
+        <td class="small-text">{{ .CreatedAt.Format "02/01/2006" }}</td>
+        <td>
+            {{ if and (ne .Status "COMPLETED") (ne .Status "CANCELLED") }}
+            <form method="post" action="/dashboard/orders/{{ .ID }}/status" style="margin:0">
+                <select name="status" onchange="this.form.submit()" class="small">
+                    {{ range $.status_choices }}
+                    <option value="{{ .Code }}">{{ .Label }}</option>
+                    {{ end }}
+                </select>
+            </form>
+            {{ else }}
+            <span class="small-text italic">Final</span>
+            {{ end }}
+        </td>
+    </tr>
+    {{ end }}
+    </tbody>
+</table>
+{{ if .pagination }}
+<div class="center-align padding">
+    <nav>
+        {{ if gt .pagination.Page 1 }}<a href="?page={{ sub .pagination.Page 1 }}" class="button transparent circle"><i>chevron_left</i></a>{{ end }}
+        <span class="padding">Page {{ .pagination.Page }} / {{ .pagination.TotalPages }}</span>
+        {{ if lt .pagination.Page .pagination.TotalPages }}<a href="?page={{ add .pagination.Page 1 }}" class="button transparent circle"><i>chevron_right</i></a>{{ end }}
+    </nav>
+</div>
+{{ end }}
+</main>
+{{ template "admin_tail" . }}

@@ -1,0 +1,224 @@
+{{ template "admin_head" . }}
+{{ template "admin_nav" . }}
+<main class="responsive">
+<div class="large-space"></div>
+
+<div class="grid">
+    <div class="s12 m4">
+        <article class="round padding surface-container">
+            <div class="row">
+                <i class="extra">lunch_dining</i>
+                <div class="max"><h6>Recipes</h6><span class="small-text">Total recipes in database</span></div>
+                <h3>{{ .recipe_count }}</h3>
+            </div>
+            <nav><a href="/dashboard/recipes" class="button small round tertiary">View all <i>arrow_forward</i></a></nav>
+        </article>
+    </div>
+    <div class="s12 m4">
+        <article class="round padding surface-container">
+            <div class="row">
+                <i class="extra">group</i>
+                <div class="max"><h6>Users</h6><span class="small-text">Registered accounts</span></div>
+                <h3>{{ .user_count }}</h3>
+            </div>
+            <nav><a href="/dashboard/users" class="button small round tertiary">View all <i>arrow_forward</i></a></nav>
+        </article>
+    </div>
+    <div class="s12 m4">
+        <article class="round padding surface-container">
+            <div class="row">
+                <i class="extra">sell</i>
+                <div class="max"><h6>Tags</h6><span class="small-text">Recipe categories</span></div>
+                <h3>{{ .tag_count }}</h3>
+            </div>
+            <nav><a href="/dashboard/tags" class="button small round tertiary">View all <i>arrow_forward</i></a></nav>
+        </article>
+    </div>
+</div>
+
+<div class="large-space"></div>
+
+<div id="dashboard-charts"
+     hx-get="/dashboard?start_date={{ .start_date }}&end_date={{ .end_date }}"
+     hx-trigger="every 30s"
+     hx-swap="outerHTML">
+    <article class="round padding surface-container">
+        <div class="row">
+            <h6 class="max">Recipes Over Time</h6>
+            <div class="field label border round small no-margin" style="width:150px">
+                <input type="date" id="chart-start" value="{{ .start_date }}" onchange="updateChartParams()">
+                <label>Start</label>
+            </div>
+            <div class="field label border round small no-margin" style="width:150px">
+                <input type="date" id="chart-end" value="{{ .end_date }}" onchange="updateChartParams()">
+                <label>End</label>
+            </div>
+        </div>
+        <canvas id="recipes-chart"></canvas>
+    </article>
+</div>
+
+<div class="space"></div>
+
+<div class="grid">
+    <div class="s12 m6">
+        <article class="round padding surface-container">
+            <h6>Orders Over Time</h6>
+            <canvas id="orders-chart" style="max-height:200px"></canvas>
+        </article>
+    </div>
+    <div class="s12 m6">
+        <article class="round padding surface-container">
+            <h6>Average Rating</h6>
+            <canvas id="ratings-chart" style="max-height:200px"></canvas>
+        </article>
+    </div>
+</div>
+
+<div class="space"></div>
+
+{{ if .pending_recipes }}
+<h5>Pending Approvals</h5>
+<div class="space"></div>
+{{ range .pending_recipes }}
+<article class="round border padding surface-container">
+    <div class="row align-center">
+        <div class="max">
+            <h6>{{ .Title }}</h6>
+            <p>by {{ if .UploadedBy }}{{ .UploadedBy.Username }}{{ else }}Unknown{{ end }}</p>
+            <p class="small-text">{{ .Description }}</p>
+        </div>
+        <nav>
+            <a href="/dashboard/recipes/{{ .ID }}/edit" class="button border round">Edit</a>
+            <a href="/dashboard/recipes/{{ .ID }}/approve" class="button primary round">Approve</a>
+        </nav>
+    </div>
+</article>
+<div class="small-space"></div>
+{{ end }}
+{{ end }}
+
+<h5>Recent Recipes</h5>
+<div class="space"></div>
+<table class="border striped">
+    <thead><tr><th>Title</th><th>Price</th><th>Created</th><th>Actions</th></tr></thead>
+    <tbody>
+    {{ range .recent_recipes }}
+    <tr>
+        <td><a href="/recipes/{{ .Slug }}">{{ .Title }}</a></td>
+        <td>{{ if .Price }}{{ printf "%.2f" .Price }} &euro;{{ else }}—{{ end }}</td>
+        <td>{{ .CreatedAt.Format "02/01/2006" }}</td>
+        <td><a href="/dashboard/recipes/{{ .ID }}/edit">Edit</a></td>
+    </tr>
+    {{ end }}
+    </tbody>
+</table>
+
+{{ if .recent_orders }}
+<div class="space"></div>
+<h5>Recent Orders</h5>
+<div class="space"></div>
+<table class="border striped">
+    <thead><tr><th>ID</th><th>User</th><th>Items</th><th>Status</th><th>Total</th></tr></thead>
+    <tbody>
+    {{ range .recent_orders }}
+    <tr>
+        <td>#{{ .ID }}</td>
+        <td>{{ .User.Username }}</td>
+        <td class="small-text">{{ range .Items }}{{ .Quantity }}x {{ .Recipe.Title }}, {{ end }}</td>
+        <td><span class="chip {{ if eq .Status "COMPLETED" }}primary{{ else if eq .Status "CANCELLED" }}error{{ else }}surface-variant{{ end }}">{{ .Status }}</span></td>
+        <td>{{ printf "%.2f" .TotalPrice }} &euro;</td>
+    </tr>
+    {{ end }}
+    </tbody>
+</table>
+{{ end }}
+
+<div class="large-space"></div>
+
+<nav class="grid">
+    <a href="/dashboard/recipes" class="s12 m3 button border round"><i>lunch_dining</i> Recipes</a>
+    <a href="/dashboard/approvals" class="s12 m3 button border round"><i>approval</i> Approvals</a>
+    <a href="/dashboard/users" class="s12 m3 button border round"><i>group</i> Users</a>
+    <a href="/dashboard/tags" class="s12 m3 button border round"><i>sell</i> Tags</a>
+    <a href="/dashboard/orders" class="s12 m3 button border round"><i>shopping_cart</i> Orders</a>
+    <a href="/dashboard/ratings" class="s12 m3 button border round"><i>star</i> Ratings</a>
+    <a href="/dashboard/settings" class="s12 m3 button border round"><i>settings</i> Settings</a>
+    <a href="/dashboard/logs" class="s12 m3 button border round"><i>terminal</i> Logs</a>
+    <a href="/dashboard/tasks" class="s12 m3 button border round"><i>schedule</i> Tasks</a>
+</nav>
+
+</main>
+
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+    var ctx = document.getElementById('recipes-chart');
+    if (ctx && window.Chart) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ to_json .recipe_labels }},
+                datasets: [{
+                    label: 'Recipes',
+                    data: {{ to_json .recipe_counts }},
+                    borderColor: '#f57c00',
+                    tension: 0.3,
+                    fill: true,
+                    backgroundColor: 'rgba(245,124,0,0.1)'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+    var octx = document.getElementById('orders-chart');
+    if (octx && window.Chart) {
+        new Chart(octx, {
+            type: 'line',
+            data: {
+                labels: {{ to_json .order_labels }},
+                datasets: [{
+                    label: 'Orders',
+                    data: {{ to_json .order_counts }},
+                    borderColor: '#1976d2',
+                    tension: 0.3,
+                    fill: true,
+                    backgroundColor: 'rgba(25,118,210,0.1)'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+    var rctx = document.getElementById('ratings-chart');
+    if (rctx && window.Chart) {
+        new Chart(rctx, {
+            type: 'bar',
+            data: {
+                labels: {{ to_json .rating_labels }},
+                datasets: [{
+                    label: 'Avg Rating',
+                    data: {{ to_json .rating_avgs }},
+                    backgroundColor: '#388e3c'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false,
+                scales: { y: { min: 0, max: 10 } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+});
+function updateChartParams() {
+    var s = document.getElementById('chart-start').value;
+    var e = document.getElementById('chart-end').value;
+    if (s && e) {
+        var url = '/dashboard?start_date=' + s + '&end_date=' + e;
+        htmx.ajax('GET', url, { target: '#dashboard-charts', swap: 'outerHTML' });
+    }
+}
+</script>
+
+{{ template "admin_tail" . }}

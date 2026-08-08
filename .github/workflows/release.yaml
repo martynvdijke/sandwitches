@@ -26,6 +26,10 @@ jobs:
       attestations: write
       id-token: write
 
+    outputs:
+      new_release_published: ${{ steps.semantic.outputs.new_release_published }}
+      new_release_version: ${{ steps.semantic.outputs.new_release_version }}
+
     steps:
       - name: Login to Docker Hub
         uses: docker/login-action@v4
@@ -43,15 +47,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v7
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.14"
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v9.0.0
-
       - name: Semantic Release
+        id: semantic
         uses: cycjimmy/semantic-release-action@v6
         with:
           extra_plugins: |
@@ -62,19 +59,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: uv version
-        id: uv_version
-        run: echo "version=$(uv version | awk '{print $2 }')" >> $GITHUB_OUTPUT
-
-      - name: Build distributions
-        run: uv build
-
-      - name: Publish package
-        run: uv publish
-        env:
-          UV_PUBLISH_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          UV_PUBLISH_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag martynvandijke/sandwitches:latest
 
@@ -83,8 +67,59 @@ jobs:
           docker tag martynvandijke/sandwitches:latest ghcr.io/martynvdijke/sandwitches:latest
           docker push martynvandijke/sandwitches:latest
           docker push ghcr.io/martynvdijke/sandwitches:latest
-          echo "Pushing versioned tag: ${{ steps.uv_version.outputs.version }}"
-          docker tag martynvandijke/sandwitches:latest martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}
-          docker tag martynvandijke/sandwitches:latest ghcr.io/martynvdijke/sandwitches:${{ steps.uv_version.outputs.version }}
-          docker push martynvandijke/sandwitches:${{ steps.uv_version.outputs.version }}
-          docker push ghcr.io/martynvdijke/sandwitches:${{ steps.uv_version.outputs.version }}
+          echo "Pushing versioned tag: ${{ steps.semantic.outputs.new_release_version }}"
+          docker tag martynvandijke/sandwitches:latest martynvandijke/sandwitches:${{ steps.semantic.outputs.new_release_version }}
+          docker tag martynvandijke/sandwitches:latest ghcr.io/martynvdijke/sandwitches:${{ steps.semantic.outputs.new_release_version }}
+          docker push martynvandijke/sandwitches:${{ steps.semantic.outputs.new_release_version }}
+          docker push ghcr.io/martynvdijke/sandwitches:${{ steps.semantic.outputs.new_release_version }}
+
+  notify:
+    needs: [ci, release]
+    if: ${{ always() }}
+    name: Gotify Notification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release Published Notification
+        if: needs.ci.result == 'success' && needs.release.result == 'success' && needs.release.outputs.new_release_published == 'true'
+        uses: eikendev/gotify-action@master
+        with:
+          gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
+          gotify_app_token: ${{ secrets.GOTIFY_APP_TOKEN }}
+          notification_title: '${{ github.repository }} Release Published - ${{ needs.release.outputs.new_release_version }}'
+          notification_message: '${{ github.repository }}: Version ${{ needs.release.outputs.new_release_version }} was successfully released.'
+
+      - name: No Release Needed Notification
+        if: needs.ci.result == 'success' && needs.release.result == 'success' && needs.release.outputs.new_release_published != 'true'
+        uses: eikendev/gotify-action@master
+        with:
+          gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
+          gotify_app_token: ${{ secrets.GOTIFY_APP_TOKEN }}
+          notification_title: '${{ github.repository }} Release - Up to Date'
+          notification_message: 'Workflow passed but no new release was published.'
+
+      - name: Failure Notification
+        if: needs.ci.result != 'success' || needs.release.result != 'success'
+        uses: eikendev/gotify-action@master
+        with:
+          gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
+          gotify_app_token: ${{ secrets.GOTIFY_APP_TOKEN }}
+          notification_title: 'Release Failed'
+          notification_message: 'The release workflow has failed. ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          notification_priority: 5
+  otel:
+    permissions:
+      contents: read # Required. To access the private repository
+      actions: read # Required. To read workflow runs
+      pull-requests: read # Optional. To read PR labels
+      checks: read # Optional. To read run annotations
+    if: always()
+    name: OpenTelemetry Export Trace
+    runs-on: ubuntu-latest
+    needs: [ci, release, notify]
+    steps:
+      - name: Export workflow
+        uses: corentinmusard/otel-cicd-action@v4
+        with:
+          otlpEndpoint: ${{ secrets.OTLP_ENDPOINT }}
+          otlpHeaders: ${{ secrets.OTLP_HEADERS }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}

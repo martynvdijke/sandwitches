@@ -1,0 +1,40 @@
+{{ define "side_menu" }}
+<dialog id="menu" class="left">
+    <nav class="drawer vertical">
+        <header>
+            <img src="/static/icons/icon.svg" class="circle large">
+            <h5 class="max">Sandwitches</h5>
+        </header>
+        <div class="space"></div>
+        <a href="/" class="padding">
+            <i class="extra padding">home</i>
+            <span class="large-text">Home</span>
+        </a>
+        {{ if .user }}
+        <a href="/favorites" class="padding">
+            <i class="extra padding">favorite</i>
+            <span class="large-text">Favorites</span>
+        </a>
+        <a href="/community" class="padding">
+            <i class="extra padding">group</i>
+            <span class="large-text">Community</span>
+        </a>
+        {{ end }}
+        <a href="/api/v1/ping" class="padding">
+            <i class="extra padding">api</i>
+            <span class="large-text">API</span>
+        </a>
+        <a href="/feeds/latest" class="padding">
+            <i class="extra padding">rss_feed</i>
+            <span class="large-text">RSS Feed</span>
+        </a>
+        {{ if .user.IsStaff }}
+        <div class="divider"></div>
+        <a href="/dashboard" class="padding">
+            <i class="extra padding">admin_panel_settings</i>
+            <span class="large-text">Admin Dashboard</span>
+        </a>
+        {{ end }}
+    </nav>
+</dialog>
+{{ end }}

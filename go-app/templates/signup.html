@@ -1,0 +1,17 @@
+{{ template "head" . }}{{ template "navbar" . }}
+<div class="space"></div>
+<article class="round elevate padding" style="max-width:500px;margin:auto">
+<h4>Sign Up</h4>
+<form method="post" action="/signup">
+<div class="field label border round"><input type="text" name="username" required minlength="3"><label>Username</label></div>
+<div class="field label border round"><input type="email" name="email"><label>Email</label></div>
+<div class="grid"><div class="s12 m6"><div class="field label border round"><input type="text" name="first_name"><label>First name</label></div></div><div class="s12 m6"><div class="field label border round"><input type="text" name="last_name"><label>Last name</label></div></div></div>
+<div class="field label border round"><input type="password" name="password1" required minlength="8"><label>Password</label></div>
+<div class="field label border round"><input type="password" name="password2" required><label>Confirm password</label></div>
+<div class="field textarea label border round"><textarea name="bio"></textarea><label>Bio</label></div>
+<div class="space"></div>
+<button type="submit" class="button primary round">Sign Up</button>
+</form>
+<p>Already have an account? <a href="/login">Login</a></p>
+</article>
+{{ template "tail" . }}

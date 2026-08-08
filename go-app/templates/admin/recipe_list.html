@@ -1,0 +1,54 @@
+{{ template "admin_head" . }}
+{{ template "admin_nav" . }}
+<main class="responsive">
+<div class="large-space"></div>
+<div class="row align-center">
+    <h4 class="max">Recipes</h4>
+    <a href="/dashboard/recipes/add" class="button primary round"><i>add</i> Add Recipe</a>
+</div>
+<div class="space"></div>
+<div class="row wrap">
+    <a href="?sort=date_desc" class="chip round surface">Newest</a>
+    <a href="?sort=date_asc" class="chip round surface">Oldest</a>
+    <a href="?sort=title" class="chip round surface">A-Z</a>
+    <a href="?sort=title_desc" class="chip round surface">Z-A</a>
+    <a href="?sort=price_desc" class="chip round surface">Price High</a>
+    <a href="?sort=price_asc" class="chip round surface">Price Low</a>
+    <a href="?sort=approved" class="chip round surface">Pending First</a>
+</div>
+<div class="space"></div>
+<table class="border striped">
+    <thead><tr><th>Image</th><th>Title</th><th>Uploader</th><th>Tags</th><th>Price</th><th>Orders</th><th>Created</th><th>Actions</th></tr></thead>
+    <tbody>
+    {{ range .recipes }}
+    <tr>
+        <td>{{ if .Image }}<img src="{{ .Image }}" class="circle" style="width:36px;height:36px;object-fit:cover">{{ else }}<i class="circle surface">restaurant</i>{{ end }}</td>
+        <td><a href="/recipes/{{ .Slug }}">{{ .Title }}</a></td>
+        <td class="small-text">{{ if .UploadedBy }}{{ .UploadedBy.Username }}{{ else }}—{{ end }}</td>
+        <td class="small-text">{{ range .Tags }}<span class="chip tiny">{{ .Name }}</span>{{ end }}</td>
+        <td>{{ if .Price }}{{ printf "%.2f" .Price }} &euro;{{ else }}—{{ end }}</td>
+        <td class="small-text">{{ .DailyOrdersCount }}{{ if .MaxDailyOrders }}/{{ .MaxDailyOrders }}{{ end }}</td>
+        <td class="small-text">{{ .CreatedAt.Format "02/01/2006" }}</td>
+        <td>
+            <a href="/dashboard/recipes/{{ .ID }}/edit" class="button small circle transparent"><i>edit</i></a>
+            <a href="/dashboard/recipes/{{ .ID }}/delete" class="button small circle transparent"><i>delete</i></a>
+        </td>
+    </tr>
+    {{ end }}
+    </tbody>
+</table>
+{{ if .pagination }}
+<div class="center-align padding">
+    <nav>
+        {{ if gt .pagination.Page 1 }}
+        <a href="?page={{ sub .pagination.Page 1 }}" class="button transparent circle"><i>chevron_left</i></a>
+        {{ end }}
+        <span class="padding">Page {{ .pagination.Page }} / {{ .pagination.TotalPages }}</span>
+        {{ if lt .pagination.Page .pagination.TotalPages }}
+        <a href="?page={{ add .pagination.Page 1 }}" class="button transparent circle"><i>chevron_right</i></a>
+        {{ end }}
+    </nav>
+</div>
+{{ end }}
+</main>
+{{ template "admin_tail" . }}

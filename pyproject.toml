@@ -1,7 +1,7 @@
 [project]
 name = "sandwitches"
 version = "2.13.8"
-description = "Add your description here"
+description = "Sandwitches recipe platform — Go backend with Playwright UI test suite"
 readme = "README.md"
 authors = [
     { name = "Martyn van Dijke", email = "martijnvdijke600@gmail.com" }
@@ -9,44 +9,17 @@ authors = [
 
 requires-python = ">=3.12"
 
-dependencies = [
-    "django-debug-toolbar>=6.1.0",
-    "django-filter>=25.2",
-    "django-imagekit>=6.0.0",
-    "django-import-export>=4.3.14",
-    "django-ninja>=1.5.1",
-    "django-simple-history>=3.10.1",
-    "django-tasks>=0.10.0",
-    "django-solo>=2.3.0",
-    "django>=6.0.0",
-    "gunicorn>=23.0.0",
-    "markdown>=3.10",
-    "pillow>=12.0.0",
-    "uvicorn>=0.40.0",
-    "whitenoise[brotli]>=6.11.0",
-    "requests>=2.32.5",
-    "django-tasks-db>=0.12.0",
-]
-
-
-[build-system]
-requires = ["uv_build>=0.12.1,<0.13.0"]
-build-backend = "uv_build"
+dependencies = []
 
 [dependency-groups]
 dev = [
-    "invoke>=2.2.1",
-    "pre-commit>=4.5.1",
-    "pytest-django>=4.11.1",
     "pytest-playwright>=0.7.2",
     "pytest>=8.4.2",
-    "ruff>=0.15.10",
-    "ty>=0.0.1a26",
 ]
 
 [tool.uv]
-package = true
+package = false
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "sandwitches.settings"
+testpaths = ["tests_go"]
 pytest_playwright_sync_api = true

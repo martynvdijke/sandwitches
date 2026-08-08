@@ -8,13 +8,13 @@ repos:
     -   id: check-added-large-files
 -   repo: local
     hooks:
-    -   id: invoke-linting
-        name: invoke-linting
-        entry: invoke linting
+    -   id: go-vet
+        name: go-vet
+        entry: bash -c 'cd go-app && go vet ./...'
         language: system
         pass_filenames: false
-    -   id: invoke-typecheck
-        name: invoke-typecheck
-        entry: invoke typecheck
+    -   id: gofmt
+        name: gofmt
+        entry: bash -c 'cd go-app && gofmt -l .'
         language: system
         pass_filenames: false

@@ -1,0 +1,99 @@
+<div class="grid justify-center" id="recipe-grid">
+{{ if not .recipes }}
+  <div class="s12 center-align">
+    <div class="large-space"></div>
+    <i class="extra gray-text">no_food</i>
+    <h5 class="gray-text">No sandwitches found.</h5>
+    <p>Be the first to create one!</p>
+    {{ if .user }}
+    <a href="/dashboard/recipes/add" class="button primary round">Add Recipe</a>
+    {{ end }}
+  </div>
+{{ else }}
+{{ range .recipes }}
+  <div class="s12 m6 l4 xl3 recipe-card">
+    <article class="round no-padding elevate secondary-container">
+       <div style="position: relative;">
+         {{ if .Image }}
+         <img src="{{ .Image }}" class="responsive top-round" style="height:220px; width:100%; object-fit:cover; cursor:pointer;" loading="lazy" alt="{{ .Title }}" onclick="location.href='/recipes/{{ .Slug }}';">
+         {{ else }}
+         <div class="primary medium-height top-round middle-align center-align" style="height:220px; cursor:pointer;" onclick="location.href='/recipes/{{ .Slug }}';">
+           <i class="extra">lunch_dining</i>
+         </div>
+         {{ end }}
+
+         {{ if $.user }}
+         <div class="absolute top left padding">
+             <a href="/recipes/favorite/{{ .ID }}" class="button circle transparent">
+                {{ $fav := false }}{{ range .FavoritedBy }}{{ if eq .ID $.user.ID }}{{ $fav = true }}{{ end }}{{ end }}
+                <i class="{{ if $fav }}red-text{{ else }}black-text{{ end }}">
+                    {{ if $fav }}favorite{{ else }}favorite_border{{ end }}
+                </i>
+             </a>
+         </div>
+         {{ end }}
+         {{ if $.user.Username }}{{ if .Price }}
+         <div class="absolute top right padding">
+          <form action="/cart/add/{{ .ID }}" method="get" class="ml-1">
+               <button type="submit" class="button circle primary" title="Add to Cart">
+                 <i>add_shopping_cart</i>
+               </button>
+          </form>
+         </div>
+         {{ end }}{{ end }}
+       </div>
+
+       <div class="padding grow">
+         <h5 class="truncate pointer" onclick="location.href='/recipes/{{ .Slug }}';">{{ .Title }}</h5>
+         {{ if .Price }}
+         <div class="row align-center mb-1">
+            <i class="small-text primary-text">euro_symbol</i>
+            <span class="bold">{{ printf "%.2f" .Price }}</span>
+         </div>
+         {{ end }}
+
+         <div class="row align-center">
+            {{ if .UploadedBy }}
+                <a href="/?uploader={{ .UploadedBy.Username | urlencode }}" class="row align-center" style="color: inherit; text-decoration: none;">
+                    {{ if .UploadedBy.Avatar }}
+                    <img src="{{ .UploadedBy.Avatar }}" class="circle tiny" alt="{{ .UploadedBy.Username }}">
+                    {{ else }}
+                    <i class="tiny circle surface">person</i>
+                    {{ end }}
+                    <span class="tiny-text left-margin">{{ .UploadedBy.Username }}</span>
+                </a>
+            {{ else }}
+                <i class="tiny circle surface">person_off</i>
+                <span class="tiny-text left-margin">Unknown</span>
+            {{ end }}
+         </div>
+         <div class="space"></div>
+         <div class="row wrap">
+             {{ $count := len .FavoritedBy }}{{ if gt $count 0 }}
+                <span class="tiny-text">
+                    Liked by {{ (index .FavoritedBy 0).Username }}
+                    {{ if eq $count 2 }}and {{ (index .FavoritedBy 1).Username }}
+                    {{ else if gt $count 2 }}, {{ (index .FavoritedBy 1).Username }} and {{ sub $count 2 }} others{{ end }}
+                </span>
+             {{ end }}
+         </div>
+
+         <div class="space"></div>
+         <div class="row wrap">
+           {{ range .Tags }}
+           <span class="chip small round surface margin-bottom">{{ .Name }}</span>
+           {{ end }}
+         </div>
+       </div>
+
+       <div class="padding pt-0 row no-space">
+         <a href="/recipes/{{ .Slug }}" class="button fill round max">
+           <span>View</span>
+           <i class="suffix">arrow_forward</i>
+         </a>
+       </div>
+    </article>
+  </div>
+{{ end }}
+{{ end }}
+</div>

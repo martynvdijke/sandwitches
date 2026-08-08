@@ -1,0 +1,8 @@
+{{ template "head" . }}{{ template "navbar" . }}
+<div class="space"></div>
+<article class="round padding" style="text-align:center">
+<h4>Oops!</h4>
+<p>{{ if .error }}{{ .error }}{{ else }}Something went wrong.{{ end }}</p>
+<a href="/" class="button primary round">Go Home</a>
+</article>
+{{ template "tail" . }}

@@ -1,0 +1,15 @@
+{{ template "head" . }}{{ template "navbar" . }}
+<div class="space"></div>
+<article class="round elevate padding" style="max-width:500px;margin:auto">
+<h4>Admin Setup</h4>
+<p>Create the first admin account.</p>
+<form method="post" action="/setup">
+<div class="field label border round"><input type="text" name="username" required minlength="3" autocomplete="username"><label>Username</label></div>
+<div class="field label border round"><input type="email" name="email" autocomplete="email"><label>Email</label></div>
+<div class="field label border round"><input type="password" name="password1" required minlength="8" autocomplete="new-password"><label>Password</label></div>
+<div class="field label border round"><input type="password" name="password2" required autocomplete="new-password"><label>Confirm password</label></div>
+<div class="space"></div>
+<button type="submit" class="button primary round">Create Admin</button>
+</form>
+</article>
+{{ template "tail" . }}

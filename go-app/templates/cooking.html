@@ -1,0 +1,56 @@
+{{ template "head" . }}
+{{ template "navbar" . }}
+
+<div class="space"></div>
+<div class="cooking-mode">
+    <div class="cooking-header">
+        <h2>{{ .recipe.Title }}</h2>
+    </div>
+
+    <div class="cooking-content">
+        {{ if .ingredients }}
+        <div class="cooking-ingredients">
+            <h3>Ingredients</h3>
+            <ul>
+                {{ range .ingredients }}
+                <li>{{ . }}</li>
+                {{ end }}
+            </ul>
+        </div>
+        {{ end }}
+
+        {{ if .steps }}
+        <div class="cooking-step-number">
+            Step {{ .current_step }} of {{ .total_steps }}
+        </div>
+
+        <div class="cooking-step-text">
+            {{ index .steps (sub .current_step 1) }}
+        </div>
+
+        <input type="hidden" id="cooking-step-input" value="{{ .current_step }}" data-total-steps="{{ .total_steps }}">
+        {{ else }}
+        <div class="cooking-step-text">
+            <p>No instructions available for this recipe.</p>
+        </div>
+        {{ end }}
+    </div>
+
+    <div class="cooking-nav">
+        <button onclick="prevStep()" {{ if le .current_step 1 }}disabled{{ end }}>
+            <i>chevron_left</i> Previous
+        </button>
+        <button onclick="nextStep()" {{ if ge .current_step .total_steps }}disabled{{ end }}>
+            Next <i>chevron_right</i>
+        </button>
+    </div>
+
+    <div class="cooking-actions">
+        <a href="/recipes/{{ .recipe.Slug }}{{ if .eink_mode }}?eink=1{{ end }}">
+            Show All Steps
+        </a>
+        <a href="/{{ if .eink_mode }}?eink=1{{ end }}">
+            Back to Recipes
+        </a>
+    </div>
+</div>

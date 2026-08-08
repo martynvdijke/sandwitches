@@ -1,0 +1,30 @@
+{{ define "admin_head" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Sandwitches Admin</title>
+    <link href="/static/dist/main.css" rel="stylesheet">
+    <script src="/static/dist/main.js" defer></script>
+    <link rel="icon" type="image/svg+xml" href="/static/icons/favicon.svg">
+    <style>
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
+        main.container { flex: 1; padding: 2rem 1rem; max-width: 1200px; margin: 0 auto; }
+        .snackbar { margin-bottom: 0.5rem; }
+        canvas { max-height: 300px; }
+    </style>
+    {{ block "extra_head" . }}{{ end }}
+</head>
+<body class="{{ if .user }}{{ .user.Theme }}{{ end }}">
+{{ if .flashes }}
+<div class="padding no-margin">
+{{ range .flashes }}
+<div class="snackbar active {{ if eq .Type "error" }}error{{ else }}primary{{ end }}">
+    <i>{{ if eq .Type "error" }}error{{ else }}check_circle{{ end }}</i>
+    <span>{{ .Message }}</span>
+</div>
+{{ end }}
+</div>
+{{ end }}
+{{ end }}
