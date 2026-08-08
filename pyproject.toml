@@ -52,5 +52,5 @@ dev = [
 package = true
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "sandwitches.settings"
+testpaths = ["tests_go"]
 pytest_playwright_sync_api = true

@@ -255,7 +255,7 @@ def test_order_tracking_ui(page: Page, go_server, device_name):
     page.wait_for_url(f"{GO_URL}/cart", wait_until="commit", timeout=5000)
     page.locator("button:has-text('Checkout')").click(timeout=5000)
     page.wait_for_url(f"{GO_URL}/profile", wait_until="commit", timeout=10000)
-    expect(page.get_by_text("PENDING")).to_be_visible()
+    expect(page.locator("td span.chip", has_text="PENDING")).to_be_visible()
     expect(page.locator("a:has-text('View')")).to_be_visible()
 
 
@@ -505,7 +505,7 @@ def test_order_tracker_anonymous(page: Page, go_server, device_name):
     page.context.clear_cookies()
     # Verify tracking page exists and shows status
     page.goto(f"{GO_URL}/orders/track/{token}", wait_until="commit", timeout=30000)
-    expect(page.get_by_text("PENDING").or_(page.get_by_text("Pending"))).to_be_visible(timeout=5000)
+    expect(page.locator("td span.chip", has_text="PENDING").or_(page.locator("td span.chip", has_text="Pending"))).to_be_visible(timeout=5000)
 
 
 # =============================================================================

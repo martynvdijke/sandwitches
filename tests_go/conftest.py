@@ -2,6 +2,7 @@ import os
 import signal
 import subprocess
 import tempfile
+import threading
 import time
 import urllib.request
 
@@ -11,6 +12,13 @@ GO_APP_DIR = os.path.join(os.path.dirname(__file__), "..", "go-app")
 GO_BINARY = os.path.join(
     os.environ.get("GO_BINARY", os.path.join(GO_APP_DIR, "sandwitches-go"))
 )
+
+
+def _drain(stream):
+    while True:
+        chunk = stream.read(4096)
+        if not chunk:
+            break
 
 
 def _build_binary():
@@ -48,6 +56,14 @@ class GoServer:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+        # Drain output pipes in background threads: with DEBUG=true GORM logs
+        # every query to stderr, and an undrained pipe fills up (64KB) and
+        # deadlocks the server mid-request.
+        self._drainers = []
+        for stream in (self.process.stdout, self.process.stderr):
+            t = threading.Thread(target=_drain, args=(stream,), daemon=True)
+            t.start()
+            self._drainers.append(t)
         self._wait_until_ready()
 
     def _wait_until_ready(self, timeout=15):
