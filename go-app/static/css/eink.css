@@ -1,0 +1,416 @@
+/* ============================================================
+   E-Ink Mode Stylesheet
+   High-contrast black-on-white for e-ink displays.
+   Scoped under .eink-mode — active when URL has ?eink=1,
+   cookie eink_mode=1, or user.theme == "eink".
+   ============================================================ */
+
+/* --- Base overrides --- */
+.eink-mode,
+.eink-mode body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+/* --- Strip all animations, transitions, effects --- */
+.eink-mode *,
+.eink-mode *::before,
+.eink-mode *::after {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+    background-image: none !important; /* removes gradients */
+}
+
+/* Allow inline SVG icons — don't strip those */
+.eink-mode svg,
+.eink-mode img[src$=".svg"] {
+    background-image: initial !important;
+}
+
+/* --- Navigation Bar --- */
+.eink-mode nav.top {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-bottom: 2px solid #000000 !important;
+}
+
+.eink-mode nav.top a,
+.eink-mode nav.top button,
+.eink-mode nav.top .chip {
+    color: #ffffff !important;
+}
+
+.eink-mode nav.top i {
+    color: #ffffff !important;
+}
+
+/* --- Main content --- */
+.eink-mode main.container {
+    background-color: #ffffff !important;
+}
+
+/* --- Cards / Articles --- */
+.eink-mode .elevate,
+.eink-mode article.round,
+.eink-mode .card,
+.eink-mode .surface {
+    box-shadow: none !important;
+    border: 2px solid #000000 !important;
+    border-radius: 0 !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+/* Remove rounded corners everywhere in eink mode */
+.eink-mode .round,
+.eink-mode .top-round,
+.eink-mode .bottom-round,
+.eink-mode .left-round,
+.eink-mode .right-round,
+.eink-mode button.round,
+.eink-mode .chip.round,
+.eink-mode .field.round,
+.eink-mode .border.round,
+.eink-mode article.round {
+    border-radius: 0 !important;
+}
+
+/* --- Buttons & interactive elements (48px min touch target) --- */
+.eink-mode button,
+.eink-mode .button,
+.eink-mode a.button,
+.eink-mode .chip,
+.eink-mode a.chip,
+.eink-mode input[type="submit"],
+.eink-mode select {
+    min-width: 48px !important;
+    min-height: 48px !important;
+    border: 2px solid #000000 !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border-radius: 0 !important;
+    font-weight: bold !important;
+}
+
+.eink-mode button:hover,
+.eink-mode .button:hover,
+.eink-mode a.button:hover,
+.eink-mode .chip:hover {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+.eink-mode button.transparent,
+.eink-mode .button.transparent {
+    background-color: #ffffff !important;
+    border: 2px solid #000000 !important;
+}
+
+/* --- Links --- */
+.eink-mode a {
+    color: #000000 !important;
+    text-decoration: underline !important;
+}
+
+.eink-mode a.button {
+    text-decoration: none !important;
+}
+
+/* --- Text colors --- */
+.eink-mode .primary-text,
+.eink-mode .primary-text * {
+    color: #000000 !important;
+}
+
+.eink-mode .gray-text,
+.eink-mode .gray-text *,
+.eink-mode .tiny-text,
+.eink-mode .small-text,
+.eink-mode .secondary-text {
+    color: #333333 !important;
+}
+
+.eink-mode .red-text {
+    color: #000000 !important;
+}
+
+/* --- Dividers & borders --- */
+.eink-mode .divider,
+.eink-mode hr {
+    border-top: 2px solid #cccccc !important;
+    background-color: transparent !important;
+}
+
+/* --- Form fields --- */
+.eink-mode input,
+.eink-mode textarea,
+.eink-mode select,
+.eink-mode .field input,
+.eink-mode .field textarea,
+.eink-mode .field select {
+    border: 2px solid #000000 !important;
+    border-radius: 0 !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    min-height: 48px !important;
+}
+
+.eink-mode .field label {
+    color: #333333 !important;
+}
+
+/* --- Recipe cards --- */
+.eink-mode .recipe-card article {
+    border: 2px solid #000000 !important;
+    border-radius: 0 !important;
+}
+
+.eink-mode .recipe-card h5 {
+    font-weight: bold !important;
+    font-size: 20px !important;
+}
+
+.eink-mode .recipe-card img {
+    border-bottom: 2px solid #000000 !important;
+}
+
+/* --- Chips / Tags --- */
+.eink-mode .chip,
+.eink-mode a.chip {
+    border: 2px solid #000000 !important;
+    border-radius: 0 !important;
+    background-color: #ffffff !important;
+    padding: 8px 16px !important;
+    font-weight: bold !important;
+}
+
+.eink-mode .chip.surface {
+    background-color: #ffffff !important;
+    border: 2px solid #000000 !important;
+}
+
+/* --- Snackbar / Messages --- */
+.eink-mode .snackbar {
+    border: 2px solid #000000 !important;
+    border-radius: 0 !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+.eink-mode .snackbar.primary {
+    border: 2px solid #000000 !important;
+    color: #000000 !important;
+}
+
+.eink-mode .snackbar.error {
+    border: 2px solid #000000 !important;
+    color: #000000 !important;
+    font-weight: bold !important;
+}
+
+/* --- Badges --- */
+.eink-mode badge,
+.eink-mode .badge {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-radius: 0 !important;
+}
+
+/* --- Side menu --- */
+.eink-mode #menu,
+.eink-mode .side-menu {
+    background-color: #ffffff !important;
+    border-right: 2px solid #000000 !important;
+    color: #000000 !important;
+}
+
+/* --- Footer --- */
+.eink-mode footer {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border-top: 2px solid #000000 !important;
+}
+
+/* --- Primary containers --- */
+.eink-mode .primary-container {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+.eink-mode .secondary-container {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+}
+
+.eink-mode .tertiary-container {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+}
+
+.eink-mode .primary {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+}
+
+/* --- Carousel --- */
+.eink-mode #highlighted-carousel article {
+    min-width: 300px !important;
+    border: 2px solid #000000 !important;
+}
+
+/* --- Paginator / Empty state --- */
+.eink-mode .gray-text {
+    color: #333333 !important;
+}
+
+/* --- All text sizing for readability --- */
+.eink-mode p,
+.eink-mode span,
+.eink-mode div:not(.field):not(.padding) {
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+}
+
+.eink-mode h4 {
+    font-size: 24px !important;
+    font-weight: bold !important;
+}
+
+.eink-mode h5 {
+    font-size: 20px !important;
+    font-weight: bold !important;
+}
+
+.eink-mode h6 {
+    font-size: 18px !important;
+    font-weight: bold !important;
+}
+
+/* --- Search input at least 44px --- */
+.eink-mode #search {
+    min-height: 44px !important;
+    font-size: 18px !important;
+}
+
+/* --- Close button spacing between touch targets: 10px min --- */
+.eink-mode .row,
+.eink-mode .grid {
+    gap: 10px !important;
+}
+
+/* ============================================================
+   Cooking Mode — Full-screen step-by-step recipe view
+   ============================================================ */
+.eink-mode .cooking-mode {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.eink-mode .cooking-mode .cooking-header {
+    text-align: center !important;
+    padding: 16px !important;
+    border-bottom: 2px solid #000000 !important;
+}
+
+.eink-mode .cooking-mode .cooking-header h2 {
+    font-size: 28px !important;
+    font-weight: bold !important;
+    margin: 0 !important;
+}
+
+.eink-mode .cooking-mode .cooking-content {
+    flex: 1 !important;
+    padding: 24px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+}
+
+.eink-mode .cooking-mode .cooking-step-number {
+    font-size: 20px !important;
+    color: #333333 !important;
+    margin-bottom: 16px !important;
+}
+
+.eink-mode .cooking-mode .cooking-step-text {
+    font-size: 24px !important;
+    line-height: 1.8 !important;
+    margin-bottom: 32px !important;
+}
+
+.eink-mode .cooking-mode .cooking-ingredients {
+    font-size: 20px !important;
+    line-height: 1.8 !important;
+    margin-bottom: 24px !important;
+    border: 2px solid #000000 !important;
+    padding: 16px !important;
+}
+
+.eink-mode .cooking-mode .cooking-ingredients h3 {
+    font-size: 22px !important;
+    font-weight: bold !important;
+}
+
+.eink-mode .cooking-mode .cooking-nav {
+    display: flex !important;
+    justify-content: space-between !important;
+    padding: 16px !important;
+    border-top: 2px solid #000000 !important;
+    gap: 16px !important;
+}
+
+.eink-mode .cooking-mode .cooking-nav button {
+    min-width: 64px !important;
+    min-height: 64px !important;
+    font-size: 20px !important;
+    font-weight: bold !important;
+    border: 2px solid #000000 !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    cursor: pointer !important;
+    padding: 16px 32px !important;
+}
+
+.eink-mode .cooking-mode .cooking-nav button:hover {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+.eink-mode .cooking-mode .cooking-nav button:disabled {
+    opacity: 0.4 !important;
+    cursor: default !important;
+}
+
+.eink-mode .cooking-mode .cooking-actions {
+    display: flex !important;
+    justify-content: center !important;
+    padding: 8px 16px 24px !important;
+    gap: 16px !important;
+}
+
+.eink-mode .cooking-mode .cooking-actions a {
+    font-size: 18px !important;
+    padding: 12px 24px !important;
+    border: 2px solid #000000 !important;
+    text-decoration: none !important;
+    color: #000000 !important;
+}
+
+/* ============================================================
+   E-Ink Toggle Button
+   ============================================================ */
+.eink-mode-toggle {
+    cursor: pointer !important;
+    font-size: 14px !important;
+}

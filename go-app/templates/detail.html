@@ -70,6 +70,11 @@
         {{ .csrf_token }}
         <button type="submit" class="button primary round"><i>flash_on</i> Order Now</button>
       </form>
+      {{ if .eink_mode }}
+      <a href="/recipes/{{ .recipe.Slug }}/cooking?step=1" class="button border round width-100 center-align">
+        <i>play_arrow</i> Cooking Mode
+      </a>
+      {{ end }}
     </div>
     {{ end }}
   </div>

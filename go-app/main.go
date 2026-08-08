@@ -199,6 +199,7 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	web.Use(middleware.CSRFMiddleware())
 	{
 		web.GET("/recipes/:slug", handlers.RecipeDetail)
+		web.GET("/recipes/:slug/cooking", handlers.RecipeCooking)
 		web.GET("/orders/track/:token", handlers.OrderTracker)
 
 		web.GET("/favorites", middleware.AuthRequired(), handlers.Favorites)

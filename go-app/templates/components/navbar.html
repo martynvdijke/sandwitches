@@ -18,6 +18,9 @@
         <div class="chip circle large primary-container">{{ first .user.Username }}</div>
         {{ end }}
     </a>
+    <a href="#" onclick="toggleEinkMode(); return false;" class="button circle transparent" title="Toggle E-Ink Mode">
+        <i>{{ if .eink_mode }}light_mode{{ else }}dark_mode{{ end }}</i>
+    </a>
     <a href="/settings">
         <i>account_circle</i>
     </a>

@@ -14,7 +14,19 @@ type TemplateData struct {
 	CSRFToken  string
 	CSRFHidden template.HTML
 	Error      string
+	EinkMode   bool
 	Data       gin.H
+}
+
+// IsEinkMode detects e-ink mode: URL param ?eink=1 > cookie eink_mode=1 > user theme.
+func IsEinkMode(c *gin.Context, user *database.User) bool {
+	if c.Query("eink") == "1" {
+		return true
+	}
+	if cookie, err := c.Cookie("eink_mode"); err == nil && cookie == "1" {
+		return true
+	}
+	return user != nil && user.Theme == "eink"
 }
 
 func NewTemplateData(c *gin.Context) *TemplateData {
@@ -25,6 +37,7 @@ func NewTemplateData(c *gin.Context) *TemplateData {
 		CSRFHidden: "",
 		Data:       make(gin.H),
 	}
+	td.EinkMode = IsEinkMode(c, td.User)
 	if tok, exists := c.Get("csrf_token"); exists {
 		td.CSRFToken = tok.(string)
 		td.CSRFHidden = template.HTML(`<input type="hidden" name="csrf_token" value="` + tok.(string) + `">`)
@@ -49,6 +62,7 @@ func (td *TemplateData) ToGinH() gin.H {
 	if td.Error != "" {
 		h["error"] = td.Error
 	}
+	h["eink_mode"] = td.EinkMode
 	for k, v := range td.Data {
 		h[k] = v
 	}

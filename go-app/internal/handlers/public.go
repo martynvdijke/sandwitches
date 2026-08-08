@@ -165,6 +165,65 @@ func RecipeDetail(c *gin.Context) {
 		ToGinH())
 }
 
+// RecipeCooking renders the e-ink cooking mode: step-by-step recipe view.
+func RecipeCooking(c *gin.Context) {
+	slug := c.Param("slug")
+	td := utils.NewTemplateData(c)
+
+	var recipe database.Recipe
+	if err := database.DB.Where("slug = ?", slug).First(&recipe).Error; err != nil {
+		c.HTML(http.StatusNotFound, "error.html", gin.H{"error": "Recipe not found"})
+		return
+	}
+
+	// Parse instructions into steps
+	rawSteps := strings.Split(strings.TrimSpace(recipe.Instructions), "\n")
+	steps := make([]string, 0, len(rawSteps))
+	for _, s := range rawSteps {
+		s = strings.TrimSpace(s)
+		if s == "" {
+			continue
+		}
+		s = strings.TrimPrefix(s, "- ")
+		s = strings.TrimPrefix(s, "* ")
+		s = strings.TrimPrefix(s, "1. ")
+		s = strings.TrimPrefix(s, "0. ")
+		steps = append(steps, strings.TrimSpace(s))
+	}
+
+	// Parse ingredients into a list
+	rawIngredients := strings.Split(strings.TrimSpace(recipe.Ingredients), "\n")
+	ingredients := make([]string, 0, len(rawIngredients))
+	for _, i := range rawIngredients {
+		i = strings.TrimSpace(i)
+		if i == "" {
+			continue
+		}
+		i = strings.TrimPrefix(i, "- ")
+		i = strings.TrimPrefix(i, "* ")
+		ingredients = append(ingredients, strings.TrimSpace(i))
+	}
+
+	currentStep := 1
+	if v := c.Query("step"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			currentStep = n
+		}
+	}
+	if len(steps) > 0 {
+		currentStep = max(1, min(currentStep, len(steps)))
+	} else {
+		currentStep = 1
+	}
+
+	c.HTML(http.StatusOK, "cooking.html", td.With("recipe", recipe).
+		With("steps", steps).
+		With("ingredients", ingredients).
+		With("current_step", currentStep).
+		With("total_steps", len(steps)).
+		ToGinH())
+}
+
 func ToggleFavorite(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil {

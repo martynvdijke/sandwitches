@@ -1,0 +1,55 @@
+<div class="layout layout--col gap">
+  <div class="grid grid--cols-1">
+    <div class="item">
+      <div class="meta"></div>
+      <div class="content">
+        <span class="value value--large">{{ IDX_0.title }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="hr"></div>
+  <div class="grid grid--cols-2">
+    <div class="col col--start gap">
+      <div class="item">
+        <div class="meta"></div>
+        <div class="content">
+          <span class="value value--small">{{ IDX_0.description }}</span>
+        </div>
+      </div>
+      {% for user in IDX_1.data %}
+        {% if user.id == IDX_0.uploaded_by %}
+          <div class="item">
+            <div class="meta"></div>
+            <div class="content">
+              <span class="label">Created by - {{ user.username }}</span>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+      <div class="item">
+        <div class="meta"></div>
+        <div class="content">
+          <span class="label">
+            {%- assign fan_found = false -%}
+            {%- for user in IDX_1.data -%}
+              {%- if IDX_0.favorited_by contains user.id -%}
+                {{ user.username }}{% unless forloop.last %}, {% endunless %}
+                {%- assign fan_found = true -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {%- if fan_found == false -%}No fans yet!{%- endif -%}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col col--center">
+      <img class="image image-dither rounded image-contain" height="325px" src="https://sandwitches.vandijke.xyz{{ IDX_0.image }}" />
+    </div>
+  </div>
+</div>
+
+<div class="title_bar">
+  <img width="60" src="https://sandwitches.vandijke.xyz/static/icons/icon.012a40b047f9.svg">
+  <span class="title">Sandwiches so good, they haunt you!</span>
+</div>
