@@ -1,4 +1,4 @@
-# [3.0.0](https://github.com/martynvdijke/sandwitches/compare/v2.13.9...v3.0.0) (2026-08-09)
+# [3.0.1](https://github.com/martynvdijke/sandwitches/compare/v2.13.9...v3.0.1) (2026-08-09)
 
 
 * feat!: release Go port replacing Django backend ([4f76dfb](https://github.com/martynvdijke/sandwitches/commit/4f76dfba39726cef103f09a93039de558e7949c6))
@@ -48,7 +48,7 @@
 application (go-app/). The Docker image now runs the Go server on port
 6270 with a /api/v1/ping healthcheck, Python/PyPI publishing is dropped,
 and the e-ink/cooking modes plus TRMNL templates are served from the Go
-stack. This marks the migration as a major release (3.0.0).
+stack. This marks the migration as a major release (3.0.1).
 
 ## [2.13.9](https://github.com/martynvdijke/sandwitches/compare/v2.13.8...v2.13.9) (2026-08-06)
 
