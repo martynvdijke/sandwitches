@@ -1,3 +1,55 @@
+# [3.0.0](https://github.com/martynvdijke/sandwitches/compare/v2.13.9...v3.0.0) (2026-08-09)
+
+
+* feat!: release Go port replacing Django backend ([4f76dfb](https://github.com/martynvdijke/sandwitches/commit/4f76dfba39726cef103f09a93039de558e7949c6))
+
+
+### Bug Fixes
+
+* complete Go port with working templates, hot reload, and missing UI components ([8d3b157](https://github.com/martynvdijke/sandwitches/commit/8d3b157a9c7157c4567742605a4a91a5277c26a6))
+* **docker:** remove COPY of empty go-app/locale dir ([8c463c3](https://github.com/martynvdijke/sandwitches/commit/8c463c3f903cd54b3df3c0a5f13a674c28b14275))
+* ensure Gotify notification always fires on release workflow ([79513cd](https://github.com/martynvdijke/sandwitches/commit/79513cd2e89940cb4c0c36c215d14bf6ff3260c8))
+* **go:** add CSRF token and nil checks to admin recipe form, add Playwright tests for Go port ([9bf26b4](https://github.com/martynvdijke/sandwitches/commit/9bf26b4bfc1e6732ade7356f34929e0d109934ca))
+* invalid timezone UTC+1, use Europe/Amsterdam instead ([87f7c37](https://github.com/martynvdijke/sandwitches/commit/87f7c37ae033c4ab98cb28c0d3069471ef7cf86b))
+* **release:** allow npm version to keep same version in prepareCmd ([6ebed66](https://github.com/martynvdijke/sandwitches/commit/6ebed66151df3a46c3301a28da87474d533c997a))
+* **release:** install uv before semantic-release prepare step ([5c56960](https://github.com/martynvdijke/sandwitches/commit/5c56960731c4a386b5bd3689437e7a0481b0fc77))
+* remove stalePr from renovate.json (no longer valid in Renovate v37) ([4828872](https://github.com/martynvdijke/sandwitches/commit/48288720b895d40ffed5b6c7d5e9b4f2250df224))
+* remove stalePrAge from renovate.json (removed in Renovate v37) ([f780c4d](https://github.com/martynvdijke/sandwitches/commit/f780c4d151819cdc75ae66558a017654a7ae5eef))
+* resolve CI failures - SECRET_KEY, Go vet, and action versions ([3db5379](https://github.com/martynvdijke/sandwitches/commit/3db5379cfa2582474864350a3c14a9489f935e24))
+* **tests:** drain Go server output pipes to prevent 64KB pipe deadlock ([be07bde](https://github.com/martynvdijke/sandwitches/commit/be07bde3e8c242fa6bf8da90770bc78e3c844cc6))
+* **ui:** add autocomplete attributes to auth forms (go-app + django) ([8e1ecd2](https://github.com/martynvdijke/sandwitches/commit/8e1ecd2faab1ca602a5551ac26c96d3d9623a551))
+* use githubToken instead of otelToken for otel-cicd-action@v4 ([e8ee09a](https://github.com/martynvdijke/sandwitches/commit/e8ee09a1d2bd625d0c8b98c03d599f5e7ad0212f))
+* visual parity with Django, CSRF HTML escaping, migration password conversion, GORM log silence, missing features ([8a479a2](https://github.com/martynvdijke/sandwitches/commit/8a479a251bb158b22d914c121ea6bf5afa8fb58f))
+
+
+### Features
+
+* add opentelemetry django instrumentation and CI test workflow ([39a6362](https://github.com/martynvdijke/sandwitches/commit/39a6362c889a105e3bf564e289ab2755716a05ff))
+* add OTel endpoint admin configuration with DB-backed settings ([c53979c](https://github.com/martynvdijke/sandwitches/commit/c53979cf6f78484bf8b73cf39299da4763b0ba1b))
+* add otlpAuthorization input for Bearer auth ([53311e0](https://github.com/martynvdijke/sandwitches/commit/53311e0b05008a2b4d257cf1652cce0dcbe51bc7))
+* add sandwitches-go binary ([ffd4c75](https://github.com/martynvdijke/sandwitches/commit/ffd4c75c014bf464db72d6aa80583859236bda4d))
+* automatic Django-to-GORM database migration ([dc92aea](https://github.com/martynvdijke/sandwitches/commit/dc92aeac8dc14cfcabe6c5e7abedd31dc65a2d8d))
+* complete Go port with pagination, CSRF, flash messages, image upload, and missing features ([d90516f](https://github.com/martynvdijke/sandwitches/commit/d90516f62569e82544559c836e8269414d3422b6))
+* feature parity with Django - quick order, filter UI, HTMX partials, cart validation, self-delete prevention ([556d4d1](https://github.com/martynvdijke/sandwitches/commit/556d4d1a4d141bef5850f2d9489f56471e082e6e))
+* Go port - API, tasks, i18n, utils, tests, CI ([cb13cac](https://github.com/martynvdijke/sandwitches/commit/cb13cac13571ec3368b378e4a7e4184e9a34c89c))
+* initial Go/Gin port - models, auth, handlers, templates, admin ([28a0f30](https://github.com/martynvdijke/sandwitches/commit/28a0f3025470a559cd287afbe2810e2f794bfeb7))
+* port e-ink mode, cooking mode, and TRMNL templates to Go ([8eae437](https://github.com/martynvdijke/sandwitches/commit/8eae43773a1f44e6020dcb6ccdded5ac0f602dbd))
+* rewrite admin templates with proper BeerCSS layout, Chart.js, HTMX ([7cce515](https://github.com/martynvdijke/sandwitches/commit/7cce515d3d584ab8b9c3a7d9113d4f9539b6d0b6))
+
+
+### Reverts
+
+* undo premature 3.0.0 version bump ([aa17e34](https://github.com/martynvdijke/sandwitches/commit/aa17e3457e25532aafeb048e3dc893479bd8251b))
+
+
+### BREAKING CHANGES
+
+* the Django backend (src/) is fully replaced by the Go
+application (go-app/). The Docker image now runs the Go server on port
+6270 with a /api/v1/ping healthcheck, Python/PyPI publishing is dropped,
+and the e-ink/cooking modes plus TRMNL templates are served from the Go
+stack. This marks the migration as a major release (3.0.0).
+
 ## [2.13.9](https://github.com/martynvdijke/sandwitches/compare/v2.13.8...v2.13.9) (2026-08-06)
 
 ## [2.13.8](https://github.com/martynvdijke/sandwitches/compare/v2.13.7...v2.13.8) (2026-08-04)
