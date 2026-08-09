@@ -15,7 +15,7 @@ plugins:
   - [
       "@semantic-release/exec",
       {
-        prepareCmd: "uv version ${nextRelease.version} && npm version ${nextRelease.version} --no-git-tag-version",
+        prepareCmd: "uv version ${nextRelease.version} && npm version ${nextRelease.version} --no-git-tag-version --allow-same-version",
       },
     ]
   - [
