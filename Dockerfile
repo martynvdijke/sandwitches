@@ -23,7 +23,6 @@ COPY --from=go-builder /sandwitches /app/sandwitches
 COPY --from=builder /build/go-app/static/dist/ /app/static/dist/
 COPY go-app/static/ /app/static/
 COPY go-app/templates/ /app/templates/
-COPY go-app/locale/ /app/locale/
 COPY go-app/supervisord.conf /etc/supervisord.conf
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
