@@ -1,3 +1,10 @@
+## [3.0.2](https://github.com/martynvdijke/sandwitches/compare/v3.0.1...v3.0.2) (2026-08-10)
+
+
+### Bug Fixes
+
+* **deps:** update module golang.org/x/crypto to v0.52.0 [security] ([#130](https://github.com/martynvdijke/sandwitches/issues/130)) ([669bbb4](https://github.com/martynvdijke/sandwitches/commit/669bbb4ff3986d7804d855281a7aa41ab341d8ef))
+
 # [3.0.1](https://github.com/martynvdijke/sandwitches/compare/v2.13.9...v3.0.1) (2026-08-09)
 
 
