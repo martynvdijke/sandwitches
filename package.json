@@ -1,6 +1,6 @@
 {
   "name": "sandwitches",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "<p align=\"center\">   <img src=\"go-app/static/icons/banner.svg\" alt=\"Sandwitches Banner\" width=\"600px\"> </p>",
   "main": "index.js",
   "directories": {
