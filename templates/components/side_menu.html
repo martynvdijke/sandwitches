@@ -28,13 +28,13 @@
             <i class="extra padding">rss_feed</i>
             <span class="large-text">RSS Feed</span>
         </a>
-        {{ if .user.IsStaff }}
+        {{ if .user }}{{ if .user.IsStaff }}
         <div class="divider"></div>
         <a href="/dashboard" class="padding">
             <i class="extra padding">admin_panel_settings</i>
             <span class="large-text">Admin Dashboard</span>
         </a>
-        {{ end }}
+        {{ end }}{{ end }}
     </nav>
 </dialog>
 {{ end }}

@@ -133,13 +133,11 @@ dist
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
 
-src/static/dist/*
-go-app/static/dist/*
-setup.sh
+static/dist/*
 main
 db.*
-go-app/sandwitches
-go-app/sandwitches-go
-go-app/tmp/
+sandwitches
+sandwitches-go
+tmp/
 openspec/
 .opencode/

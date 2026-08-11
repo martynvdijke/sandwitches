@@ -10,11 +10,11 @@ repos:
     hooks:
     -   id: go-vet
         name: go-vet
-        entry: bash -c 'cd go-app && go vet ./...'
+        entry: go vet ./...
         language: system
         pass_filenames: false
     -   id: gofmt
         name: gofmt
-        entry: bash -c 'cd go-app && gofmt -l .'
+        entry: gofmt -l .
         language: system
         pass_filenames: false

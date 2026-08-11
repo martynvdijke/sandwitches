@@ -13,7 +13,7 @@
 <h5>Items</h5>
 <table class="border striped">
 <thead><tr><th>Recipe</th><th>Qty</th><th>Price</th></tr></thead>
-<tbody>{{ range .order.Items }}<tr><td><a href="/recipes/{{ .Recipe.Slug }}">{{ .Recipe.Title }}</a></td><td>{{ .Quantity }}</td><td>{{ printf "%.2f" .Price }} &euro;</td></tr>{{ end }}</tbody>
+<tbody>{{ range .order.Items }}<tr><td>{{ if .Recipe }}<a href="/recipes/{{ .Recipe.Slug }}">{{ .Recipe.Title }}</a>{{ else }}Deleted recipe{{ end }}</td><td>{{ .Quantity }}</td><td>{{ printf "%.2f" .Price }} &euro;</td></tr>{{ end }}</tbody>
 </table>
 </article>
 {{ template "tail" . }}

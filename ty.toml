@@ -1,9 +1,0 @@
-# ty.toml configuration
-
-[src]
-include = ["src", "tests"]
-
-[rules]
-unresolved-import = "ignore"
-invalid-assignment = "ignore"
-unresolved-attribute = "ignore"

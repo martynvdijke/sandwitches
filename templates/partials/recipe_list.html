@@ -32,7 +32,7 @@
              </a>
          </div>
          {{ end }}
-         {{ if $.user.Username }}{{ if .Price }}
+         {{ if $.user }}{{ if .Price }}
          <div class="absolute top right padding">
           <form action="/cart/add/{{ .ID }}" method="get" class="ml-1">
                <button type="submit" class="button circle primary" title="Add to Cart">

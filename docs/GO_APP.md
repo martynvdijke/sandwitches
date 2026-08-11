@@ -144,7 +144,7 @@ Open **[http://localhost:6270](http://localhost:6270)** in your browser.
 ## Project Structure
 
 ```
-go-app/
+.
 ├── main.go                    # Application entry point & route setup
 ├── internal/
 │   ├── api/
@@ -175,14 +175,14 @@ go-app/
 │       ├── image.go           # Image processing
 │       └── i18n.go            # Internationalization
 ├── templates/                 # Go HTML templates
-├── static/                    # Static assets
-├── locale/                    # i18n translation files
-├── migrations/                # Database migrations
+├── static/                    # Static assets (css, js, icons, dist/)
 ├── supervisord.conf           # Supervisor process manager config
+├── .air.toml                  # Air hot-reload config
+├── Dockerfile                 # Multi-stage build (frontend + Go)
 └── go.mod / go.sum            # Go module dependencies
 ```
 
-(The multi-stage Docker build lives in the repository root `Dockerfile`; build from the repo root with `docker build -t sandwitches-go .`.)
+(The multi-stage Docker build lives in the repository root `Dockerfile`; build from the repo root with `docker build -t sandwitches .`.)
 
 ## API Endpoints
 

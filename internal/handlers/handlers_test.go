@@ -20,6 +20,7 @@ import (
 	"github.com/martynvdijke/sandwitches-go/internal/config"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
+	"github.com/martynvdijke/sandwitches-go/internal/render"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -209,7 +210,7 @@ func loadTestTemplates(r *gin.Engine) {
 		}
 		return nil
 	})
-	r.SetHTMLTemplate(tmpl)
+	r.HTMLRender = render.HTMLRender{Template: tmpl}
 }
 
 func newClient() *http.Client {

@@ -12,3 +12,15 @@ assets/external/
 *.pyc
 .venv/*
 .ruff_cache/*
+node_modules/
+static/dist/
+.git/
+tests_go/
+trmnl/
+docs/
+.github/
+main
+sandwitches
+sandwitches-go
+tmp/
+*.log

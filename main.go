@@ -19,6 +19,7 @@ import (
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/handlers"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
+	"github.com/martynvdijke/sandwitches-go/internal/render"
 	"github.com/martynvdijke/sandwitches-go/internal/tasks"
 )
 
@@ -32,7 +33,7 @@ func main() {
 
 	djangoDB := os.Getenv("Django_DB_PATH")
 	if djangoDB == "" {
-		for _, p := range []string{"../src/db.sqlite3", "db.sqlite3", "/config/db.sqlite3"} {
+		for _, p := range []string{"db.sqlite3", "/config/db.sqlite3"} {
 			if _, err := os.Stat(p); err == nil {
 				djangoDB = p
 				break
@@ -173,7 +174,7 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 		}
 		return nil
 	})
-	router.SetHTMLTemplate(tmpl)
+	router.HTMLRender = render.HTMLRender{Template: tmpl}
 
 	router.StaticFS("/static", http.Dir("static"))
 	router.StaticFS("/media", http.Dir(cfg.MediaRoot))

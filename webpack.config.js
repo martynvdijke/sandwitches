@@ -3,9 +3,9 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: 'development', // Set to 'production' for production builds
-  entry: './go-app/static/js/index.js',
+  entry: './static/js/index.js',
   output: {
-    path: path.resolve(__dirname, 'go-app/static/dist'),
+    path: path.resolve(__dirname, 'static/dist'),
     filename: 'main.js',
     publicPath: '/static/dist/', // Public path for the bundled assets
   },

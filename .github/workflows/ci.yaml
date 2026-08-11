@@ -24,7 +24,6 @@ jobs:
         with:
           go-version: stable
       - name: Build Go binary for UI tests
-        working-directory: go-app
         run: go build -o sandwitches-go .
       - name: Install Python dependencies
         run: uv sync --dev
@@ -37,9 +36,6 @@ jobs:
 
   test-go:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: go-app
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v7

@@ -90,7 +90,7 @@
 <h6>All Ratings</h6>
 {{ range .all_ratings }}
 <div style="display:flex;align-items:center;gap:0.5rem;padding:0.25rem 0">
-  <b>{{ .User.Username }}</b>
+  <b>{{ if .User }}{{ .User.Username }}{{ else }}Deleted user{{ end }}</b>
   <span>{{ printf "%.1f" .Score }} <i class="small">star</i></span>
   {{ if .Comment }}<p>{{ .Comment }}</p>{{ end }}
 </div>

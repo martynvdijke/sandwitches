@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="go-app/static/icons/banner.svg" alt="Sandwitches Banner" width="600px">
+  <img src="static/icons/banner.svg" alt="Sandwitches Banner" width="600px">
 </p>
 
 <h1 align="center">🥪 Sandwitches</h1>
@@ -28,6 +28,7 @@
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
 - [🧪 Testing & Quality](#-testing--quality)
+- [📚 Documentation](#-documentation)
 
 ---
 
@@ -138,16 +139,14 @@ Below is a list of all supported environment variables.
 2. **Install dependencies and build the frontend**:
 
     ```bash
-    cd go-app
     go mod download
-    cd .. && npm install
-    npm run build   # builds static assets into go-app/static/dist
+    npm install
+    npm run build   # builds static assets into static/dist
     ```
 
 3. **Run the server**:
 
     ```bash
-    cd go-app
     go run .        # or: task dev (hot reload via air)
     ```
 
@@ -155,9 +154,14 @@ The server listens on port 6270 and the first visit to `/setup` bootstraps the a
 
 ## 🧪 Testing & Quality
 
-- **Go unit tests**: `cd go-app && go test ./...`
-- **Go linting**: `cd go-app && go vet ./...`
+- **Go unit tests**: `go test ./...`
+- **Go linting**: `go vet ./...`
 - **UI tests (Playwright)**: `uv sync --dev && uv run playwright install chromium && uv run pytest tests_go`
+
+## 📚 Documentation
+
+- [Go App Reference](docs/GO_APP.md) — project structure, configuration, API endpoints
+- [Django → Go Port Guide](docs/PORTING.md) — how the app was ported and how to extend it
 
 ---
 

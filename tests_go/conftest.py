@@ -8,7 +8,7 @@ import urllib.request
 
 import pytest
 
-GO_APP_DIR = os.path.join(os.path.dirname(__file__), "..", "go-app")
+GO_APP_DIR = os.path.join(os.path.dirname(__file__), "..")
 GO_BINARY = os.path.join(
     os.environ.get("GO_BINARY", os.path.join(GO_APP_DIR, "sandwitches-go"))
 )
