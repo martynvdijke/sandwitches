@@ -141,3 +141,5 @@ db.*
 go-app/sandwitches
 go-app/sandwitches-go
 go-app/tmp/
+openspec/
+.opencode/
