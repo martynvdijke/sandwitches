@@ -1,3 +1,10 @@
+## [3.0.6](https://github.com/martynvdijke/sandwitches/compare/v3.0.5...v3.0.6) (2026-08-11)
+
+
+### Bug Fixes
+
+* repair anonymous homepage truncation and flatten Go app to repo root ([c4e996a](https://github.com/martynvdijke/sandwitches/commit/c4e996a949a84fad3ecfa049332829bb2db2b060))
+
 ## [3.0.5](https://github.com/martynvdijke/sandwitches/compare/v3.0.4...v3.0.5) (2026-08-11)
 
 ## [3.0.4](https://github.com/martynvdijke/sandwitches/compare/v3.0.3...v3.0.4) (2026-08-11)
