@@ -17,7 +17,7 @@ COPY go-app/ ./
 RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o /sandwitches .
 
 # Stage 3: Minimal runtime
-FROM alpine:3.22
+FROM alpine:3.24
 RUN apk add --no-cache ca-certificates supervisor
 COPY --from=go-builder /sandwitches /app/sandwitches
 COPY --from=builder /build/go-app/static/dist/ /app/static/dist/
