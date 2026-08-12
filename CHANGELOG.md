@@ -1,3 +1,10 @@
+## [3.0.9](https://github.com/martynvdijke/sandwitches/compare/v3.0.8...v3.0.9) (2026-08-12)
+
+
+### Bug Fixes
+
+* preserve Django logins and repair homepage filters ([4852032](https://github.com/martynvdijke/sandwitches/commit/4852032fc6711e723d179158f76dcff5d7c60bb2))
+
 ## [3.0.8](https://github.com/martynvdijke/sandwitches/compare/v3.0.7...v3.0.8) (2026-08-12)
 
 ## [3.0.7](https://github.com/martynvdijke/sandwitches/compare/v3.0.6...v3.0.7) (2026-08-12)
