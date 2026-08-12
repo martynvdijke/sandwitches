@@ -513,14 +513,30 @@ def test_order_tracker_anonymous(page: Page, go_server, device_name):
 # =============================================================================
 
 def test_community_recipe_hidden(page: Page, go_server):
+    # A recipe submitted by a COMMUNITY-group user is unapproved and must not
+    # appear on the anonymous homepage (only admin-group recipes are listed
+    # there). Django semantics: admin-group recipes always show regardless of
+    # approval status, so submitting via admin would leak the recipe.
     create_admin(go_server)
     login_session(page, go_server, "admin", "adminpass123")
+
+    page.goto(f"{GO_URL}/logout", **NAV)
+    page.goto(f"{GO_URL}/signup", **NAV)
+    page.fill("input[name='username']", "community_user")
+    page.fill("input[name='email']", "comm@test.com")
+    page.fill("input[name='first_name']", "Community")
+    page.fill("input[name='last_name']", "User")
+    page.fill("input[name='password1']", "password123")
+    page.fill("input[name='password2']", "password123")
+    page.locator("input[name='password2']").press("Enter")
+    expect(page).to_have_url(f"{GO_URL}/")
 
     page.goto(f"{GO_URL}/community", **NAV)
     page.fill("input[name='title']", "Hidden Recipe")
     page.fill("textarea[name='description']", "Should be hidden")
     page.fill("textarea[name='ingredients']", "Secret ingredients")
     page.fill("textarea[name='instructions']", "Secret steps")
+    page.fill("input[name='price']", "0.00")
     page.locator("button:has-text('Submit Recipe')").click()
     page.wait_for_url(f"{GO_URL}/profile", wait_until="commit", timeout=5000)
 
