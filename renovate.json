@@ -21,7 +21,7 @@
   "platformAutomerge": true,
   "prCreation": "immediate",
   "prHourlyLimit": 10,
-  "rebaseWhen": "behind-base-branch",
+  "rebaseWhen": "conflicted",
   "configMigration": true,
   "repositories": [
     "martynvdijke/sandwitches"
