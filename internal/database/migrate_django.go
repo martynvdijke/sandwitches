@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
-	"golang.org/x/crypto/bcrypt"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func MigrateFromDjango(djangoDBPath string) error {
@@ -101,14 +100,9 @@ func migrateUsers(dj *sql.DB) error {
 			u.Avatar = "/media/" + avatar.String
 		}
 
-		// Django uses PBKDF2 hashes, Go uses bcrypt — replace with bcrypt hash of "admin"
-		if strings.HasPrefix(u.Password, "pbkdf2_sha256$") || strings.HasPrefix(u.Password, "pbkdf2_") {
-			hashed, err := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
-			if err == nil {
-				u.Password = string(hashed)
-				log.Printf("  User %s: converted Django password to bcrypt (login with 'admin')", u.Username)
-			}
-		}
+		// Keep the original Django hash as-is. The login handler supports
+		// both bcrypt (new signups) and Django PBKDF2 (pbkdf2_sha256$) hashes,
+		// so migrated users can keep logging in with their original password.
 
 		DB.Create(&u)
 		count++

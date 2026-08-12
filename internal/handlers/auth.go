@@ -1,7 +1,12 @@
 package handlers
 
 import (
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/base64"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -10,7 +15,39 @@ import (
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
 	"github.com/martynvdijke/sandwitches-go/internal/utils"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/crypto/pbkdf2"
 )
+
+// verifyPassword checks a stored password hash against the supplied password.
+// Supports bcrypt (native, used by new signups) and Django PBKDF2 hashes
+// (pbkdf2_sha256$..., carried over from the old Django backend) so that
+// migrated users can keep logging in with their original passwords.
+func verifyPassword(stored, password string) bool {
+	if strings.HasPrefix(stored, "$2a$") || strings.HasPrefix(stored, "$2b$") || strings.HasPrefix(stored, "$2y$") {
+		return bcrypt.CompareHashAndPassword([]byte(stored), []byte(password)) == nil
+	}
+	return verifyDjangoPBKDF2(stored, password)
+}
+
+// verifyDjangoPBKDF2 verifies a Django PBKDF2-SHA256 hash of the form
+// pbkdf2_sha256$iterations$salt$b64hash.
+func verifyDjangoPBKDF2(stored, password string) bool {
+	parts := strings.Split(stored, "$")
+	if len(parts) != 4 || parts[0] != "pbkdf2_sha256" {
+		return false
+	}
+	iterations, err := strconv.Atoi(parts[1])
+	if err != nil || iterations <= 0 {
+		return false
+	}
+	salt := parts[2]
+	expected, err := base64.StdEncoding.DecodeString(parts[3])
+	if err != nil {
+		return false
+	}
+	dk := pbkdf2.Key([]byte(password), []byte(salt), iterations, 32, sha256.New)
+	return subtle.ConstantTimeCompare(dk, expected) == 1
+}
 
 type SignupForm struct {
 	Username  string `form:"username" binding:"required,min=3,max=150"`
@@ -107,7 +144,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(form.Password)); err != nil {
+	if !verifyPassword(user.Password, form.Password) {
 		c.HTML(http.StatusOK, "login.html", td.With("error", "Invalid username or password").With("form", form).ToGinH())
 		return
 	}

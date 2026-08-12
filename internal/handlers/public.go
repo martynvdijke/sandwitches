@@ -30,8 +30,7 @@ func Index(c *gin.Context) {
 	query := database.DB.Preload("FavoritedBy").Preload("Tags").Preload("UploadedBy").
 		Joins("JOIN user_groups ON recipes.uploaded_by_id = user_groups.user_id").
 		Joins("JOIN groups ON user_groups.group_id = groups.id").
-		Where("groups.name = ?", "admin").
-		Where("recipes.is_approved = ?", true)
+		Where("groups.name = ?", "admin")
 
 	if q := c.Query("q"); q != "" {
 		query = query.Where("recipes.title LIKE ? OR recipes.id IN (SELECT recipe_id FROM recipe_tags JOIN tags ON recipe_tags.tag_id = tags.id WHERE tags.name LIKE ?)", "%"+q+"%", "%"+q+"%")

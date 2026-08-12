@@ -624,6 +624,57 @@ func TestLogin(t *testing.T) {
 	}
 }
 
+// TestLoginDjangoPBKDF2 verifies that users migrated from Django (whose
+// passwords are pbkdf2_sha256$ hashes) can log in with their original password.
+func TestLoginDjangoPBKDF2(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	// Django-style hash of "testpassword123" with iterations=1200000, salt="testsalt12345678"
+	djangoHash := "pbkdf2_sha256$1200000$testsalt12345678$h49bosFU9WbOiEw3xL336bdkspIRhPV7FYCkBjl2fns="
+	user := database.User{
+		Username:   "django_migrated",
+		Password:   djangoHash,
+		Email:      "django_migrated@test.com",
+		Language:   "en",
+		Theme:      "light",
+		IsActive:   true,
+		DateJoined: time.Now(),
+	}
+	if err := database.DB.Create(&user).Error; err != nil {
+		t.Fatalf("failed to create user: %v", err)
+	}
+
+	client := newClient()
+	body := url.Values{}
+	body.Set("username", "django_migrated")
+	body.Set("password", "testpassword123")
+
+	resp, err := client.PostForm(srv.URL+"/login", body)
+	if err != nil {
+		t.Fatalf("login request failed: %v", err)
+	}
+	resp.Body.Close()
+
+	if resp.StatusCode != http.StatusFound {
+		t.Errorf("expected redirect (302) for Django PBKDF2 user, got %d", resp.StatusCode)
+	}
+
+	// Wrong password must still be rejected for PBKDF2 hashes
+	client2 := newClient()
+	badBody := url.Values{}
+	badBody.Set("username", "django_migrated")
+	badBody.Set("password", "wrong_password")
+	badResp, err := client2.PostForm(srv.URL+"/login", badBody)
+	if err != nil {
+		t.Fatalf("bad login request failed: %v", err)
+	}
+	badResp.Body.Close()
+	if badResp.StatusCode != http.StatusOK {
+		t.Errorf("expected 200 (rejected) for wrong PBKDF2 password, got %d", badResp.StatusCode)
+	}
+}
+
 func TestLoginInvalidCredentials(t *testing.T) {
 	srv, cleanup := setupTestServer(t)
 	defer cleanup()

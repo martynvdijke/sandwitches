@@ -21,7 +21,15 @@
   {{ if .uploaders }}
   <div class="s12 m2"><div class="field label border round small"><select name="uploader"><option value="">All Uploaders</option>{{ range .uploaders }}<option value="{{ . }}" {{ if eq $.uploader . }}selected{{ end }}>{{ . }}</option>{{ end }}</select><label>Uploader</label></div></div>
   {{ end }}
-  <div class="s12 m2"><div class="field label border round small"><select name="tag" multiple><option value="">All Tags</option>{{ range .tags }}<option value="{{ .Name }}" {{ if has .Name $.selected_tags }}selected{{ end }}>{{ .Name }}</option>{{ end }}</select><label>Tags</label></div></div>
+  <div class="s12 m3"><div class="border round small padding" style="height:40px; display:flex; align-items:center; gap:4px; overflow-x:auto; white-space:nowrap; scrollbar-width:none;">
+      <span class="tiny-text gray-text" style="flex-shrink:0; margin-right:4px;">Tags:</span>
+      {{ range .tags }}
+      <label class="chip small round {{ if has .Name $.selected_tags }}primary{{ else }}border{{ end }}" style="cursor:pointer; flex-shrink:0; height:26px; line-height:26px; padding:0 10px; font-size:13px;">
+        <input type="checkbox" name="tag" value="{{ .Name }}" {{ if has .Name $.selected_tags }}checked{{ end }} style="display:none;">
+        {{ .Name }}
+      </label>
+      {{ end }}
+    </div></div>
   {{ if .user }}
   <div class="s12 m2"><label class="field middle-align round small padding"><input type="checkbox" name="favorites" value="on" {{ if eq "on" .favorites }}checked{{ end }}> Favorites only</label></div>
   {{ end }}
