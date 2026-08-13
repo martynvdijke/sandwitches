@@ -11,10 +11,11 @@ RUN npm install && npm run build
 FROM golang:1.26-alpine AS go-builder
 RUN apk add --no-cache gcc musl-dev
 WORKDIR /build
+ARG VERSION=dev
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . ./
-RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o /sandwitches .
+RUN CGO_ENABLED=1 go build -ldflags="-s -w -X main.Version=${VERSION}" -o /sandwitches .
 
 # Stage 3: Minimal runtime
 FROM alpine:3.24

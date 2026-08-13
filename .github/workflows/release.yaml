@@ -76,7 +76,9 @@ jobs:
 
       - name: Build the Docker image
         if: steps.tagcheck.outputs.tag != '' || steps.semantic.outputs.new_release_published == 'true'
-        run: docker build . --file Dockerfile --tag martynvandijke/sandwitches:latest
+        run: docker build . --file Dockerfile --build-arg VERSION="$VERSION" --tag martynvandijke/sandwitches:latest
+        env:
+          VERSION: ${{ steps.tagcheck.outputs.tag || steps.semantic.outputs.new_release_version }}
 
       - name: Push Docker image
         if: steps.tagcheck.outputs.tag != '' || steps.semantic.outputs.new_release_published == 'true'
