@@ -1,3 +1,10 @@
+# [3.1.0](https://github.com/martynvdijke/sandwitches/compare/v3.0.12...v3.1.0) (2026-08-13)
+
+
+### Features
+
+* resize and compress images at upload time ([a10bf1a](https://github.com/martynvdijke/sandwitches/commit/a10bf1a8ee2701381cfdfa5f4596b6f0313c369b))
+
 ## [3.0.12](https://github.com/martynvdijke/sandwitches/compare/v3.0.11...v3.0.12) (2026-08-13)
 
 
