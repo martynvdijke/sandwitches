@@ -1,3 +1,10 @@
+## [3.0.12](https://github.com/martynvdijke/sandwitches/compare/v3.0.11...v3.0.12) (2026-08-13)
+
+
+### Bug Fixes
+
+* serve resized thumbnails for recipe cards and fix RSS base URL ([06e6e5c](https://github.com/martynvdijke/sandwitches/commit/06e6e5ca273dbde320b49acb674689dca0ca1bc7))
+
 ## [3.0.11](https://github.com/martynvdijke/sandwitches/compare/v3.0.10...v3.0.11) (2026-08-13)
 
 
