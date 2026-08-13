@@ -33,7 +33,7 @@ func LatestRecipesFeed(c *gin.Context) {
 	var recipes []database.Recipe
 	database.DB.Order("created_at DESC").Limit(5).Find(&recipes)
 
-	base := baseURL()
+	base := baseURL(c)
 
 	items := make([]rssItem, len(recipes))
 	for i, r := range recipes {
@@ -58,10 +58,14 @@ func LatestRecipesFeed(c *gin.Context) {
 	c.XML(http.StatusOK, feed)
 }
 
-func baseURL() string {
+func baseURL(c *gin.Context) string {
 	url := os.Getenv("BASE_URL")
 	if url == "" {
-		url = "http://localhost"
+		scheme := "http"
+		if c.Request.TLS != nil || c.GetHeader("X-Forwarded-Proto") == "https" {
+			scheme = "https"
+		}
+		url = scheme + "://" + c.Request.Host
 	}
 	return url
 }

@@ -15,7 +15,7 @@
     <article class="round no-padding elevate secondary-container">
        <div style="position: relative;">
          {{ if .Image }}
-         <img src="{{ .Image }}" class="responsive top-round" style="height:220px; width:100%; object-fit:cover; cursor:pointer;" loading="lazy" alt="{{ .Title }}" onclick="location.href='/recipes/{{ .Slug }}';">
+         <img src="{{ thumb .Image 800 }}" class="responsive top-round" style="height:220px; width:100%; object-fit:cover; cursor:pointer;" loading="lazy" alt="{{ .Title }}" onclick="location.href='/recipes/{{ .Slug }}';">
          {{ else }}
          <div class="primary medium-height top-round middle-align center-align" style="height:220px; cursor:pointer;" onclick="location.href='/recipes/{{ .Slug }}';">
            <i class="extra">lunch_dining</i>
@@ -56,7 +56,7 @@
             {{ if .UploadedBy }}
                 <a href="/?uploader={{ .UploadedBy.Username | urlencode }}" class="row align-center" style="color: inherit; text-decoration: none;">
                     {{ if .UploadedBy.Avatar }}
-                    <img src="{{ .UploadedBy.Avatar }}" class="circle tiny" alt="{{ .UploadedBy.Username }}">
+                    <img src="{{ thumb .UploadedBy.Avatar 96 }}" class="circle tiny" alt="{{ .UploadedBy.Username }}">
                     {{ else }}
                     <i class="tiny circle surface">person</i>
                     {{ end }}

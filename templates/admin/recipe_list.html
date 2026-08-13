@@ -22,7 +22,7 @@
     <tbody>
     {{ range .recipes }}
     <tr>
-        <td>{{ if .Image }}<img src="{{ .Image }}" class="circle" style="width:36px;height:36px;object-fit:cover">{{ else }}<i class="circle surface">restaurant</i>{{ end }}</td>
+        <td>{{ if .Image }}<img src="{{ thumb .Image 96 }}" class="circle" style="width:36px;height:36px;object-fit:cover">{{ else }}<i class="circle surface">restaurant</i>{{ end }}</td>
         <td><a href="/recipes/{{ .Slug }}">{{ .Title }}</a></td>
         <td class="small-text">{{ if .UploadedBy }}{{ .UploadedBy.Username }}{{ else }}—{{ end }}</td>
         <td class="small-text">{{ range .Tags }}<span class="chip tiny">{{ .Name }}</span>{{ end }}</td>

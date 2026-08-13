@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -149,6 +150,13 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 			return fmt.Sprintf("%."+fmt.Sprint(precision)+"f", f)
 		},
 		"version": func() string { return Version },
+		"thumb": func(path string, width int) string {
+			if path == "" || strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") || strings.HasPrefix(path, "data:") {
+				return path
+			}
+			trimmed := strings.TrimPrefix(path, "/media")
+			return "/thumb" + trimmed + "?w=" + strconv.Itoa(width)
+		},
 	})
 
 	templatesDir := "templates"
@@ -178,6 +186,7 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 
 	router.StaticFS("/static", http.Dir("static"))
 	router.StaticFS("/media", http.Dir(cfg.MediaRoot))
+	router.GET("/thumb/*path", handlers.Thumbnail)
 	router.StaticFile("/favicon.ico", "static/icons/favicon.svg")
 
 	router.Use(middleware.OptionalAuth())

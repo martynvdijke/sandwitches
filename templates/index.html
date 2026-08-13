@@ -46,7 +46,7 @@
         <a href="/recipes/{{ .Slug }}">
         <article class="round no-padding elevate tertiary-container" style="min-width: 300px; width: 300px; flex-shrink: 0; scroll-snap-align: start;">
                 {{ if .Image }}
-                <img src="{{ .Image }}" class="responsive top-round" alt="{{ .Title }}" style="height: 200px; object-fit: cover;">
+                <img src="{{ thumb .Image 800 }}" class="responsive top-round" alt="{{ .Title }}" style="height: 200px; object-fit: cover;">
                 {{ else }}
                 <div class="primary medium-height top-round middle-align center-align" style="height:200px;">
                     <i class="extra">lunch_dining</i>

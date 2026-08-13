@@ -13,7 +13,7 @@
     </a>
     <a href="/profile">
         {{ if .user.Avatar }}
-        <img src="{{ .user.Avatar }}" class="circle">
+        <img src="{{ thumb .user.Avatar 96 }}" class="circle">
         {{ else }}
         <div class="chip circle large primary-container">{{ first .user.Username }}</div>
         {{ end }}

@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -102,6 +103,7 @@ func setupTestServer(t *testing.T) (*httptest.Server, func()) {
 			return fmt.Sprintf("%."+fmt.Sprint(precision)+"f", f)
 		},
 		"version": func() string { return "test" },
+		"thumb":   func(path string, width int) string { return "/thumb" + path + "?w=" + strconv.Itoa(width) },
 	})
 
 	loadTestTemplates(r)

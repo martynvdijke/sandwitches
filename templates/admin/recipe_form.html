@@ -84,7 +84,7 @@
 
             <div class="s12 m6 center-align">
                 {{ if and .recipe .recipe.Image }}
-                <img src="{{ .recipe.Image }}" class="responsive round" style="max-height:200px" alt="Preview">
+                <img src="{{ thumb .recipe.Image 640 }}" class="responsive round" style="max-height:200px" alt="Preview">
                 <div class="small-space"></div>
                 <a href="/dashboard/recipes/{{ .recipe.ID }}/rotate?direction=cw" class="button small round" title="Rotate Clockwise"><i>rotate_right</i></a>
                 <a href="/dashboard/recipes/{{ .recipe.ID }}/rotate?direction=ccw" class="button small round" title="Rotate Counter-Clockwise"><i>rotate_left</i></a>
