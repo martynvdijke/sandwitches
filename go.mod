@@ -6,10 +6,10 @@ require (
 	github.com/gin-contrib/sessions v1.1.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/google/uuid v1.6.0
-	github.com/mattn/go-sqlite3 v1.14.22
+	github.com/mattn/go-sqlite3 v1.14.49
 	github.com/yuin/goldmark v1.8.5
 	golang.org/x/crypto v0.55.0
-	golang.org/x/image v0.44.0
+	golang.org/x/image v0.45.0
 	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.31.2
 )
