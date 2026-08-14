@@ -1,3 +1,10 @@
+## [3.1.1](https://github.com/martynvdijke/sandwitches/compare/v3.1.0...v3.1.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* use proper beercss drawer layout in sidebar menu ([21703f6](https://github.com/martynvdijke/sandwitches/commit/21703f68c4703d8198159691eaa62df7ce1e0a64))
+
 # [3.1.0](https://github.com/martynvdijke/sandwitches/compare/v3.0.12...v3.1.0) (2026-08-13)
 
 
