@@ -27,6 +27,14 @@ jobs:
         with:
           ruby-version: "4.0"
       - run: gem install trmnl_preview
+      - name: Require existing TRMNL plugin ID
+        run: |
+          plugin_id=$(ruby -e 'require "yaml"; puts YAML.load_file("trmnl/src/settings.yml")["id"].to_s.strip')
+          if [ -z "$plugin_id" ]; then
+            echo "::error::trmnl/src/settings.yml has no 'id' set. Set the plugin ID (see 'trmnlp list' or the TRMNL dashboard) so 'trmnlp push' updates the existing plugin instead of creating a new one."
+            exit 1
+          fi
+          echo "TRMNL plugin ID: $plugin_id"
       - run: trmnlp push --force --dir trmnl
         env:
           TRMNL_API_KEY: ${{ secrets.TRML_TOKEN }}

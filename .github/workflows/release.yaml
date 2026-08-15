@@ -127,6 +127,7 @@ jobs:
           notification_message: 'The release workflow has failed. ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
           notification_priority: 5
   trml:
+    if: needs.release.result == 'success' && needs.release.outputs.new_release_published == 'true'
     name: TRMNL
     uses: ./.github/workflows/trml.yaml
     needs: [ci, release]
