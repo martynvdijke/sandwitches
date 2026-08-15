@@ -6,6 +6,7 @@ on:
 
 jobs:
   lint:
+    name: TRMNL lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -16,6 +17,7 @@ jobs:
       - run: trmnlp lint --dir trmnl
 
   push:
+    name: TRMNL push
     needs: lint
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
