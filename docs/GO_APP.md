@@ -176,7 +176,6 @@ Open **[http://localhost:6270](http://localhost:6270)** in your browser.
 │       └── i18n.go            # Internationalization
 ├── templates/                 # Go HTML templates
 ├── static/                    # Static assets (css, js, icons, dist/)
-├── supervisord.conf           # Supervisor process manager config
 ├── .air.toml                  # Air hot-reload config
 ├── Dockerfile                 # Multi-stage build (frontend + Go)
 └── go.mod / go.sum            # Go module dependencies

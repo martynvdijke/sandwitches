@@ -42,7 +42,7 @@ existing Django `db.sqlite3` on first boot.
 | Django i18n (`locale/`)               | `internal/utils/i18n.go`                        |
 | Celery/background tasks               | `internal/tasks/tasks.go` (goroutines)          |
 | REST via DRF                          | `internal/api/api.go` (plain gin JSON)          |
-| `asgi.py`/gunicorn                    | `supervisord.conf` running the compiled binary  |
+| `asgi.py`/gunicorn                    | `/app/sandwitches` binary as PID 1 (no process manager) |
 
 ### Project layout (new)
 
@@ -62,7 +62,6 @@ existing Django `db.sqlite3` on first boot.
 ├── static/                    # Frontend source (js/, css/, icons/) + dist/
 ├── trmnl/                     # TRMNL e-ink display Liquid templates
 ├── Dockerfile                 # Multi-stage: node → go → alpine runtime
-├── supervisord.conf           # Process manager for the Docker runtime
 └── Taskfile.yml               # Task runner (build/dev/test/clean)
 ```
 
@@ -183,8 +182,8 @@ The `Dockerfile` is a 3-stage build:
 
 1. **node:24-alpine** — webpack bundles `static/js/index.js` → `static/dist/`.
 2. **golang:1.26-alpine** — compiles the CGO-enabled binary (SQLite needs CGO).
-3. **alpine:3.24** — runtime: `supervisord` runs the binary, `entrypoint.sh`
-   validates env, healthcheck hits `/api/v1/ping`.
+3. **alpine:3.24** — runtime: the compiled binary runs directly as PID 1,
+   `entrypoint.sh` validates env, healthcheck hits `/api/v1/ping`.
 
 ```bash
 docker build -t martynvandijke/sandwitches:latest .

@@ -19,15 +19,14 @@ RUN CGO_ENABLED=1 go build -ldflags="-s -w -X main.Version=${VERSION}" -o /sandw
 
 # Stage 3: Minimal runtime
 FROM alpine:3.24
-RUN apk add --no-cache ca-certificates supervisor curl
+RUN apk add --no-cache ca-certificates curl
 COPY --from=go-builder /sandwitches /app/sandwitches
 COPY --from=builder /build/static/dist/ /app/static/dist/
 COPY static/ /app/static/
 COPY templates/ /app/templates/
-COPY supervisord.conf /etc/supervisord.conf
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
 WORKDIR /app
 EXPOSE 6270
-CMD ["supervisord", "-c", "/etc/supervisord.conf"]
+CMD ["/app/sandwitches"]

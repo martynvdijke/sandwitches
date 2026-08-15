@@ -48,6 +48,10 @@ func main() {
 		}
 	}
 
+	// Drop legacy Django tables (django_*, sandwitches_*, auth_*) after a
+	// verified backup, once, so the database no longer contains dead tables.
+	database.CleanupLegacy(cfg)
+
 	handlers.SetMediaRoot(cfg.MediaRoot)
 
 	router := setupRouter(cfg)
