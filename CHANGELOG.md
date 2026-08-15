@@ -1,3 +1,16 @@
+# [3.7.0](https://github.com/martynvdijke/sandwitches/compare/v3.6.1...v3.7.0) (2026-08-15)
+
+
+### Bug Fixes
+
+* **trmnl:** reference current icon asset in plugin layouts ([139ad92](https://github.com/martynvdijke/sandwitches/commit/139ad9278e9fcabc78570cf1d08a4b247d933779))
+* **trmnl:** remove leftover instance URL from half_horizontal title bar ([3453d9b](https://github.com/martynvdijke/sandwitches/commit/3453d9bf48dd6941a1348d59a99e8379f1ed7699))
+
+
+### Features
+
+* **trmnl:** add uploader and fan list rendering to quadrant layout ([3e78f74](https://github.com/martynvdijke/sandwitches/commit/3e78f747cceac6204967346613ea2b32c4cf16da))
+
 ## [3.6.1](https://github.com/martynvdijke/sandwitches/compare/v3.6.0...v3.6.1) (2026-08-15)
 
 
