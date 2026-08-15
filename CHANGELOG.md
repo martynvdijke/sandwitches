@@ -1,3 +1,10 @@
+# [3.3.0](https://github.com/martynvdijke/sandwitches/compare/v3.2.0...v3.3.0) (2026-08-15)
+
+
+### Features
+
+* rotate legacy log file and write Go logs to sandwitches.log ([408355f](https://github.com/martynvdijke/sandwitches/commit/408355f1f4520fdc8b34b69ae0222228fe238397))
+
 # [3.2.0](https://github.com/martynvdijke/sandwitches/compare/v3.1.3...v3.2.0) (2026-08-15)
 
 
