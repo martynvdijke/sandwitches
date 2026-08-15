@@ -1,0 +1,21 @@
+name: TRMNL Diag
+on:
+  workflow_dispatch:
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0"
+      - name: Account and plugins
+        env:
+          TRMNL_API_KEY: ${{ secrets.TRML_TOKEN }}
+        run: |
+          gem install trmnl_preview >/dev/null 2>&1
+          echo "--- ACCOUNT (/api/me) ---"
+          curl -s https://trmnl.com/api/me -H "Authorization: Bearer $TRMNL_API_KEY" || echo "curl failed"
+          echo
+          echo "--- PLUGINS (trmnlp list) ---"
+          trmnlp list 2>&1 || true
