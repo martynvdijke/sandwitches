@@ -1,3 +1,10 @@
+## [3.7.1](https://github.com/martynvdijke/sandwitches/compare/v3.7.0...v3.7.1) (2026-08-15)
+
+
+### Bug Fixes
+
+* **trmnl:** fall back to instance URL when plugin custom field is unset ([96b9a24](https://github.com/martynvdijke/sandwitches/commit/96b9a24746b82c36f51571d4fe1f66b7acb8f99c))
+
 # [3.7.0](https://github.com/martynvdijke/sandwitches/compare/v3.6.1...v3.7.0) (2026-08-15)
 
 
