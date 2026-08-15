@@ -1,3 +1,10 @@
+# [3.2.0](https://github.com/martynvdijke/sandwitches/compare/v3.1.3...v3.2.0) (2026-08-15)
+
+
+### Features
+
+* run Go binary directly and drop legacy Django tables ([efe460c](https://github.com/martynvdijke/sandwitches/commit/efe460ce7a2c0cd3e5b138d5729feaa0ac3f8a25))
+
 ## [3.1.3](https://github.com/martynvdijke/sandwitches/compare/v3.1.2...v3.1.3) (2026-08-15)
 
 
