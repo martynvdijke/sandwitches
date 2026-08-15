@@ -1,5 +1,5 @@
 import 'material-dynamic-colors/dist/cdn/material-dynamic-colors.min.js';
-import 'htmx.org/dist/htmx.min.js';
+import htmx from 'htmx.org';
 import 'beercss/dist/cdn/beer.min.css';
 import 'beercss/dist/cdn/beer.min.js';
 import Chart from 'chart.js/auto';
@@ -12,5 +12,6 @@ import EasyMDE from 'easymde';
 window.Chart = Chart;
 window.Cropper = Cropper;
 window.EasyMDE = EasyMDE;
+window.htmx = htmx;
 // You can add your own custom JS here
 console.log('Webpack bundle loaded!');

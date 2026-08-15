@@ -38,42 +38,7 @@
 
 <div class="large-space"></div>
 
-<div id="dashboard-charts"
-     hx-get="/dashboard?start_date={{ .start_date }}&end_date={{ .end_date }}"
-     hx-trigger="every 30s"
-     hx-swap="outerHTML">
-    <article class="round padding surface-container">
-        <div class="row">
-            <h6 class="max">Recipes Over Time</h6>
-            <div class="field label border round small no-margin" style="width:150px">
-                <input type="date" id="chart-start" value="{{ .start_date }}" onchange="updateChartParams()">
-                <label>Start</label>
-            </div>
-            <div class="field label border round small no-margin" style="width:150px">
-                <input type="date" id="chart-end" value="{{ .end_date }}" onchange="updateChartParams()">
-                <label>End</label>
-            </div>
-        </div>
-        <canvas id="recipes-chart"></canvas>
-    </article>
-</div>
-
-<div class="space"></div>
-
-<div class="grid">
-    <div class="s12 m6">
-        <article class="round padding surface-container">
-            <h6>Orders Over Time</h6>
-            <canvas id="orders-chart" style="max-height:200px"></canvas>
-        </article>
-    </div>
-    <div class="s12 m6">
-        <article class="round padding surface-container">
-            <h6>Average Rating</h6>
-            <canvas id="ratings-chart" style="max-height:200px"></canvas>
-        </article>
-    </div>
-</div>
+{{ template "admin/partials/dashboard_charts.html" . }}
 
 <div class="space"></div>
 
@@ -149,76 +114,5 @@
 </nav>
 
 </main>
-
-<script>
-window.addEventListener('DOMContentLoaded', function() {
-    var ctx = document.getElementById('recipes-chart');
-    if (ctx && window.Chart) {
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: {{ to_json .recipe_labels }},
-                datasets: [{
-                    label: 'Recipes',
-                    data: {{ to_json .recipe_counts }},
-                    borderColor: '#f57c00',
-                    tension: 0.3,
-                    fill: true,
-                    backgroundColor: 'rgba(245,124,0,0.1)'
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
-            }
-        });
-    }
-    var octx = document.getElementById('orders-chart');
-    if (octx && window.Chart) {
-        new Chart(octx, {
-            type: 'line',
-            data: {
-                labels: {{ to_json .order_labels }},
-                datasets: [{
-                    label: 'Orders',
-                    data: {{ to_json .order_counts }},
-                    borderColor: '#1976d2',
-                    tension: 0.3,
-                    fill: true,
-                    backgroundColor: 'rgba(25,118,210,0.1)'
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
-            }
-        });
-    }
-    var rctx = document.getElementById('ratings-chart');
-    if (rctx && window.Chart) {
-        new Chart(rctx, {
-            type: 'bar',
-            data: {
-                labels: {{ to_json .rating_labels }},
-                datasets: [{
-                    label: 'Avg Rating',
-                    data: {{ to_json .rating_avgs }},
-                    backgroundColor: '#388e3c'
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false,
-                scales: { y: { min: 0, max: 10 } },
-                plugins: { legend: { display: false } }
-            }
-        });
-    }
-});
-function updateChartParams() {
-    var s = document.getElementById('chart-start').value;
-    var e = document.getElementById('chart-end').value;
-    if (s && e) {
-        var url = '/dashboard?start_date=' + s + '&end_date=' + e;
-        htmx.ajax('GET', url, { target: '#dashboard-charts', swap: 'outerHTML' });
-    }
-}
-</script>
 
 {{ template "admin_tail" . }}

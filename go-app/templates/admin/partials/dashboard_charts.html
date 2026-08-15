@@ -1,40 +1,114 @@
-<article class="round padding surface-container">
-    <div class="row">
-        <h6 class="max">Recipes Over Time</h6>
-        <div class="field label border round small no-margin" style="width:150px">
-            <input type="date" id="chart-start" value="{{ .start_date }}" onchange="updateChartParams()">
-            <label>Start</label>
+<div id="dashboard-charts"
+     hx-get="/dashboard?start_date={{ .start_date }}&end_date={{ .end_date }}"
+     hx-trigger="every 30s"
+     hx-swap="outerHTML">
+    <article class="round padding surface-container">
+        <div class="row">
+            <h6 class="max">Recipes Over Time</h6>
+            <div class="field label border round small no-margin" style="width:150px">
+                <input type="date" id="chart-start" value="{{ .start_date }}" onchange="updateChartParams()">
+                <label>Start</label>
+            </div>
+            <div class="field label border round small no-margin" style="width:150px">
+                <input type="date" id="chart-end" value="{{ .end_date }}" onchange="updateChartParams()">
+                <label>End</label>
+            </div>
         </div>
-        <div class="field label border round small no-margin" style="width:150px">
-            <input type="date" id="chart-end" value="{{ .end_date }}" onchange="updateChartParams()">
-            <label>End</label>
+        <canvas id="recipes-chart"></canvas>
+    </article>
+
+    <div class="space"></div>
+
+    <div class="grid">
+        <div class="s12 m6">
+            <article class="round padding surface-container">
+                <h6>Orders Over Time</h6>
+                <canvas id="orders-chart" style="max-height:200px"></canvas>
+            </article>
+        </div>
+        <div class="s12 m6">
+            <article class="round padding surface-container">
+                <h6>Average Rating</h6>
+                <canvas id="ratings-chart" style="max-height:200px"></canvas>
+            </article>
         </div>
     </div>
-    <canvas id="recipes-chart"></canvas>
-</article>
+</div>
 <script>
 (function(){
-    var ctx = document.getElementById('recipes-chart');
-    if (ctx && window.Chart) {
-        var existing = Chart.getChart('recipes-chart');
-        if (existing) existing.destroy();
-        new Chart(ctx, {
-            type: 'line',
-            data: {
+    function renderCharts() {
+        if (!window.Chart) return;
+
+        var definitions = [
+            {
+                id: 'recipes-chart',
+                type: 'line',
                 labels: {{ to_json .recipe_labels }},
-                datasets: [{
-                    label: 'Recipes',
-                    data: {{ to_json .recipe_counts }},
-                    borderColor: '#f57c00',
-                    tension: 0.3,
-                    fill: true,
-                    backgroundColor: 'rgba(245,124,0,0.1)'
-                }]
+                data: {{ to_json .recipe_counts }},
+                borderColor: '#f57c00',
+                backgroundColor: 'rgba(245,124,0,0.1)'
             },
-            options: { responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
+            {
+                id: 'orders-chart',
+                type: 'line',
+                labels: {{ to_json .order_labels }},
+                data: {{ to_json .order_counts }},
+                borderColor: '#1976d2',
+                backgroundColor: 'rgba(25,118,210,0.1)'
+            },
+            {
+                id: 'ratings-chart',
+                type: 'bar',
+                labels: {{ to_json .rating_labels }},
+                data: {{ to_json .rating_avgs }},
+                backgroundColor: '#388e3c'
             }
+        ];
+
+        definitions.forEach(function(definition) {
+            var canvas = document.getElementById(definition.id);
+            if (!canvas) return;
+
+            var existing = window.Chart.getChart(canvas);
+            if (existing) existing.destroy();
+
+            var dataset = {
+                label: definition.id === 'ratings-chart' ? 'Avg Rating' : definition.id === 'orders-chart' ? 'Orders' : 'Recipes',
+                data: definition.data,
+                backgroundColor: definition.backgroundColor
+            };
+            if (definition.type === 'line') {
+                dataset.borderColor = definition.borderColor;
+            }
+
+            new window.Chart(canvas, {
+                type: definition.type,
+                data: { labels: definition.labels, datasets: [dataset] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: definition.type === 'bar' ? { y: { min: 0, max: 10 } } : undefined,
+                    plugins: { legend: { display: false } }
+                }
+            });
         });
     }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderCharts, { once: true });
+    } else {
+        renderCharts();
+    }
 })();
+
+window.updateChartParams = function() {
+    var start = document.getElementById('chart-start');
+    var end = document.getElementById('chart-end');
+    if (!start || !end || !start.value || !end.value || !window.htmx) return;
+
+    window.htmx.ajax('GET', '/dashboard?start_date=' + start.value + '&end_date=' + end.value, {
+        target: '#dashboard-charts',
+        swap: 'outerHTML'
+    });
+};
 </script>

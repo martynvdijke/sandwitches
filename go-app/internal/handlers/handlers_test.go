@@ -1168,7 +1168,7 @@ func TestAdminUserManagement(t *testing.T) {
 	srv, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	createTestUser(t, "manage_u", "password123", false, false, "")
+	createTestUser(t, "manage_u", "password123", false, false, "community")
 	createTestUser(t, "manage_a", "password123", true, true, "admin")
 
 	client := newClient()
@@ -1204,6 +1204,27 @@ func TestAdminUserManagement(t *testing.T) {
 	}
 	if !updated.IsStaff {
 		t.Error("user should be staff after update")
+	}
+
+	resp3, _ := client.Get(srv.URL + fmt.Sprintf("/dashboard/users/%d/delete", targetUser.ID))
+	deletePage, _ := io.ReadAll(resp3.Body)
+	resp3.Body.Close()
+	if !strings.Contains(string(deletePage), `name="csrf_token"`) {
+		t.Error("user delete confirmation should include a CSRF token")
+	}
+
+	deleteBody := url.Values{}
+	deleteBody.Set("csrf_token", getCSRFToken(t, srv, client))
+	resp4, _ := client.PostForm(srv.URL+fmt.Sprintf("/dashboard/users/%d/delete", targetUser.ID), deleteBody)
+	resp4.Body.Close()
+	if resp4.StatusCode != http.StatusFound {
+		t.Errorf("user delete returned status %d, expected redirect", resp4.StatusCode)
+	}
+
+	var deletedCount int64
+	database.DB.Model(&database.User{}).Where("id = ?", targetUser.ID).Count(&deletedCount)
+	if deletedCount != 0 {
+		t.Error("user should be deleted")
 	}
 }
 
