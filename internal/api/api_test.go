@@ -77,14 +77,14 @@ func createAPIUser(t *testing.T, username string, isStaff bool) *database.User {
 	t.Helper()
 	hashed, _ := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
 	user := database.User{
-		Username:    username,
-		Password:    string(hashed),
-		Email:       username + "@test.com",
-		Language:    "en",
-		Theme:       "light",
-		IsActive:    true,
-		IsStaff:     isStaff,
-		DateJoined:  time.Now(),
+		Username:   username,
+		Password:   string(hashed),
+		Email:      username + "@test.com",
+		Language:   "en",
+		Theme:      "light",
+		IsActive:   true,
+		IsStaff:    isStaff,
+		DateJoined: time.Now(),
 	}
 	database.DB.Create(&user)
 	return &user
@@ -165,8 +165,13 @@ func TestAPIMeUnauthorized(t *testing.T) {
 	defer cleanup()
 
 	w := apiGet(t, r, "/api/v1/me", "")
-	if w.Code != http.StatusFound {
-		t.Errorf("expected 302 redirect, got %d", w.Code)
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("expected 401, got %d", w.Code)
+	}
+	var result map[string]string
+	json.Unmarshal(w.Body.Bytes(), &result)
+	if result["message"] == "" {
+		t.Error("401 response should include a message")
 	}
 }
 
@@ -320,7 +325,7 @@ func TestAPIRatingUnauthorized(t *testing.T) {
 		"score":   8.0,
 		"comment": "Delicious!",
 	}, "")
-	if w.Code != http.StatusFound {
-		t.Errorf("rating without auth should return 302 redirect, got %d", w.Code)
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("rating without auth should return 401, got %d", w.Code)
 	}
 }
