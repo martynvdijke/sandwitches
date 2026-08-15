@@ -1,3 +1,11 @@
+# [3.4.0](https://github.com/martynvdijke/sandwitches/compare/v3.3.0...v3.4.0) (2026-08-15)
+
+
+### Features
+
+* **api:** restore v2.x API parity with DTOs, auth 401s, OpenAPI docs ([7e5060b](https://github.com/martynvdijke/sandwitches/commit/7e5060b0e1a672ae7b6f7ae5e37c87f4deed244c))
+* **trmnl:** restore TRMNL plugin payloads and template URLs ([9396bc8](https://github.com/martynvdijke/sandwitches/commit/9396bc8c86e6f004df9ed288f370e14b021c33d0))
+
 # [3.3.0](https://github.com/martynvdijke/sandwitches/compare/v3.2.0...v3.3.0) (2026-08-15)
 
 
