@@ -104,10 +104,12 @@ func AdminDashboard(c *gin.Context) {
 		orderMap[o.Date] = o.Count
 	}
 
-	var recipeLabels, ratingLabels, orderLabels []string
-	var recipeCounts []int
-	var ratingAvgs []float64
-	var orderCounts []int
+	recipeLabels := make([]string, 0, len(dateList))
+	ratingLabels := make([]string, 0, len(dateList))
+	orderLabels := make([]string, 0, len(dateList))
+	recipeCounts := make([]int, 0, len(dateList))
+	ratingAvgs := make([]float64, 0, len(dateList))
+	orderCounts := make([]int, 0, len(dateList))
 
 	for _, d := range dateList {
 		label := d.Format("02/01/2006")
@@ -455,7 +457,43 @@ func AdminUserDelete(c *gin.Context) {
 			c.Redirect(http.StatusFound, "/dashboard/users")
 			return
 		}
-		database.DB.Delete(&database.User{}, id)
+
+		tx := database.DB.Begin()
+		if tx.Error != nil {
+			utils.AddFlash(c, "error", "Could not delete user")
+			c.Redirect(http.StatusFound, "/dashboard/users")
+			return
+		}
+
+		// Keep authored recipes and order history, but remove references owned by the account.
+		cleanup := []string{
+			"UPDATE recipes SET uploaded_by_id = NULL WHERE uploaded_by_id = ?",
+			"UPDATE orders SET user_id = NULL WHERE user_id = ?",
+			"UPDATE recipe_histories SET changed_by_id = NULL WHERE changed_by_id = ?",
+			"DELETE FROM user_groups WHERE user_id = ?",
+			"DELETE FROM user_favorites WHERE user_id = ?",
+			"DELETE FROM ratings WHERE user_id = ?",
+			"DELETE FROM cart_items WHERE user_id = ?",
+		}
+		for _, query := range cleanup {
+			if err := tx.Exec(query, id).Error; err != nil {
+				tx.Rollback()
+				utils.AddFlash(c, "error", "Could not delete user")
+				c.Redirect(http.StatusFound, "/dashboard/users")
+				return
+			}
+		}
+		if err := tx.Delete(&database.User{}, id).Error; err != nil {
+			tx.Rollback()
+			utils.AddFlash(c, "error", "Could not delete user")
+			c.Redirect(http.StatusFound, "/dashboard/users")
+			return
+		}
+		if err := tx.Commit().Error; err != nil {
+			utils.AddFlash(c, "error", "Could not delete user")
+			c.Redirect(http.StatusFound, "/dashboard/users")
+			return
+		}
 		utils.AddFlash(c, "success", "User deleted")
 		c.Redirect(http.StatusFound, "/dashboard/users")
 		return
