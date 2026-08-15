@@ -1,3 +1,10 @@
+# [3.5.0](https://github.com/martynvdijke/sandwitches/compare/v3.4.0...v3.5.0) (2026-08-15)
+
+
+### Features
+
+* **api:** add pagination, filtering, error envelope, rate limiting, CORS, ETag caching ([49d41bf](https://github.com/martynvdijke/sandwitches/commit/49d41bf2ea4389c9d38a254ce6cce96aceb00529))
+
 # [3.4.0](https://github.com/martynvdijke/sandwitches/compare/v3.3.0...v3.4.0) (2026-08-15)
 
 
