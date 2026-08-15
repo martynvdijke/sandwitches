@@ -1,6 +1,6 @@
 [project]
 name = "sandwitches"
-version = "3.6.0"
+version = "3.6.1"
 description = "Sandwitches recipe platform — Go backend with Playwright UI test suite"
 readme = "README.md"
 authors = [

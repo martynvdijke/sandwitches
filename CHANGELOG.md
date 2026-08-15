@@ -1,3 +1,10 @@
+## [3.6.1](https://github.com/martynvdijke/sandwitches/compare/v3.6.0...v3.6.1) (2026-08-15)
+
+
+### Bug Fixes
+
+* **trmnl:** restructure plugin into trmnlp layout and point workflow at trmnl/ ([0d81988](https://github.com/martynvdijke/sandwitches/commit/0d819881bb5ea99171df4dc94730fe5d2a70c712))
+
 # [3.6.0](https://github.com/martynvdijke/sandwitches/compare/v3.5.0...v3.6.0) (2026-08-15)
 
 
