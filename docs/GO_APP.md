@@ -215,6 +215,55 @@ Open **[http://localhost:6270](http://localhost:6270)** in your browser.
 | `POST` | `/api/v1/cart` | Yes | Add to cart |
 | `PATCH` | `/api/v1/cart/:id` | Yes | Update cart item |
 | `DELETE` | `/api/v1/cart/:id` | Yes | Remove from cart |
+| `GET` | `/api/openapi.json` | No | OpenAPI 3.1 specification |
+| `GET` | `/api/docs` | No | Swagger UI (interactive docs) |
+| `GET` | `/api/redoc` | No | ReDoc (reference docs) |
+
+### Query Parameters
+
+List endpoints accept pagination and (for recipes) filtering:
+
+| Endpoint | Parameters |
+|----------|------------|
+| `/api/v1/users` | `limit`, `offset` |
+| `/api/v1/recipes` | `limit`, `offset`, `search`, `tag`, `is_approved`, `uploaded_by` |
+| `/api/v1/tags` | `limit`, `offset` |
+| `/api/v1/orders` | `limit`, `offset` |
+| `/api/v1/cart` | `limit`, `offset` |
+
+- `limit` — maximum number of results (default `50`, max `200`).
+- `offset` — number of results to skip (default `0`).
+- `search` — case-insensitive match against title, description and ingredients.
+- `tag` — filter by tag slug.
+- `is_approved` — `true` or `false`.
+- `uploaded_by` — numeric user id.
+
+When `limit` or `offset` is supplied the response is an envelope:
+`{"items": [...], "total": N}`. Without pagination parameters the response
+is a plain array (kept for backward compatibility with the TRMNL plugin).
+
+### Errors and Request IDs
+
+- Every API response carries an `X-Request-Id` header (echoed from the client
+  or generated server-side) so requests can be correlated in the logs.
+- Every error response uses the envelope
+  `{"message": "...", "code": "...", "request_id": "..."}` where `code` is one
+  of `bad_request`, `validation_error`, `not_found`, `unauthorized`,
+  `forbidden`, `rate_limited`, `internal`.
+- Unauthenticated API requests return `401` (JSON), authenticated web pages
+  still redirect to `/login`.
+
+### API Middleware Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `API_CORS_ORIGINS` | *(empty)* | Comma-separated list of allowed CORS origins (empty disables CORS) |
+| `API_RATE_LIMIT_RATE` | `10` | Per-IP token refill rate (requests/second) |
+| `API_RATE_LIMIT_BURST` | `100` | Per-IP token bucket burst size |
+
+Rate limiting is per-IP; exceeded requests get `429` with a `Retry-After`
+header and a `rate_limited` envelope. Defaults are generous enough that the
+TRMNL plugin (polls once per day) is never affected.
 
 ## License
 

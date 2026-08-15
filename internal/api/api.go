@@ -1,10 +1,12 @@
 package api
 
 import (
+	"encoding/json"
 	"math"
 	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -71,14 +73,14 @@ func getSettings(c *gin.Context) {
 func updateSettings(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil || !user.IsStaff {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Not authorized"})
+		apiError(c, http.StatusForbidden, "Not authorized")
 		return
 	}
 	var s database.Setting
 	database.DB.First(&s)
 	var input SettingUpdateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		apiError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	applySettingUpdates(&s, input)
@@ -89,16 +91,32 @@ func updateSettings(c *gin.Context) {
 func me(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Please sign in"})
+		apiError(c, http.StatusForbidden, "Please sign in")
 		return
 	}
 	c.JSON(http.StatusOK, userToDTO(user))
 }
 
 func users(c *gin.Context) {
+	query := database.DB.Model(&database.User{})
+	var total int64
+	query.Count(&total)
+
+	paginated := wantsPagination(c)
+	pg, ok := parsePagination(c)
+	if !ok {
+		return
+	}
+
 	var users []database.User
-	database.DB.Find(&users)
-	c.JSON(http.StatusOK, usersToDTOs(users))
+	query.Limit(pg.limit).Offset(pg.offset).Find(&users)
+
+	items := usersToDTOs(users)
+	if paginated {
+		c.JSON(http.StatusOK, gin.H{"items": items, "total": total})
+		return
+	}
+	c.JSON(http.StatusOK, items)
 }
 
 type RecipeCreateInput struct {
@@ -163,24 +181,69 @@ func recipeToJSON(r *database.Recipe) gin.H {
 }
 
 func getRecipes(c *gin.Context) {
+	query := database.DB.Model(&database.Recipe{})
+
+	// Filters (AND semantics).
+	if s := c.Query("search"); s != "" {
+		like := "%" + s + "%"
+		query = query.Where("LOWER(title) LIKE ? OR LOWER(description) LIKE ? OR LOWER(ingredients) LIKE ?",
+			strings.ToLower(like), strings.ToLower(like), strings.ToLower(like))
+	}
+	if tagSlug := c.Query("tag"); tagSlug != "" {
+		query = query.Joins("JOIN recipe_tags rt ON rt.recipe_id = recipes.id").
+			Joins("JOIN tags t ON t.id = rt.tag_id").
+			Where("t.slug = ?", tagSlug)
+	}
+	if v := c.Query("is_approved"); v != "" {
+		b, err := strconv.ParseBool(v)
+		if err != nil {
+			apiError(c, http.StatusUnprocessableEntity, "is_approved must be true or false")
+			return
+		}
+		query = query.Where("is_approved = ?", b)
+	}
+	if v := c.Query("uploaded_by"); v != "" {
+		uid, err := strconv.Atoi(v)
+		if err != nil {
+			apiError(c, http.StatusUnprocessableEntity, "uploaded_by must be an integer")
+			return
+		}
+		query = query.Where("uploaded_by_id = ?", uid)
+	}
+
+	var total int64
+	query.Count(&total)
+
+	paginated := wantsPagination(c)
+	pg, ok := parsePagination(c)
+	if !ok {
+		return
+	}
+
 	var recipes []database.Recipe
-	database.DB.Preload("Tags").Preload("FavoritedBy").Find(&recipes)
+	query.Preload("Tags").Preload("FavoritedBy").Limit(pg.limit).Offset(pg.offset).Find(&recipes)
+
 	result := make([]gin.H, len(recipes))
 	for i, r := range recipes {
 		result[i] = recipeToJSON(&r)
 	}
-	c.JSON(http.StatusOK, result)
+
+	if paginated {
+		serveWithETag(c, gin.H{"items": result, "total": total})
+		return
+	}
+	serveWithETag(c, result)
 }
 
 func createRecipe(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Not authorized"})
+		apiError(c, http.StatusForbidden, "Not authorized")
 		return
 	}
 	var input RecipeCreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		apiError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -209,7 +272,7 @@ func getRecipe(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var r database.Recipe
 	if err := database.DB.Preload("Tags").Preload("FavoritedBy").First(&r, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Recipe not found"})
+		apiError(c, http.StatusNotFound, "Recipe not found")
 		return
 	}
 	c.JSON(http.StatusOK, recipeToJSON(&r))
@@ -218,23 +281,23 @@ func getRecipe(c *gin.Context) {
 func updateRecipe(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Not authorized"})
+		apiError(c, http.StatusForbidden, "Not authorized")
 		return
 	}
 	id, _ := strconv.Atoi(c.Param("id"))
 	var r database.Recipe
 	if err := database.DB.First(&r, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Recipe not found"})
+		apiError(c, http.StatusNotFound, "Recipe not found")
 		return
 	}
 	if !user.IsStaff && (r.UploadedByID == nil || *r.UploadedByID != user.ID) {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Not authorized"})
+		apiError(c, http.StatusForbidden, "Not authorized")
 		return
 	}
 
 	var input RecipeUpdateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		apiError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -275,17 +338,17 @@ func updateRecipe(c *gin.Context) {
 func deleteRecipe(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Not authorized"})
+		apiError(c, http.StatusForbidden, "Not authorized")
 		return
 	}
 	id, _ := strconv.Atoi(c.Param("id"))
 	var r database.Recipe
 	if err := database.DB.First(&r, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Recipe not found"})
+		apiError(c, http.StatusNotFound, "Recipe not found")
 		return
 	}
 	if !user.IsStaff && (r.UploadedByID == nil || *r.UploadedByID != user.ID) {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Not authorized"})
+		apiError(c, http.StatusForbidden, "Not authorized")
 		return
 	}
 	database.DB.Delete(&r)
@@ -304,12 +367,12 @@ func scaleIngredients(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	targetStr := c.Query("target_servings")
 	if targetStr == "" {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": "target_servings is required"})
+		apiError(c, http.StatusUnprocessableEntity, "target_servings is required")
 		return
 	}
 	target, err := strconv.Atoi(targetStr)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": "target_servings must be an integer"})
+		apiError(c, http.StatusUnprocessableEntity, "target_servings must be an integer")
 		return
 	}
 	if target < 1 {
@@ -318,7 +381,7 @@ func scaleIngredients(c *gin.Context) {
 
 	var r database.Recipe
 	if err := database.DB.First(&r, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Recipe not found"})
+		apiError(c, http.StatusNotFound, "Recipe not found")
 		return
 	}
 
@@ -359,13 +422,13 @@ type RatingInput struct {
 func createRating(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Please sign in"})
+		apiError(c, http.StatusForbidden, "Please sign in")
 		return
 	}
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input RatingInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		apiError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -382,39 +445,84 @@ func createRating(c *gin.Context) {
 }
 
 func recipeOfTheDay(c *gin.Context) {
+	now := time.Now()
+	dayKey := strconv.Itoa(now.Year()) + "-" + strconv.Itoa(now.YearDay())
+
+	var count int64
+	database.DB.Model(&database.Recipe{}).Count(&count)
+
+	recipeOfTheDayCache.mu.Lock()
+	if recipeOfTheDayCache.day == dayKey && recipeOfTheDayCache.count == count && recipeOfTheDayCache.body != nil {
+		body := recipeOfTheDayCache.body
+		recipeOfTheDayCache.mu.Unlock()
+		serveETagBody(c, body)
+		return
+	}
+	recipeOfTheDayCache.mu.Unlock()
+
+	var payload interface{}
 	var recipes []database.Recipe
 	database.DB.Preload("Tags").Preload("FavoritedBy").Find(&recipes)
 	if len(recipes) == 0 {
-		c.JSON(http.StatusOK, nil)
+		payload = nil
+	} else {
+		// Seed deterministically from the local calendar day so the "recipe of the
+		// day" is stable for all requests within one local day (v2.x seeded with
+		// date.today().toordinal()).
+		seed := int64(now.Year())*1000 + int64(now.YearDay())
+		rng := rand.New(rand.NewSource(seed))
+		r := recipes[rng.Intn(len(recipes))]
+		payload = recipeToJSON(&r)
+	}
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		apiError(c, http.StatusInternalServerError, "Failed to encode response")
 		return
 	}
-	// Seed deterministically from the local calendar day so the "recipe of the
-	// day" is stable for all requests within one local day (v2.x seeded with
-	// date.today().toordinal()).
-	now := time.Now()
-	seed := int64(now.Year())*1000 + int64(now.YearDay())
-	rng := rand.New(rand.NewSource(seed))
-	r := recipes[rng.Intn(len(recipes))]
-	c.JSON(http.StatusOK, recipeToJSON(&r))
+
+	recipeOfTheDayCache.mu.Lock()
+	recipeOfTheDayCache.day = dayKey
+	recipeOfTheDayCache.count = count
+	recipeOfTheDayCache.body = body
+	recipeOfTheDayCache.mu.Unlock()
+
+	serveETagBody(c, body)
 }
 
 func getTags(c *gin.Context) {
+	query := database.DB.Model(&database.Tag{})
+	var total int64
+	query.Count(&total)
+
+	paginated := wantsPagination(c)
+	pg, ok := parsePagination(c)
+	if !ok {
+		return
+	}
+
 	var tags []database.Tag
-	database.DB.Find(&tags)
-	c.JSON(http.StatusOK, tagsToDTOs(tags))
+	query.Limit(pg.limit).Offset(pg.offset).Find(&tags)
+
+	items := tagsToDTOs(tags)
+	if paginated {
+		c.JSON(http.StatusOK, gin.H{"items": items, "total": total})
+		return
+	}
+	c.JSON(http.StatusOK, items)
 }
 
 func createTag(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil || !user.IsStaff {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Not authorized"})
+		apiError(c, http.StatusForbidden, "Not authorized")
 		return
 	}
 	var input struct {
 		Name string `json:"name" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		apiError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	tag := database.Tag{Name: input.Name}
@@ -426,7 +534,7 @@ func getTag(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var tag database.Tag
 	if err := database.DB.First(&tag, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Tag not found"})
+		apiError(c, http.StatusNotFound, "Tag not found")
 		return
 	}
 	c.JSON(http.StatusOK, tagToDTO(&tag))
@@ -435,20 +543,20 @@ func getTag(c *gin.Context) {
 func updateTag(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil || !user.IsStaff {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Not authorized"})
+		apiError(c, http.StatusForbidden, "Not authorized")
 		return
 	}
 	id, _ := strconv.Atoi(c.Param("id"))
 	var tag database.Tag
 	if err := database.DB.First(&tag, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Tag not found"})
+		apiError(c, http.StatusNotFound, "Tag not found")
 		return
 	}
 	var input struct {
 		Name string `json:"name"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		apiError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	tag.Name = input.Name
@@ -459,7 +567,7 @@ func updateTag(c *gin.Context) {
 func deleteTag(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil || !user.IsStaff {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Not authorized"})
+		apiError(c, http.StatusForbidden, "Not authorized")
 		return
 	}
 	id, _ := strconv.Atoi(c.Param("id"))
@@ -470,16 +578,31 @@ func deleteTag(c *gin.Context) {
 func getOrders(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Please sign in"})
+		apiError(c, http.StatusForbidden, "Please sign in")
 		return
 	}
-	var orders []database.Order
-	query := database.DB.Preload("Items.Recipe")
+	query := database.DB.Model(&database.Order{}).Preload("Items.Recipe")
 	if !user.IsStaff {
 		query = query.Where("user_id = ?", user.ID)
 	}
-	query.Find(&orders)
-	c.JSON(http.StatusOK, ordersToDTOs(orders))
+	var total int64
+	query.Count(&total)
+
+	paginated := wantsPagination(c)
+	pg, ok := parsePagination(c)
+	if !ok {
+		return
+	}
+
+	var orders []database.Order
+	query.Limit(pg.limit).Offset(pg.offset).Find(&orders)
+
+	items := ordersToDTOs(orders)
+	if paginated {
+		c.JSON(http.StatusOK, gin.H{"items": items, "total": total})
+		return
+	}
+	c.JSON(http.StatusOK, items)
 }
 
 type CreateOrderInput struct {
@@ -489,18 +612,18 @@ type CreateOrderInput struct {
 func createOrder(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Please sign in"})
+		apiError(c, http.StatusForbidden, "Please sign in")
 		return
 	}
 	var input CreateOrderInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		apiError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	var recipe database.Recipe
 	if err := database.DB.First(&recipe, input.RecipeID).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Recipe not found"})
+		apiError(c, http.StatusBadRequest, "Recipe not found")
 		return
 	}
 
@@ -513,16 +636,16 @@ func createOrder(c *gin.Context) {
 	order := database.Order{UserID: user.ID, Status: "PENDING", TotalPrice: price}
 	if err := tx.Create(&order).Error; err != nil {
 		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create order"})
+		apiError(c, http.StatusInternalServerError, "Failed to create order")
 		return
 	}
 	if err := tx.Create(&database.OrderItem{OrderID: order.ID, RecipeID: recipe.ID, Quantity: 1, Price: price}).Error; err != nil {
 		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create order"})
+		apiError(c, http.StatusInternalServerError, "Failed to create order")
 		return
 	}
 	if err := tx.Commit().Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create order"})
+		apiError(c, http.StatusInternalServerError, "Failed to create order")
 		return
 	}
 
@@ -532,7 +655,7 @@ func createOrder(c *gin.Context) {
 func getOrder(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Please sign in"})
+		apiError(c, http.StatusForbidden, "Please sign in")
 		return
 	}
 	id, _ := strconv.Atoi(c.Param("id"))
@@ -542,7 +665,7 @@ func getOrder(c *gin.Context) {
 		query = query.Where("user_id = ?", user.ID)
 	}
 	if err := query.First(&order, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Order not found"})
+		apiError(c, http.StatusNotFound, "Order not found")
 		return
 	}
 	c.JSON(http.StatusOK, orderToDetailDTO(&order))
@@ -551,7 +674,7 @@ func getOrder(c *gin.Context) {
 func updateOrderStatus(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil || !user.IsStaff {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Not authorized"})
+		apiError(c, http.StatusForbidden, "Not authorized")
 		return
 	}
 	id, _ := strconv.Atoi(c.Param("id"))
@@ -559,7 +682,7 @@ func updateOrderStatus(c *gin.Context) {
 		Status string `json:"status" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		apiError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	database.DB.Model(&database.Order{}).Where("id = ?", id).Update("status", input.Status)
@@ -569,12 +692,30 @@ func updateOrderStatus(c *gin.Context) {
 func getCart(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Please sign in"})
+		apiError(c, http.StatusForbidden, "Please sign in")
 		return
 	}
+	query := database.DB.Model(&database.CartItem{}).
+		Preload("Recipe.Tags").Preload("Recipe.FavoritedBy").
+		Where("user_id = ?", user.ID)
+	var total int64
+	query.Count(&total)
+
+	paginated := wantsPagination(c)
+	pg, ok := parsePagination(c)
+	if !ok {
+		return
+	}
+
 	var items []database.CartItem
-	database.DB.Preload("Recipe.Tags").Preload("Recipe.FavoritedBy").Where("user_id = ?", user.ID).Find(&items)
-	c.JSON(http.StatusOK, cartItemsToDTOs(items))
+	query.Limit(pg.limit).Offset(pg.offset).Find(&items)
+
+	dto := cartItemsToDTOs(items)
+	if paginated {
+		c.JSON(http.StatusOK, gin.H{"items": dto, "total": total})
+		return
+	}
+	c.JSON(http.StatusOK, dto)
 }
 
 type CartItemInput struct {
@@ -585,12 +726,12 @@ type CartItemInput struct {
 func addToCartAPI(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Please sign in"})
+		apiError(c, http.StatusForbidden, "Please sign in")
 		return
 	}
 	var input CartItemInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		apiError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	if input.Quantity < 1 {
@@ -618,18 +759,18 @@ type CartItemUpdateInput struct {
 func updateCartAPI(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Please sign in"})
+		apiError(c, http.StatusForbidden, "Please sign in")
 		return
 	}
 	id, _ := strconv.Atoi(c.Param("id"))
 	var item database.CartItem
 	if err := database.DB.Where("id = ? AND user_id = ?", id, user.ID).First(&item).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Cart item not found"})
+		apiError(c, http.StatusNotFound, "Cart item not found")
 		return
 	}
 	var input CartItemUpdateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		apiError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	item.Quantity = input.Quantity
@@ -642,7 +783,7 @@ func updateCartAPI(c *gin.Context) {
 func deleteCartAPI(c *gin.Context) {
 	user := middleware.GetUser(c)
 	if user == nil {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Please sign in"})
+		apiError(c, http.StatusForbidden, "Please sign in")
 		return
 	}
 	id, _ := strconv.Atoi(c.Param("id"))

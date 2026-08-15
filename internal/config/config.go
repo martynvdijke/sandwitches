@@ -3,29 +3,33 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 type Config struct {
-	Debug                       bool
-	SecretKey                   string
-	AllowedHosts                string
-	CSRFTrustedOrigins          string
-	DatabaseFile                string
-	MediaRoot                   string
-	LogFile                     string
-	SendEmail                   bool
-	SMTPHost                    string
-	SMTPPort                    string
-	SMTPUser                    string
-	SMTPPassword                string
-	SMTPFromEmail               string
-	GotifyURL                   string
-	GotifyToken                 string
-	UmamiHost                   string
-	UmamiWebsiteID              string
-	LanguageCode                string
-	StaticRoot                  string
-	BaseDir                     string
+	Debug              bool
+	SecretKey          string
+	AllowedHosts       string
+	CSRFTrustedOrigins string
+	DatabaseFile       string
+	MediaRoot          string
+	LogFile            string
+	SendEmail          bool
+	SMTPHost           string
+	SMTPPort           string
+	SMTPUser           string
+	SMTPPassword       string
+	SMTPFromEmail      string
+	GotifyURL          string
+	GotifyToken        string
+	UmamiHost          string
+	UmamiWebsiteID     string
+	LanguageCode       string
+	StaticRoot         string
+	BaseDir            string
+	APICORSOrigins     string
+	APIRateLimitRate   float64
+	APIRateLimitBurst  float64
 }
 
 func Load() *Config {
@@ -54,6 +58,9 @@ func Load() *Config {
 		UmamiWebsiteID:     os.Getenv("UMAMI_WEBSITE_ID"),
 		LanguageCode:       envOr("LANGUAGE_CODE", "en"),
 		BaseDir:            baseDir,
+		APICORSOrigins:     os.Getenv("API_CORS_ORIGINS"),
+		APIRateLimitRate:   envFloat("API_RATE_LIMIT_RATE", 10),
+		APIRateLimitBurst:  envFloat("API_RATE_LIMIT_BURST", 100),
 	}
 
 	if cfg.DatabaseFile == "" {
@@ -75,6 +82,15 @@ func Load() *Config {
 func envOr(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
+	}
+	return fallback
+}
+
+func envFloat(key string, fallback float64) float64 {
+	if v := os.Getenv(key); v != "" {
+		if f, err := strconv.ParseFloat(v, 64); err == nil {
+			return f
+		}
 	}
 	return fallback
 }

@@ -76,13 +76,19 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	}
 
 	router := gin.New()
+	router.Use(middleware.RequestID())
 	router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-		return fmt.Sprintf("[%s] %s %s %d %s\n",
+		rid, _ := param.Keys["request_id"].(string)
+		if rid == "" {
+			rid = "-"
+		}
+		return fmt.Sprintf("[%s] %s %s %d %s request_id=%s\n",
 			param.TimeStamp.Format("2006-01-02 15:04:05"),
 			param.Method,
 			param.Path,
 			param.StatusCode,
 			param.Latency,
+			rid,
 		)
 	}))
 	router.Use(gin.Recovery())
@@ -97,28 +103,71 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	router.Use(sessions.Sessions("sandwitches_session", store))
 
 	router.SetFuncMap(template.FuncMap{
-		"add":        func(a, b int) int { return a + b },
-		"sub":        func(a, b int) int { return a - b },
-		"lower":      strings.ToLower,
-		"upper":      strings.ToUpper,
-		"title":      strings.Title,
-		"contains":   strings.Contains,
-		"join":       func(sep string, s []string) string { return strings.Join(s, sep) },
-		"split":      func(sep, s string) []string { return strings.Split(s, sep) },
-		"now":        func() time.Time { return time.Now() },
-		"div":        func(a, b int) int { return a / b },
-		"mul":        func(a, b int) int { return a * b },
-		"mod":        func(a, b int) int { return a % b },
-		"seq":        func(n int) []int { s := make([]int, n); for i := range s { s[i] = i }; return s },
-		"dict":       func(values ...interface{}) map[string]interface{} { m := make(map[string]interface{}); for i := 0; i < len(values); i += 2 { m[fmt.Sprint(values[i])] = values[i+1] }; return m },
-		"default":    func(def, val interface{}) interface{} { if val == nil || val == "" { return def }; return val },
-		"first":      func(s string) string { if len(s) > 0 { return string(s[0]) } else { return "" } },
-		"urlencode":  func(s string) string { return strings.ReplaceAll(s, " ", "+") },
-		"has": func(s string, list []string) bool { for _, v := range list { if v == s { return true }; }; return false },
-		"floatmul":   func(a float64, b int) float64 { return a * float64(b) },
-		"striptags":  func(s string) string { return strings.Map(func(r rune) rune { if r == '<' || r == '>' { return -1 }; return r }, s) },
-		"truncatechars": func(n int, s string) string { runes := []rune(s); if len(runes) > n { return string(runes[:n]) + "..." }; return s },
-		"safe":       func(s string) template.HTML { return template.HTML(s) },
+		"add":      func(a, b int) int { return a + b },
+		"sub":      func(a, b int) int { return a - b },
+		"lower":    strings.ToLower,
+		"upper":    strings.ToUpper,
+		"title":    strings.Title,
+		"contains": strings.Contains,
+		"join":     func(sep string, s []string) string { return strings.Join(s, sep) },
+		"split":    func(sep, s string) []string { return strings.Split(s, sep) },
+		"now":      func() time.Time { return time.Now() },
+		"div":      func(a, b int) int { return a / b },
+		"mul":      func(a, b int) int { return a * b },
+		"mod":      func(a, b int) int { return a % b },
+		"seq": func(n int) []int {
+			s := make([]int, n)
+			for i := range s {
+				s[i] = i
+			}
+			return s
+		},
+		"dict": func(values ...interface{}) map[string]interface{} {
+			m := make(map[string]interface{})
+			for i := 0; i < len(values); i += 2 {
+				m[fmt.Sprint(values[i])] = values[i+1]
+			}
+			return m
+		},
+		"default": func(def, val interface{}) interface{} {
+			if val == nil || val == "" {
+				return def
+			}
+			return val
+		},
+		"first": func(s string) string {
+			if len(s) > 0 {
+				return string(s[0])
+			} else {
+				return ""
+			}
+		},
+		"urlencode": func(s string) string { return strings.ReplaceAll(s, " ", "+") },
+		"has": func(s string, list []string) bool {
+			for _, v := range list {
+				if v == s {
+					return true
+				}
+			}
+			return false
+		},
+		"floatmul": func(a float64, b int) float64 { return a * float64(b) },
+		"striptags": func(s string) string {
+			return strings.Map(func(r rune) rune {
+				if r == '<' || r == '>' {
+					return -1
+				}
+				return r
+			}, s)
+		},
+		"truncatechars": func(n int, s string) string {
+			runes := []rune(s)
+			if len(runes) > n {
+				return string(runes[:n]) + "..."
+			}
+			return s
+		},
+		"safe": func(s string) template.HTML { return template.HTML(s) },
 		"convert_markdown": func(s string) template.HTML {
 			md := s
 			md = strings.ReplaceAll(md, "\n\n", "</p><p>")
@@ -288,7 +337,10 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 		}
 	}
 
-	api.RegisterRoutes(router.Group("/api"))
+	apiGroup := router.Group("/api")
+	apiGroup.Use(middleware.CORS(cfg.APICORSOrigins))
+	apiGroup.Use(middleware.RateLimit(cfg.APIRateLimitRate, cfg.APIRateLimitBurst))
+	api.RegisterRoutes(apiGroup)
 
 	return router
 }

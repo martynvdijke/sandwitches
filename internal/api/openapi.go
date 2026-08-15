@@ -32,7 +32,9 @@ func buildOpenAPISpec() map[string]interface{} {
 		return map[string]interface{}{
 			"type": "object",
 			"properties": map[string]interface{}{
-				"message": map[string]interface{}{"type": "string"},
+				"message":    map[string]interface{}{"type": "string"},
+				"code":       map[string]interface{}{"type": "string", "description": "Machine-readable error code (bad_request, validation_error, not_found, unauthorized, forbidden, rate_limited, internal)"},
+				"request_id": map[string]interface{}{"type": "string", "description": "Correlates with the X-Request-Id response header"},
 			},
 		}
 	}
@@ -49,6 +51,24 @@ func buildOpenAPISpec() map[string]interface{} {
 		"schema": map[string]interface{}{"type": "integer"},
 	}}
 
+	// queryParam builds a non-required query string parameter.
+	queryParam := func(name, desc, typ string) map[string]interface{} {
+		return map[string]interface{}{"name": name, "in": "query", "required": false, "description": desc,
+			"schema": map[string]interface{}{"type": typ}}
+	}
+
+	paginationParams := []map[string]interface{}{
+		queryParam("limit", "Maximum number of results (default 50, max 200)", "integer"),
+		queryParam("offset", "Number of results to skip (default 0)", "integer"),
+	}
+
+	recipeFilterParams := []map[string]interface{}{
+		queryParam("search", "Case-insensitive search over title, description and ingredients", "string"),
+		queryParam("tag", "Filter by tag slug", "string"),
+		queryParam("is_approved", "Filter by approval status (true or false)", "boolean"),
+		queryParam("uploaded_by", "Filter by uploader user id", "integer"),
+	}
+
 	jsonBody := func(schema interface{}) map[string]interface{} {
 		return map[string]interface{}{"required": true, "content": map[string]interface{}{
 			"application/json": map[string]interface{}{"schema": schema},
@@ -59,7 +79,7 @@ func buildOpenAPISpec() map[string]interface{} {
 		"openapi": "3.1.0",
 		"info": map[string]interface{}{
 			"title":       "Sandwitches API",
-			"description": "Recipe collection, ordering and community API (v2.x parity).",
+			"description": "Recipe collection, ordering and community API (v2.x parity). Every response carries an X-Request-Id header; every error is a JSON object with message, code and request_id fields. List endpoints accept limit/offset pagination and return {items, total} when pagination parameters are present.",
 			"version":     "1.0.0",
 		},
 		"servers": []map[string]interface{}{{"url": "/api/v1"}},
@@ -115,6 +135,7 @@ func buildOpenAPISpec() map[string]interface{} {
 					"summary":     "List users",
 					"operationId": "users",
 					"tags":        []string{"Users"},
+					"parameters":  paginationParams,
 					"responses":   responses("Users", map[string]interface{}{"type": "array", "items": ref("User")}),
 				},
 			},
@@ -123,6 +144,7 @@ func buildOpenAPISpec() map[string]interface{} {
 					"summary":     "List recipes",
 					"operationId": "getRecipes",
 					"tags":        []string{"Recipes"},
+					"parameters":  append(paginationParams, recipeFilterParams...),
 					"responses":   responses("Recipes", map[string]interface{}{"type": "array", "items": ref("Recipe")}),
 				},
 				"post": map[string]interface{}{
@@ -238,6 +260,7 @@ func buildOpenAPISpec() map[string]interface{} {
 					"summary":     "List tags",
 					"operationId": "getTags",
 					"tags":        []string{"Tags"},
+					"parameters":  paginationParams,
 					"responses":   responses("Tags", map[string]interface{}{"type": "array", "items": ref("Tag")}),
 				},
 				"post": map[string]interface{}{
@@ -303,6 +326,7 @@ func buildOpenAPISpec() map[string]interface{} {
 					"operationId": "getOrders",
 					"tags":        []string{"Orders"},
 					"security":    auth,
+					"parameters":  paginationParams,
 					"responses": map[string]interface{}{
 						"200": responses("Orders", map[string]interface{}{"type": "array", "items": ref("Order")})["200"],
 						"401": errorResponses["401"],
@@ -361,6 +385,7 @@ func buildOpenAPISpec() map[string]interface{} {
 					"operationId": "getCart",
 					"tags":        []string{"Cart"},
 					"security":    auth,
+					"parameters":  paginationParams,
 					"responses": map[string]interface{}{
 						"200": responses("Cart items", map[string]interface{}{"type": "array", "items": ref("CartItem")})["200"],
 						"401": errorResponses["401"],

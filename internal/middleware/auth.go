@@ -19,7 +19,11 @@ func isAPIRequest(c *gin.Context) bool {
 // v2.x django-ninja behavior) or a 302 login redirect for web requests.
 func unauthorized(c *gin.Context) {
 	if isAPIRequest(c) {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Please sign in first"})
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message":    "Please sign in first",
+			"code":       "unauthorized",
+			"request_id": GetRequestID(c),
+		})
 	} else {
 		c.Redirect(http.StatusFound, "/login?next="+c.Request.URL.Path)
 	}
