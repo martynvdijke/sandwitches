@@ -7,6 +7,26 @@
       </div>
     </div>
   </div>
+  {% for user in IDX_1.data %}
+    {% if user.id == IDX_0.uploaded_by %}
+    <div class="item">
+      <div class="meta"></div>
+      <div class="content">
+        <span class="label">Made by - {{ user.username }} </span>
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
+  {% for user in IDX_1.data %}
+    {% if IDX_0.favorited_by contains user.id %}
+    <div class="item">
+      <div class="meta"></div>
+      <div class="content">
+        <span class="label">Favourited by : {{ user.username }} </span>
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
   <img class="image image-dither image-contain rounded" src="{{ trml.plugin_settings.custom_fields_values.url }}{{ IDX_0.image }}" />
 </div>
 <div class="title_bar">
