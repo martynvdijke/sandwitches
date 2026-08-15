@@ -1,3 +1,10 @@
+# [3.6.0](https://github.com/martynvdijke/sandwitches/compare/v3.5.0...v3.6.0) (2026-08-15)
+
+
+### Features
+
+* **ui:** link API menu item to OpenAPI docs instead of ping ([8d444e8](https://github.com/martynvdijke/sandwitches/commit/8d444e81e042713c594b96f12e7d5785d586bd78))
+
 # [3.5.0](https://github.com/martynvdijke/sandwitches/compare/v3.4.0...v3.5.0) (2026-08-15)
 
 
