@@ -101,6 +101,7 @@ Below is a list of all supported environment variables.
 | CSRF_TRUSTED_ORIGINS | Yes          | A list of trusted origins for safe cross-site requests (e.g., <https://example.com>). |
 | DATABASE_FILE        | No           | The file path to the SQLite database (default `db.sqlite3`).                          |
 | MEDIA_ROOT           | No           | The filesystem path to the directory that holds user-uploaded files (default `media`).|
+| LOG_FILE             | No           | The file the app writes its logs to (default `{MEDIA_ROOT}/sandwitches.log`). A stale Django-era log at that path is backed up automatically on first start.|
 | DEBUG                | No           | Boolean to enable debug mode (default `false`).                                       |
 | PORT                 | No           | The port the server listens on (default `6270`).                                      |
 | LANGUAGE_CODE        | No           | Default language code (default `en`).                                                 |

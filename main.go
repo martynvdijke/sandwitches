@@ -29,6 +29,8 @@ var Version = "dev"
 func main() {
 	cfg := config.Load()
 
+	setupLogFile(cfg)
+
 	database.Init(cfg)
 	tasks.Init(cfg)
 

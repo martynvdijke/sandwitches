@@ -170,6 +170,7 @@ The full table lives in `README.md`. Key ones:
 | `CSRF_TRUSTED_ORIGINS` | Origins allowed to POST (required)             |
 | `DATABASE_FILE`    | SQLite path (default `db.sqlite3`)                 |
 | `MEDIA_ROOT`       | Uploaded files dir (default `media`)               |
+| `LOG_FILE`         | App log file (default `{MEDIA_ROOT}/sandwitches.log`); legacy Django log is backed up on first start |
 | `PORT`             | Listen port (default `6270`)                       |
 | `Django_DB_PATH`   | Legacy Django DB to auto-migrate from              |
 | `GOTIFY_URL`/`TOKEN`, `SMTP_*`, `UMAMI_*` | Notifications & analytics |

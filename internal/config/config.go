@@ -12,6 +12,7 @@ type Config struct {
 	CSRFTrustedOrigins          string
 	DatabaseFile                string
 	MediaRoot                   string
+	LogFile                     string
 	SendEmail                   bool
 	SMTPHost                    string
 	SMTPPort                    string
@@ -40,6 +41,7 @@ func Load() *Config {
 		CSRFTrustedOrigins: os.Getenv("CSRF_TRUSTED_ORIGINS"),
 		DatabaseFile:       os.Getenv("DATABASE_FILE"),
 		MediaRoot:          os.Getenv("MEDIA_ROOT"),
+		LogFile:            os.Getenv("LOG_FILE"),
 		SendEmail:          os.Getenv("SEND_EMAIL") == "true",
 		SMTPHost:           os.Getenv("SMTP_HOST"),
 		SMTPPort:           os.Getenv("SMTP_PORT"),
@@ -59,6 +61,9 @@ func Load() *Config {
 	}
 	if cfg.MediaRoot == "" {
 		cfg.MediaRoot = filepath.Join(baseDir, "media")
+	}
+	if cfg.LogFile == "" {
+		cfg.LogFile = filepath.Join(cfg.MediaRoot, "sandwitches.log")
 	}
 	if cfg.SecretKey == "" && !cfg.Debug {
 		panic("SECRET_KEY must be set in production")

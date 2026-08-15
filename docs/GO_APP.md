@@ -124,6 +124,7 @@ Open **[http://localhost:6270](http://localhost:6270)** in your browser.
 | `DEBUG` | `false` | Enable debug mode |
 | `DATABASE_FILE` | `{BASE_DIR}/db.sqlite3` | SQLite database path |
 | `MEDIA_ROOT` | `{BASE_DIR}/media` | Media upload directory |
+| `LOG_FILE` | `{MEDIA_ROOT}/sandwitches.log` | App log file (written to stdout too); legacy Django log is backed up on first start |
 | `ALLOWED_HOSTS` | — | Comma-separated allowed hostnames |
 | `CSRF_TRUSTED_ORIGINS` | — | Trusted origins for CSRF |
 | `BASE_DIR` | CWD | Base directory for defaults |
