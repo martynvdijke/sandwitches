@@ -1,0 +1,5 @@
+---
+# Local dev-server config for trmnlp (https://github.com/usetrmnl/trmnlp).
+# This file marks trmnl/ as a plugin project so `trmnlp lint` and
+# `trmnlp push` (run from .github/workflows/trml.yaml) work. All fields
+# are optional; see https://github.com/usetrmnl/trmnlp#trmnlpyml-reference

@@ -13,7 +13,7 @@ jobs:
         with:
           ruby-version: "4.0"
       - run: gem install trmnl_preview
-      - run: trmnlp lint
+      - run: trmnlp lint --dir trmnl
 
   push:
     needs: lint
@@ -25,6 +25,6 @@ jobs:
         with:
           ruby-version: "4.0"
       - run: gem install trmnl_preview
-      - run: trmnlp push --force
+      - run: trmnlp push --force --dir trmnl
         env:
           TRMNL_API_KEY: ${{ secrets.TRML_TOKEN }}
