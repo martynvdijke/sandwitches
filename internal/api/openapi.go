@@ -485,7 +485,7 @@ func buildOpenAPISpec() map[string]interface{} {
 						"calories":           map[string]interface{}{"type": "integer", "nullable": true},
 						"uploaded_by":        map[string]interface{}{"type": "integer", "nullable": true},
 						"tags":               map[string]interface{}{"type": "array", "items": ref("Tag")},
-						"favorited_by":       map[string]interface{}{"type": "array", "items": ref("UserPublic")},
+						"favorited_by":       map[string]interface{}{"type": "array", "items": sch("integer")},
 						"average_rating":     sch("number"),
 						"daily_orders_count": sch("integer"),
 						"created_at":         sch("string"),

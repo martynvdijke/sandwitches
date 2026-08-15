@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 	"testing"
+
+	"github.com/martynvdijke/sandwitches-go/internal/database"
 )
 
 // TestAPISettingsShape: settings response uses snake_case keys.
@@ -320,5 +322,68 @@ func TestAPIRatingShape(t *testing.T) {
 	}
 	if _, ok := user["first_name"]; !ok {
 		t.Error("rating user should be full public schema (first_name)")
+	}
+}
+
+// TestAPIFavoritedByShape: recipe favorited_by is an array of user IDs and
+// uploaded_by is a user ID (required by the TRMNL plugin templates).
+func TestAPIFavoritedByShape(t *testing.T) {
+	r, cleanup := setupAPITest(t)
+	defer cleanup()
+
+	chef := createAPIUser(t, "fav_chef", true)
+	chefCookie := loginAPIUser(t, r, "fav_chef")
+	fan := createAPIUser(t, "fav_fan", false)
+
+	w := apiPost(t, r, "/api/v1/recipes", map[string]interface{}{
+		"title": "Favorite Shape Recipe", "description": "d", "servings": 1,
+	}, chefCookie)
+	var created map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &created)
+	recipeID := int(created["id"].(float64))
+
+	// Add a favorite directly via the association.
+	var recipe database.Recipe
+	if err := database.DB.First(&recipe, recipeID).Error; err != nil {
+		t.Fatal(err)
+	}
+	if err := database.DB.Model(&recipe).Association("FavoritedBy").Append(fan); err != nil {
+		t.Fatal(err)
+	}
+
+	w2 := apiGet(t, r, "/api/v1/recipes", "")
+	if w2.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", w2.Code)
+	}
+	var list []map[string]interface{}
+	json.Unmarshal(w2.Body.Bytes(), &list)
+	var target map[string]interface{}
+	for _, rec := range list {
+		if int(rec["id"].(float64)) == recipeID {
+			target = rec
+			break
+		}
+	}
+	if target == nil {
+		t.Fatal("created recipe not found in /recipes")
+	}
+
+	favs, ok := target["favorited_by"].([]interface{})
+	if !ok {
+		t.Fatalf("favorited_by should be an array, got %T", target["favorited_by"])
+	}
+	if len(favs) != 1 {
+		t.Fatalf("expected 1 favorite, got %d", len(favs))
+	}
+	if int(favs[0].(float64)) != int(fan.ID) {
+		t.Errorf("favorited_by should contain user ID %d, got %v", fan.ID, favs)
+	}
+
+	uploadedBy, ok := target["uploaded_by"].(float64)
+	if !ok {
+		t.Fatalf("uploaded_by should be a user ID, got %T", target["uploaded_by"])
+	}
+	if int(uploadedBy) != int(chef.ID) {
+		t.Errorf("uploaded_by should be user ID %d, got %v", chef.ID, uploadedBy)
 	}
 }

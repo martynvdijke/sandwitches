@@ -126,14 +126,9 @@ func recipeToJSON(r *database.Recipe) gin.H {
 	for i, t := range r.Tags {
 		tags[i] = gin.H{"id": t.ID, "name": t.Name, "slug": t.Slug}
 	}
-	favorites := make([]gin.H, len(r.FavoritedBy))
+	favoriteIDs := make([]uint, len(r.FavoritedBy))
 	for i, u := range r.FavoritedBy {
-		favorites[i] = gin.H{
-			"username":   u.Username,
-			"first_name": u.FirstName,
-			"last_name":  u.LastName,
-			"avatar":     u.Avatar,
-		}
+		favoriteIDs[i] = u.ID
 	}
 	var avgRating float64
 	database.DB.Model(&database.Rating{}).Where("recipe_id = ?", r.ID).Select("COALESCE(AVG(score), 0)").Scan(&avgRating)
@@ -159,7 +154,7 @@ func recipeToJSON(r *database.Recipe) gin.H {
 		"calories":           r.Calories,
 		"uploaded_by":        r.UploadedByID,
 		"tags":               tags,
-		"favorited_by":       favorites,
+		"favorited_by":       favoriteIDs,
 		"average_rating":     math.Round(avgRating*10) / 10,
 		"daily_orders_count": r.DailyOrdersCount,
 		"created_at":         r.CreatedAt,

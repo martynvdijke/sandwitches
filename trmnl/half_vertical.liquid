@@ -23,7 +23,7 @@
     {% endif %}
     {% endfor %}
     {% for user in IDX_1.data %}
-    {% if user.id == IDX_0.favorited_by %}
+    {% if IDX_0.favorited_by contains user.id %}
     <div class="item">
       <div class="meta"></div>
       <div class="content">
@@ -32,10 +32,10 @@
     </div>
     {% endif %}
     {% endfor %}
-    <img class="image image-contain rounded image-dither" height=280px src="https://sandwitches.vandijke.xyz{{ IDX_0.image }}" />
+    <img class="image image-contain rounded image-dither" height=280px src="{{ trml.plugin_settings.custom_fields_values.url }}{{ IDX_0.image }}" />
   </div>
 </div>
 <div class="title_bar">
-  <img width="60" src="https://sandwitches.vandijke.xyz/static/icons/icon.012a40b047f9.svg">
+  <img width="60" src="{{ trml.plugin_settings.custom_fields_values.url }}/static/icons/icon.012a40b047f9.svg">
   <span class="title">Sandwiches so good ! </span>
 </div>
