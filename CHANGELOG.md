@@ -1,3 +1,11 @@
+## [3.1.3](https://github.com/martynvdijke/sandwitches/compare/v3.1.2...v3.1.3) (2026-08-15)
+
+
+### Bug Fixes
+
+* make navbar full width ([96d07ca](https://github.com/martynvdijke/sandwitches/commit/96d07ca64a5f13c7f79fcffe81bd06300e303a10))
+* repair admin charts and user deletion ([2f411fa](https://github.com/martynvdijke/sandwitches/commit/2f411fa42d0061f45a1e363d666bb29ef1b8ae03))
+
 ## [3.1.2](https://github.com/martynvdijke/sandwitches/compare/v3.1.1...v3.1.2) (2026-08-14)
 
 
