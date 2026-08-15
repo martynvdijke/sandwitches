@@ -36,11 +36,11 @@
     </div>
   </div>
   <div class="column">
-      <img class="image image-cover image-dither rounded" src="{{ trml.plugin_settings.custom_fields_values.url }}{{ IDX_0.image }}" />
+      <img class="image image-cover image-dither rounded" src="{{ trml.plugin_settings.custom_fields_values.url | default: 'https://sandwitches.vandijke.xyz' }}{{ IDX_0.image }}" />
     </div>
 </div>
 
 <div class="title_bar">
-  <img class="image image--contain" src="{{ trml.plugin_settings.custom_fields_values.url }}/static/icons/icon.svg">
+  <img class="image image--contain" src="{{ trml.plugin_settings.custom_fields_values.url | default: 'https://sandwitches.vandijke.xyz' }}/static/icons/icon.svg">
   <span class="title">Sandwiches so good, they haunt you!</span>
 </div>

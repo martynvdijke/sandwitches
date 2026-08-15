@@ -32,10 +32,10 @@
     </div>
     {% endif %}
     {% endfor %}
-    <img class="image image-contain rounded image-dither" height=280px src="{{ trml.plugin_settings.custom_fields_values.url }}{{ IDX_0.image }}" />
+    <img class="image image-contain rounded image-dither" height=280px src="{{ trml.plugin_settings.custom_fields_values.url | default: 'https://sandwitches.vandijke.xyz' }}{{ IDX_0.image }}" />
   </div>
 </div>
 <div class="title_bar">
-  <img width="60" src="{{ trml.plugin_settings.custom_fields_values.url }}/static/icons/icon.svg">
+  <img width="60" src="{{ trml.plugin_settings.custom_fields_values.url | default: 'https://sandwitches.vandijke.xyz' }}/static/icons/icon.svg">
   <span class="title">Sandwiches so good ! </span>
 </div>
