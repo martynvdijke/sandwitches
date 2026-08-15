@@ -4,7 +4,7 @@ no_screen_padding: 'no'
 dark_mode: 'no'
 static_data: ''
 polling_verb: get
-framework_version: 2.3.7
+framework_version: latest
 serverless_language: ''
 polling_url: "https://sandwitches.vandijke.xyz/api/v1/recipe-of-the-day\r\nhttps://sandwitches.vandijke.xyz/api/v1/users"
 polling_headers: ''
