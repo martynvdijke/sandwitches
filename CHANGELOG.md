@@ -1,3 +1,10 @@
+# [3.8.0](https://github.com/martynvdijke/sandwitches/compare/v3.7.2...v3.8.0) (2026-08-16)
+
+
+### Features
+
+* **auth:** add password reset flow with emailed reset links ([e2c0bd1](https://github.com/martynvdijke/sandwitches/commit/e2c0bd110ddec649cb82bcb858afc1328a753044))
+
 ## [3.7.2](https://github.com/martynvdijke/sandwitches/compare/v3.7.1...v3.7.2) (2026-08-16)
 
 ## [3.7.1](https://github.com/martynvdijke/sandwitches/compare/v3.7.0...v3.7.1) (2026-08-15)
