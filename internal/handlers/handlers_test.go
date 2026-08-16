@@ -116,6 +116,10 @@ func setupTestServer(t *testing.T) (*httptest.Server, func()) {
 	r.POST("/signup", Signup)
 	r.GET("/login", LoginPage)
 	r.POST("/login", Login)
+	r.GET("/forgot-password", ForgotPasswordPage)
+	r.POST("/forgot-password", ForgotPassword)
+	r.GET("/reset-password", ResetPasswordPage)
+	r.POST("/reset-password", ResetPassword)
 	r.GET("/logout", Logout)
 	r.GET("/setup", SetupPage)
 	r.POST("/setup", Setup)
@@ -577,6 +581,7 @@ func TestSignupDuplicateUsername(t *testing.T) {
 	body.Set("username", "existing")
 	body.Set("password1", "password123")
 	body.Set("password2", "password123")
+	body.Set("email", "dupe@test.com")
 
 	resp, err := client.PostForm(srv.URL+"/signup", body)
 	if err != nil {
@@ -1347,5 +1352,234 @@ func TestAdminSettings(t *testing.T) {
 	}
 	if setting.LogLevel != "DEBUG" {
 		t.Errorf("expected log level 'DEBUG', got '%s'", setting.LogLevel)
+	}
+}
+
+func TestForgotPasswordPage(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	resp, err := newClient().Get(srv.URL + "/forgot-password")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected 200, got %d", resp.StatusCode)
+	}
+}
+
+func TestForgotPasswordUnknownEmail(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	client := newClient()
+	body := url.Values{}
+	body.Set("email", "nobody@test.com")
+
+	resp, err := client.PostForm(srv.URL+"/forgot-password", body)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+	respBody, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected 200, got %d", resp.StatusCode)
+	}
+	if !strings.Contains(string(respBody), "reset link has been sent") {
+		t.Error("unknown email should still show the generic success message")
+	}
+	var count int64
+	database.DB.Model(&database.PasswordResetToken{}).Count(&count)
+	if count != 0 {
+		t.Errorf("no token should be created for unknown email, found %d", count)
+	}
+}
+
+func TestForgotPasswordKnownEmail(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	createTestUser(t, "resetme", "password123", false, false, "")
+
+	client := newClient()
+	body := url.Values{}
+	body.Set("email", "resetme@test.com")
+
+	resp, err := client.PostForm(srv.URL+"/forgot-password", body)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+	respBody, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected 200, got %d", resp.StatusCode)
+	}
+	if !strings.Contains(string(respBody), "reset link has been sent") {
+		t.Error("should show success message")
+	}
+
+	var user database.User
+	database.DB.Where("username = ?", "resetme").First(&user)
+	var token database.PasswordResetToken
+	if err := database.DB.Where("user_id = ?", user.ID).First(&token).Error; err != nil {
+		t.Fatalf("reset token was not created: %v", err)
+	}
+	if token.TokenHash == "" {
+		t.Error("token hash should not be empty")
+	}
+	if time.Now().After(token.ExpiresAt) {
+		t.Error("token should not be expired immediately")
+	}
+}
+
+func TestForgotPasswordInvalidEmail(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	client := newClient()
+	body := url.Values{}
+	body.Set("email", "not-an-email")
+
+	resp, err := client.PostForm(srv.URL+"/forgot-password", body)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+	respBody, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected 200, got %d", resp.StatusCode)
+	}
+	if !strings.Contains(string(respBody), "Enter a valid email address") {
+		t.Error("invalid email should show validation error")
+	}
+}
+
+func TestResetPasswordPageInvalidToken(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	resp, err := newClient().Get(srv.URL + "/reset-password?token=bogus")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+	respBody, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected 200, got %d", resp.StatusCode)
+	}
+	if !strings.Contains(string(respBody), "invalid or has expired") {
+		t.Error("invalid token should show error message")
+	}
+}
+
+func TestResetPasswordFlow(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	user := createTestUser(t, "resetflow", "oldpass123", false, false, "")
+	token := "valid-reset-token-123"
+	database.DB.Create(&database.PasswordResetToken{
+		UserID:    user.ID,
+		TokenHash: hashResetToken(token),
+		ExpiresAt: time.Now().Add(24 * time.Hour),
+	})
+
+	client := newClient()
+
+	// Page renders with the form.
+	resp, err := client.Get(srv.URL + "/reset-password?token=" + token)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+	respBody, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if !strings.Contains(string(respBody), "New password") {
+		t.Error("valid token should show the reset form")
+	}
+
+	// Submit the new password.
+	body := url.Values{}
+	body.Set("token", token)
+	body.Set("password1", "newpass456")
+	body.Set("password2", "newpass456")
+
+	resp, err = client.PostForm(srv.URL+"/reset-password", body)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusFound {
+		t.Errorf("expected redirect (302), got %d", resp.StatusCode)
+	}
+
+	// Old password fails, new password works.
+	oldLogin := url.Values{}
+	oldLogin.Set("username", "resetflow")
+	oldLogin.Set("password", "oldpass123")
+	oldResp, _ := client.PostForm(srv.URL+"/login", oldLogin)
+	oldBody, _ := io.ReadAll(oldResp.Body)
+	oldResp.Body.Close()
+	if !strings.Contains(string(oldBody), "Invalid username or password") {
+		t.Error("old password should no longer work")
+	}
+
+	newLogin := url.Values{}
+	newLogin.Set("username", "resetflow")
+	newLogin.Set("password", "newpass456")
+	newResp, _ := client.PostForm(srv.URL+"/login", newLogin)
+	newResp.Body.Close()
+	if newResp.StatusCode != http.StatusFound {
+		t.Error("new password should allow login")
+	}
+
+	// Token is now single-use.
+	var stored database.PasswordResetToken
+	database.DB.Where("user_id = ?", user.ID).First(&stored)
+	if stored.UsedAt == nil {
+		t.Error("token should be marked as used")
+	}
+}
+
+func TestResetPasswordUsedToken(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	user := createTestUser(t, "usedtoken", "oldpass123", false, false, "")
+	now := time.Now()
+	token := "already-used-token"
+	database.DB.Create(&database.PasswordResetToken{
+		UserID:    user.ID,
+		TokenHash: hashResetToken(token),
+		ExpiresAt: time.Now().Add(24 * time.Hour),
+		UsedAt:    &now,
+	})
+
+	client := newClient()
+	body := url.Values{}
+	body.Set("token", token)
+	body.Set("password1", "newpass456")
+	body.Set("password2", "newpass456")
+
+	resp, err := client.PostForm(srv.URL+"/reset-password", body)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+	respBody, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+
+	if !strings.Contains(string(respBody), "invalid or has expired") {
+		t.Error("used token should be rejected")
+	}
+
+	var user2 database.User
+	database.DB.First(&user2, user.ID)
+	if bcrypt.CompareHashAndPassword([]byte(user2.Password), []byte("newpass456")) == nil {
+		t.Error("password should not be changed by a used token")
 	}
 }

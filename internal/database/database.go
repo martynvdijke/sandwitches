@@ -62,6 +62,7 @@ func Init(cfg *config.Config) {
 		&Setting{},
 		&User{},
 		&Group{},
+		&PasswordResetToken{},
 		&Tag{},
 		&Recipe{},
 		&Rating{},

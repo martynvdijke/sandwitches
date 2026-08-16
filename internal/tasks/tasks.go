@@ -78,7 +78,7 @@ Track your order: %s/orders/track/%s
 Thank you for ordering with Sandwitches.`,
 		order.User.Username, order.ID, itemsList, order.TotalPrice, baseURL(), order.TrackingToken)
 
-	sendEmail(order.User.Email, subject, body)
+	SendEmail(order.User.Email, subject, body)
 
 	EnqueueGotify("New Order Received",
 		fmt.Sprintf("Order #%d by %s. Total: %.2f EUR", order.ID, order.User.Username, order.TotalPrice), 6)
@@ -113,7 +113,7 @@ func notifyNewRecipe(recipeID uint) {
 	textBody := fmt.Sprintf("New recipe: %s\n\n%s\n\nView: %s", recipe.Title, recipe.Description, url)
 
 	for _, email := range emails {
-		sendHTMLEmail(email, subject, textBody, htmlBody)
+		SendHTMLEmail(email, subject, textBody, htmlBody)
 	}
 
 	EnqueueGotify("New Recipe Uploaded",
@@ -149,7 +149,13 @@ func sendGotify(title, msg string, priority int) {
 	resp.Body.Close()
 }
 
-func sendEmail(to, subject, body string) {
+// EmailEnabled reports whether SMTP email delivery is configured.
+func EmailEnabled() bool {
+	return cfg != nil && cfg.SendEmail
+}
+
+// SendEmail sends a plain-text email via SMTP when email delivery is enabled.
+func SendEmail(to, subject, body string) {
 	if cfg == nil || !cfg.SendEmail {
 		return
 	}
@@ -163,7 +169,9 @@ func sendEmail(to, subject, body string) {
 	}
 }
 
-func sendHTMLEmail(to, subject, textBody, htmlBody string) {
+// SendHTMLEmail sends a multipart (text + HTML) email via SMTP when email
+// delivery is enabled.
+func SendHTMLEmail(to, subject, textBody, htmlBody string) {
 	if cfg == nil || !cfg.SendEmail {
 		return
 	}

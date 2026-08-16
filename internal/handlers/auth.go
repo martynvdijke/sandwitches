@@ -1,9 +1,13 @@
 package handlers
 
 import (
+	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/base64"
+	"encoding/hex"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,6 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
+	"github.com/martynvdijke/sandwitches-go/internal/tasks"
 	"github.com/martynvdijke/sandwitches-go/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/pbkdf2"
@@ -55,7 +60,7 @@ type SignupForm struct {
 	Password2 string `form:"password2" binding:"required,eqfield=Password1"`
 	FirstName string `form:"first_name"`
 	LastName  string `form:"last_name"`
-	Email     string `form:"email"`
+	Email     string `form:"email" binding:"required,email"`
 	Bio       string `form:"bio"`
 }
 
@@ -174,6 +179,151 @@ func Logout(c *gin.Context) {
 	_ = session.Save()
 	utils.AddFlash(c, "success", "You have been logged out")
 	c.Redirect(http.StatusFound, "/")
+}
+
+const resetTokenTTL = 24 * time.Hour
+
+type ForgotPasswordForm struct {
+	Email string `form:"email" binding:"required,email"`
+}
+
+// generateResetToken returns a cryptographically random, URL-safe token.
+func generateResetToken() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(b), nil
+}
+
+// hashResetToken hashes a raw reset token so the plaintext is never stored.
+func hashResetToken(token string) string {
+	sum := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(sum[:])
+}
+
+// validResetToken looks up an unused, unexpired reset token by its raw value.
+func validResetToken(token string) (*database.PasswordResetToken, error) {
+	if token == "" {
+		return nil, fmt.Errorf("empty token")
+	}
+	var rt database.PasswordResetToken
+	if err := database.DB.Where("token_hash = ?", hashResetToken(token)).First(&rt).Error; err != nil {
+		return nil, err
+	}
+	if rt.UsedAt != nil {
+		return nil, fmt.Errorf("token already used")
+	}
+	if time.Now().After(rt.ExpiresAt) {
+		return nil, fmt.Errorf("token expired")
+	}
+	return &rt, nil
+}
+
+func ForgotPasswordPage(c *gin.Context) {
+	td := utils.NewTemplateData(c)
+	c.HTML(http.StatusOK, "forgot_password.html", td.ToGinH())
+}
+
+func ForgotPassword(c *gin.Context) {
+	td := utils.NewTemplateData(c)
+	var form ForgotPasswordForm
+	if err := c.ShouldBind(&form); err != nil {
+		c.HTML(http.StatusOK, "forgot_password.html", td.With("error", "Enter a valid email address").ToGinH())
+		return
+	}
+
+	// Always report success regardless of whether the account exists so the
+	// endpoint cannot be used to enumerate registered emails.
+	td.With("sent", true)
+
+	var user database.User
+	if err := database.DB.Where("email = ?", form.Email).First(&user).Error; err != nil {
+		c.HTML(http.StatusOK, "forgot_password.html", td.ToGinH())
+		return
+	}
+
+	// Invalidate any previously issued tokens for this user (single active token).
+	database.DB.Model(&database.PasswordResetToken{}).
+		Where("user_id = ? AND used_at IS NULL", user.ID).
+		Update("used_at", time.Now())
+
+	token, err := generateResetToken()
+	if err != nil {
+		log.Printf("password reset token generation failed: %v", err)
+		c.HTML(http.StatusOK, "forgot_password.html", td.ToGinH())
+		return
+	}
+
+	rt := database.PasswordResetToken{
+		UserID:    user.ID,
+		TokenHash: hashResetToken(token),
+		ExpiresAt: time.Now().Add(resetTokenTTL),
+	}
+	if err := database.DB.Create(&rt).Error; err != nil {
+		log.Printf("password reset token save failed: %v", err)
+		c.HTML(http.StatusOK, "forgot_password.html", td.ToGinH())
+		return
+	}
+
+	resetURL := fmt.Sprintf("%s/reset-password?token=%s", baseURL(c), token)
+	subject := "Reset your Sandwitches password"
+	textBody := fmt.Sprintf("You requested a password reset. Open this link to choose a new password:\n\n%s\n\nIf you didn't request this, you can ignore this email.", resetURL)
+	htmlBody := fmt.Sprintf("<p>You requested a password reset. Open this link to choose a new password:</p><p><a href=\"%s\">%s</a></p>", resetURL, resetURL)
+	if tasks.EmailEnabled() {
+		tasks.SendHTMLEmail(user.Email, subject, textBody, htmlBody)
+	} else {
+		log.Printf("[password-reset] reset link for %s: %s", user.Email, resetURL)
+	}
+
+	c.HTML(http.StatusOK, "forgot_password.html", td.ToGinH())
+}
+
+type ResetPasswordForm struct {
+	Token     string `form:"token" binding:"required"`
+	Password1 string `form:"password1" binding:"required,min=8"`
+	Password2 string `form:"password2" binding:"required,eqfield=Password1"`
+}
+
+func ResetPasswordPage(c *gin.Context) {
+	td := utils.NewTemplateData(c)
+	token := c.Query("token")
+	if _, err := validResetToken(token); err != nil {
+		c.HTML(http.StatusOK, "reset_password.html", td.With("error", "This reset link is invalid or has expired.").ToGinH())
+		return
+	}
+	c.HTML(http.StatusOK, "reset_password.html", td.With("token", token).ToGinH())
+}
+
+func ResetPassword(c *gin.Context) {
+	td := utils.NewTemplateData(c)
+	var form ResetPasswordForm
+	if err := c.ShouldBind(&form); err != nil {
+		c.HTML(http.StatusOK, "reset_password.html", td.With("error", "Passwords must match and be at least 8 characters.").With("token", form.Token).ToGinH())
+		return
+	}
+
+	rt, err := validResetToken(form.Token)
+	if err != nil {
+		c.HTML(http.StatusOK, "reset_password.html", td.With("error", "This reset link is invalid or has expired.").With("token", form.Token).ToGinH())
+		return
+	}
+
+	hashed, err := bcrypt.GenerateFromPassword([]byte(form.Password1), bcrypt.DefaultCost)
+	if err != nil {
+		c.HTML(http.StatusOK, "reset_password.html", td.With("error", "Server error").With("token", form.Token).ToGinH())
+		return
+	}
+
+	now := time.Now()
+	if err := database.DB.Model(&database.User{}).Where("id = ?", rt.UserID).Update("password", string(hashed)).Error; err != nil {
+		c.HTML(http.StatusOK, "reset_password.html", td.With("error", "Server error").With("token", form.Token).ToGinH())
+		return
+	}
+	database.DB.Model(&database.PasswordResetToken{}).Where("id = ?", rt.ID).Update("used_at", now)
+
+	utils.AddFlash(c, "success", "Password reset. You can log in now.")
+	c.Redirect(http.StatusFound, "/login")
 }
 
 func SetupPage(c *gin.Context) {

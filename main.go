@@ -258,6 +258,11 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	router.GET("/login", handlers.LoginPage)
 	router.POST("/login", handlers.Login)
 
+	router.GET("/forgot-password", handlers.ForgotPasswordPage)
+	router.POST("/forgot-password", handlers.ForgotPassword)
+	router.GET("/reset-password", handlers.ResetPasswordPage)
+	router.POST("/reset-password", handlers.ResetPassword)
+
 	router.GET("/logout", handlers.Logout)
 
 	web := router.Group("/")

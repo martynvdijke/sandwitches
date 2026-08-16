@@ -60,6 +60,19 @@ type Group struct {
 	Users []User `gorm:"many2many:user_groups;"`
 }
 
+// PasswordResetToken is a single-use token for resetting a password. Only the
+// SHA-256 hash of the token is stored; the raw token is emailed to the user in
+// the reset link.
+type PasswordResetToken struct {
+	ID        uint `gorm:"primaryKey"`
+	UserID    uint `gorm:"index"`
+	User      User
+	TokenHash string `gorm:"size:64;uniqueIndex"`
+	CreatedAt time.Time
+	ExpiresAt time.Time
+	UsedAt    *time.Time
+}
+
 type Tag struct {
 	ID   uint   `gorm:"primaryKey"`
 	Name string `gorm:"size:50;uniqueIndex;not null"`
