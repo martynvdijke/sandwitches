@@ -1,3 +1,10 @@
+## [3.8.1](https://github.com/martynvdijke/sandwitches/compare/v3.8.0...v3.8.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/mattn/go-sqlite3 to v1.14.50 ([#149](https://github.com/martynvdijke/sandwitches/issues/149)) ([aa91db1](https://github.com/martynvdijke/sandwitches/commit/aa91db165903a15addc1f93248f92f0414124d61))
+
 # [3.8.0](https://github.com/martynvdijke/sandwitches/compare/v3.7.2...v3.8.0) (2026-08-16)
 
 
