@@ -1,3 +1,10 @@
+## [3.8.3](https://github.com/martynvdijke/sandwitches/compare/v3.8.2...v3.8.3) (2026-08-18)
+
+
+### Bug Fixes
+
+* use latest ([0662b62](https://github.com/martynvdijke/sandwitches/commit/0662b62f8717e03a2603710634ac2392049c7a49))
+
 ## [3.8.2](https://github.com/martynvdijke/sandwitches/compare/v3.8.1...v3.8.2) (2026-08-18)
 
 ## [3.8.1](https://github.com/martynvdijke/sandwitches/compare/v3.8.0...v3.8.1) (2026-08-18)
