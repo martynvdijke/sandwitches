@@ -1,3 +1,5 @@
+## [3.8.2](https://github.com/martynvdijke/sandwitches/compare/v3.8.1...v3.8.2) (2026-08-18)
+
 ## [3.8.1](https://github.com/martynvdijke/sandwitches/compare/v3.8.0...v3.8.1) (2026-08-18)
 
 
