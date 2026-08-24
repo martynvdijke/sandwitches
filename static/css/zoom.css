@@ -1,0 +1,80 @@
+/* ============================================================
+   Photo Zoom Lightbox
+   Scoped under #photo-zoom to avoid clashing with BeerCSS.
+   ============================================================ */
+
+#photo-zoom {
+    position: fixed;
+    inset: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-width: 100vw;
+    max-height: 100dvh;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: rgba(0, 0, 0, 0.92);
+    overflow: hidden;
+}
+
+/* BeerCSS shifts open dialogs with translate(-50%); keep ours full-screen */
+#photo-zoom:is([open], .active) {
+    transform: none;
+}
+
+#photo-zoom::backdrop {
+    background: rgba(0, 0, 0, 0.92);
+}
+
+#photo-zoom #photo-zoom-stage {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    touch-action: none; /* pointer events handle pan/pinch */
+}
+
+#photo-zoom #photo-zoom-img {
+    max-width: 96%;
+    max-height: 96%;
+    user-select: none;
+    -webkit-user-drag: none;
+    transform-origin: center center;
+    will-change: transform;
+}
+
+#photo-zoom #photo-zoom-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 10;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+/* --- Zoom affordance overlaid on card photos --- */
+.zoom-btn {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    z-index: 6;
+    background: rgba(255, 255, 255, 0.92) !important;
+    color: #000000 !important;
+}
+
+/* --- E-ink theme: plain black-on-white, no translucency --- */
+.eink-mode #photo-zoom,
+.eink-mode #photo-zoom::backdrop {
+    background: #ffffff;
+}
+
+.eink-mode #photo-zoom #photo-zoom-close,
+.eink-mode .zoom-btn {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #000000;
+}

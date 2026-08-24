@@ -18,5 +18,5 @@
 </article>
 <div class="space"></div>
 <h4>Community Recipes</h4>
-<div class="grid">{{ range .recipes }}<div class="s12 m6 l4"><a href="/recipes/{{ .Slug }}"><article class="round elevate no-padding">{{ if .Image }}<img src="{{ thumb .Image 600 }}" class="responsive top-round" style="height:180px;object-fit:cover" alt="{{ .Title }}">{{ end }}<div class="padding"><h6>{{ .Title }}{{ if not .IsApproved }} <span class="chip small">Pending</span>{{ end }}</h6></div></article></a></div>{{ end }}</div>
+<div class="grid">{{ range .recipes }}<div class="s12 m6 l4"><a href="/recipes/{{ .Slug }}"><article class="round elevate no-padding" style="position:relative">{{ if .Image }}<img src="{{ thumb .Image 600 }}" class="responsive top-round" style="height:180px;object-fit:cover" alt="{{ .Title }}"><button type="button" class="button circle small zoom-btn" data-zoom-src="{{ thumb .Image 1600 }}" data-zoom-alt="{{ .Title }}" title="Zoom photo" aria-label="Zoom photo"><i>zoom_in</i></button>{{ end }}<div class="padding"><h6>{{ .Title }}{{ if not .IsApproved }} <span class="chip small">Pending</span>{{ end }}</h6></div></article></a></div>{{ end }}</div>
 {{ template "tail" . }}

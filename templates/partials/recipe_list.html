@@ -41,6 +41,11 @@
           </form>
          </div>
          {{ end }}{{ end }}
+         {{ if .Image }}
+         <button type="button" class="button circle small zoom-btn" data-zoom-src="{{ thumb .Image 1600 }}" data-zoom-alt="{{ .Title }}" title="Zoom photo" aria-label="Zoom photo">
+           <i>zoom_in</i>
+         </button>
+         {{ end }}
        </div>
 
        <div class="padding grow">

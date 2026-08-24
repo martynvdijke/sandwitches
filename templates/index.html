@@ -44,9 +44,12 @@
     <div class="row scroll snap no-scrollbar large-padding" id="highlighted-carousel" style="gap: 20px; flex-wrap: nowrap;">
         {{ range .highlighted_recipes }}
         <a href="/recipes/{{ .Slug }}">
-        <article class="round no-padding elevate tertiary-container" style="min-width: 300px; width: 300px; flex-shrink: 0; scroll-snap-align: start;">
+        <article class="round no-padding elevate tertiary-container" style="min-width: 300px; width: 300px; flex-shrink: 0; scroll-snap-align: start; position: relative;">
                 {{ if .Image }}
                 <img src="{{ thumb .Image 800 }}" class="responsive top-round" alt="{{ .Title }}" style="height: 200px; object-fit: cover;">
+                <button type="button" class="button circle small zoom-btn" data-zoom-src="{{ thumb .Image 1600 }}" data-zoom-alt="{{ .Title }}" title="Zoom photo" aria-label="Zoom photo">
+                    <i>zoom_in</i>
+                </button>
                 {{ else }}
                 <div class="primary medium-height top-round middle-align center-align" style="height:200px;">
                     <i class="extra">lunch_dining</i>

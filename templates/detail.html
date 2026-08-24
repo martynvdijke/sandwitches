@@ -11,7 +11,7 @@
 
 <article class="round no-padding elevate">
   {{ if .recipe.Image }}
-  <img src="{{ thumb .recipe.Image 1200 }}" class="responsive top-round" alt="{{ .recipe.Title }}" style="max-height:400px;object-fit:cover;width:100%">
+  <img src="{{ thumb .recipe.Image 1200 }}" data-zoom-src="{{ thumb .recipe.Image 1600 }}" class="responsive top-round" alt="{{ .recipe.Title }}" style="max-height:400px;object-fit:cover;width:100%;cursor:zoom-in">
   {{ else }}
   <div style="height:300px;display:flex;align-items:center;justify-content:center;background:var(--md-sys-color-primary-container)">
     <i class="extra">lunch_dining</i>
