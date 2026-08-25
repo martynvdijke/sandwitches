@@ -1,3 +1,15 @@
+# [3.9.0](https://github.com/martynvdijke/sandwitches/compare/v3.8.5...v3.9.0) (2026-08-25)
+
+
+### Bug Fixes
+
+* **ci:** build frontend bundle before python UI tests ([41dda6f](https://github.com/martynvdijke/sandwitches/commit/41dda6fde6ca2e166423263924b56926a9440058))
+
+
+### Features
+
+* add photo zoom lightbox for recipe photos ([4e085a0](https://github.com/martynvdijke/sandwitches/commit/4e085a07e4b0b737cc9500754fdbf6eb9aae5b55))
+
 ## [3.8.5](https://github.com/martynvdijke/sandwitches/compare/v3.8.4...v3.8.5) (2026-08-24)
 
 ## [3.8.4](https://github.com/martynvdijke/sandwitches/compare/v3.8.3...v3.8.4) (2026-08-20)
