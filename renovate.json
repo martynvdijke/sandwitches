@@ -5,7 +5,8 @@
     ":semanticCommits",
     ":separateMajorReleases",
     ":combinePatchMinorReleases",
-    "group:allNonMajor"
+    "group:allNonMajor",
+    "helpers:pinGitHubActionDigestsToSemver"
   ],
   "automergeType": "pr",
   "dependencyDashboard": true,
