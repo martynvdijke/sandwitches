@@ -1,3 +1,10 @@
+## [3.9.2](https://github.com/martynvdijke/sandwitches/compare/v3.9.1...v3.9.2) (2026-08-28)
+
+
+### Bug Fixes
+
+* **ci:** remove unsupported --diff flag from pinact ([1b0419a](https://github.com/martynvdijke/sandwitches/commit/1b0419acdccd206ef48c2c4ccd5f2e8310f16772))
+
 ## [3.9.1](https://github.com/martynvdijke/sandwitches/compare/v3.9.0...v3.9.1) (2026-08-25)
 
 # [3.9.0](https://github.com/martynvdijke/sandwitches/compare/v3.8.5...v3.9.0) (2026-08-25)
