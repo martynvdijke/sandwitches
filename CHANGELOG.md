@@ -1,3 +1,11 @@
+## [3.9.3](https://github.com/martynvdijke/sandwitches/compare/v3.9.2...v3.9.3) (2026-08-28)
+
+
+### Bug Fixes
+
+* **ci:** make pinact check non-blocking ([9c1446b](https://github.com/martynvdijke/sandwitches/commit/9c1446be1c86b6ac16957e0f36d206517f4a110a))
+* **ci:** update actionlint to v1.7.12 (v1 tag removed upstream) ([e0c85c3](https://github.com/martynvdijke/sandwitches/commit/e0c85c373d118a951a05dc68e646680b5d5920e2))
+
 ## [3.9.2](https://github.com/martynvdijke/sandwitches/compare/v3.9.1...v3.9.2) (2026-08-28)
 
 
