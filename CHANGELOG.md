@@ -1,3 +1,10 @@
+## [3.9.5](https://github.com/martynvdijke/sandwitches/compare/v3.9.4...v3.9.5) (2026-08-29)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/yuin/goldmark to v2 ([#156](https://github.com/martynvdijke/sandwitches/issues/156)) ([06d1214](https://github.com/martynvdijke/sandwitches/commit/06d121407dd2af07b8dbb7cfeef3f34a34a15459))
+
 ## [3.9.4](https://github.com/martynvdijke/sandwitches/compare/v3.9.3...v3.9.4) (2026-08-28)
 
 ## [3.9.3](https://github.com/martynvdijke/sandwitches/compare/v3.9.2...v3.9.3) (2026-08-28)
