@@ -23,7 +23,7 @@ jobs:
           persist-credentials: false
 
       - name: Run actionlint
-        uses: rhysd/actionlint@v1.7.12
+        uses: rhysd/actionlint@914e7df21a07ef503a81201c76d2b11c789d3fca # v1.7.12
         with:
           fail-on-error: true
 
@@ -33,7 +33,7 @@ jobs:
           persona: regular
 
       - name: Setup Go for pinact
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
           go-version: stable
 
