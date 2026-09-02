@@ -4,14 +4,18 @@ import (
 	"bytes"
 	"html/template"
 
-	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/v2/parser"
+	"github.com/yuin/goldmark/v2/renderer/html"
 )
 
-var mdRenderer = goldmark.New()
+var mdParser = parser.New()
+var mdRenderer = html.New()
 
 func RenderMarkdown(input string) template.HTML {
 	var buf bytes.Buffer
-	if err := mdRenderer.Convert([]byte(input), &buf); err != nil {
+	src := []byte(input)
+	doc := mdParser.Parse(src)
+	if err := mdRenderer.Render(&buf, src, doc); err != nil {
 		return template.HTML(input)
 	}
 	return template.HTML(buf.String())
