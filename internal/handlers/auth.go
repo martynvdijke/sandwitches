@@ -9,12 +9,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/martynvdijke/sandwitches-go/internal/config"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
 	"github.com/martynvdijke/sandwitches-go/internal/tasks"
@@ -132,7 +134,14 @@ type LoginForm struct {
 
 func LoginPage(c *gin.Context) {
 	next := c.Query("next")
-	c.HTML(http.StatusOK, "login.html", gin.H{"next": next})
+	errMsg := c.Query("error")
+	h := gin.H{"next": next}
+	if errMsg == "oidc" {
+		h["error"] = "OIDC login failed. Please try again."
+	}
+	// expose OIDC enabled flag
+	h["OIDCEnabled"] = isOIDCEnabled()
+	c.HTML(http.StatusOK, "login.html", h)
 }
 
 func Login(c *gin.Context) {
@@ -178,6 +187,10 @@ func Logout(c *gin.Context) {
 	session.Clear()
 	_ = session.Save()
 	utils.AddFlash(c, "success", "You have been logged out")
+	if isOIDCEnabled() {
+		c.Redirect(http.StatusFound, OIDCLogoutRedirect())
+		return
+	}
 	c.Redirect(http.StatusFound, "/")
 }
 
@@ -380,4 +393,26 @@ func Setup(c *gin.Context) {
 
 func AuthUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"user": middleware.GetUser(c)})
+}
+
+func isOIDCEnabled() bool {
+	return config.Load().OIDCEnabled
+}
+
+func OIDCLogoutRedirect() string {
+	cfg := config.Load()
+	if !cfg.OIDCEnabled {
+		return "/"
+	}
+	base := "https://authelia.vandijke.xyz/logout"
+	if cfg.OIDCRedirectURL != "" {
+		if u, err := url.Parse(cfg.OIDCRedirectURL); err == nil && u.Host != "" {
+			scheme := u.Scheme
+			if scheme == "" {
+				scheme = "https"
+			}
+			base = fmt.Sprintf("https://authelia.vandijke.xyz/logout?post_logout_redirect_uri=%s://%s/", scheme, u.Host)
+		}
+	}
+	return base
 }

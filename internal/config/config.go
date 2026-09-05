@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 type Config struct {
@@ -30,6 +31,12 @@ type Config struct {
 	APICORSOrigins     string
 	APIRateLimitRate   float64
 	APIRateLimitBurst  float64
+	OIDCEnabled        bool
+	OIDCIssuer         string
+	OIDCClientID       string
+	OIDCClientSecret   string
+	OIDCRedirectURL    string
+	OIDCScopes         string
 }
 
 func Load() *Config {
@@ -61,6 +68,12 @@ func Load() *Config {
 		APICORSOrigins:     os.Getenv("API_CORS_ORIGINS"),
 		APIRateLimitRate:   envFloat("API_RATE_LIMIT_RATE", 10),
 		APIRateLimitBurst:  envFloat("API_RATE_LIMIT_BURST", 100),
+		OIDCEnabled:        os.Getenv("OIDC_ENABLED") == "true",
+		OIDCIssuer:         envOr("OIDC_ISSUER", "https://authelia.vandijke.xyz"),
+		OIDCClientID:       os.Getenv("OIDC_CLIENT_ID"),
+		OIDCClientSecret:   loadOIDCSecret(),
+		OIDCRedirectURL:    os.Getenv("OIDC_REDIRECT_URL"),
+		OIDCScopes:         envOr("OIDC_SCOPES", "openid email profile groups"),
 	}
 
 	if cfg.DatabaseFile == "" {
@@ -93,4 +106,19 @@ func envFloat(key string, fallback float64) float64 {
 		}
 	}
 	return fallback
+}
+
+func loadOIDCSecret() string {
+	if v := os.Getenv("OIDC_CLIENT_SECRET"); v != "" {
+		return v
+	}
+	file := os.Getenv("OIDC_CLIENT_SECRET_FILE")
+	if file == "" {
+		return ""
+	}
+	b, err := os.ReadFile(file)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(b))
 }

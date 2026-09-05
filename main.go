@@ -257,6 +257,8 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 
 	router.GET("/login", handlers.LoginPage)
 	router.POST("/login", handlers.Login)
+	router.GET("/login/oidc", handlers.LoginOIDC)
+	router.GET("/api/auth/oidc/callback", handlers.CallbackOIDC)
 
 	router.GET("/forgot-password", handlers.ForgotPasswordPage)
 	router.POST("/forgot-password", handlers.ForgotPassword)

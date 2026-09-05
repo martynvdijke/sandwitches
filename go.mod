@@ -3,6 +3,7 @@ module github.com/martynvdijke/sandwitches-go
 go 1.26.2
 
 require (
+	github.com/coreos/go-oidc/v3 v3.15.0
 	github.com/gin-contrib/sessions v1.1.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/google/uuid v1.6.0
@@ -10,6 +11,7 @@ require (
 	github.com/yuin/goldmark/v2 v2.0.0
 	golang.org/x/crypto v0.55.0
 	golang.org/x/image v0.45.0
+	golang.org/x/oauth2 v0.30.0
 	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.31.2
 )
@@ -21,6 +23,7 @@ require (
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
+	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.30.2 // indirect

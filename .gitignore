@@ -142,3 +142,7 @@ sandwitches-go
 tmp/
 openspec/
 .opencode/
+*secret*
+oidc_secret
+/config/oidc_secret
+/run/secrets/oidc_secret
