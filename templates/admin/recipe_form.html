@@ -80,12 +80,14 @@
                     <label>Image</label>
                     <i>publish</i>
                 </div>
+                <button type="button" class="button small round" data-edit-photo="new" hidden><i>edit</i> Edit chosen photo</button>
             </div>
 
             <div class="s12 m6 center-align">
                 {{ if and .recipe .recipe.Image }}
-                <img src="{{ thumb .recipe.Image 640 }}" class="responsive round" style="max-height:200px" alt="Preview">
+                <img id="photo-preview" src="{{ thumb .recipe.Image 640 }}" class="responsive round" style="max-height:200px" alt="Preview">
                 <div class="small-space"></div>
+                <button type="button" class="button small round" data-edit-photo="existing" data-full-src="{{ .recipe.Image }}" title="Edit photo" hidden><i>edit</i></button>
                 <a href="/dashboard/recipes/{{ .recipe.ID }}/rotate?direction=cw" class="button small round" title="Rotate Clockwise"><i>rotate_right</i></a>
                 <a href="/dashboard/recipes/{{ .recipe.ID }}/rotate?direction=ccw" class="button small round" title="Rotate Counter-Clockwise"><i>rotate_left</i></a>
                 {{ end }}
@@ -132,5 +134,31 @@
         </nav>
     </form>
 </article>
+
+<div id="photo-editor" hidden>
+    <div class="editor-card" role="dialog" aria-modal="true" aria-label="Edit photo">
+        <cropper-canvas id="pe-canvas" background>
+            <cropper-image id="pe-image" rotatable scalable translatable></cropper-image>
+            <cropper-selection id="pe-selection" movable resizable zoomable keyboard outlined initial-coverage="0.8"></cropper-selection>
+        </cropper-canvas>
+        <div class="editor-toolbar">
+            <button type="button" class="button small round" data-rotate="ccw" title="Rotate counter-clockwise"><i>rotate_left</i></button>
+            <button type="button" class="button small round" data-rotate="cw" title="Rotate clockwise"><i>rotate_right</i></button>
+            <button type="button" class="button small round" data-flip="h" title="Flip horizontal"><i>flip</i></button>
+            <button type="button" class="button small round" data-flip="v" title="Flip vertical"><i>flip</i></button>
+            <button type="button" class="button small round" data-reset title="Reset edits"><i>restart_alt</i></button>
+            <span class="editor-aspects">
+                <button type="button" class="button small round" data-aspect="NaN">Free</button>
+                <button type="button" class="button small round" data-aspect="1">1:1</button>
+                <button type="button" class="button small round" data-aspect="1.3333">4:3</button>
+                <button type="button" class="button small round" data-aspect="1.7778">16:9</button>
+            </span>
+            <span class="editor-actions">
+                <button type="button" class="button small transparent border round" data-editor-close><i>close</i> Cancel</button>
+                <button type="button" class="button small primary round" data-editor-apply><i>check</i> Apply</button>
+            </span>
+        </div>
+    </div>
+</div>
 </main>
 {{ template "admin_tail" . }}

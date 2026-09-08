@@ -9,7 +9,9 @@ import 'easymde/dist/easymde.min.css';
 import 'easymde/dist/easymde.min.js';
 import EasyMDE from 'easymde';
 import '../css/zoom.css';
+import '../css/editor.css';
 import { initPhotoZoom } from './zoom.js';
+import { initPhotoEditor } from './editor.js';
 // This makes Chart available to your HTML/scripts
 window.Chart = Chart;
 window.Cropper = Cropper;
@@ -17,4 +19,5 @@ window.EasyMDE = EasyMDE;
 window.htmx = htmx;
 // You can add your own custom JS here
 initPhotoZoom();
+initPhotoEditor();
 console.log('Webpack bundle loaded!');
