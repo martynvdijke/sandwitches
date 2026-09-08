@@ -1,3 +1,10 @@
+# [3.10.0](https://github.com/martynvdijke/sandwitches/compare/v3.9.12...v3.10.0) (2026-09-08)
+
+
+### Features
+
+* **photos:** add in-browser photo editor (rotate/crop) to recipe form ([80d1bc8](https://github.com/martynvdijke/sandwitches/commit/80d1bc84d32011309ff75e29e99bb00b681fd81a))
+
 ## [3.9.12](https://github.com/martynvdijke/sandwitches/compare/v3.9.11...v3.9.12) (2026-09-05)
 
 
