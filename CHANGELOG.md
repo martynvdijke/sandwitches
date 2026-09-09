@@ -1,3 +1,10 @@
+## [3.10.3](https://github.com/martynvdijke/sandwitches/compare/v3.10.2...v3.10.3) (2026-09-09)
+
+
+### Bug Fixes
+
+* **analytics:** wire UMAMI_HOST/UMAMI_WEBSITE_ID to templates via umami func ([3994e7b](https://github.com/martynvdijke/sandwitches/commit/3994e7b410bd28d5405af4d9cd1fe6684bb998c2))
+
 ## [3.10.2](https://github.com/martynvdijke/sandwitches/compare/v3.10.1...v3.10.2) (2026-09-09)
 
 
