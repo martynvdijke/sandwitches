@@ -205,6 +205,18 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 			return fmt.Sprintf("%."+fmt.Sprint(precision)+"f", f)
 		},
 		"version": func() string { return Version },
+		"umami": func() template.HTML {
+			host := strings.TrimSuffix(os.Getenv("UMAMI_HOST"), "/")
+			id := os.Getenv("UMAMI_WEBSITE_ID")
+			if host == "" || id == "" {
+				return ""
+			}
+			if !strings.Contains(host, "://") {
+				host = "https://" + strings.TrimPrefix(host, "/")
+			}
+			// ponytail: host/id from env (admin-controlled), escape id only
+			return template.HTML(`<script defer src="` + host + `/script.js" data-website-id="` + template.HTMLEscapeString(id) + `"></script>`)
+		},
 		"thumb": func(path string, width int) string {
 			if path == "" || strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") || strings.HasPrefix(path, "data:") {
 				return path
