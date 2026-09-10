@@ -7,7 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/google/uuid v1.6.0
 	github.com/mattn/go-sqlite3 v1.14.52
-	github.com/yuin/goldmark/v2 v2.0.1
+	github.com/yuin/goldmark/v2 v2.0.2
 	golang.org/x/crypto v0.57.0
 	golang.org/x/image v0.46.0
 	gorm.io/driver/sqlite v1.6.0
