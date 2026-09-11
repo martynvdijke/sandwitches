@@ -1,3 +1,10 @@
+# [3.11.0](https://github.com/martynvdijke/sandwitches/compare/v3.10.5...v3.11.0) (2026-09-11)
+
+
+### Features
+
+* **otel:** add opt-in OpenTelemetry traces, metrics, and logs ([ba86777](https://github.com/martynvdijke/sandwitches/commit/ba86777bef945b8a23e012fd2f91181d8c0ef40a))
+
 ## [3.10.5](https://github.com/martynvdijke/sandwitches/compare/v3.10.4...v3.10.5) (2026-09-11)
 
 ## [3.10.4](https://github.com/martynvdijke/sandwitches/compare/v3.10.3...v3.10.4) (2026-09-10)
