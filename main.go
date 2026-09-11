@@ -1,15 +1,19 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -22,6 +26,8 @@ import (
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
 	"github.com/martynvdijke/sandwitches-go/internal/render"
 	"github.com/martynvdijke/sandwitches-go/internal/tasks"
+	"github.com/martynvdijke/sandwitches-go/internal/telemetry"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var Version = "dev"
@@ -29,7 +35,20 @@ var Version = "dev"
 func main() {
 	cfg := config.Load()
 
-	setupLogFile(cfg)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	tel := telemetry.Setup(ctx, Version)
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := tel.Shutdown(shutdownCtx); err != nil {
+			log.Printf("Telemetry shutdown error: %v", err)
+		}
+	}()
+
+	setupLogFile(cfg, tel.LogWriter)
+	log.Printf("Telemetry enabled: %t", tel.Enabled)
 
 	database.Init(cfg)
 	tasks.Init(cfg)
@@ -56,39 +75,64 @@ func main() {
 
 	handlers.SetMediaRoot(cfg.MediaRoot)
 
-	router := setupRouter(cfg)
+	router := setupRouter(cfg, tel)
 
 	port := "6270"
 	if p := os.Getenv("PORT"); p != "" {
 		port = p
 	}
 
-	log.Printf("Starting server on :%s", port)
-	if err := router.Run(":" + port); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+	srv := &http.Server{
+		Addr:              ":" + port,
+		Handler:           router,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
+
+	go func() {
+		log.Printf("Starting server on :%s", port)
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("Failed to start server: %v", err)
+		}
+	}()
+
+	<-ctx.Done()
+	log.Println("Shutting down server...")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		log.Printf("Server shutdown error: %v", err)
 	}
 }
 
-func setupRouter(cfg *config.Config) *gin.Engine {
+func setupRouter(cfg *config.Config, tel *telemetry.Telemetry) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	if cfg.Debug {
 		gin.SetMode(gin.DebugMode)
 	}
 
 	router := gin.New()
+	if h := tel.GinMiddleware(); h != nil {
+		router.Use(h)
+	}
 	router.Use(middleware.RequestID())
 	router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		rid, _ := param.Keys["request_id"].(string)
 		if rid == "" {
 			rid = "-"
 		}
-		return fmt.Sprintf("[%s] %s %s %d %s request_id=%s\n",
+		tid := "-"
+		if sc := trace.SpanContextFromContext(param.Request.Context()); sc.IsValid() {
+			tid = sc.TraceID().String()
+		}
+		return fmt.Sprintf("[%s] %s %s %d %s request_id=%s trace_id=%s\n",
 			param.TimeStamp.Format("2006-01-02 15:04:05"),
 			param.Method,
 			param.Path,
 			param.StatusCode,
 			param.Latency,
 			rid,
+			tid,
 		)
 	}))
 	router.Use(gin.Recovery())

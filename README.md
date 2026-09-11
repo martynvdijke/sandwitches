@@ -118,6 +118,12 @@ Below is a list of all supported environment variables.
 | GOTIFY_TOKEN         | No           | The application-specific token used to authenticate with Gotify.                      |
 | UMAMI_HOST           | No           | UMAMI analytics tracking host.                                                        |
 | UMAMI_WEBSITE_ID     | No           | UMAMI analytics website id.                                                           |
+| OTEL_EXPORTER_OTLP_ENDPOINT | No | OTLP/HTTP collector endpoint (e.g. `http://collector:4318`). Telemetry is disabled unless this or a per-signal `OTEL_EXPORTER_OTLP_{TRACES,METRICS,LOGS}_ENDPOINT` is set. |
+| OTEL_SERVICE_NAME    | No           | Overrides the reported `service.name` (default `sandwitches`).                        |
+| OTEL_EXPORTER_OTLP_HEADERS | No     | Comma-separated `key=value` headers (e.g. collector auth token).                      |
+| OTEL_SDK_DISABLED    | No           | Set to `true` to force-disable all telemetry.                                         |
+
+All other standard OpenTelemetry SDK environment variables (sampler, resource attributes, per-signal protocol/headers/timeouts) are honored as-is. Traces are exported for HTTP requests and GORM/SQLite queries, metrics for HTTP requests, and application logs are bridged to OTLP.
 
 ## Development setup
 

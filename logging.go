@@ -21,7 +21,7 @@ import (
 // and a fresh file is started. All Go log output is then written to both
 // stdout (visible via `docker logs`) and the log file (visible in the admin
 // dashboard).
-func setupLogFile(cfg *config.Config) {
+func setupLogFile(cfg *config.Config, extra ...io.Writer) {
 	logFile := cfg.LogFile
 	if logFile == "" {
 		logFile = filepath.Join(cfg.MediaRoot, "sandwitches.log")
@@ -46,7 +46,13 @@ func setupLogFile(cfg *config.Config) {
 		return
 	}
 
-	log.SetOutput(io.MultiWriter(os.Stdout, f))
+	writers := []io.Writer{os.Stdout, f}
+	for _, w := range extra {
+		if w != nil {
+			writers = append(writers, w)
+		}
+	}
+	log.SetOutput(io.MultiWriter(writers...))
 	log.Printf("Logging to %s (and stdout)", logFile)
 }
 

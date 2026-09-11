@@ -58,6 +58,7 @@ A full-featured recipe management platform with user accounts, shopping cart, or
 - **Umami Analytics** — Optional privacy-friendly analytics
 - **Gotify** — Self-hosted push notifications
 - **SMTP Email** — Transactional emails
+- **OpenTelemetry** — Opt-in OTLP/HTTP export of traces, metrics, and logs (disabled unless configured)
 - **Django Migration** — Import users and recipes from a legacy Django database
 
 ### i18n
@@ -141,6 +142,12 @@ Open **[http://localhost:6270](http://localhost:6270)** in your browser.
 | `LANGUAGE_CODE` | `en` | Default language |
 | `BASE_URL` | `http://localhost` | Public base URL (for emails) |
 | `Django_DB_PATH` | — | Path to legacy Django database for migration |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | — | OTLP/HTTP collector endpoint (e.g. `http://collector:4318`). Telemetry stays disabled unless this or a per-signal `OTEL_EXPORTER_OTLP_{TRACES,METRICS,LOGS}_ENDPOINT` is set |
+| `OTEL_SERVICE_NAME` | `sandwitches` | Reported `service.name` |
+| `OTEL_EXPORTER_OTLP_HEADERS` | — | Comma-separated `key=value` headers (e.g. collector auth token) |
+| `OTEL_SDK_DISABLED` | `false` | Set `true` to force-disable all telemetry |
+
+All other standard OpenTelemetry SDK environment variables are honored as-is. Traces cover HTTP requests and GORM/SQLite queries, metrics cover HTTP requests, and application logs are bridged to OTLP.
 
 ## Project Structure
 
@@ -167,6 +174,8 @@ Open **[http://localhost:6270](http://localhost:6270)** in your browser.
 │   │   └── csrf.go            # CSRF protection middleware
 │   ├── tasks/
 │   │   └── tasks.go           # Background tasks (notifications, resets)
+│   ├── telemetry/
+│   │   └── telemetry.go       # OpenTelemetry setup (traces, metrics, logs)
 │   └── utils/
 │       ├── template.go        # Template helpers
 │       ├── flash.go           # Flash message helpers

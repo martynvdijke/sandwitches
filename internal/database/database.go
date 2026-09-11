@@ -12,6 +12,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"gorm.io/plugin/opentelemetry/tracing"
 )
 
 var DB *gorm.DB
@@ -49,6 +50,11 @@ func Init(cfg *config.Config) {
 	})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	// Emits a span per query once telemetry is configured; a no-op otherwise.
+	if err := DB.Use(tracing.NewPlugin(tracing.WithDBSystem("sqlite"))); err != nil {
+		log.Printf("Warning: could not enable database telemetry: %v", err)
 	}
 
 	if err := DB.Exec("PRAGMA journal_mode=WAL").Error; err != nil {
