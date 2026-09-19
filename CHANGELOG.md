@@ -1,3 +1,10 @@
+## [3.11.6](https://github.com/martynvdijke/sandwitches/compare/v3.11.5...v3.11.6) (2026-09-19)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([cf215a2](https://github.com/martynvdijke/sandwitches/commit/cf215a211f934a5c65078b287142a11131a6a29a))
+
 ## [3.11.5](https://github.com/martynvdijke/sandwitches/compare/v3.11.4...v3.11.5) (2026-09-17)
 
 
