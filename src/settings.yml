@@ -6,6 +6,7 @@ static_data: ''
 polling_verb: get
 framework_version: latest
 serverless_language:
+refresh_interval_floor:
 polling_url: "https://sandwitches.vandijke.xyz/api/v1/recipe-of-the-day\r\nhttps://sandwitches.vandijke.xyz/api/v1/users"
 polling_headers: ''
 polling_body: ''
