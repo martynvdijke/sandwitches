@@ -289,7 +289,7 @@ wheels = [
 
 [[package]]
 name = "sandwitches"
-version = "3.11.10"
+version = "3.11.11"
 source = { virtual = "." }
 
 [package.dev-dependencies]
