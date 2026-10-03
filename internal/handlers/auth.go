@@ -132,7 +132,8 @@ type LoginForm struct {
 
 func LoginPage(c *gin.Context) {
 	next := c.Query("next")
-	c.HTML(http.StatusOK, "login.html", gin.H{"next": next})
+	errMsg := c.Query("error")
+	c.HTML(http.StatusOK, "login.html", gin.H{"next": next, "error": errMsg, "oidc_enabled": loadOIDCConfig().valid()})
 }
 
 func Login(c *gin.Context) {
@@ -177,6 +178,12 @@ func Logout(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Clear()
 	_ = session.Save()
+	clearOIDCCookies(c)
+	cfg := loadOIDCConfig()
+	if cfg.valid() {
+		c.Redirect(http.StatusFound, cfg.LogoutURL)
+		return
+	}
 	utils.AddFlash(c, "success", "You have been logged out")
 	c.Redirect(http.StatusFound, "/")
 }

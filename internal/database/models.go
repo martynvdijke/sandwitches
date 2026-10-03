@@ -52,6 +52,7 @@ type User struct {
 	IsStaff      bool   `gorm:"default:false"`
 	IsActive     bool   `gorm:"default:true"`
 	IsSuperuser  bool   `gorm:"default:false"`
+	OIDCSub      string `gorm:"column:oidc_sub;size:255;uniqueIndex:idx_users_oidc_sub,where:oidc_sub <> ''"`
 	DateJoined   time.Time
 	LastLogin    *time.Time
 	Favorites    []Recipe  `gorm:"many2many:user_favorites;"`

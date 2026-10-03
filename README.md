@@ -122,6 +122,14 @@ Below is a list of all supported environment variables.
 | OTEL_SERVICE_NAME    | No           | Overrides the reported `service.name` (default `sandwitches`).                        |
 | OTEL_EXPORTER_OTLP_HEADERS | No     | Comma-separated `key=value` headers (e.g. collector auth token).                      |
 | OTEL_SDK_DISABLED    | No           | Set to `true` to force-disable all telemetry.                                         |
+| OIDC_ENABLED         | No           | Enable Authelia OIDC SSO (default `true` when fully configured; `false`/`0` disables). |
+| OIDC_ISSUER_URL      | No           | OIDC issuer URL (default `https://authelia.vandijke.xyz`; alias `OIDC_ISSUER`).       |
+| OIDC_CLIENT_ID       | No           | OIDC client ID (default `sandwitches`).                                               |
+| OIDC_CLIENT_SECRET_FILE | No        | Path to file containing OIDC client secret (trimmed; preferred over `OIDC_CLIENT_SECRET`). |
+| OIDC_CLIENT_SECRET   | No           | OIDC client secret fallback if `*_FILE` unset/empty.                                  |
+| OIDC_REDIRECT_URL    | No           | OIDC redirect URL (default `https://sandwitches.vandijke.xyz/api/auth/oidc/callback`). |
+| OIDC_SCOPES          | No           | OIDC scopes (default `openid email profile groups`).                                  |
+| OIDC_LOGOUT_URL      | No           | OIDC logout URL (default `{issuer}/logout`).                                          |
 
 All other standard OpenTelemetry SDK environment variables (sampler, resource attributes, per-signal protocol/headers/timeouts) are honored as-is. Traces are exported for HTTP requests and GORM/SQLite queries, metrics for HTTP requests, and application logs are bridged to OTLP.
 

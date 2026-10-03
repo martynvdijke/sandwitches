@@ -313,6 +313,9 @@ func setupRouter(cfg *config.Config, tel *telemetry.Telemetry) *gin.Engine {
 
 	router.GET("/login", handlers.LoginPage)
 	router.POST("/login", handlers.Login)
+	router.GET("/login/oidc", handlers.OIDCLogin)
+	router.GET("/api/auth/oidc/callback", handlers.OIDCCallback)
+	router.GET("/api/auth/oidc/status", handlers.OIDCStatus)
 
 	router.GET("/forgot-password", handlers.ForgotPasswordPage)
 	router.POST("/forgot-password", handlers.ForgotPassword)
