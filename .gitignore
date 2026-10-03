@@ -142,3 +142,6 @@ sandwitches-go
 tmp/
 openspec/
 .opencode/
+
+# Zensical build output
+site/
