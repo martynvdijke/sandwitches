@@ -1,3 +1,11 @@
+# [3.12.0](https://github.com/martynvdijke/sandwitches/compare/v3.11.13...v3.12.0) (2026-10-03)
+
+
+### Features
+
+* **admin:** add in-app SMTP email settings and test endpoint ([9e9233f](https://github.com/martynvdijke/sandwitches/commit/9e9233f592e6a0a59f4c93263813cb6f9e99a8f6))
+* **auth:** add OIDC login ([2c9b599](https://github.com/martynvdijke/sandwitches/commit/2c9b599ff19cc779e616d3f4db8b19470904adfa))
+
 ## [3.11.13](https://github.com/martynvdijke/sandwitches/compare/v3.11.12...v3.11.13) (2026-10-02)
 
 
