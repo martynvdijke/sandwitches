@@ -391,6 +391,7 @@ func setupRouter(cfg *config.Config, tel *telemetry.Telemetry) *gin.Engine {
 
 			admin.GET("/settings", handlers.AdminSettings)
 			admin.POST("/settings", handlers.AdminSettings)
+			admin.POST("/settings/test-email", handlers.AdminTestEmail)
 
 			admin.GET("/logs", handlers.AdminLogs)
 			admin.POST("/logs", handlers.AdminLogs)

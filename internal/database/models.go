@@ -27,6 +27,13 @@ type Setting struct {
 	GotifyToken      string
 	OTelEndpoint     string `gorm:"size:255"`
 	OTelEnabled      bool   `gorm:"default:false"`
+	SMTPEnabled      bool   `gorm:"default:false"`
+	SMTPHost         string `gorm:"size:255"`
+	SMTPPort         string `gorm:"size:10"`
+	SMTPUser         string `gorm:"size:255"`
+	SMTPPassword     string `gorm:"size:255"`
+	SMTPFromEmail    string `gorm:"size:255"`
+	SMTPTLS          bool   `gorm:"default:false"`
 }
 
 func (Setting) TableName() string { return "settings" }

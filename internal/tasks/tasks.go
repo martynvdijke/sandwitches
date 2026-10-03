@@ -151,19 +151,21 @@ func sendGotify(title, msg string, priority int) {
 
 // EmailEnabled reports whether SMTP email delivery is configured.
 func EmailEnabled() bool {
-	return cfg != nil && cfg.SendEmail
+	ec := database.GetEmailConfig()
+	return ec.Enabled && ec.Host != ""
 }
 
 // SendEmail sends a plain-text email via SMTP when email delivery is enabled.
 func SendEmail(to, subject, body string) {
-	if cfg == nil || !cfg.SendEmail {
+	ec := database.GetEmailConfig()
+	if !ec.Enabled || ec.Host == "" {
 		return
 	}
-	auth := smtp.PlainAuth("", cfg.SMTPUser, cfg.SMTPPassword, cfg.SMTPHost)
+	auth := smtp.PlainAuth("", ec.User, ec.Password, ec.Host)
 	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n%s",
-		cfg.SMTPFromEmail, to, subject, body)
-	err := smtp.SendMail(fmt.Sprintf("%s:%s", cfg.SMTPHost, cfg.SMTPPort),
-		auth, cfg.SMTPFromEmail, []string{to}, []byte(msg))
+		ec.FromEmail, to, subject, body)
+	err := smtp.SendMail(fmt.Sprintf("%s:%s", ec.Host, ec.Port),
+		auth, ec.FromEmail, []string{to}, []byte(msg))
 	if err != nil {
 		log.Printf("Email to %s failed: %v", to, err)
 	}
@@ -172,15 +174,16 @@ func SendEmail(to, subject, body string) {
 // SendHTMLEmail sends a multipart (text + HTML) email via SMTP when email
 // delivery is enabled.
 func SendHTMLEmail(to, subject, textBody, htmlBody string) {
-	if cfg == nil || !cfg.SendEmail {
+	ec := database.GetEmailConfig()
+	if !ec.Enabled || ec.Host == "" {
 		return
 	}
-	auth := smtp.PlainAuth("", cfg.SMTPUser, cfg.SMTPPassword, cfg.SMTPHost)
+	auth := smtp.PlainAuth("", ec.User, ec.Password, ec.Host)
 	boundary := "boundary-42"
 	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative; boundary=%s\r\n\r\n--%s\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n%s\r\n--%s\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s\r\n--%s--",
-		cfg.SMTPFromEmail, to, subject, boundary, boundary, textBody, boundary, htmlBody, boundary)
-	err := smtp.SendMail(fmt.Sprintf("%s:%s", cfg.SMTPHost, cfg.SMTPPort),
-		auth, cfg.SMTPFromEmail, []string{to}, []byte(msg))
+		ec.FromEmail, to, subject, boundary, boundary, textBody, boundary, htmlBody, boundary)
+	err := smtp.SendMail(fmt.Sprintf("%s:%s", ec.Host, ec.Port),
+		auth, ec.FromEmail, []string{to}, []byte(msg))
 	if err != nil {
 		log.Printf("HTML Email to %s failed: %v", to, err)
 	}

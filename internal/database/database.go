@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"os"
 	"log"
 	"regexp"
 	"strings"
@@ -138,6 +139,45 @@ func UniqueSlug(base string, existingID *uint) string {
 		}
 	}
 	return slug + fmt.Sprintf("-%d", time.Now().Unix())
+}
+
+type EmailConfig struct {
+	Enabled   bool
+	Host      string
+	Port      string
+	User      string
+	Password  string
+	FromEmail string
+	UseTLS    bool
+}
+
+func GetEmailConfig() EmailConfig {
+	// DB precedence
+	var s Setting
+	if DB != nil {
+		DB.First(&s)
+		if s.SMTPEnabled && s.SMTPHost != "" {
+			return EmailConfig{
+				Enabled:   true,
+				Host:      s.SMTPHost,
+				Port:      s.SMTPPort,
+				User:      s.SMTPUser,
+				Password:  s.SMTPPassword,
+				FromEmail: s.SMTPFromEmail,
+				UseTLS:    s.SMTPTLS,
+			}
+		}
+	}
+	// env fallback
+	return EmailConfig{
+		Enabled:   os.Getenv("SEND_EMAIL") == "true",
+		Host:      os.Getenv("SMTP_HOST"),
+		Port:      os.Getenv("SMTP_PORT"),
+		User:      os.Getenv("SMTP_USER"),
+		Password:  os.Getenv("SMTP_PASSWORD"),
+		FromEmail: func() string { if v := os.Getenv("SMTP_FROM_EMAIL"); v != "" { return v }; return "noreply@sandwitches.local" }(),
+		UseTLS:    false,
+	}
 }
 
 func RecordRecipeHistory(tx *gorm.DB, recipeID uint, changedByID *uint, fieldName, oldValue, newValue string) {

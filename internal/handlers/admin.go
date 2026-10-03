@@ -15,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
+	"github.com/martynvdijke/sandwitches-go/internal/tasks"
 	"github.com/martynvdijke/sandwitches-go/internal/utils"
 	"gorm.io/gorm"
 )
@@ -646,6 +647,15 @@ func AdminSettings(c *gin.Context) {
 		setting.GotifyToken = c.PostForm("gotify_token")
 		setting.OTelEndpoint = c.PostForm("otel_endpoint")
 		setting.OTelEnabled = c.PostForm("otel_enabled") == "on"
+		setting.SMTPEnabled = c.PostForm("smtp_enabled") == "on"
+		setting.SMTPHost = c.PostForm("smtp_host")
+		setting.SMTPPort = c.PostForm("smtp_port")
+		setting.SMTPUser = c.PostForm("smtp_user")
+		if pw := c.PostForm("smtp_password"); pw != "" {
+			setting.SMTPPassword = pw
+		}
+		setting.SMTPFromEmail = c.PostForm("smtp_from_email")
+		setting.SMTPTLS = c.PostForm("smtp_tls") == "on"
 		database.DB.Save(&setting)
 		utils.AddFlash(c, "success", "Settings saved")
 		c.Redirect(http.StatusFound, "/dashboard/settings")
@@ -707,6 +717,30 @@ var mediaRoot string
 
 func SetMediaRoot(root string) {
 	mediaRoot = root
+}
+
+func AdminTestEmail(c *gin.Context) {
+	user := middleware.GetUser(c)
+	var setting database.Setting
+	database.DB.First(&setting)
+	to := setting.Email
+	if to == "" && user != nil {
+		to = user.Email
+	}
+	if to == "" {
+		utils.AddFlash(c, "error", "No recipient email configured")
+		c.Redirect(http.StatusFound, "/dashboard/settings")
+		return
+	}
+	ec := database.GetEmailConfig()
+	if !ec.Enabled || ec.Host == "" {
+		utils.AddFlash(c, "error", "SMTP not configured")
+		c.Redirect(http.StatusFound, "/dashboard/settings")
+		return
+	}
+	tasks.SendEmail(to, "Sandwitches test email", "This is a test email from Sandwitches SMTP settings.")
+	utils.AddFlash(c, "success", "Test email sent to "+to)
+	c.Redirect(http.StatusFound, "/dashboard/settings")
 }
 
 var logLevelChoices = []string{"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}

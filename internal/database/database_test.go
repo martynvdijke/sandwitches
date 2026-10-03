@@ -145,3 +145,59 @@ func TestMain(m *testing.M) {
 	}
 	os.Exit(code)
 }
+
+
+func TestEmailConfigDBPrecedence(t *testing.T) {
+    tmp := t.TempDir()
+    dbPath := tmp + "/test.db"
+    os.Setenv("SEND_EMAIL", "true")
+    os.Setenv("SMTP_HOST", "env-host")
+    os.Setenv("SMTP_PORT", "587")
+    os.Setenv("SMTP_USER", "env-user")
+    os.Setenv("SMTP_PASSWORD", "env-pass")
+    os.Setenv("SMTP_FROM_EMAIL", "env@example.com")
+    defer func() {
+        os.Unsetenv("SEND_EMAIL")
+        os.Unsetenv("SMTP_HOST")
+        os.Unsetenv("SMTP_PORT")
+        os.Unsetenv("SMTP_USER")
+        os.Unsetenv("SMTP_PASSWORD")
+        os.Unsetenv("SMTP_FROM_EMAIL")
+    }()
+    cfg := &config.Config{DatabaseFile: dbPath, Debug: false, SecretKey: "testkey", LanguageCode: "en"}
+    Init(cfg)
+    // env fallback when DB not enabled
+    ec := GetEmailConfig()
+    if ec.Host != "env-host" {
+        t.Fatalf("expected env-host got %q", ec.Host)
+    }
+    // now set DB config
+    var s Setting
+    DB.First(&s)
+    s.SMTPEnabled = true
+    s.SMTPHost = "db-host"
+    s.SMTPPort = "2525"
+    s.SMTPUser = "db-user"
+    s.SMTPPassword = "db-pass"
+    s.SMTPFromEmail = "db@example.com"
+    DB.Save(&s)
+    ec2 := GetEmailConfig()
+    if ec2.Host != "db-host" || ec2.Port != "2525" || ec2.User != "db-user" || ec2.FromEmail != "db@example.com" {
+        t.Fatalf("DB precedence failed: %+v", ec2)
+    }
+    if !ec2.Enabled {
+        t.Fatal("expected enabled")
+    }
+}
+
+func TestEmailConfigDisabled(t *testing.T) {
+    tmp := t.TempDir()
+    os.Unsetenv("SEND_EMAIL")
+    os.Unsetenv("SMTP_HOST")
+    cfg := &config.Config{DatabaseFile: tmp + "/test.db", Debug: false, SecretKey: "testkey", LanguageCode: "en"}
+    Init(cfg)
+    ec := GetEmailConfig()
+    if ec.Enabled {
+        t.Fatal("expected disabled")
+    }
+}
