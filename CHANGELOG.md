@@ -1,3 +1,10 @@
+## [3.12.7](https://github.com/martynvdijke/sandwitches/compare/v3.12.6...v3.12.7) (2026-10-10)
+
+
+### Bug Fixes
+
+* **trmnl:** replace invalid value--medium framework class ([#191](https://github.com/martynvdijke/sandwitches/issues/191)) ([e003f1d](https://github.com/martynvdijke/sandwitches/commit/e003f1d56fbf76357dd96ee970339c497412201a))
+
 ## [3.12.6](https://github.com/martynvdijke/sandwitches/compare/v3.12.5...v3.12.6) (2026-10-08)
 
 ## [3.12.5](https://github.com/martynvdijke/sandwitches/compare/v3.12.4...v3.12.5) (2026-10-08)
