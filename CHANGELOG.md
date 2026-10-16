@@ -1,3 +1,11 @@
+# [3.13.0](https://github.com/martynvdijke/sandwitches/compare/v3.12.8...v3.13.0) (2026-10-16)
+
+
+### Features
+
+* **api:** add recipe ratings listing and public order tracking endpoints ([cc4713c](https://github.com/martynvdijke/sandwitches/commit/cc4713c1913297a2635e50ea1e084e53edc49dc3))
+* **mobile:** add Flutter Android client ([eadd07f](https://github.com/martynvdijke/sandwitches/commit/eadd07f35f9d2748d0bd1c797860451342a75062))
+
 ## [3.12.8](https://github.com/martynvdijke/sandwitches/compare/v3.12.7...v3.12.8) (2026-10-12)
 
 ## [3.12.7](https://github.com/martynvdijke/sandwitches/compare/v3.12.6...v3.12.7) (2026-10-10)
