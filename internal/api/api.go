@@ -5,6 +5,7 @@ import (
 	"math"
 	"math/rand"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +16,10 @@ import (
 	"github.com/martynvdijke/sandwitches-go/internal/utils"
 	"gorm.io/gorm"
 )
+
+var mediaRoot string
+
+func SetMediaRoot(root string) { mediaRoot = root }
 
 func RegisterRoutes(r *gin.RouterGroup) {
 	r.GET("/openapi.json", openapiJSON)
@@ -38,6 +43,7 @@ func RegisterRoutes(r *gin.RouterGroup) {
 		api.DELETE("/recipes/:id", middleware.AuthRequired(), deleteRecipe)
 		api.GET("/recipes/:id/scale-ingredients", scaleIngredients)
 		api.GET("/recipes/:id/rating", getRecipeRating)
+		api.GET("/recipes/:id/ratings", getRecipeRatings)
 		api.POST("/recipes/:id/ratings", middleware.AuthRequired(), createRating)
 
 		api.GET("/recipe-of-the-day", recipeOfTheDay)
@@ -48,6 +54,7 @@ func RegisterRoutes(r *gin.RouterGroup) {
 		api.PATCH("/tags/:id", middleware.AuthRequired(), updateTag)
 		api.DELETE("/tags/:id", middleware.AuthRequired(), deleteTag)
 
+		api.GET("/orders/track/:token", trackOrder)
 		api.GET("/orders", middleware.AuthRequired(), getOrders)
 		api.POST("/orders", middleware.AuthRequired(), createOrder)
 		api.GET("/orders/:id", middleware.AuthRequired(), getOrder)
@@ -426,22 +433,98 @@ func createRating(c *gin.Context) {
 		return
 	}
 	id, _ := strconv.Atoi(c.Param("id"))
-	var input RatingInput
-	if err := c.ShouldBindJSON(&input); err != nil {
-		apiError(c, http.StatusBadRequest, err.Error())
-		return
+
+	var score float64
+	var comment string
+	isMultipart := strings.HasPrefix(c.Request.Header.Get("Content-Type"), "multipart/form-data") || strings.HasPrefix(c.ContentType(), "multipart/form-data")
+
+	if isMultipart {
+		scoreStr := c.PostForm("score")
+		if scoreStr == "" {
+			apiError(c, http.StatusUnprocessableEntity, "score is required")
+			return
+		}
+		var err error
+		score, err = strconv.ParseFloat(scoreStr, 64)
+		if err != nil {
+			apiError(c, http.StatusUnprocessableEntity, "score must be a number")
+			return
+		}
+		comment = c.PostForm("comment")
+	} else {
+		var input RatingInput
+		if err := c.ShouldBindJSON(&input); err != nil {
+			apiError(c, http.StatusBadRequest, err.Error())
+			return
+		}
+		score = input.Score
+		comment = input.Comment
 	}
 
 	var rating database.Rating
 	database.DB.Where("recipe_id = ? AND user_id = ?", id, user.ID).First(&rating)
 	rating.RecipeID = uint(id)
 	rating.UserID = user.ID
-	rating.Score = input.Score
-	rating.Comment = input.Comment
+	rating.Score = score
+	rating.Comment = comment
+
+	if isMultipart {
+		if file, err := c.FormFile("image"); err == nil && file != nil {
+			dir := filepath.Join(mediaRoot, "ratings")
+			if mediaRoot == "" {
+				dir = filepath.Join("media", "ratings")
+			}
+			if imgPath, err := utils.SaveUploadedFile(file, dir, "ratings"); err == nil {
+				rating.Image = imgPath
+			}
+		}
+	}
+
 	database.DB.Save(&rating)
 
 	rating.User = *user
 	c.JSON(http.StatusCreated, ratingToDTO(&rating))
+}
+
+func getRecipeRatings(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var recipe database.Recipe
+	if err := database.DB.First(&recipe, id).Error; err != nil {
+		apiError(c, http.StatusNotFound, "Recipe not found")
+		return
+	}
+	query := database.DB.Model(&database.Rating{}).Where("recipe_id = ?", id).Preload("User")
+	var total int64
+	query.Count(&total)
+
+	paginated := wantsPagination(c)
+	pg, ok := parsePagination(c)
+	if !ok {
+		return
+	}
+
+	var ratings []database.Rating
+	query.Order("updated_at DESC").Limit(pg.limit).Offset(pg.offset).Find(&ratings)
+
+	items := make([]RatingDTO, len(ratings))
+	for i, r := range ratings {
+		items[i] = ratingToDTO(&r)
+	}
+	if paginated {
+		c.JSON(http.StatusOK, gin.H{"items": items, "total": total})
+		return
+	}
+	c.JSON(http.StatusOK, items)
+}
+
+func trackOrder(c *gin.Context) {
+	token := c.Param("token")
+	var order database.Order
+	if err := database.DB.Preload("Items.Recipe").Preload("Items.Recipe.Tags").Where("tracking_token = ?", token).First(&order).Error; err != nil {
+		apiError(c, http.StatusNotFound, "Order not found")
+		return
+	}
+	c.JSON(http.StatusOK, orderToDetailDTO(&order))
 }
 
 func recipeOfTheDay(c *gin.Context) {

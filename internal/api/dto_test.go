@@ -91,12 +91,15 @@ func TestOrderDTOsHideInternalFields(t *testing.T) {
 	b, _ := json.Marshal(dto)
 	var raw map[string]interface{}
 	json.Unmarshal(b, &raw)
-	for _, k := range []string{"tracking_token", "user_id", "completed", "UserID", "TrackingToken"} {
+	for _, k := range []string{"user_id", "completed", "UserID", "TrackingToken"} {
 		if _, ok := raw[k]; ok {
 			t.Errorf("orderToDTO must not expose %s", k)
 		}
 	}
-	if dto.Status != "PENDING" || dto.TotalPrice != 12.5 {
+	if _, ok := raw["tracking_token"]; !ok {
+		t.Error("orderToDTO should expose tracking_token")
+	}
+	if dto.Status != "PENDING" || dto.TotalPrice != 12.5 || dto.TrackingToken != "tok-123" {
 		t.Error("orderToDTO lost public fields")
 	}
 

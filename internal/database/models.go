@@ -155,6 +155,7 @@ type Rating struct {
 	User      User
 	Score     float64 `gorm:"type:real"`
 	Comment   string
+	Image     string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

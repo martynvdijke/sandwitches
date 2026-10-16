@@ -74,6 +74,7 @@ func main() {
 	database.CleanupLegacy(cfg)
 
 	handlers.SetMediaRoot(cfg.MediaRoot)
+	api.SetMediaRoot(cfg.MediaRoot)
 
 	router := setupRouter(cfg, tel)
 

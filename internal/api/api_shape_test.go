@@ -140,12 +140,12 @@ func TestAPIOrdersShape(t *testing.T) {
 		t.Fatalf("expected 1 order, got %d", len(orders))
 	}
 	o := orders[0]
-	for _, k := range []string{"tracking_token", "user_id", "completed", "UserID", "TrackingToken"} {
+	for _, k := range []string{"user_id", "completed", "UserID", "TrackingToken"} {
 		if _, ok := o[k]; ok {
 			t.Errorf("order must not expose %s", k)
 		}
 	}
-	for _, k := range []string{"id", "status", "total_price", "created_at", "updated_at"} {
+	for _, k := range []string{"id", "status", "total_price", "tracking_token", "created_at", "updated_at"} {
 		if _, ok := o[k]; !ok {
 			t.Errorf("order should expose %s", k)
 		}
@@ -167,8 +167,8 @@ func TestAPIOrdersShape(t *testing.T) {
 	if _, ok := item["recipe"]; !ok {
 		t.Error("order item should include full recipe")
 	}
-	if _, ok := detail["tracking_token"]; ok {
-		t.Error("order detail must not expose tracking_token")
+	if _, ok := detail["tracking_token"]; !ok {
+		t.Error("order detail should expose tracking_token")
 	}
 }
 

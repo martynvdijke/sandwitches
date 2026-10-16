@@ -161,13 +161,14 @@ func tagsToDTOs(tags []database.Tag) []TagDTO {
 }
 
 // OrderDTO mirrors the v2.x OrderSchema (list/create responses). Internal
-// fields such as tracking_token, user_id and completed are never exposed.
+// fields such as user_id and completed are never exposed.
 type OrderDTO struct {
-	ID         uint      `json:"id"`
-	Status     string    `json:"status"`
-	TotalPrice float64   `json:"total_price"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	ID            uint      `json:"id"`
+	Status        string    `json:"status"`
+	TotalPrice    float64   `json:"total_price"`
+	TrackingToken string    `json:"tracking_token"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 // OrderDetailDTO mirrors the v2.x OrderDetailSchema (single-order responses).
@@ -186,11 +187,12 @@ type OrderItemDTO struct {
 
 func orderToDTO(o *database.Order) OrderDTO {
 	return OrderDTO{
-		ID:         o.ID,
-		Status:     o.Status,
-		TotalPrice: o.TotalPrice,
-		CreatedAt:  o.CreatedAt,
-		UpdatedAt:  o.UpdatedAt,
+		ID:            o.ID,
+		Status:        o.Status,
+		TotalPrice:    o.TotalPrice,
+		TrackingToken: o.TrackingToken,
+		CreatedAt:     o.CreatedAt,
+		UpdatedAt:     o.UpdatedAt,
 	}
 }
 
@@ -251,6 +253,7 @@ type RatingDTO struct {
 	Recipe    uint          `json:"recipe"`
 	Score     float64       `json:"score"`
 	Comment   string        `json:"comment"`
+	Image     string        `json:"image"`
 	User      UserPublicDTO `json:"user"`
 	CreatedAt time.Time     `json:"created_at"`
 	UpdatedAt time.Time     `json:"updated_at"`
@@ -266,6 +269,7 @@ func ratingToDTO(r *database.Rating) RatingDTO {
 		Recipe:    r.RecipeID,
 		Score:     r.Score,
 		Comment:   r.Comment,
+		Image:     r.Image,
 		User:      user,
 		CreatedAt: r.CreatedAt,
 		UpdatedAt: r.UpdatedAt,

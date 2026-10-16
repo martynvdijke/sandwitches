@@ -231,17 +231,42 @@ func buildOpenAPISpec() map[string]interface{} {
 				},
 			},
 			"/recipes/{id}/ratings": map[string]interface{}{
+				"get": map[string]interface{}{
+					"summary":     "List ratings for a recipe (newest first)",
+					"operationId": "getRecipeRatings",
+					"tags":        []string{"Recipes"},
+					"parameters":  append(idParam, paginationParams...),
+					"responses": map[string]interface{}{
+						"200": responses("Ratings", map[string]interface{}{"type": "array", "items": ref("Rating")})["200"],
+						"404": errorResponses["404"],
+					},
+				},
 				"post": map[string]interface{}{
-					"summary":     "Create or update a rating",
+					"summary":     "Create or update a rating (JSON or multipart with image)",
 					"operationId": "createRating",
 					"tags":        []string{"Recipes"},
 					"security":    auth,
 					"parameters":  idParam,
-					"requestBody": jsonBody(ref("RatingCreate")),
+					"requestBody": map[string]interface{}{
+						"required": true,
+						"content": map[string]interface{}{
+							"application/json": map[string]interface{}{"schema": ref("RatingCreate")},
+							"multipart/form-data": map[string]interface{}{"schema": map[string]interface{}{
+								"type": "object",
+								"properties": map[string]interface{}{
+									"score":   map[string]interface{}{"type": "number"},
+									"comment": map[string]interface{}{"type": "string"},
+									"image":   map[string]interface{}{"type": "string", "format": "binary"},
+								},
+								"required": []string{"score"},
+							}},
+						},
+					},
 					"responses": map[string]interface{}{
 						"201": responses("Created rating", ref("Rating"))["200"],
 						"400": errorResponses["400"],
 						"401": errorResponses["401"],
+						"422": errorResponses["422"],
 					},
 				},
 			},
@@ -376,6 +401,21 @@ func buildOpenAPISpec() map[string]interface{} {
 						})["200"],
 						"400": errorResponses["400"],
 						"403": errorResponses["403"],
+					},
+				},
+			},
+			"/orders/track/{token}": map[string]interface{}{
+				"get": map[string]interface{}{
+					"summary":     "Track order by token (public)",
+					"operationId": "trackOrder",
+					"tags":        []string{"Orders"},
+					"parameters": []map[string]interface{}{{
+						"name": "token", "in": "path", "required": true, "description": "Order tracking token",
+						"schema": map[string]interface{}{"type": "string"},
+					}},
+					"responses": map[string]interface{}{
+						"200": responses("Order detail", ref("OrderDetail"))["200"],
+						"404": errorResponses["404"],
 					},
 				},
 			},
@@ -559,6 +599,7 @@ func buildOpenAPISpec() map[string]interface{} {
 						"recipe":     sch("integer"),
 						"score":      sch("number"),
 						"comment":    sch("string"),
+						"image":      sch("string"),
 						"user":       ref("UserPublic"),
 						"created_at": sch("string"),
 						"updated_at": sch("string"),
@@ -575,11 +616,12 @@ func buildOpenAPISpec() map[string]interface{} {
 				"Order": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
-						"id":          sch("integer"),
-						"status":      sch("string"),
-						"total_price": sch("number"),
-						"created_at":  sch("string"),
-						"updated_at":  sch("string"),
+						"id":             sch("integer"),
+						"status":         sch("string"),
+						"total_price":    sch("number"),
+						"tracking_token": sch("string"),
+						"created_at":     sch("string"),
+						"updated_at":     sch("string"),
 					},
 				},
 				"OrderItem": map[string]interface{}{
@@ -594,12 +636,13 @@ func buildOpenAPISpec() map[string]interface{} {
 				"OrderDetail": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
-						"id":          sch("integer"),
-						"status":      sch("string"),
-						"total_price": sch("number"),
-						"created_at":  sch("string"),
-						"updated_at":  sch("string"),
-						"items":       map[string]interface{}{"type": "array", "items": ref("OrderItem")},
+						"id":             sch("integer"),
+						"status":         sch("string"),
+						"total_price":    sch("number"),
+						"tracking_token": sch("string"),
+						"created_at":     sch("string"),
+						"updated_at":     sch("string"),
+						"items":          map[string]interface{}{"type": "array", "items": ref("OrderItem")},
 					},
 				},
 				"OrderCreate": map[string]interface{}{
