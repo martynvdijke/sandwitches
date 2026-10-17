@@ -1,3 +1,10 @@
+## [3.13.3](https://github.com/martynvdijke/sandwitches/compare/v3.13.2...v3.13.3) (2026-10-17)
+
+
+### Bug Fixes
+
+* **ci:** verify android apk upload after disabling release immutability ([b424793](https://github.com/martynvdijke/sandwitches/commit/b4247931b3e7b993d0b587f86158bef4f50c6c1e))
+
 ## [3.13.2](https://github.com/martynvdijke/sandwitches/compare/v3.13.1...v3.13.2) (2026-10-17)
 
 
