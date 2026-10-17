@@ -204,7 +204,7 @@ jobs:
       - name: Build APK
         run: |
           cd mobile && flutter pub get && flutter build apk --release
-          cp mobile/build/app/outputs/flutter-apk/app-release.apk sandwitches-${{ needs.release.outputs.new_release_version }}-android.apk
+          cp build/app/outputs/flutter-apk/app-release.apk ../sandwitches-${{ needs.release.outputs.new_release_version }}-android.apk
 
       - name: Upload APK to release
         run: gh release upload "v${{ needs.release.outputs.new_release_version }}" "sandwitches-${{ needs.release.outputs.new_release_version }}-android.apk" --clobber
