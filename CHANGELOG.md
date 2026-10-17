@@ -1,3 +1,11 @@
+## [3.13.1](https://github.com/martynvdijke/sandwitches/compare/v3.13.0...v3.13.1) (2026-10-17)
+
+
+### Bug Fixes
+
+* **mobile:** track Android host sources hidden by gitignore ([8d8c902](https://github.com/martynvdijke/sandwitches/commit/8d8c902ab07062cb58078602c77d0534c13cb8a0))
+* **mobile:** verify gated Android release pipeline end-to-end ([c5cbb47](https://github.com/martynvdijke/sandwitches/commit/c5cbb47c7caa843b97d3018d47ce342328ecc86f))
+
 # [3.13.0](https://github.com/martynvdijke/sandwitches/compare/v3.12.8...v3.13.0) (2026-10-16)
 
 
