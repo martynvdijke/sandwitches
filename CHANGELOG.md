@@ -1,3 +1,10 @@
+## [3.13.2](https://github.com/martynvdijke/sandwitches/compare/v3.13.1...v3.13.2) (2026-10-17)
+
+
+### Bug Fixes
+
+* **ci:** correct APK path in release upload step ([efb0e0b](https://github.com/martynvdijke/sandwitches/commit/efb0e0b135b8e1231fc6c16ad64b8471101a2574))
+
 ## [3.13.1](https://github.com/martynvdijke/sandwitches/compare/v3.13.0...v3.13.1) (2026-10-17)
 
 
