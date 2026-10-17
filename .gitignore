@@ -135,13 +135,16 @@ dist
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
 
 static/dist/*
-main
+/main
 db.*
-sandwitches
-sandwitches-go
+/sandwitches
+/sandwitches-go
 tmp/
 openspec/
 .opencode/
 
 # Zensical build output
 site/
+
+# Flutter Android launcher icons are required build inputs (see *.png above)
+!mobile/android/app/src/main/res/mipmap-*/ic_launcher.png
