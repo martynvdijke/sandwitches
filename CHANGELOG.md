@@ -1,3 +1,10 @@
+## [3.13.4](https://github.com/martynvdijke/sandwitches/compare/v3.13.3...v3.13.4) (2026-10-18)
+
+
+### Bug Fixes
+
+* **ci:** build release APK once inside semantic-release prepare ([795aad9](https://github.com/martynvdijke/sandwitches/commit/795aad91020a6076b3a6df488a69697abfdfd02c))
+
 ## [3.13.3](https://github.com/martynvdijke/sandwitches/compare/v3.13.2...v3.13.3) (2026-10-17)
 
 
