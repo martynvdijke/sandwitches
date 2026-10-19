@@ -79,7 +79,7 @@ function scrollCarousel(dir) {
 
 <div class="large-space"></div>
 
-{{ template "partials/recipe_list.html" dict "recipes" .recipes "user" .user }}
+{{ template "partials/recipe_list.html" dict "recipes" .recipes "user" .user "csrf_token" .csrf_token }}
 
 {{ if .pagination }}
 {{ $q := .q }}{{ $sort := .sort }}{{ $date_start := .date_start }}{{ $date_end := .date_end }}{{ $uploader := .uploader }}{{ $favorites := .favorites }}

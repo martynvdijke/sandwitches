@@ -88,8 +88,8 @@
                 <img id="photo-preview" src="{{ thumb .recipe.Image 640 }}" class="responsive round" style="max-height:200px" alt="Preview">
                 <div class="small-space"></div>
                 <button type="button" class="button small round" data-edit-photo="existing" data-full-src="{{ .recipe.Image }}" title="Edit photo" hidden><i>edit</i></button>
-                <a href="/dashboard/recipes/{{ .recipe.ID }}/rotate?direction=cw" class="button small round" title="Rotate Clockwise"><i>rotate_right</i></a>
-                <a href="/dashboard/recipes/{{ .recipe.ID }}/rotate?direction=ccw" class="button small round" title="Rotate Counter-Clockwise"><i>rotate_left</i></a>
+                <button type="submit" formaction="/dashboard/recipes/{{ .recipe.ID }}/rotate" name="direction" value="cw" class="button small round" title="Rotate Clockwise"><i>rotate_right</i></button>
+                <button type="submit" formaction="/dashboard/recipes/{{ .recipe.ID }}/rotate" name="direction" value="ccw" class="button small round" title="Rotate Counter-Clockwise"><i>rotate_left</i></button>
                 {{ end }}
             </div>
 

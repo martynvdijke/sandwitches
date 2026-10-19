@@ -4,6 +4,7 @@
 <h4>Login</h4>
 {{ if .error }}<div class="padding small-round" style="background:var(--error-container);color:var(--on-error-container);margin-bottom:12px">{{ .error }}</div>{{ end }}
 <form method="post" action="/login">
+{{ if .next }}<input type="hidden" name="next" value="{{ .next }}">{{ end }}
 <div class="field label border round"><input type="text" name="username" required autocomplete="username"><label>Username</label></div>
 <div class="field label border round"><input type="password" name="password" required autocomplete="current-password"><label>Password</label></div>
 <div class="space"></div>

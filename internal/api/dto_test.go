@@ -26,8 +26,42 @@ func TestSettingToDTO(t *testing.T) {
 	if dto.SiteName != "Sandwitches" || dto.AIConnectionPoint != "http://ai" || !dto.OTelEnabled {
 		t.Error("settingToDTO did not map fields")
 	}
-	if dto.SiteName == "" || dto.AIAPIKey == "" {
-		t.Error("settingToDTO lost data")
+	if dto.SiteName == "" || dto.AIModel != "gpt-4" {
+		t.Error("settingToDTO lost non-secret data")
+	}
+	// Secrets must never travel to API clients; only their presence is exposed.
+	if dto.AIAPIKey != "" || dto.GotifyToken != "" {
+		t.Error("settingToDTO must not return AIAPIKey or GotifyToken")
+	}
+	if !dto.AIAPIKeySet || !dto.GotifyTokenSet {
+		t.Error("settingToDTO should report that secrets are configured")
+	}
+
+	b, _ := json.Marshal(dto)
+	var raw map[string]interface{}
+	json.Unmarshal(b, &raw)
+	if raw["ai_api_key"] != "" || raw["gotify_token"] != "" {
+		t.Error("serialized settings must not contain secret values")
+	}
+}
+
+func TestApplySettingUpdatesKeepsWriteOnlySecrets(t *testing.T) {
+	s := &database.Setting{AIAPIKey: "old-ai", GotifyToken: "old-gotify"}
+
+	blank := ""
+	masked := secretMask
+	applySettingUpdates(s, SettingUpdateInput{AIAPIKey: &blank, GotifyToken: &masked})
+	if s.AIAPIKey != "old-ai" || s.GotifyToken != "old-gotify" {
+		t.Error("blank/masked secrets must mean unchanged")
+	}
+
+	newKey := "new-ai"
+	applySettingUpdates(s, SettingUpdateInput{AIAPIKey: &newKey})
+	if s.AIAPIKey != "new-ai" {
+		t.Error("non-empty secret should update")
+	}
+	if s.GotifyToken != "old-gotify" {
+		t.Error("omitted secret should be unchanged")
 	}
 }
 

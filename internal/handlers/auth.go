@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -128,10 +129,40 @@ func Signup(c *gin.Context) {
 type LoginForm struct {
 	Username string `form:"username" binding:"required"`
 	Password string `form:"password" binding:"required"`
+	Next     string `form:"next"`
+}
+
+// loginLimiter throttles credential stuffing and password guessing per client
+// IP and per account. Five failures within 15 minutes lock that key for 15
+// minutes; a successful login clears both counters.
+var loginLimiter = middleware.NewLoginLimiter(5, 15*time.Minute, 15*time.Minute)
+
+// ResetLoginLimiterForTest clears process-wide limiter state between tests.
+func ResetLoginLimiterForTest() { loginLimiter.Reset() }
+
+// safeNext only allows same-origin, absolute-path redirect targets. Anything
+// that could send the browser to another host (scheme, host, protocol-relative
+// URL, backslash tricks) falls back to the home page.
+func safeNext(next string) string {
+	next = strings.TrimSpace(next)
+	if next == "" {
+		return "/"
+	}
+	if strings.ContainsAny(next, "\\\r\n") {
+		return "/"
+	}
+	u, err := url.Parse(next)
+	if err != nil || u.IsAbs() || u.Host != "" || u.Scheme != "" {
+		return "/"
+	}
+	if !strings.HasPrefix(u.Path, "/") || strings.HasPrefix(next, "//") {
+		return "/"
+	}
+	return next
 }
 
 func LoginPage(c *gin.Context) {
-	next := c.Query("next")
+	next := safeNext(c.Query("next"))
 	errMsg := c.Query("error")
 	c.HTML(http.StatusOK, "login.html", gin.H{"next": next, "error": errMsg, "oidc_enabled": loadOIDCConfig().valid()})
 }
@@ -140,20 +171,37 @@ func Login(c *gin.Context) {
 	td := utils.NewTemplateData(c)
 	var form LoginForm
 	if err := c.ShouldBind(&form); err != nil {
-		c.HTML(http.StatusOK, "login.html", td.With("error", "Invalid form").With("form", form).ToGinH())
+		c.HTML(http.StatusOK, "login.html", td.With("error", "Invalid form").With("next", safeNext(form.Next)).ToGinH())
+		return
+	}
+
+	if allowed, wait := loginLimiter.Allow(c.ClientIP(), form.Username); !allowed {
+		seconds := int(wait.Seconds())
+		if seconds < 1 {
+			seconds = 1
+		}
+		c.Header("Retry-After", strconv.Itoa(seconds))
+		c.HTML(http.StatusTooManyRequests, "login.html", td.
+			With("error", "Too many failed login attempts. Please try again later.").
+			With("next", safeNext(form.Next)).
+			With("form", form).ToGinH())
 		return
 	}
 
 	var user database.User
 	if err := database.DB.Where("username = ?", form.Username).First(&user).Error; err != nil {
-		c.HTML(http.StatusOK, "login.html", td.With("error", "Invalid username or password").With("form", form).ToGinH())
+		loginLimiter.Failure(c.ClientIP(), form.Username)
+		c.HTML(http.StatusOK, "login.html", td.With("error", "Invalid username or password").With("next", safeNext(form.Next)).With("form", form).ToGinH())
 		return
 	}
 
 	if !verifyPassword(user.Password, form.Password) {
-		c.HTML(http.StatusOK, "login.html", td.With("error", "Invalid username or password").With("form", form).ToGinH())
+		loginLimiter.Failure(c.ClientIP(), form.Username)
+		c.HTML(http.StatusOK, "login.html", td.With("error", "Invalid username or password").With("next", safeNext(form.Next)).With("form", form).ToGinH())
 		return
 	}
+
+	loginLimiter.Success(c.ClientIP(), form.Username)
 
 	now := time.Now()
 	user.LastLogin = &now
@@ -162,16 +210,12 @@ func Login(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Set("user_id", user.ID)
 	if err := session.Save(); err != nil {
-		c.HTML(http.StatusOK, "login.html", td.With("error", "Session error").ToGinH())
+		c.HTML(http.StatusOK, "login.html", td.With("error", "Session error").With("next", safeNext(form.Next)).ToGinH())
 		return
 	}
 
-	next := c.PostForm("next")
-	if next == "" {
-		next = "/"
-	}
 	utils.AddFlash(c, "success", "Welcome back, "+user.Username+"!")
-	c.Redirect(http.StatusFound, next)
+	c.Redirect(http.StatusFound, safeNext(form.Next))
 }
 
 func Logout(c *gin.Context) {

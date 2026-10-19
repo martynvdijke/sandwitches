@@ -303,7 +303,6 @@ func setupRouter(cfg *config.Config, tel *telemetry.Telemetry) *gin.Engine {
 
 	router.Use(middleware.OptionalAuth())
 
-	router.GET("/", handlers.Index)
 	router.GET("/feeds/latest", handlers.LatestRecipesFeed)
 
 	router.GET("/setup", handlers.SetupPage)
@@ -328,6 +327,7 @@ func setupRouter(cfg *config.Config, tel *telemetry.Telemetry) *gin.Engine {
 	web := router.Group("/")
 	web.Use(middleware.CSRFMiddleware())
 	{
+		web.GET("/", handlers.Index)
 		web.GET("/recipes/:slug", handlers.RecipeDetail)
 		web.GET("/recipes/:slug/cooking", handlers.RecipeCooking)
 		web.GET("/orders/track/:token", handlers.OrderTracker)
@@ -345,16 +345,15 @@ func setupRouter(cfg *config.Config, tel *telemetry.Telemetry) *gin.Engine {
 		web.GET("/orders/:id", middleware.AuthRequired(), handlers.UserOrderDetail)
 
 		web.GET("/cart", middleware.AuthRequired(), handlers.ViewCart)
-		web.GET("/cart/add/:id", middleware.AuthRequired(), handlers.AddToCart)
-		web.GET("/cart/remove/:id", middleware.AuthRequired(), handlers.RemoveFromCart)
+		web.POST("/cart/add/:id", middleware.AuthRequired(), handlers.AddToCart)
+		web.POST("/cart/remove/:id", middleware.AuthRequired(), handlers.RemoveFromCart)
 		web.POST("/cart/update/:id", middleware.AuthRequired(), handlers.UpdateCartQuantity)
 		web.POST("/cart/checkout", middleware.AuthRequired(), handlers.Checkout)
 
 		web.POST("/recipes/order/:id", middleware.AuthRequired(), handlers.OrderRecipe)
 
-		web.GET("/recipes/rate/:id", middleware.AuthRequired(), handlers.RecipeRate)
 		web.POST("/recipes/rate/:id", middleware.AuthRequired(), handlers.RecipeRate)
-		web.GET("/recipes/favorite/:id", middleware.AuthRequired(), handlers.ToggleFavorite)
+		web.POST("/recipes/favorite/:id", middleware.AuthRequired(), handlers.ToggleFavorite)
 
 		admin := web.Group("/dashboard", middleware.StaffRequired())
 		{
@@ -367,8 +366,8 @@ func setupRouter(cfg *config.Config, tel *telemetry.Telemetry) *gin.Engine {
 			admin.POST("/recipes/:id/edit", handlers.AdminRecipeEdit)
 			admin.GET("/recipes/:id/delete", handlers.AdminRecipeDelete)
 			admin.POST("/recipes/:id/delete", handlers.AdminRecipeDelete)
-			admin.GET("/recipes/:id/approve", handlers.AdminRecipeApprove)
-			admin.GET("/recipes/:id/rotate", handlers.AdminRecipeRotate)
+			admin.POST("/recipes/:id/approve", handlers.AdminRecipeApprove)
+			admin.POST("/recipes/:id/rotate", handlers.AdminRecipeRotate)
 
 			admin.GET("/approvals", handlers.AdminRecipeApprovalList)
 

@@ -7,6 +7,9 @@ import (
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 )
 
+// secretMask is accepted as "unchanged" on write-only secret fields.
+const secretMask = "••••"
+
 // SettingDTO mirrors the v2.x SettingSchema. All fields snake_case.
 type SettingDTO struct {
 	SiteName          string `json:"site_name"`
@@ -15,24 +18,30 @@ type SettingDTO struct {
 	AIConnectionPoint string `json:"ai_connection_point"`
 	AIModel           string `json:"ai_model"`
 	AIAPIKey          string `json:"ai_api_key"`
+	AIAPIKeySet       bool   `json:"ai_api_key_set"`
 	LogLevel          string `json:"log_level"`
 	GotifyURL         string `json:"gotify_url"`
 	GotifyToken       string `json:"gotify_token"`
+	GotifyTokenSet    bool   `json:"gotify_token_set"`
 	OTelEndpoint      string `json:"otel_endpoint"`
 	OTelEnabled       bool   `json:"otel_enabled"`
 }
 
 func settingToDTO(s *database.Setting) SettingDTO {
+	// Secrets are never returned by the API. The *Set flags let clients show
+	// whether a value is configured without disclosing it.
 	return SettingDTO{
 		SiteName:          s.SiteName,
 		SiteDescription:   s.SiteDescription,
 		Email:             s.Email,
 		AIConnectionPoint: s.AIConnectionPoint,
 		AIModel:           s.AIModel,
-		AIAPIKey:          s.AIAPIKey,
+		AIAPIKey:          "",
+		AIAPIKeySet:       s.AIAPIKey != "",
 		LogLevel:          s.LogLevel,
 		GotifyURL:         s.GotifyURL,
-		GotifyToken:       s.GotifyToken,
+		GotifyToken:       "",
+		GotifyTokenSet:    s.GotifyToken != "",
 		OTelEndpoint:      s.OTelEndpoint,
 		OTelEnabled:       s.OTelEnabled,
 	}
@@ -69,7 +78,9 @@ func applySettingUpdates(s *database.Setting, in SettingUpdateInput) {
 	if in.AIModel != nil {
 		s.AIModel = *in.AIModel
 	}
-	if in.AIAPIKey != nil {
+	// Secret fields are write-only: an omitted, blank, or masked value means
+	// "keep the stored secret", so settings clients can round-trip the DTO.
+	if in.AIAPIKey != nil && *in.AIAPIKey != "" && *in.AIAPIKey != secretMask {
 		s.AIAPIKey = *in.AIAPIKey
 	}
 	if in.LogLevel != nil {
@@ -78,7 +89,7 @@ func applySettingUpdates(s *database.Setting, in SettingUpdateInput) {
 	if in.GotifyURL != nil {
 		s.GotifyURL = *in.GotifyURL
 	}
-	if in.GotifyToken != nil {
+	if in.GotifyToken != nil && *in.GotifyToken != "" && *in.GotifyToken != secretMask {
 		s.GotifyToken = *in.GotifyToken
 	}
 	if in.OTelEndpoint != nil {

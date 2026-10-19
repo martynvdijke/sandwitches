@@ -24,17 +24,21 @@
 
          {{ if $.user }}
          <div class="absolute top left padding">
-             <a href="/recipes/favorite/{{ .ID }}" class="button circle transparent">
+             <form method="post" action="/recipes/favorite/{{ .ID }}" style="display:inline">
+                {{ $.csrf_token }}
                 {{ $fav := false }}{{ range .FavoritedBy }}{{ if eq .ID $.user.ID }}{{ $fav = true }}{{ end }}{{ end }}
+                <button type="submit" class="button circle transparent" title="{{ if $fav }}Remove from favourites{{ else }}Add to favourites{{ end }}">
                 <i class="{{ if $fav }}red-text{{ else }}black-text{{ end }}">
                     {{ if $fav }}favorite{{ else }}favorite_border{{ end }}
                 </i>
-             </a>
+                </button>
+             </form>
          </div>
          {{ end }}
          {{ if $.user }}{{ if .Price }}
          <div class="absolute top right padding">
-          <form action="/cart/add/{{ .ID }}" method="get" class="ml-1">
+          <form action="/cart/add/{{ .ID }}" method="post" class="ml-1">
+               {{ $.csrf_token }}
                <button type="submit" class="button circle primary" title="Add to Cart">
                  <i>add_shopping_cart</i>
                </button>

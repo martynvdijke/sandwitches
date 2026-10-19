@@ -22,7 +22,7 @@
     </div></div>
   <div class="s12 m1"><button type="submit" class="button circle primary"><i>search</i></button></div>
 </form>
-<div class="grid" id="recipe-grid">{{ template "partials/recipe_list.html" dict "recipes" .recipes "user" .user }}</div>
+<div class="grid" id="recipe-grid">{{ template "partials/recipe_list.html" dict "recipes" .recipes "user" .user "csrf_token" .csrf_token }}</div>
 {{ if .pagination }}
 {{ $q := .q }}{{ $sort := .sort }}{{ $date_start := .date_start }}{{ $date_end := .date_end }}{{ $uploader := .uploader }}
 <div class="pagination">

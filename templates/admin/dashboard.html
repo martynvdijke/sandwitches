@@ -55,7 +55,7 @@
         </div>
         <nav>
             <a href="/dashboard/recipes/{{ .ID }}/edit" class="button border round">Edit</a>
-            <a href="/dashboard/recipes/{{ .ID }}/approve" class="button primary round">Approve</a>
+            <form method="post" action="/dashboard/recipes/{{ .ID }}/approve" style="display:inline">{{ $.csrf_token }}<button type="submit" class="button primary round">Approve</button></form>
         </nav>
     </div>
 </article>

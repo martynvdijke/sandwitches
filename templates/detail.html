@@ -62,10 +62,14 @@
     {{ if .recipe.Price }}
     <div class="space"></div>
     <div class="row wrap align-center" style="gap:8px">
-      <a href="/recipes/favorite/{{ .recipe.ID }}" class="button border round">
-        <i>favorite</i>
-      </a>
-      <a href="/cart/add/{{ .recipe.ID }}" class="button round"><i>add_shopping_cart</i> Add to Cart</a>
+      <form method="post" action="/recipes/favorite/{{ .recipe.ID }}" style="display:inline">
+        {{ .csrf_token }}
+        <button type="submit" class="button border round"><i>favorite</i></button>
+      </form>
+      <form method="post" action="/cart/add/{{ .recipe.ID }}" style="display:inline">
+        {{ .csrf_token }}
+        <button type="submit" class="button round"><i>add_shopping_cart</i> Add to Cart</button>
+      </form>
       <form method="post" action="/recipes/order/{{ .recipe.ID }}" style="display:inline">
         {{ .csrf_token }}
         <button type="submit" class="button primary round"><i>flash_on</i> Order Now</button>

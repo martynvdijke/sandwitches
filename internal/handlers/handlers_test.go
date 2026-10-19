@@ -34,6 +34,7 @@ func TestMain(m *testing.M) {
 
 func setupTestServer(t *testing.T) (*httptest.Server, func()) {
 	t.Helper()
+	ResetLoginLimiterForTest()
 
 	tmp := t.TempDir()
 	dbPath := tmp + "/test.db"
@@ -54,30 +55,73 @@ func setupTestServer(t *testing.T) (*httptest.Server, func()) {
 	r.Use(middleware.OptionalAuth())
 
 	r.SetFuncMap(template.FuncMap{
-		"add":        func(a, b int) int { return a + b },
-		"sub":        func(a, b int) int { return a - b },
-		"lower":      strings.ToLower,
-		"upper":      strings.ToUpper,
-		"title":      strings.Title,
-		"contains":   strings.Contains,
-		"join":       func(sep string, s []string) string { return strings.Join(s, sep) },
-		"split":      func(sep, s string) []string { return strings.Split(s, sep) },
-		"now":        func() time.Time { return time.Now() },
-		"div":        func(a, b int) int { return a / b },
-		"mul":        func(a, b int) int { return a * b },
-		"mod":        func(a, b int) int { return a % b },
-		"seq":        func(n int) []int { s := make([]int, n); for i := range s { s[i] = i }; return s },
-		"dict":       func(values ...interface{}) map[string]interface{} { m := make(map[string]interface{}); for i := 0; i < len(values); i += 2 { m[fmt.Sprint(values[i])] = values[i+1] }; return m },
-		"default":    func(def, val interface{}) interface{} { if val == nil || val == "" { return def }; return val },
-		"first":      func(s string) string { if len(s) > 0 { return string(s[0]) } else { return "" } },
-		"urlencode":  func(s string) string { return strings.ReplaceAll(s, " ", "+") },
-		"has": func(s string, list []string) bool { for _, v := range list { if v == s { return true }; }; return false },
-		"floatmul":   func(a float64, b int) float64 { return a * float64(b) },
-		"striptags":  func(s string) string { return strings.Map(func(r rune) rune { if r == '<' || r == '>' { return -1 }; return r }, s) },
-		"truncatechars": func(n int, s string) string { runes := []rune(s); if len(runes) > n { return string(runes[:n]) + "..." }; return s },
-		"safe":         func(s string) template.HTML { return template.HTML(s) },
+		"add":      func(a, b int) int { return a + b },
+		"sub":      func(a, b int) int { return a - b },
+		"lower":    strings.ToLower,
+		"upper":    strings.ToUpper,
+		"title":    strings.Title,
+		"contains": strings.Contains,
+		"join":     func(sep string, s []string) string { return strings.Join(s, sep) },
+		"split":    func(sep, s string) []string { return strings.Split(s, sep) },
+		"now":      func() time.Time { return time.Now() },
+		"div":      func(a, b int) int { return a / b },
+		"mul":      func(a, b int) int { return a * b },
+		"mod":      func(a, b int) int { return a % b },
+		"seq": func(n int) []int {
+			s := make([]int, n)
+			for i := range s {
+				s[i] = i
+			}
+			return s
+		},
+		"dict": func(values ...interface{}) map[string]interface{} {
+			m := make(map[string]interface{})
+			for i := 0; i < len(values); i += 2 {
+				m[fmt.Sprint(values[i])] = values[i+1]
+			}
+			return m
+		},
+		"default": func(def, val interface{}) interface{} {
+			if val == nil || val == "" {
+				return def
+			}
+			return val
+		},
+		"first": func(s string) string {
+			if len(s) > 0 {
+				return string(s[0])
+			} else {
+				return ""
+			}
+		},
+		"urlencode": func(s string) string { return strings.ReplaceAll(s, " ", "+") },
+		"has": func(s string, list []string) bool {
+			for _, v := range list {
+				if v == s {
+					return true
+				}
+			}
+			return false
+		},
+		"floatmul": func(a float64, b int) float64 { return a * float64(b) },
+		"striptags": func(s string) string {
+			return strings.Map(func(r rune) rune {
+				if r == '<' || r == '>' {
+					return -1
+				}
+				return r
+			}, s)
+		},
+		"truncatechars": func(n int, s string) string {
+			runes := []rune(s)
+			if len(runes) > n {
+				return string(runes[:n]) + "..."
+			}
+			return s
+		},
+		"safe":             func(s string) template.HTML { return template.HTML(s) },
 		"convert_markdown": func(s string) template.HTML { return template.HTML(s) },
-		"to_json":           func(v interface{}) string { return fmt.Sprintf("%v", v) },
+		"to_json":          func(v interface{}) string { return fmt.Sprintf("%v", v) },
 		"iso8601_duration": func(minutes interface{}) string {
 			m := 0
 			switch v := minutes.(type) {
@@ -109,7 +153,7 @@ func setupTestServer(t *testing.T) (*httptest.Server, func()) {
 
 	loadTestTemplates(r)
 
-	r.GET("/", Index)
+	r.GET("/", middleware.CSRFMiddleware(), Index)
 	r.GET("/feeds/latest", LatestRecipesFeed)
 	r.GET("/recipes/:slug", RecipeDetail)
 	r.GET("/orders/track/:token", OrderTracker)
@@ -132,12 +176,11 @@ func setupTestServer(t *testing.T) (*httptest.Server, func()) {
 		csrf.GET("/profile", middleware.AuthRequired(), UserProfile)
 		csrf.POST("/profile", middleware.AuthRequired(), UserProfile)
 		csrf.GET("/cart", middleware.AuthRequired(), ViewCart)
-		csrf.GET("/cart/add/:id", middleware.AuthRequired(), AddToCart)
-		csrf.GET("/cart/remove/:id", middleware.AuthRequired(), RemoveFromCart)
+		csrf.POST("/cart/add/:id", middleware.AuthRequired(), AddToCart)
+		csrf.POST("/cart/remove/:id", middleware.AuthRequired(), RemoveFromCart)
 		csrf.POST("/cart/update/:id", middleware.AuthRequired(), UpdateCartQuantity)
 		csrf.POST("/cart/checkout", middleware.AuthRequired(), Checkout)
-		csrf.GET("/recipes/favorite/:id", middleware.AuthRequired(), ToggleFavorite)
-		csrf.GET("/recipes/rate/:id", middleware.AuthRequired(), RecipeRate)
+		csrf.POST("/recipes/favorite/:id", middleware.AuthRequired(), ToggleFavorite)
 		csrf.POST("/recipes/rate/:id", middleware.AuthRequired(), RecipeRate)
 		csrf.GET("/community", middleware.AuthRequired(), Community)
 		csrf.POST("/community", middleware.AuthRequired(), Community)
@@ -152,8 +195,8 @@ func setupTestServer(t *testing.T) (*httptest.Server, func()) {
 			admin.POST("/recipes/:id/edit", AdminRecipeEdit)
 			admin.GET("/recipes/:id/delete", AdminRecipeDelete)
 			admin.POST("/recipes/:id/delete", AdminRecipeDelete)
-			admin.GET("/recipes/:id/approve", AdminRecipeApprove)
-			admin.GET("/recipes/:id/rotate", AdminRecipeRotate)
+			admin.POST("/recipes/:id/approve", AdminRecipeApprove)
+			admin.POST("/recipes/:id/rotate", AdminRecipeRotate)
 			admin.GET("/approvals", AdminRecipeApprovalList)
 			admin.GET("/users", AdminUserList)
 			admin.GET("/users/:id/edit", AdminUserEdit)
@@ -751,8 +794,10 @@ func TestFavoritesToggle(t *testing.T) {
 
 	client := newClient()
 	loginUser(t, srv, client, "fav_toggle", "password123")
+	csrfToken := getCSRFToken(t, srv, client)
 
-	resp, err := client.Get(srv.URL + fmt.Sprintf("/recipes/favorite/%d", recipe.ID))
+	form := url.Values{"csrf_token": {csrfToken}}
+	resp, err := client.PostForm(srv.URL+fmt.Sprintf("/recipes/favorite/%d", recipe.ID), form)
 	if err != nil {
 		t.Fatalf("favorite toggle failed: %v", err)
 	}
@@ -764,7 +809,7 @@ func TestFavoritesToggle(t *testing.T) {
 		t.Error("recipe should be added to favorites")
 	}
 
-	resp2, _ := client.Get(srv.URL + fmt.Sprintf("/recipes/favorite/%d", recipe.ID))
+	resp2, _ := client.PostForm(srv.URL+fmt.Sprintf("/recipes/favorite/%d", recipe.ID), form)
 	resp2.Body.Close()
 
 	database.DB.Table("user_favorites").Where("user_id = ? AND recipe_id = ?", user.ID, recipe.ID).Count(&count)
@@ -810,8 +855,10 @@ func TestCart(t *testing.T) {
 
 	client := newClient()
 	loginUser(t, srv, client, "cart_user", "password123")
+	csrfToken := getCSRFToken(t, srv, client)
+	form := url.Values{"csrf_token": {csrfToken}}
 
-	resp, err := client.Get(srv.URL + fmt.Sprintf("/cart/add/%d", recipe.ID))
+	resp, err := client.PostForm(srv.URL+fmt.Sprintf("/cart/add/%d", recipe.ID), form)
 	if err != nil {
 		t.Fatalf("cart add failed: %v", err)
 	}
@@ -829,7 +876,7 @@ func TestCart(t *testing.T) {
 		t.Errorf("expected quantity 1, got %d", items[0].Quantity)
 	}
 
-	resp2, _ := client.Get(srv.URL + fmt.Sprintf("/cart/add/%d", recipe.ID))
+	resp2, _ := client.PostForm(srv.URL+fmt.Sprintf("/cart/add/%d", recipe.ID), form)
 	resp2.Body.Close()
 
 	database.DB.Where("user_id = ?", user.ID).Find(&items)
@@ -840,7 +887,7 @@ func TestCart(t *testing.T) {
 		t.Errorf("expected quantity 2, got %d", items[0].Quantity)
 	}
 
-	resp3, _ := client.Get(srv.URL + fmt.Sprintf("/cart/remove/%d", items[0].ID))
+	resp3, _ := client.PostForm(srv.URL+fmt.Sprintf("/cart/remove/%d", items[0].ID), form)
 	resp3.Body.Close()
 
 	database.DB.Where("user_id = ?", user.ID).Find(&items)
@@ -864,7 +911,9 @@ func TestCartCheckout(t *testing.T) {
 	loginUser(t, srv, client, "checkout_u", "password123")
 	csrfToken := getCSRFToken(t, srv, client)
 
-	resp, _ := client.Get(srv.URL + fmt.Sprintf("/cart/add/%d", recipe.ID))
+	addBody := url.Values{}
+	addBody.Set("csrf_token", csrfToken)
+	resp, _ := client.PostForm(srv.URL+fmt.Sprintf("/cart/add/%d", recipe.ID), addBody)
 	resp.Body.Close()
 
 	body := url.Values{}
@@ -1190,8 +1239,9 @@ func TestAdminRecipeApproval(t *testing.T) {
 
 	client := newClient()
 	loginUser(t, srv, client, "approve_a", "password123")
+	csrfToken := getCSRFToken(t, srv, client)
 
-	resp, err := client.Get(srv.URL + fmt.Sprintf("/dashboard/recipes/%d/approve", recipe.ID))
+	resp, err := client.PostForm(srv.URL+fmt.Sprintf("/dashboard/recipes/%d/approve", recipe.ID), url.Values{"csrf_token": {csrfToken}})
 	if err != nil {
 		t.Fatalf("approval request failed: %v", err)
 	}
@@ -1582,5 +1632,142 @@ func TestResetPasswordUsedToken(t *testing.T) {
 	database.DB.First(&user2, user.ID)
 	if bcrypt.CompareHashAndPassword([]byte(user2.Password), []byte("newpass456")) == nil {
 		t.Error("password should not be changed by a used token")
+	}
+}
+
+func TestLoginRateLimitLocksAccountAndIP(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	createTestUser(t, "limited_user", "password123", false, false, "")
+	client := newClient()
+
+	bad := url.Values{}
+	bad.Set("username", "limited_user")
+	bad.Set("password", "wrong_password")
+	for i := 0; i < 5; i++ {
+		resp, err := client.PostForm(srv.URL+"/login", bad)
+		if err != nil {
+			t.Fatalf("attempt %d failed: %v", i, err)
+		}
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("attempt %d: expected 200, got %d", i, resp.StatusCode)
+		}
+	}
+
+	// Even the correct password is refused while the account/IP is locked.
+	good := url.Values{}
+	good.Set("username", "limited_user")
+	good.Set("password", "password123")
+	resp, err := client.PostForm(srv.URL+"/login", good)
+	if err != nil {
+		t.Fatalf("locked login failed: %v", err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusTooManyRequests {
+		t.Fatalf("expected 429 while locked, got %d", resp.StatusCode)
+	}
+	if resp.Header.Get("Retry-After") == "" {
+		t.Error("locked response should include Retry-After")
+	}
+
+	// Clearing the limiter (simulating lockout expiry) allows a legitimate retry.
+	ResetLoginLimiterForTest()
+	resp2, _ := client.PostForm(srv.URL+"/login", good)
+	resp2.Body.Close()
+	if resp2.StatusCode != http.StatusFound {
+		t.Errorf("expected redirect after lock expiry, got %d", resp2.StatusCode)
+	}
+}
+
+func TestLoginNextRejectsOpenRedirect(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	createTestUser(t, "next_user", "password123", false, false, "")
+
+	client := newClient()
+	body := url.Values{}
+	body.Set("username", "next_user")
+	body.Set("password", "password123")
+	body.Set("next", "https://evil.example/phish")
+	resp, err := client.PostForm(srv.URL+"/login", body)
+	if err != nil {
+		t.Fatalf("login failed: %v", err)
+	}
+	resp.Body.Close()
+	if loc := resp.Header.Get("Location"); loc != "/" {
+		t.Errorf("external next must fall back to /, got %q", loc)
+	}
+
+	client2 := newClient()
+	body2 := url.Values{}
+	body2.Set("username", "next_user")
+	body2.Set("password", "password123")
+	body2.Set("next", "/cart")
+	resp2, _ := client2.PostForm(srv.URL+"/login", body2)
+	resp2.Body.Close()
+	if loc := resp2.Header.Get("Location"); loc != "/cart" {
+		t.Errorf("same-origin next should be preserved, got %q", loc)
+	}
+
+	// Protocol-relative URLs are rejected too.
+	client3 := newClient()
+	body3 := url.Values{}
+	body3.Set("username", "next_user")
+	body3.Set("password", "password123")
+	body3.Set("next", "//evil.example")
+	resp3, _ := client3.PostForm(srv.URL+"/login", body3)
+	resp3.Body.Close()
+	if loc := resp3.Header.Get("Location"); loc != "/" {
+		t.Errorf("protocol-relative next must fall back to /, got %q", loc)
+	}
+}
+
+func TestLoginPageSanitizesNext(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	resp, err := newClient().Get(srv.URL + "/login?next=https%3A%2F%2Fevil.example")
+	if err != nil {
+		t.Fatalf("login page failed: %v", err)
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	if strings.Contains(string(body), "evil.example") {
+		t.Error("login page must not render an external next target")
+	}
+}
+
+func TestConvertedMutationRoutesRequirePOSTAndCSRF(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	user := createTestUser(t, "csrf_mut", "password123", false, false, "")
+	adminUser := createTestUser(t, "csrf_mut_a", "password123", true, true, "admin")
+	recipe := createTestRecipe(t, "CsrfMutation", adminUser, true)
+
+	client := newClient()
+	loginUser(t, srv, client, "csrf_mut", "password123")
+
+	// GET no longer mutates (route not registered).
+	getResp, _ := client.Get(srv.URL + fmt.Sprintf("/recipes/favorite/%d", recipe.ID))
+	getResp.Body.Close()
+	var count int64
+	database.DB.Table("user_favorites").Where("user_id = ? AND recipe_id = ?", user.ID, recipe.ID).Count(&count)
+	if count != 0 {
+		t.Fatal("GET favorite route must not mutate state")
+	}
+
+	// POST without a CSRF token is rejected.
+	postResp, _ := client.PostForm(srv.URL+fmt.Sprintf("/recipes/favorite/%d", recipe.ID), url.Values{})
+	postResp.Body.Close()
+	if postResp.StatusCode != http.StatusForbidden {
+		t.Errorf("expected 403 without CSRF token, got %d", postResp.StatusCode)
+	}
+	database.DB.Table("user_favorites").Where("user_id = ? AND recipe_id = ?", user.ID, recipe.ID).Count(&count)
+	if count != 0 {
+		t.Fatal("CSRF-rejected request must not mutate state")
 	}
 }

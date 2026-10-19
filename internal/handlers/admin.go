@@ -383,7 +383,10 @@ func AdminRecipeRotate(c *gin.Context) {
 		return
 	}
 
-	direction := c.Query("direction")
+	direction := c.PostForm("direction")
+	if direction == "" {
+		direction = c.Query("direction")
+	}
 	clockwise := direction != "ccw"
 
 	imagePath := strings.TrimPrefix(recipe.Image, "/media/")
@@ -644,7 +647,9 @@ func AdminSettings(c *gin.Context) {
 		setting.Email = c.PostForm("email")
 		setting.LogLevel = c.PostForm("log_level")
 		setting.GotifyURL = c.PostForm("gotify_url")
-		setting.GotifyToken = c.PostForm("gotify_token")
+		if token := c.PostForm("gotify_token"); token != "" {
+			setting.GotifyToken = token
+		}
 		setting.OTelEndpoint = c.PostForm("otel_endpoint")
 		setting.OTelEnabled = c.PostForm("otel_enabled") == "on"
 		setting.SMTPEnabled = c.PostForm("smtp_enabled") == "on"

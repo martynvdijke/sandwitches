@@ -11,7 +11,7 @@
 <td><a href="/recipes/{{ .Recipe.Slug }}">{{ .Recipe.Title }}</a></td>
 <td><form method="post" action="/cart/update/{{ .ID }}" style="display:flex;align-items:center;gap:4px">{{ $.csrf_token }}<input type="number" name="quantity" value="{{ .Quantity }}" min="0" style="width:60px" onchange="this.form.submit()"></form></td>
 <td>{{ printf "%.2f" .TotalPrice }} &euro;</td>
-<td><a href="/cart/remove/{{ .ID }}" class="button circle transparent"><i>delete</i></a></td>
+<td><form method="post" action="/cart/remove/{{ .ID }}" style="display:inline">{{ $.csrf_token }}<button type="submit" class="button circle transparent"><i>delete</i></button></form></td>
 </tr>{{ end }}</tbody>
 </table>
 </div>
