@@ -126,6 +126,10 @@ func oidcRandHex(n int) (string, error) {
 	return hex.EncodeToString(b), nil
 }
 
+// oidcLoginCookieMaxAge gives users enough time to complete a password, MFA
+// and consent flow before the temporary OIDC cookies expire.
+const oidcLoginCookieMaxAge = 15 * 60
+
 func setOIDCCookie(c *gin.Context, name, value string, maxAge int) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	secure := os.Getenv("DEBUG") != "true"
@@ -160,11 +164,11 @@ func OIDCLogin(c *gin.Context) {
 		return
 	}
 	verifier := oauth2.GenerateVerifier()
-	setOIDCCookie(c, "oidc_state", state, 300)
-	setOIDCCookie(c, "oidc_nonce", nonce, 300)
-	setOIDCCookie(c, "oidc_verifier", verifier, 300)
+	setOIDCCookie(c, "oidc_state", state, oidcLoginCookieMaxAge)
+	setOIDCCookie(c, "oidc_nonce", nonce, oidcLoginCookieMaxAge)
+	setOIDCCookie(c, "oidc_verifier", verifier, oidcLoginCookieMaxAge)
 	if c.Query("mobile") == "1" {
-		setOIDCCookie(c, "oidc_mobile", "1", 300)
+		setOIDCCookie(c, "oidc_mobile", "1", oidcLoginCookieMaxAge)
 	} else {
 		setOIDCCookie(c, "oidc_mobile", "", -1)
 	}

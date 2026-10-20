@@ -1,0 +1,1 @@
+Extends the OIDC sign-in window to 15 minutes, so slower logins and consent screens complete without expiring.

@@ -170,6 +170,14 @@ func TestMobileOIDCFlowEndToEnd(t *testing.T) {
 	if len(loginCookies) == 0 {
 		t.Fatal("login did not set OIDC cookies")
 	}
+	for _, c := range loginCookies {
+		switch c.Name {
+		case "oidc_state", "oidc_nonce", "oidc_verifier", "oidc_mobile":
+			if c.MaxAge != oidcLoginCookieMaxAge {
+				t.Fatalf("%s MaxAge = %d, want %d", c.Name, c.MaxAge, oidcLoginCookieMaxAge)
+			}
+		}
+	}
 
 	// IdP redirects back to the web callback with a code.
 	noRedirect := &http.Client{CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
