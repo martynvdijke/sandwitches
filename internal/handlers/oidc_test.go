@@ -22,7 +22,7 @@ func setupOIDCTestDB(t *testing.T) {
 		t.Fatalf("open db: %v", err)
 	}
 	database.DB = db
-	_ = db.AutoMigrate(&database.User{}, &database.Group{})
+	_ = db.AutoMigrate(&database.User{}, &database.Group{}, &database.MobileAuthCode{})
 	db.Create(&database.Group{Name: "community"})
 	db.Create(&database.Group{Name: "admin"})
 }
@@ -144,6 +144,33 @@ func TestOIDCCallbackBadState(t *testing.T) {
 	}
 	if w2.Header().Get("Location") != "/login?error=oidc_state" {
 		t.Fatalf("location %q", w2.Header().Get("Location"))
+	}
+}
+
+func TestOIDCCallbackMobileExpiredRedirectsToApp(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	setupOIDCTestDB(t)
+	t.Setenv("OIDC_ENABLED", "true")
+	t.Setenv("OIDC_ISSUER_URL", "https://authelia.vandijke.xyz")
+	t.Setenv("OIDC_CLIENT_ID", "sandwitches")
+	t.Setenv("OIDC_CLIENT_SECRET", "secret")
+	t.Setenv("OIDC_REDIRECT_URL", "https://sandwitches.vandijke.xyz/api/auth/oidc/callback")
+	resetOIDCCacheForTest()
+
+	store := cookie.NewStore([]byte("test-secret-12345678901234567890"))
+	r := gin.New()
+	r.Use(sessions.Sessions("sandwitches_session", store))
+	r.GET("/api/auth/oidc/callback", OIDCCallback)
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/api/auth/oidc/callback?code=abc&state=xyz", nil)
+	req.AddCookie(&http.Cookie{Name: "oidc_mobile", Value: "1"})
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusFound {
+		t.Fatalf("expected 302 got %d", w.Code)
+	}
+	if loc := w.Header().Get("Location"); loc != "sandwitches://auth?error=oidc_expired" {
+		t.Fatalf("mobile error location %q", loc)
 	}
 }
 

@@ -4,4 +4,7 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Allow local HTTP servers (e.g. http://127.0.0.1:8080 via adb reverse)
+         while developing. Release builds keep Android's cleartext block. -->
+    <application android:usesCleartextTraffic="true" />
 </manifest>

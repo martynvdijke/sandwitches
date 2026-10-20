@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
@@ -66,21 +67,64 @@ class _LoginState extends ConsumerState<LoginScreen> {
     if (base.isEmpty) { setState(()=> error='No server URL'); return; }
     setState(()=> oidcLoading=true);
     try {
-      final url = '$base/login/oidc';
-      // Use a dummy callback scheme; server should redirect to it
       const callbackScheme = 'sandwitches';
-      await FlutterWebAuth2.authenticate(url: url, callbackUrlScheme: callbackScheme);
-      // After flow, check session
+      final result = await FlutterWebAuth2.authenticate(
+        url: '$base/login/oidc?mobile=1',
+        callbackUrlScheme: callbackScheme,
+      );
+      final callback = Uri.parse(result);
+      if (callback.scheme != callbackScheme || callback.host != 'auth') {
+        setState(()=> error='OIDC login returned an unexpected response');
+        return;
+      }
+      final oidcError = callback.queryParameters['error'];
+      if (oidcError != null && oidcError.isNotEmpty) {
+        setState(()=> error=_oidcErrorMessage(oidcError));
+        return;
+      }
+      final code = callback.queryParameters['code'];
+      if (code == null || code.isEmpty) {
+        setState(()=> error='OIDC login did not return a code');
+        return;
+      }
       final dio = ref.read(dioProvider);
+      final exchange = await dio.post('$base/api/auth/mobile/exchange',
+        data: {'code': code},
+        options: Options(contentType: Headers.jsonContentType, followRedirects: false),
+      );
+      if (exchange.statusCode != 200) {
+        setState(()=> error='OIDC login could not be completed');
+        return;
+      }
       final me = await dio.get('$base/api/v1/me');
       if (me.statusCode==200) {
         if (mounted) context.go('/');
       } else {
         setState(()=> error='OIDC login failed');
       }
-    } catch(e){
-      setState(()=> error='OIDC error: $e');
+    } on PlatformException catch(e) {
+      if (e.code != 'CANCELED') {
+        setState(()=> error='OIDC login failed. Please try again.');
+      }
+    } catch(_) {
+      setState(()=> error='OIDC login failed. Please try again.');
     } finally { if(mounted) setState(()=> oidcLoading=false); }
+  }
+
+  String _oidcErrorMessage(String code) {
+    switch (code) {
+      case 'oidc_expired':
+        return 'OIDC login expired. Please try again.';
+      case 'oidc_state':
+      case 'oidc_nonce':
+        return 'OIDC login could not be verified. Please try again.';
+      case 'oidc_email':
+        return 'Your OIDC account needs a verified email address.';
+      case 'oidc_handoff':
+        return 'OIDC login could not be handed to the app. Please try again.';
+      default:
+        return 'OIDC login failed ($code)';
+    }
   }
 
   Future<void> logout() async {

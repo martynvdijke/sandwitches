@@ -163,10 +163,16 @@ func OIDCLogin(c *gin.Context) {
 	setOIDCCookie(c, "oidc_state", state, 300)
 	setOIDCCookie(c, "oidc_nonce", nonce, 300)
 	setOIDCCookie(c, "oidc_verifier", verifier, 300)
+	if c.Query("mobile") == "1" {
+		setOIDCCookie(c, "oidc_mobile", "1", 300)
+	} else {
+		setOIDCCookie(c, "oidc_mobile", "", -1)
+	}
 	url := p.oauth.AuthCodeURL(state,
 		oauth2.S256ChallengeOption(verifier),
 		oauth2.SetAuthURLParam("nonce", nonce),
 	)
+	c.Header("Cache-Control", "no-store")
 	c.Redirect(http.StatusFound, url)
 }
 
@@ -182,13 +188,20 @@ type oidcClaims struct {
 func clearOIDCCookies(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	secure := os.Getenv("DEBUG") != "true"
-	for _, n := range []string{"oidc_state", "oidc_nonce", "oidc_verifier"} {
+	for _, n := range []string{"oidc_state", "oidc_nonce", "oidc_verifier", "oidc_mobile"} {
 		c.SetCookie(n, "", -1, "/", "", secure, true)
 	}
 }
 
 func oidcFail(c *gin.Context, msg string) {
+	mobile := isMobileOIDC(c)
 	clearOIDCCookies(c)
+	c.Header("Cache-Control", "no-store")
+	if mobile {
+		c.Redirect(http.StatusFound, mobileAuthCallbackURL+"?error="+msg)
+		c.Abort()
+		return
+	}
 	c.Redirect(http.StatusFound, "/login?error="+msg)
 	c.Abort()
 }
@@ -270,7 +283,18 @@ func OIDCCallback(c *gin.Context) {
 		oidcFail(c, "oidc_user")
 		return
 	}
+	mobile := isMobileOIDC(c)
 	clearOIDCCookies(c)
+	c.Header("Cache-Control", "no-store")
+	if mobile {
+		code, err := createMobileAuthCode(u.ID)
+		if err != nil {
+			c.Redirect(http.StatusFound, mobileAuthCallbackURL+"?error=oidc_handoff")
+			return
+		}
+		c.Redirect(http.StatusFound, mobileAuthCallbackURL+"?code="+code)
+		return
+	}
 	// Regenerate session to prevent fixation (clear pre-existing session)
 	session := sessions.Default(c)
 	session.Clear()
