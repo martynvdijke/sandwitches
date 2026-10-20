@@ -1,3 +1,10 @@
+## [3.14.1](https://github.com/martynvdijke/sandwitches/compare/v3.14.0...v3.14.1) (2026-10-20)
+
+
+### Bug Fixes
+
+* **auth:** extend OIDC login window to 15 minutes ([#202](https://github.com/martynvdijke/sandwitches/issues/202)) ([c5057da](https://github.com/martynvdijke/sandwitches/commit/c5057daba21a669d5acfffcaac30ec5828b9d15f))
+
 # [3.14.0](https://github.com/martynvdijke/sandwitches/compare/v3.13.5...v3.14.0) (2026-10-20)
 
 
