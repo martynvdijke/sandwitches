@@ -1,3 +1,10 @@
+# [3.14.0](https://github.com/martynvdijke/sandwitches/compare/v3.13.5...v3.14.0) (2026-10-20)
+
+
+### Features
+
+* **mobile:** signed releases, native OIDC login and F-Droid readiness ([#201](https://github.com/martynvdijke/sandwitches/issues/201)) ([ddd1869](https://github.com/martynvdijke/sandwitches/commit/ddd1869f936fe4d9c690ce74d5f9b560972dc4be))
+
 ## [3.13.5](https://github.com/martynvdijke/sandwitches/compare/v3.13.4...v3.13.5) (2026-10-18)
 
 ## [3.13.4](https://github.com/martynvdijke/sandwitches/compare/v3.13.3...v3.13.4) (2026-10-18)
