@@ -2,8 +2,8 @@ package database
 
 import (
 	"fmt"
-	"os"
 	"log"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -70,6 +70,7 @@ func Init(cfg *config.Config) {
 		&User{},
 		&Group{},
 		&PasswordResetToken{},
+		&MobileAuthCode{},
 		&Tag{},
 		&Recipe{},
 		&Rating{},
@@ -170,13 +171,18 @@ func GetEmailConfig() EmailConfig {
 	}
 	// env fallback
 	return EmailConfig{
-		Enabled:   os.Getenv("SEND_EMAIL") == "true",
-		Host:      os.Getenv("SMTP_HOST"),
-		Port:      os.Getenv("SMTP_PORT"),
-		User:      os.Getenv("SMTP_USER"),
-		Password:  os.Getenv("SMTP_PASSWORD"),
-		FromEmail: func() string { if v := os.Getenv("SMTP_FROM_EMAIL"); v != "" { return v }; return "noreply@sandwitches.local" }(),
-		UseTLS:    false,
+		Enabled:  os.Getenv("SEND_EMAIL") == "true",
+		Host:     os.Getenv("SMTP_HOST"),
+		Port:     os.Getenv("SMTP_PORT"),
+		User:     os.Getenv("SMTP_USER"),
+		Password: os.Getenv("SMTP_PASSWORD"),
+		FromEmail: func() string {
+			if v := os.Getenv("SMTP_FROM_EMAIL"); v != "" {
+				return v
+			}
+			return "noreply@sandwitches.local"
+		}(),
+		UseTLS: false,
 	}
 }
 

@@ -1,0 +1,15 @@
+Sandwitches is a native Android client for a self-hosted Sandwitches recipe server.
+
+Browse and search sandwich recipes, read ingredients and step-by-step instructions, rate recipes, keep favourites, place orders and follow their progress. The app talks to your own Sandwitches instance, so your recipes and account stay on hardware you control.
+
+Features:
+<ul>
+<li>Browse the community recipe collection</li>
+<li>Step-by-step cooking mode and an e-ink friendly reading view</li>
+<li>Ratings, reviews and favourites</li>
+<li>Shopping cart and order tracking</li>
+<li>Sign in against your own server</li>
+<li>Works with any Sandwitches server URL, including a local development instance</li>
+</ul>
+
+You need access to a Sandwitches server to use this app. The server is free software released under the MIT licence and lives in the same source repository as the app.

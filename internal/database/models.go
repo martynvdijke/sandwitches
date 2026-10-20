@@ -15,51 +15,51 @@ import (
 
 // Setting is a singleton model (only one row).
 type Setting struct {
-	ID               uint   `gorm:"primaryKey"`
-	SiteName         string `gorm:"size:255;default:Sandwitches"`
-	SiteDescription  string
-	Email            string
+	ID                uint   `gorm:"primaryKey"`
+	SiteName          string `gorm:"size:255;default:Sandwitches"`
+	SiteDescription   string
+	Email             string
 	AIConnectionPoint string
-	AIModel          string
-	AIAPIKey         string
-	LogLevel         string `gorm:"size:10;default:INFO"`
-	GotifyURL        string
-	GotifyToken      string
-	OTelEndpoint     string `gorm:"size:255"`
-	OTelEnabled      bool   `gorm:"default:false"`
-	SMTPEnabled      bool   `gorm:"default:false"`
-	SMTPHost         string `gorm:"size:255"`
-	SMTPPort         string `gorm:"size:10"`
-	SMTPUser         string `gorm:"size:255"`
-	SMTPPassword     string `gorm:"size:255"`
-	SMTPFromEmail    string `gorm:"size:255"`
-	SMTPTLS          bool   `gorm:"default:false"`
+	AIModel           string
+	AIAPIKey          string
+	LogLevel          string `gorm:"size:10;default:INFO"`
+	GotifyURL         string
+	GotifyToken       string
+	OTelEndpoint      string `gorm:"size:255"`
+	OTelEnabled       bool   `gorm:"default:false"`
+	SMTPEnabled       bool   `gorm:"default:false"`
+	SMTPHost          string `gorm:"size:255"`
+	SMTPPort          string `gorm:"size:10"`
+	SMTPUser          string `gorm:"size:255"`
+	SMTPPassword      string `gorm:"size:255"`
+	SMTPFromEmail     string `gorm:"size:255"`
+	SMTPTLS           bool   `gorm:"default:false"`
 }
 
 func (Setting) TableName() string { return "settings" }
 
 type User struct {
-	ID           uint      `gorm:"primaryKey"`
-	Username     string    `gorm:"size:150;uniqueIndex;not null"`
-	Email        string    `gorm:"size:254"`
-	Password     string    `gorm:"size:128;not null"`
-	FirstName    string    `gorm:"size:150"`
-	LastName     string    `gorm:"size:150"`
-	Avatar       string
-	Bio          string
-	Language     string `gorm:"size:10;default:en"`
-	Theme        string `gorm:"size:10;default:light"`
-	IsStaff      bool   `gorm:"default:false"`
-	IsActive     bool   `gorm:"default:true"`
-	IsSuperuser  bool   `gorm:"default:false"`
-	OIDCSub      string `gorm:"column:oidc_sub;size:255;uniqueIndex:idx_users_oidc_sub,where:oidc_sub <> ''"`
-	DateJoined   time.Time
-	LastLogin    *time.Time
-	Favorites    []Recipe  `gorm:"many2many:user_favorites;"`
-	Recipes      []Recipe  `gorm:"foreignKey:UploadedByID"`
-	Orders       []Order   `gorm:"foreignKey:UserID"`
-	Ratings      []Rating  `gorm:"foreignKey:UserID"`
-	CartItems    []CartItem `gorm:"foreignKey:UserID"`
+	ID          uint   `gorm:"primaryKey"`
+	Username    string `gorm:"size:150;uniqueIndex;not null"`
+	Email       string `gorm:"size:254"`
+	Password    string `gorm:"size:128;not null"`
+	FirstName   string `gorm:"size:150"`
+	LastName    string `gorm:"size:150"`
+	Avatar      string
+	Bio         string
+	Language    string `gorm:"size:10;default:en"`
+	Theme       string `gorm:"size:10;default:light"`
+	IsStaff     bool   `gorm:"default:false"`
+	IsActive    bool   `gorm:"default:true"`
+	IsSuperuser bool   `gorm:"default:false"`
+	OIDCSub     string `gorm:"column:oidc_sub;size:255;uniqueIndex:idx_users_oidc_sub,where:oidc_sub <> ''"`
+	DateJoined  time.Time
+	LastLogin   *time.Time
+	Favorites   []Recipe   `gorm:"many2many:user_favorites;"`
+	Recipes     []Recipe   `gorm:"foreignKey:UploadedByID"`
+	Orders      []Order    `gorm:"foreignKey:UserID"`
+	Ratings     []Rating   `gorm:"foreignKey:UserID"`
+	CartItems   []CartItem `gorm:"foreignKey:UserID"`
 }
 
 type Group struct {
@@ -81,6 +81,18 @@ type PasswordResetToken struct {
 	UsedAt    *time.Time
 }
 
+// MobileAuthCode is a short-lived, single-use code that hands a completed OIDC
+// login in the system browser back to the mobile app. Only the SHA-256 hash of
+// the code is stored. The app exchanges it for a normal session cookie.
+type MobileAuthCode struct {
+	ID        uint   `gorm:"primaryKey"`
+	UserID    uint   `gorm:"index;not null"`
+	CodeHash  string `gorm:"size:64;uniqueIndex;not null"`
+	CreatedAt time.Time
+	ExpiresAt time.Time
+	UsedAt    *time.Time
+}
+
 type Tag struct {
 	ID   uint   `gorm:"primaryKey"`
 	Name string `gorm:"size:50;uniqueIndex;not null"`
@@ -95,16 +107,16 @@ func (t *Tag) BeforeSave(tx *gorm.DB) error {
 }
 
 type Recipe struct {
-	ID               uint      `gorm:"primaryKey"`
-	Title            string    `gorm:"size:255;uniqueIndex;not null"`
-	Slug             string    `gorm:"size:255;uniqueIndex"`
+	ID               uint   `gorm:"primaryKey"`
+	Title            string `gorm:"size:255;uniqueIndex;not null"`
+	Slug             string `gorm:"size:255;uniqueIndex"`
 	Description      string
 	Ingredients      string
 	Instructions     string
-	Servings         int       `gorm:"default:1"`
-	Price            *float64  `gorm:"type:decimal(6,2)"`
+	Servings         int      `gorm:"default:1"`
+	Price            *float64 `gorm:"type:decimal(6,2)"`
 	UploadedByID     *uint
-	UploadedBy       *User     `gorm:"foreignKey:UploadedByID"`
+	UploadedBy       *User `gorm:"foreignKey:UploadedByID"`
 	Image            string
 	ImageThumbnail   string
 	ImageSmall       string
@@ -113,13 +125,13 @@ type Recipe struct {
 	IsHighlighted    bool `gorm:"default:false"`
 	IsApproved       bool `gorm:"default:false"`
 	MaxDailyOrders   *int
-	DailyOrdersCount int       `gorm:"default:0"`
+	DailyOrdersCount int `gorm:"default:0"`
 	PrepTime         *int
 	CookTime         *int
 	Calories         *int
-	Tags             []Tag     `gorm:"many2many:recipe_tags;"`
-	FavoritedBy      []User    `gorm:"many2many:user_favorites;"`
-	Ratings          []Rating  `gorm:"foreignKey:RecipeID"`
+	Tags             []Tag    `gorm:"many2many:recipe_tags;"`
+	FavoritedBy      []User   `gorm:"many2many:user_favorites;"`
+	Ratings          []Rating `gorm:"foreignKey:RecipeID"`
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 }
@@ -164,10 +176,10 @@ type Order struct {
 	ID            uint `gorm:"primaryKey"`
 	UserID        uint
 	User          User
-	Status        string    `gorm:"size:20;default:PENDING"`
-	Completed     bool      `gorm:"default:false"`
-	TotalPrice    float64   `gorm:"type:decimal(6,2);default:0"`
-	TrackingToken string    `gorm:"type:uuid;uniqueIndex;not null"`
+	Status        string      `gorm:"size:20;default:PENDING"`
+	Completed     bool        `gorm:"default:false"`
+	TotalPrice    float64     `gorm:"type:decimal(6,2);default:0"`
+	TrackingToken string      `gorm:"type:uuid;uniqueIndex;not null"`
 	Items         []OrderItem `gorm:"foreignKey:OrderID"`
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
@@ -196,7 +208,7 @@ type CartItem struct {
 	User      User
 	RecipeID  uint `gorm:"uniqueIndex:idx_cart_user_recipe"`
 	Recipe    Recipe
-	Quantity  int     `gorm:"default:1"`
+	Quantity  int `gorm:"default:1"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

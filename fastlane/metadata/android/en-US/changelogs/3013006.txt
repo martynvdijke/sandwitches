@@ -1,0 +1,1 @@
+Release builds are now signed with a dedicated key, network access works in release builds, and version codes increase with every release.
