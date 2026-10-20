@@ -1,3 +1,11 @@
+## [3.14.2](https://github.com/martynvdijke/sandwitches/compare/v3.14.1...v3.14.2) (2026-10-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency cached_network_image to v4 ([#195](https://github.com/martynvdijke/sandwitches/issues/195)) ([0ec906d](https://github.com/martynvdijke/sandwitches/commit/0ec906daaf760938c3129c4daf215b0c75c3de1f))
+* **deps:** update dependency flutter_secure_storage to v11 ([#198](https://github.com/martynvdijke/sandwitches/issues/198)) ([0ee67fc](https://github.com/martynvdijke/sandwitches/commit/0ee67fcbfed0f62eadda1cba24bc1e93d860906a))
+
 ## [3.14.1](https://github.com/martynvdijke/sandwitches/compare/v3.14.0...v3.14.1) (2026-10-20)
 
 
