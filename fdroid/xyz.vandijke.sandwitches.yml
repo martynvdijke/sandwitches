@@ -14,9 +14,9 @@ RepoType: git
 Repo: https://github.com/martynvdijke/sandwitches.git
 
 Builds:
-  - versionName: 3.14.0
-    versionCode: 3014000
-    commit: v3.14.0
+  - versionName: 3.14.1
+    versionCode: 3014001
+    commit: v3.14.1
     subdir: mobile
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
@@ -35,5 +35,5 @@ Builds:
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
 UpdateCheckData: mobile/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 3.14.0
-CurrentVersionCode: 3014000
+CurrentVersion: 3.14.1
+CurrentVersionCode: 3014001
