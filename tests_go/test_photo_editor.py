@@ -63,7 +63,7 @@ def test_new_file_edit_apply_creates_recipe(page: Page, go_server, device_name):
     page.locator("[data-editor-apply]").click()
     expect(overlay).to_be_hidden()
 
-    page.locator("button[type='submit']").click()
+    page.locator("button:has-text('Save')").click()
     page.wait_for_url(f"{go_server.url}/dashboard/recipes", timeout=10000)
     expect(page.locator("tbody")).to_contain_text(f"Edited {device_name}")
 
@@ -78,7 +78,7 @@ def test_existing_photo_edit_and_cancel(page: Page, go_server, device_name):
         "input[name='image']",
         {"name": "sandwich.png", "mimeType": "image/png", "buffer": _png_bytes()},
     )
-    page.locator("button[type='submit']").click()
+    page.locator("button:has-text('Save')").click()
     page.wait_for_url(f"{go_server.url}/dashboard/recipes", timeout=10000)
 
     slug = page.locator("tbody td a").first.get_attribute("href").rstrip("/").rsplit("/", 1)[-1]
@@ -102,7 +102,7 @@ def test_existing_photo_edit_and_cancel(page: Page, go_server, device_name):
     page.locator("[data-reset]").click()
     page.locator("[data-editor-apply]").click()
     expect(overlay).to_be_hidden()
-    page.locator("button[type='submit']").click()
+    page.locator("button:has-text('Save')").click()
     page.wait_for_url(f"{go_server.url}/dashboard/recipes", timeout=10000)
 
 
@@ -120,7 +120,7 @@ def test_nojs_fallback_hides_editor(page: Page, go_server, browser):
             "input[name='image']",
             {"name": "sandwich.png", "mimeType": "image/png", "buffer": _png_bytes()},
         )
-        nojs.locator("button[type='submit']").click()
+        nojs.locator("button:has-text('Save')").click()
         nojs.wait_for_url(f"{go_server.url}/dashboard/recipes", timeout=10000)
         expect(nojs.locator("tbody")).to_contain_text("NoJS Sandwich")
     finally:
