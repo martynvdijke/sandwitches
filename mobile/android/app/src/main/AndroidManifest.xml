@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required for the app to talk to the Sandwitches API in release builds. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="sandwitches"
         android:name="${applicationName}"

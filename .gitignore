@@ -149,5 +149,13 @@ site/
 # Flutter Android launcher icons are required build inputs (see *.png above)
 !mobile/android/app/src/main/res/mipmap-*/ic_launcher.png
 
+# Fastlane/F-Droid store graphics
+!fastlane/metadata/android/**/*.png
+
 # Generated release APK built by semantic-release prepareCmd
 sandwitches-*-android.apk
+
+# Android signing material (never commit)
+*.jks
+*.keystore
+key.properties

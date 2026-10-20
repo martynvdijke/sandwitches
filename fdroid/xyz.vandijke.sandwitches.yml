@@ -1,0 +1,39 @@
+Categories:
+  - Diet
+License: MIT
+AuthorName: Martyn van Dijke
+WebSite: https://sandwitches.vandijke.xyz
+SourceCode: https://github.com/martynvdijke/sandwitches
+IssueTracker: https://github.com/martynvdijke/sandwitches/issues
+Changelog: https://github.com/martynvdijke/sandwitches/releases
+
+Name: Sandwitches
+AutoName: Sandwitches
+
+RepoType: git
+Repo: https://github.com/martynvdijke/sandwitches.git
+
+Builds:
+  - versionName: 3.13.6
+    versionCode: 3013006
+    commit: v3.13.6
+    subdir: mobile
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.47.7
+    prebuild:
+      - sed -i '/signingConfig = /d' android/app/build.gradle.kts
+      - export PUB_CACHE=$(pwd)/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter build apk --release
+    scandelete:
+      - .pub-cache
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+UpdateCheckData: mobile/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 3.13.6
+CurrentVersionCode: 3013006
