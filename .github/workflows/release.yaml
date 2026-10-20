@@ -7,7 +7,10 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel an in-flight release: semantic-release pushes the tag and
+  # GitHub release before the Docker build/push, so a mid-run cancel can leave
+  # a published version with no images. Newer pushes queue instead.
+  cancel-in-progress: false
 
 jobs:
   ci:
@@ -166,13 +169,13 @@ jobs:
           docker push ghcr.io/martynvdijke/sandwitches:$VERSION
 
   notify:
-    needs: [ci, release]
+    needs: [ci, android-check, release]
     if: ${{ always() }}
     name: Gotify Notification
     runs-on: ubuntu-latest
     steps:
       - name: Release Published Notification
-        if: needs.ci.result == 'success' && needs.release.result == 'success' && needs.release.outputs.new_release_published == 'true'
+        if: needs.ci.result == 'success' && needs.android-check.result == 'success' && needs.release.result == 'success' && needs.release.outputs.new_release_published == 'true'
         uses: eikendev/gotify-action@cb63800546f25c393ab96f09d12a094138c514f4 # master
         with:
           gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
@@ -181,7 +184,7 @@ jobs:
           notification_message: '${{ github.repository }}: Version ${{ needs.release.outputs.new_release_version }} was successfully released.'
 
       - name: No Release Needed Notification
-        if: needs.ci.result == 'success' && needs.release.result == 'success' && needs.release.outputs.new_release_published != 'true'
+        if: needs.ci.result == 'success' && needs.android-check.result == 'success' && needs.release.result == 'success' && needs.release.outputs.new_release_published != 'true'
         uses: eikendev/gotify-action@cb63800546f25c393ab96f09d12a094138c514f4 # master
         with:
           gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
@@ -190,7 +193,7 @@ jobs:
           notification_message: 'Workflow passed but no new release was published.'
 
       - name: Failure Notification
-        if: needs.ci.result != 'success' || needs.release.result != 'success'
+        if: needs.ci.result == 'failure' || needs.android-check.result == 'failure' || needs.release.result == 'failure'
         uses: eikendev/gotify-action@cb63800546f25c393ab96f09d12a094138c514f4 # master
         with:
           gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
