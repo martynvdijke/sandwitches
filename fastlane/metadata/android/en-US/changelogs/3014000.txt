@@ -1,0 +1,1 @@
+Sign in with OIDC directly in the app, a refreshed launcher icon and splash screen, and properly signed release builds.

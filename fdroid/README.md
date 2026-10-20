@@ -5,8 +5,8 @@ This directory stages the metadata that belongs in the
 built and signed by F-Droid; the APK attached to a GitHub release is not
 uploaded anywhere.
 
-The metadata targets `v3.13.6`, the first release that contains the F-Droid
-readiness fixes. Do not submit before that tag exists and the release APK is
+The metadata targets `v3.14.0`, the first release that contains the F-Droid
+readiness fixes and native OIDC login. Do not submit before that tag exists and the release APK is
 published.
 
 ## Before submitting
@@ -14,7 +14,7 @@ published.
 The release must contain:
 
 - `INTERNET` permission in the release manifest
-- a version code derived from the semantic version (`3.13.6` -> `3013006`)
+- a version code derived from the semantic version (`3.14.0` -> `3014000`)
 - a Flutter version pinned by `.fvmrc`
 - Fastlane metadata under `fastlane/metadata/android/en-US/`
 
