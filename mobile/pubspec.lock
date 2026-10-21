@@ -133,10 +133,10 @@ packages:
     dependency: transitive
     description:
       name: desktop_webview_window
-      sha256: "57cf20d81689d5cbb1adfd0017e96b669398a669d927906073b0e42fc64111c0"
+      sha256: "20c3ac0f0404f72a0ce76f6f729f4dc656c04747f42e0a38d9553855b1d6012e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.3"
+    version: "0.3.2"
   dio:
     dependency: "direct main"
     description:
@@ -332,18 +332,18 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_web_auth_2
-      sha256: "3c14babeaa066c371f3a743f204dd0d348b7d42ffa6fae7a9847a521aff33696"
+      sha256: a7655829251ee63aae64a748f8512f36670d8eba4657b0055cdf5ef304a9d164
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.0"
+    version: "5.1.0"
   flutter_web_auth_2_platform_interface:
     dependency: transitive
     description:
       name: flutter_web_auth_2_platform_interface
-      sha256: c63a472c8070998e4e422f6b34a17070e60782ac442107c70000dd1bed645f4d
+      sha256: ba0fbba55bffb47242025f96852ad1ffba34bc451568f56ef36e613612baffab
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.0"
+    version: "5.0.0"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
