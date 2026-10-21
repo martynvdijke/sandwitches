@@ -1,3 +1,11 @@
+## [3.14.3](https://github.com/martynvdijke/sandwitches/compare/v3.14.2...v3.14.3) (2026-10-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency cupertino_icons to v2 ([#196](https://github.com/martynvdijke/sandwitches/issues/196)) ([409a771](https://github.com/martynvdijke/sandwitches/commit/409a771802cc9a7104e8facc4a5302e9b82f96ab))
+* **deps:** update dependency flutter_web_auth_2 to v5 ([#199](https://github.com/martynvdijke/sandwitches/issues/199)) ([5a68a62](https://github.com/martynvdijke/sandwitches/commit/5a68a627dae90e2bee31ac6f97f5f73f748f3c9f))
+
 ## [3.14.2](https://github.com/martynvdijke/sandwitches/compare/v3.14.1...v3.14.2) (2026-10-20)
 
 
