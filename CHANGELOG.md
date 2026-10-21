@@ -1,3 +1,10 @@
+## [3.14.4](https://github.com/martynvdijke/sandwitches/compare/v3.14.3...v3.14.4) (2026-10-21)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#190](https://github.com/martynvdijke/sandwitches/issues/190)) ([aa20515](https://github.com/martynvdijke/sandwitches/commit/aa20515fc082bf2f5ae10ccd8e2e57f3a2bb7692))
+
 ## [3.14.3](https://github.com/martynvdijke/sandwitches/compare/v3.14.2...v3.14.3) (2026-10-21)
 
 
