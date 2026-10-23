@@ -4,6 +4,11 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to finish publishing (e.g. v3.14.7)"
+        required: false
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -69,8 +74,8 @@ jobs:
       id-token: write
 
     outputs:
-      new_release_published: ${{ steps.tagcheck.outputs.tag != '' && 'true' || steps.semantic.outputs.new_release_published }}
-      new_release_version: ${{ steps.tagcheck.outputs.tag || steps.semantic.outputs.new_release_version }}
+      new_release_published: ${{ steps.resolve.outputs.version != '' && 'true' || 'false' }}
+      new_release_version: ${{ steps.resolve.outputs.version }}
 
     steps:
       - name: Login to Docker Hub
@@ -90,6 +95,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          # A workflow_dispatch can point at an already-tagged commit to
+          # finish a release that failed after pushing its tag.
+          ref: ${{ inputs.tag || github.sha }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
@@ -116,7 +124,6 @@ jobs:
           echo "tag=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       - name: Prepare Android signing key
-        if: steps.tagcheck.outputs.tag == ''
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -139,6 +146,13 @@ jobs:
       - name: Semantic Release
         id: semantic
         if: steps.tagcheck.outputs.tag == ''
+        # Pushing the release notes ref is the last thing semantic-release does
+        # before it publishes the GitHub release. GitHub occasionally rejects
+        # that push ("fatal error in commit_refs") even though the tag and
+        # release commit were already accepted. Treat the step as recoverable:
+        # the steps below finish the release from the tag at HEAD instead of
+        # leaving a published tag with no release, APK or Docker images.
+        continue-on-error: true
         uses: cycjimmy/semantic-release-action@d9bf53a078bd2f86aaffaec796dbb3d28f1b6f34 # v8.1.3
         with:
           extra_plugins: |
@@ -149,24 +163,106 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build APK for existing tag
+        if: steps.tagcheck.outputs.tag != ''
+        working-directory: mobile
+        run: |
+          set -euo pipefail
+          flutter pub get
+          flutter build apk --release
+          cp build/app/outputs/flutter-apk/app-release.apk \
+            "../sandwitches-${{ steps.tagcheck.outputs.tag }}-android.apk"
+
+      - name: Resolve release version
+        id: resolve
+        if: always()
+        env:
+          SEMANTIC_OUTCOME: ${{ steps.semantic.outcome }}
+        run: |
+          set -euo pipefail
+          TAG_AT_HEAD=$(git describe --tags --exact-match HEAD 2>/dev/null || true)
+          VERSION=""
+          if [ -n "$TAG_AT_HEAD" ]; then
+            VERSION="${TAG_AT_HEAD#v}"
+          fi
+
+          # A failure with no tag at HEAD happened before the release was
+          # recorded (build, changelog, etc.), so it is a real failure.
+          if [ "$SEMANTIC_OUTCOME" = "failure" ] && [ -z "$VERSION" ]; then
+            echo "::error::semantic-release failed before pushing a release tag"
+            exit 1
+          fi
+
+          if [ -n "$VERSION" ] && [ "$SEMANTIC_OUTCOME" = "failure" ]; then
+            echo "::warning::semantic-release failed after pushing $TAG_AT_HEAD; finishing the release"
+            pushed=false
+            for attempt in 1 2 3; do
+              if git push origin "refs/notes/semantic-release-$TAG_AT_HEAD"; then
+                pushed=true
+                break
+              fi
+              echo "::warning::Release notes push failed (attempt $attempt), retrying"
+              sleep $((attempt * 10))
+            done
+            if [ "$pushed" != "true" ]; then
+              echo "::warning::Could not push release notes for $TAG_AT_HEAD; the release itself is unaffected"
+            fi
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub release
+        if: steps.resolve.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.resolve.outputs.version }}
+        run: |
+          set -euo pipefail
+          TAG="v$VERSION"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "GitHub release $TAG already exists"
+          else
+            NOTES_FILE=$(mktemp)
+            awk -v version="$VERSION" '
+              index($0, "## [" version "]") == 1 { found = 1 }
+              found && index($0, "## [") == 1 && index($0, "## [" version "]") != 1 { exit }
+              found { print }
+            ' CHANGELOG.md > "$NOTES_FILE"
+            if [ -s "$NOTES_FILE" ]; then
+              gh release create "$TAG" --verify-tag --title "$TAG" --notes-file "$NOTES_FILE"
+            else
+              gh release create "$TAG" --verify-tag --title "$TAG" --generate-notes
+            fi
+          fi
+
+          APK="sandwitches-$VERSION-android.apk"
+          if [ ! -f "$APK" ]; then
+            echo "::warning::No APK found for $TAG; skipping asset upload"
+          elif gh release view "$TAG" --json assets --jq '.assets[].name' | grep -qx "$APK"; then
+            echo "APK already attached to $TAG"
+          else
+            gh release upload "$TAG" "$APK"
+          fi
+
       - name: Build the Docker image
-        if: steps.tagcheck.outputs.tag != '' || steps.semantic.outputs.new_release_published == 'true'
+        if: steps.resolve.outputs.version != ''
         run: docker build . --file Dockerfile --build-arg VERSION="$VERSION" --tag martynvandijke/sandwitches:latest
         env:
-          VERSION: ${{ steps.tagcheck.outputs.tag || steps.semantic.outputs.new_release_version }}
+          VERSION: ${{ steps.resolve.outputs.version }}
 
       - name: Push Docker image
-        if: steps.tagcheck.outputs.tag != '' || steps.semantic.outputs.new_release_published == 'true'
+        if: steps.resolve.outputs.version != ''
+        env:
+          VERSION: ${{ steps.resolve.outputs.version }}
         run: |
           docker tag martynvandijke/sandwitches:latest ghcr.io/martynvdijke/sandwitches:latest
           docker push martynvandijke/sandwitches:latest
           docker push ghcr.io/martynvdijke/sandwitches:latest
-          VERSION="${{ steps.tagcheck.outputs.tag || steps.semantic.outputs.new_release_version }}"
           echo "Pushing versioned tag: $VERSION"
-          docker tag martynvandijke/sandwitches:latest martynvandijke/sandwitches:$VERSION
-          docker tag martynvandijke/sandwitches:latest ghcr.io/martynvdijke/sandwitches:$VERSION
-          docker push martynvandijke/sandwitches:$VERSION
-          docker push ghcr.io/martynvdijke/sandwitches:$VERSION
+          docker tag martynvandijke/sandwitches:latest "martynvandijke/sandwitches:$VERSION"
+          docker tag martynvandijke/sandwitches:latest "ghcr.io/martynvdijke/sandwitches:$VERSION"
+          docker push "martynvandijke/sandwitches:$VERSION"
+          docker push "ghcr.io/martynvdijke/sandwitches:$VERSION"
 
   notify:
     needs: [ci, android-check, release]
