@@ -146,6 +146,10 @@ func TestAPIRecipeFilters(t *testing.T) {
 	if w.Code != http.StatusCreated {
 		t.Fatalf("expected 201, got %d: %s", w.Code, w.Body.String())
 	}
+	var pancake map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &pancake)
+	// Staff-created recipes are auto-approved; unapprove one so the filter is meaningful.
+	database.DB.Model(&database.Recipe{}).Where("id = ?", pancake["id"]).Update("is_approved", false)
 
 	recipe2 := map[string]interface{}{
 		"title":        "Waffle Iron Special",

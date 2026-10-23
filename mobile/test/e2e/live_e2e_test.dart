@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dio/dio.dart';
 import 'package:cookie_jar/cookie_jar.dart';
@@ -19,27 +20,93 @@ void main() {
 
   test('live e2e: app API layer against live Go backend', () async {
     final baseUrl = url.endsWith('/') ? url.substring(0, url.length - 1) : url;
-    final tmpDir = await Directory.systemTemp.createTemp('sandwitches_e2e_cookies_');
+    final tmpDir = await Directory.systemTemp.createTemp(
+      'sandwitches_e2e_cookies_',
+    );
     final pngFile = File('${tmpDir.path}/tiny.png');
 
     // 1x1 valid PNG
     final pngBytes = Uint8List.fromList([
-      0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
-      0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
-      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-      0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, 0xDE,
-      0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41, 0x54,
-      0x08, 0xD7, 0x63, 0xF8, 0xFF, 0xFF, 0x3F, 0x00, 0x05, 0xFE, 0x02, 0xFE, 0xDC, 0xCC, 0x59, 0xE7,
-      0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+      0x89,
+      0x50,
+      0x4E,
+      0x47,
+      0x0D,
+      0x0A,
+      0x1A,
+      0x0A,
+      0x00,
+      0x00,
+      0x00,
+      0x0D,
+      0x49,
+      0x48,
+      0x44,
+      0x52,
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x08,
+      0x02,
+      0x00,
+      0x00,
+      0x00,
+      0x90,
+      0x77,
+      0x53,
+      0xDE,
+      0x00,
+      0x00,
+      0x00,
+      0x0C,
+      0x49,
+      0x44,
+      0x41,
+      0x54,
+      0x08,
+      0xD7,
+      0x63,
+      0xF8,
+      0xFF,
+      0xFF,
+      0x3F,
+      0x00,
+      0x05,
+      0xFE,
+      0x02,
+      0xFE,
+      0xDC,
+      0xCC,
+      0x59,
+      0xE7,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x49,
+      0x45,
+      0x4E,
+      0x44,
+      0xAE,
+      0x42,
+      0x60,
+      0x82,
     ]);
     await pngFile.writeAsBytes(pngBytes);
 
     final jar = PersistCookieJar(storage: FileStorage(tmpDir.path));
-    final dio = Dio(BaseOptions(
-      baseUrl: baseUrl,
-      followRedirects: false,
-      validateStatus: (s) => s != null && s < 500,
-    ));
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: baseUrl,
+        followRedirects: false,
+        validateStatus: (s) => s != null && s < 500,
+      ),
+    );
     dio.interceptors.add(CookieManager(jar));
     final repo = ApiRepository(dio, baseUrl);
 
@@ -65,35 +132,45 @@ void main() {
 
       // setup
       {
-        final r = await dio.post('/setup',
-            data: {
-              'username': 'e2eadmin',
-              'password1': 'TestPass123!',
-              'password2': 'TestPass123!',
-              'email': 'e2e@example.com',
-            },
-            options: Options(
-              contentType: Headers.formUrlEncodedContentType,
-              followRedirects: false,
-              validateStatus: (s) => s != null && s < 500,
-            ));
+        final r = await dio.post(
+          '/setup',
+          data: {
+            'username': 'e2eadmin',
+            'password1': 'TestPass123!',
+            'password2': 'TestPass123!',
+            'email': 'e2e@example.com',
+          },
+          options: Options(
+            contentType: Headers.formUrlEncodedContentType,
+            followRedirects: false,
+            validateStatus: (s) => s != null && s < 500,
+          ),
+        );
         // 302 on success or if already exists (superuser exists)
-        expect(r.statusCode, anyOf([200, 302, 303]),
-            reason: 'setup status ${r.statusCode} body=${r.data}');
+        expect(
+          r.statusCode,
+          anyOf([200, 302, 303]),
+          reason: 'setup status ${r.statusCode} body=${r.data}',
+        );
         pass('setup', 'POST /setup ${r.statusCode}');
       }
 
       // login
       {
-        final r = await dio.post('/login',
-            data: {'username': 'e2eadmin', 'password': 'TestPass123!'},
-            options: Options(
-              contentType: Headers.formUrlEncodedContentType,
-              followRedirects: false,
-              validateStatus: (s) => s != null && s < 500,
-            ));
-        expect(r.statusCode, anyOf([200, 302, 303]),
-            reason: 'login status ${r.statusCode}');
+        final r = await dio.post(
+          '/login',
+          data: {'username': 'e2eadmin', 'password': 'TestPass123!'},
+          options: Options(
+            contentType: Headers.formUrlEncodedContentType,
+            followRedirects: false,
+            validateStatus: (s) => s != null && s < 500,
+          ),
+        );
+        expect(
+          r.statusCode,
+          anyOf([200, 302, 303]),
+          reason: 'login status ${r.statusCode}',
+        );
         pass('login', 'POST /login ${r.statusCode}');
       }
 
@@ -101,22 +178,34 @@ void main() {
       {
         final me = await repo.fetchMe();
         expect(me, isNotNull, reason: '/me should be 200 after login');
-        pass('me', 'GET /api/v1/me 200 user=${me!['username'] ?? me['email'] ?? me}');
+        expect(
+          me!['is_staff'] == true || me['is_superuser'] == true,
+          isTrue,
+          reason: '/me should expose admin flags',
+        );
+        pass(
+          'me',
+          'GET /api/v1/me 200 user=${me['username'] ?? me['email'] ?? me}',
+        );
       }
 
       // create 2 recipes
       int id1, id2;
       {
         Future<int> create(String title, String tagName) async {
-          final r = await dio.post('$baseUrl/api/v1/recipes', data: {
-            'title': title,
-            'description': 'desc $title',
-            'ingredients': '2 cups flour\n1 cup sugar',
-            'instructions': 'Mix and bake.',
-            'servings': 4,
-            'price': 9.99,
-            'tags': [tagName],
-          }, options: Options(contentType: Headers.jsonContentType));
+          final r = await dio.post(
+            '$baseUrl/api/v1/recipes',
+            data: {
+              'title': title,
+              'description': 'desc $title',
+              'ingredients': '2 cups flour\n1 cup sugar',
+              'instructions': 'Mix and bake.',
+              'servings': 4,
+              'price': 9.99,
+              'tags': [tagName],
+            },
+            options: Options(contentType: Headers.jsonContentType),
+          );
           expect(r.statusCode, 201, reason: 'create $title ${r.data}');
           final j = r.data as Map<String, dynamic>;
           return (j['id'] as num).toInt();
@@ -127,12 +216,45 @@ void main() {
         pass('create_recipes', 'created $id1 and $id2');
       }
 
+      // admin upload through the app repository (multipart + photo)
+      {
+        final uploaded = await repo.createRecipe(
+          title: 'E2E Uploaded Recipe',
+          description: 'Created through ApiRepository.createRecipe',
+          ingredients: '1 cup flour\n1 egg',
+          instructions: 'Mix and bake.',
+          servings: 2,
+          price: 4.5,
+          tags: const ['E2E-Tag-Upload'],
+          imagePath: pngFile.path,
+        );
+        expect(
+          uploaded.image.isNotEmpty,
+          isTrue,
+          reason: 'uploaded recipe should have an image',
+        );
+        expect(
+          uploaded.isApproved,
+          isTrue,
+          reason: 'staff uploads should be auto-approved',
+        );
+        final fetched = await repo.fetchRecipe(uploaded.id);
+        expect(fetched.image, uploaded.image);
+        pass(
+          'create_recipe_upload',
+          'POST /api/v1/recipes multipart id=${uploaded.id} image=${uploaded.image}',
+        );
+      }
+
       // list recipes contains them
       {
         final list = await repo.fetchRecipes();
         expect(list.any((r) => r.id == id1), isTrue);
         expect(list.any((r) => r.id == id2), isTrue);
-        pass('list', 'GET /api/v1/recipes contains both (${list.length} total)');
+        pass(
+          'list',
+          'GET /api/v1/recipes contains both (${list.length} total)',
+        );
       }
 
       // search filters correctly
@@ -140,9 +262,15 @@ void main() {
         final filtered = await repo.fetchRecipes(search: 'Recipe One');
         expect(filtered.any((r) => r.id == id1), isTrue);
         // should NOT contain recipe two (title doesn't match)
-        expect(filtered.any((r) => r.id == id2), isFalse,
-            reason: 'search should filter out non-matching');
-        pass('search', 'search=Recipe One filtered correctly (${filtered.length})');
+        expect(
+          filtered.any((r) => r.id == id2),
+          isFalse,
+          reason: 'search should filter out non-matching',
+        );
+        pass(
+          'search',
+          'search=Recipe One filtered correctly (${filtered.length})',
+        );
       }
 
       // tags list non-empty
@@ -162,24 +290,42 @@ void main() {
       // scaleIngredients
       {
         final rows = await repo.scaleIngredients(id1, 8);
-        expect(rows.isNotEmpty, isTrue, reason: 'scaleIngredients should return rows');
+        expect(
+          rows.isNotEmpty,
+          isTrue,
+          reason: 'scaleIngredients should return rows',
+        );
         pass('scale', 'scale target 8 returned ${rows.length} rows');
       }
 
       // post rating JSON path
       {
-        final r = await dio.post('$baseUrl/api/v1/recipes/$id1/ratings',
-            data: {'score': 5, 'comment': 'json rating'},
-            options: Options(contentType: Headers.jsonContentType));
-        expect(r.statusCode, anyOf([200, 201]),
-            reason: 'post rating json ${r.statusCode} ${r.data}');
+        final r = await dio.post(
+          '$baseUrl/api/v1/recipes/$id1/ratings',
+          data: {'score': 5, 'comment': 'json rating'},
+          options: Options(contentType: Headers.jsonContentType),
+        );
+        expect(
+          r.statusCode,
+          anyOf([200, 201]),
+          reason: 'post rating json ${r.statusCode} ${r.data}',
+        );
         pass('rating_json', 'POST rating JSON  score=5');
       }
 
       // post rating WITH image (multipart via repo)
       {
-        final rating = await repo.postRating(id1, 4, 'with image', imagePath: pngFile.path);
-        expect(rating.image, isNotNull, reason: 'image field should be non-null');
+        final rating = await repo.postRating(
+          id1,
+          4,
+          'with image',
+          imagePath: pngFile.path,
+        );
+        expect(
+          rating.image,
+          isNotNull,
+          reason: 'image field should be non-null',
+        );
         expect(rating.image!.isNotEmpty, isTrue);
         pass('rating_image', 'POST rating multipart image=${rating.image}');
       }
@@ -191,7 +337,10 @@ void main() {
         // after multipart update, image should be present
         expect(ratings.first.image, isNotNull);
         expect(ratings.first.image!.isNotEmpty, isTrue);
-        pass('ratings_list', 'GET ratings list ${ratings.length} entries image=${ratings.first.image}');
+        pass(
+          'ratings_list',
+          'GET ratings list ${ratings.length} entries image=${ratings.first.image}',
+        );
       }
 
       // cart add/update/delete
@@ -219,11 +368,17 @@ void main() {
       late int orderId;
       {
         final order = await repo.createOrder(id1);
-        expect(order.trackingToken.isNotEmpty, isTrue,
-            reason: 'trackingToken non-empty ${order.trackingToken}');
+        expect(
+          order.trackingToken.isNotEmpty,
+          isTrue,
+          reason: 'trackingToken non-empty ${order.trackingToken}',
+        );
         trackingToken = order.trackingToken;
         orderId = order.id;
-        pass('create_order', 'POST /api/v1/orders id=$orderId token=$trackingToken');
+        pass(
+          'create_order',
+          'POST /api/v1/orders id=$orderId token=$trackingToken',
+        );
       }
 
       // orders list/detail
@@ -234,21 +389,31 @@ void main() {
 
         final detail = await repo.fetchOrder(orderId);
         expect(detail.items.isNotEmpty, isTrue);
-        pass('order_detail', 'GET /api/v1/orders/$orderId items=${detail.items.length}');
+        pass(
+          'order_detail',
+          'GET /api/v1/orders/$orderId items=${detail.items.length}',
+        );
       }
 
       // public trackOrder
       {
         final tracked = await repo.trackOrder(trackingToken);
         expect(tracked.id, orderId);
-        pass('track', 'GET /api/v1/orders/track/$trackingToken id=${tracked.id}');
+        pass(
+          'track',
+          'GET /api/v1/orders/track/$trackingToken id=${tracked.id}',
+        );
       }
 
       // staff patchOrderStatus
       {
         await repo.patchOrderStatus(orderId, 'MAKING');
         final refetched = await repo.fetchOrder(orderId);
-        expect(refetched.status, 'MAKING', reason: 'status should be MAKING got ${refetched.status}');
+        expect(
+          refetched.status,
+          'MAKING',
+          reason: 'status should be MAKING got ${refetched.status}',
+        );
         pass('patch_status', 'PATCH status MAKING verified');
       }
 

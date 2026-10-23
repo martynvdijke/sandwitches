@@ -101,28 +101,33 @@ func applySettingUpdates(s *database.Setting, in SettingUpdateInput) {
 }
 
 // UserDTO mirrors the v2.x UserSchema: excludes email, password and the
-// staff/superuser/active/joined bookkeeping fields.
+// active/joined bookkeeping fields. The staff flags are exposed so clients can
+// show admin-only features without guessing from a role string.
 type UserDTO struct {
-	ID        uint   `json:"id"`
-	Username  string `json:"username"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Avatar    string `json:"avatar"`
-	Bio       string `json:"bio"`
-	Language  string `json:"language"`
-	Theme     string `json:"theme"`
+	ID          uint   `json:"id"`
+	Username    string `json:"username"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	Avatar      string `json:"avatar"`
+	Bio         string `json:"bio"`
+	Language    string `json:"language"`
+	Theme       string `json:"theme"`
+	IsStaff     bool   `json:"is_staff"`
+	IsSuperuser bool   `json:"is_superuser"`
 }
 
 func userToDTO(u *database.User) UserDTO {
 	return UserDTO{
-		ID:        u.ID,
-		Username:  u.Username,
-		FirstName: u.FirstName,
-		LastName:  u.LastName,
-		Avatar:    u.Avatar,
-		Bio:       u.Bio,
-		Language:  u.Language,
-		Theme:     u.Theme,
+		ID:          u.ID,
+		Username:    u.Username,
+		FirstName:   u.FirstName,
+		LastName:    u.LastName,
+		Avatar:      u.Avatar,
+		Bio:         u.Bio,
+		Language:    u.Language,
+		Theme:       u.Theme,
+		IsStaff:     u.IsStaff,
+		IsSuperuser: u.IsSuperuser,
 	}
 }
 

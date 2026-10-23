@@ -148,11 +148,30 @@ func buildOpenAPISpec() map[string]interface{} {
 					"responses":   responses("Recipes", map[string]interface{}{"type": "array", "items": ref("Recipe")}),
 				},
 				"post": map[string]interface{}{
-					"summary":     "Create recipe",
+					"summary":     "Create recipe (admin only; JSON or multipart with image)",
 					"operationId": "createRecipe",
 					"tags":        []string{"Recipes"},
 					"security":    auth,
-					"requestBody": jsonBody(ref("RecipeCreate")),
+					"requestBody": map[string]interface{}{
+						"required": true,
+						"content": map[string]interface{}{
+							"application/json": map[string]interface{}{"schema": ref("RecipeCreate")},
+							"multipart/form-data": map[string]interface{}{"schema": map[string]interface{}{
+								"type": "object",
+								"properties": map[string]interface{}{
+									"title":        sch("string"),
+									"description":  sch("string"),
+									"ingredients":  sch("string"),
+									"instructions": sch("string"),
+									"servings":     sch("integer"),
+									"price":        map[string]interface{}{"type": "number", "nullable": true},
+									"tags":         map[string]interface{}{"type": "array", "items": sch("string")},
+									"image":        map[string]interface{}{"type": "string", "format": "binary"},
+								},
+								"required": []string{"title"},
+							}},
+						},
+					},
 					"responses": map[string]interface{}{
 						"201": responses("Created recipe", ref("Recipe"))["200"],
 						"400": errorResponses["400"],
@@ -502,14 +521,16 @@ func buildOpenAPISpec() map[string]interface{} {
 				"User": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
-						"id":         sch("integer"),
-						"username":   sch("string"),
-						"first_name": sch("string"),
-						"last_name":  sch("string"),
-						"avatar":     sch("string"),
-						"bio":        sch("string"),
-						"language":   sch("string"),
-						"theme":      sch("string"),
+						"id":           sch("integer"),
+						"username":     sch("string"),
+						"first_name":   sch("string"),
+						"last_name":    sch("string"),
+						"avatar":       sch("string"),
+						"bio":          sch("string"),
+						"language":     sch("string"),
+						"theme":        sch("string"),
+						"is_staff":     sch("boolean"),
+						"is_superuser": sch("boolean"),
 					},
 				},
 				"UserPublic": map[string]interface{}{

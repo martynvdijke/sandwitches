@@ -48,10 +48,34 @@ func TestAPIMeShape(t *testing.T) {
 	if _, ok := m["email"]; ok {
 		t.Error("/me must not expose email")
 	}
-	for _, k := range []string{"id", "username", "first_name", "last_name", "avatar", "bio", "language", "theme"} {
+	for _, k := range []string{"id", "username", "first_name", "last_name", "avatar", "bio", "language", "theme", "is_staff", "is_superuser"} {
 		if _, ok := m[k]; !ok {
 			t.Errorf("/me should expose %s", k)
 		}
+	}
+	if m["is_staff"] != false || m["is_superuser"] != false {
+		t.Errorf("/me staff flags should be false for a normal user, got %v/%v", m["is_staff"], m["is_superuser"])
+	}
+}
+
+// TestAPIMeStaffFlags: /me exposes the admin flags the mobile client uses.
+func TestAPIMeStaffFlags(t *testing.T) {
+	r, cleanup := setupAPITest(t)
+	defer cleanup()
+
+	staff := createAPIUser(t, "me_staff", true)
+	staff.IsSuperuser = true
+	database.DB.Save(staff)
+	cookie := loginAPIUser(t, r, "me_staff")
+
+	w := apiGet(t, r, "/api/v1/me", cookie)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", w.Code)
+	}
+	var m map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &m)
+	if m["is_staff"] != true || m["is_superuser"] != true {
+		t.Errorf("/me staff flags should be true, got %v/%v", m["is_staff"], m["is_superuser"])
 	}
 }
 
@@ -209,8 +233,8 @@ func TestAPICartShape(t *testing.T) {
 	}
 }
 
-// TestAPIRecipeIsApprovedFalse: new recipes default to is_approved=false.
-func TestAPIRecipeIsApprovedFalse(t *testing.T) {
+// TestAPIRecipeAutoApproved: staff-created recipes are approved immediately.
+func TestAPIRecipeAutoApproved(t *testing.T) {
 	r, cleanup := setupAPITest(t)
 	defer cleanup()
 
@@ -218,15 +242,15 @@ func TestAPIRecipeIsApprovedFalse(t *testing.T) {
 	cookie := loginAPIUser(t, r, "approval_chef")
 
 	w := apiPost(t, r, "/api/v1/recipes", map[string]interface{}{
-		"title": "Pending Approval", "description": "d", "servings": 1,
+		"title": "Auto Approved", "description": "d", "servings": 1,
 	}, cookie)
 	if w.Code != http.StatusCreated {
 		t.Fatalf("expected 201, got %d", w.Code)
 	}
 	var recipe map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &recipe)
-	if recipe["is_approved"].(bool) {
-		t.Error("new recipes must default to is_approved=false")
+	if !recipe["is_approved"].(bool) {
+		t.Error("staff-created recipes must be auto-approved")
 	}
 }
 

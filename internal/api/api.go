@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"math/rand"
 	"net/http"
@@ -248,10 +249,32 @@ func createRecipe(c *gin.Context) {
 		apiError(c, http.StatusForbidden, "Not authorized")
 		return
 	}
+	if !user.IsStaff && !user.IsSuperuser {
+		apiError(c, http.StatusForbidden, "Only admins can create recipes")
+		return
+	}
+
 	var input RecipeCreateInput
-	if err := c.ShouldBindJSON(&input); err != nil {
+	var imagePath string
+	isMultipart := strings.HasPrefix(c.Request.Header.Get("Content-Type"), "multipart/form-data") || strings.HasPrefix(c.ContentType(), "multipart/form-data")
+	if isMultipart {
+		var err error
+		input, imagePath, err = parseRecipeMultipart(c)
+		if err != nil {
+			apiError(c, http.StatusBadRequest, err.Error())
+			return
+		}
+	} else if err := c.ShouldBindJSON(&input); err != nil {
 		apiError(c, http.StatusBadRequest, err.Error())
 		return
+	}
+
+	if strings.TrimSpace(input.Title) == "" {
+		apiError(c, http.StatusBadRequest, "title is required")
+		return
+	}
+	if input.Servings < 1 {
+		input.Servings = 1
 	}
 
 	r := database.Recipe{
@@ -261,18 +284,97 @@ func createRecipe(c *gin.Context) {
 		Instructions: input.Instructions,
 		Servings:     input.Servings,
 		Price:        input.Price,
+		Image:        imagePath,
+		IsApproved:   true,
 	}
 	r.UploadedByID = &user.ID
-	database.DB.Create(&r)
-
-	for _, tagName := range input.Tags {
-		var tag database.Tag
-		database.DB.Where("name = ?", tagName).FirstOrCreate(&tag, database.Tag{Name: tagName})
-		database.DB.Exec("INSERT INTO recipe_tags (recipe_id, tag_id) VALUES (?, ?)", r.ID, tag.ID)
+	if err := database.DB.Create(&r).Error; err != nil {
+		apiError(c, http.StatusInternalServerError, "Could not create recipe")
+		return
 	}
+
+	attachRecipeTags(r.ID, input.Tags)
 
 	database.DB.Preload("Tags").Preload("FavoritedBy").First(&r, r.ID)
 	c.JSON(http.StatusCreated, recipeToJSON(&r))
+}
+
+// parseRecipeMultipart reads the admin recipe form. The image is saved before
+// the recipe row is created so a bad upload cannot leave a half-created recipe.
+func parseRecipeMultipart(c *gin.Context) (RecipeCreateInput, string, error) {
+	var input RecipeCreateInput
+	input.Title = strings.TrimSpace(c.PostForm("title"))
+	input.Description = c.PostForm("description")
+	input.Ingredients = c.PostForm("ingredients")
+	input.Instructions = c.PostForm("instructions")
+
+	if v := strings.TrimSpace(c.PostForm("servings")); v != "" {
+		servings, err := strconv.Atoi(v)
+		if err != nil {
+			return input, "", fmt.Errorf("servings must be an integer")
+		}
+		input.Servings = servings
+	}
+	if v := strings.TrimSpace(c.PostForm("price")); v != "" {
+		price, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			return input, "", fmt.Errorf("price must be a number")
+		}
+		if price < 0 {
+			return input, "", fmt.Errorf("price must be zero or greater")
+		}
+		input.Price = &price
+	}
+
+	tagValues := c.PostFormArray("tags")
+	if raw := c.PostForm("tags_string"); raw != "" {
+		tagValues = append(tagValues, raw)
+	}
+	input.Tags = splitTagNames(tagValues)
+
+	imagePath := ""
+	file, err := c.FormFile("image")
+	if err != nil {
+		if err != http.ErrMissingFile {
+			return input, "", fmt.Errorf("could not read image: %w", err)
+		}
+	} else if file != nil {
+		dir := filepath.Join(mediaRoot, "recipes")
+		if mediaRoot == "" {
+			dir = filepath.Join("media", "recipes")
+		}
+		saved, err := utils.SaveUploadedFile(file, dir, "recipes")
+		if err != nil {
+			return input, "", fmt.Errorf("could not save image: %w", err)
+		}
+		imagePath = saved
+	}
+
+	return input, imagePath, nil
+}
+
+func splitTagNames(values []string) []string {
+	seen := make(map[string]bool)
+	var tags []string
+	for _, value := range values {
+		for _, name := range strings.Split(value, ",") {
+			name = strings.TrimSpace(name)
+			if name == "" || seen[name] {
+				continue
+			}
+			seen[name] = true
+			tags = append(tags, name)
+		}
+	}
+	return tags
+}
+
+func attachRecipeTags(recipeID uint, tagNames []string) {
+	for _, tagName := range tagNames {
+		var tag database.Tag
+		database.DB.Where("name = ?", tagName).FirstOrCreate(&tag, database.Tag{Name: tagName})
+		database.DB.Exec("INSERT INTO recipe_tags (recipe_id, tag_id) VALUES (?, ?)", recipeID, tag.ID)
+	}
 }
 
 func getRecipe(c *gin.Context) {
