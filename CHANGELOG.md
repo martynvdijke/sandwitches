@@ -1,3 +1,10 @@
+# [3.15.0](https://github.com/martynvdijke/sandwitches/compare/v3.14.7...v3.15.0) (2026-10-23)
+
+
+### Features
+
+* **api,mobile:** allow admins to upload recipes with photos ([2ea8861](https://github.com/martynvdijke/sandwitches/commit/2ea88617a66234a993e0e523157ea39875eed291))
+
 ## [3.14.7](https://github.com/martynvdijke/sandwitches/compare/v3.14.6...v3.14.7) (2026-10-23)
 
 ## [3.14.6](https://github.com/martynvdijke/sandwitches/compare/v3.14.5...v3.14.6) (2026-10-22)
