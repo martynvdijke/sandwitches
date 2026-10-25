@@ -1,3 +1,11 @@
+## [3.15.2](https://github.com/martynvdijke/sandwitches/compare/v3.15.1...v3.15.2) (2026-10-25)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([c463507](https://github.com/martynvdijke/sandwitches/commit/c4635073b50ec23472d4fcbcd061dc2228f0950e))
+* **deps:** update dependency go_router to v18 ([560a42f](https://github.com/martynvdijke/sandwitches/commit/560a42fdaa52d4589f9587123645d367402d1d80))
+
 ## [3.15.1](https://github.com/martynvdijke/sandwitches/compare/v3.15.0...v3.15.1) (2026-10-25)
 
 # [3.15.0](https://github.com/martynvdijke/sandwitches/compare/v3.14.7...v3.15.0) (2026-10-23)
