@@ -101,6 +101,7 @@ jobs:
     steps:
       - name: Release Published Notification
         if: needs.ci.result == 'success' && needs.release.result == 'success' && needs.release.outputs.new_release_published == 'true'
+        continue-on-error: true
         uses: eikendev/gotify-action@cb63800546f25c393ab96f09d12a094138c514f4 # master
         with:
           gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
@@ -110,6 +111,7 @@ jobs:
 
       - name: No Release Needed Notification
         if: needs.ci.result == 'success' && needs.release.result == 'success' && needs.release.outputs.new_release_published != 'true'
+        continue-on-error: true
         uses: eikendev/gotify-action@cb63800546f25c393ab96f09d12a094138c514f4 # master
         with:
           gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
@@ -119,6 +121,7 @@ jobs:
 
       - name: Failure Notification
         if: needs.ci.result != 'success' || needs.release.result != 'success'
+        continue-on-error: true
         uses: eikendev/gotify-action@cb63800546f25c393ab96f09d12a094138c514f4 # master
         with:
           gotify_api_base: ${{ secrets.GOTIFY_API_BASE }}
@@ -145,6 +148,7 @@ jobs:
     needs: [ci, release, notify, trml]
     steps:
       - name: Export workflow
+        continue-on-error: true
         uses: corentinmusard/otel-cicd-action@4826b79d63662fa91657272e7711420cb6aea543 # v4.2.0
         with:
           otlpEndpoint: ${{ secrets.OTLP_ENDPOINT }}

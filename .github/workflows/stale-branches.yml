@@ -26,6 +26,7 @@ jobs:
     needs: [stale_branches]
     steps:
       - name: Export workflow
+        continue-on-error: true
         uses: corentinmusard/otel-cicd-action@4826b79d63662fa91657272e7711420cb6aea543 # v4.2.0
         with:
           otlpEndpoint: ${{ secrets.OTLP_ENDPOINT }}
