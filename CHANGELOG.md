@@ -1,3 +1,10 @@
+# [3.16.0](https://github.com/martynvdijke/sandwitches/compare/v3.15.3...v3.16.0) (2026-10-26)
+
+
+### Features
+
+* **release:** publish android bundles to google play and add emulator e2e ([7afa282](https://github.com/martynvdijke/sandwitches/commit/7afa282eb64baee996a491073b92cc089d001fc2))
+
 ## [3.15.3](https://github.com/martynvdijke/sandwitches/compare/v3.15.2...v3.15.3) (2026-10-26)
 
 ## [3.15.2](https://github.com/martynvdijke/sandwitches/compare/v3.15.1...v3.15.2) (2026-10-25)
