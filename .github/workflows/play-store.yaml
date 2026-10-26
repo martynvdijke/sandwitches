@@ -1,0 +1,101 @@
+name: Play Store
+
+# Publishes a signed Android App Bundle to Google Play. Called from the release
+# workflow after semantic-release has published a new version.
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Release version to publish (for example 3.14.8)
+        required: true
+        type: string
+      build-number:
+        description: Play version code; defaults to the git commit count
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish to Google Play
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: v${{ inputs.version }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Java
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version-file: mobile/.fvmrc
+          cache: true
+
+      - name: Prepare Android signing key
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ANDROID_KEYSTORE_BASE64:-}" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not configured; refusing to publish an unsigned bundle."
+            exit 1
+          fi
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > mobile/android/upload-keystore.jks
+          cat > mobile/android/key.properties <<EOF
+          storeFile=$GITHUB_WORKSPACE/mobile/android/upload-keystore.jks
+          storePassword=${ANDROID_KEYSTORE_PASSWORD}
+          keyAlias=${ANDROID_KEY_ALIAS}
+          keyPassword=${ANDROID_KEY_PASSWORD}
+          EOF
+
+      - name: Build signed App Bundle
+        working-directory: mobile
+        env:
+          BUILD_NUMBER_INPUT: ${{ inputs.build-number }}
+          VERSION_NAME: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          BUILD_NUMBER="$BUILD_NUMBER_INPUT"
+          if [ -z "$BUILD_NUMBER" ]; then
+            BUILD_NUMBER=$(git rev-list --count HEAD)
+          fi
+          echo "Building $VERSION_NAME ($BUILD_NUMBER)"
+          flutter pub get
+          flutter build appbundle --release \
+            --build-name "$VERSION_NAME" \
+            --build-number "$BUILD_NUMBER"
+
+      - name: Upload App Bundle artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: app-release-aab
+          path: mobile/build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+      - name: Upload bundle to Google Play
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ vars.ANDROID_PACKAGE_NAME || 'xyz.vandijke.sandwitches' }}
+          releaseFiles: mobile/build/app/outputs/bundle/release/app-release.aab
+          track: ${{ vars.GOOGLE_PLAY_TRACK || 'internal' }}
+          status: ${{ vars.GOOGLE_PLAY_RELEASE_STATUS || 'completed' }}
+          releaseName: ${{ inputs.version }}

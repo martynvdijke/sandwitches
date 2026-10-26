@@ -325,3 +325,14 @@ jobs:
           otlpEndpoint: ${{ secrets.OTLP_ENDPOINT }}
           otlpHeaders: ${{ secrets.OTLP_HEADERS }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+
+  play-store:
+    name: Play Store
+    needs: [release]
+    if: needs.release.result == 'success' && needs.release.outputs.new_release_version != ''
+    uses: ./.github/workflows/play-store.yaml
+    with:
+      version: ${{ needs.release.outputs.new_release_version }}
+    secrets: inherit
+    permissions:
+      contents: read
