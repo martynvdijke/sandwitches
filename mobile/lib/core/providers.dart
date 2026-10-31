@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 
+import 'config.dart';
 import 'storage.dart';
 import 'models.dart';
 
@@ -19,7 +20,7 @@ final persistCookieJarProvider = Provider<PersistCookieJar>(
 );
 
 final dioProvider = Provider<Dio>((ref) {
-  final baseUrl = ref.watch(baseUrlProvider) ?? 'http://localhost:8000';
+  final baseUrl = ref.watch(baseUrlProvider) ?? kDefaultBaseUrl;
   final jar = ref.watch(persistCookieJarProvider);
   final dio = Dio(
     BaseOptions(
@@ -37,7 +38,7 @@ final dioProvider = Provider<Dio>((ref) {
 });
 
 final apiBaseProvider = Provider<String>((ref) {
-  final b = ref.watch(baseUrlProvider) ?? '';
+  final b = ref.watch(baseUrlProvider) ?? kDefaultBaseUrl;
   final base = b.endsWith('/') ? b.substring(0, b.length - 1) : b;
   return '$base/api/v1';
 });
@@ -295,7 +296,7 @@ class ApiRepository {
 
 final repositoryProvider = Provider<ApiRepository>((ref) {
   final dio = ref.watch(dioProvider);
-  final base = ref.watch(baseUrlProvider) ?? '';
+  final base = ref.watch(baseUrlProvider) ?? kDefaultBaseUrl;
   return ApiRepository(dio, base);
 });
 

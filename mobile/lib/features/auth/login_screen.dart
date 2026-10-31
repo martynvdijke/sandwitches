@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
+import '../../core/config.dart';
 import '../../core/providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -20,7 +21,7 @@ class _LoginState extends ConsumerState<LoginScreen> {
   bool oidcLoading=false;
 
   Future<void> doLogin() async {
-    final base = ref.read(baseUrlProvider) ?? await ref.read(storageProvider).getBaseUrl() ?? '';
+    final base = ref.read(baseUrlProvider) ?? await ref.read(storageProvider).getBaseUrl() ?? kDefaultBaseUrl;
     if (base.isEmpty) { setState(()=> error='No server URL configured'); return; }
     setState(()=> loading=true);
     try {
@@ -62,7 +63,7 @@ class _LoginState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> doOidc() async {
-    final baseRaw = ref.read(baseUrlProvider) ?? await ref.read(storageProvider).getBaseUrl() ?? '';
+    final baseRaw = ref.read(baseUrlProvider) ?? await ref.read(storageProvider).getBaseUrl() ?? kDefaultBaseUrl;
     final base = baseRaw.endsWith('/') ? baseRaw.substring(0,baseRaw.length-1) : baseRaw;
     if (base.isEmpty) { setState(()=> error='No server URL'); return; }
     setState(()=> oidcLoading=true);

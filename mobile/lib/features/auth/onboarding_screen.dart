@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
+import '../../core/config.dart';
 import '../../core/providers.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -10,7 +11,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
   ConsumerState<OnboardingScreen> createState()=> _OnboardingState();
 }
 class _OnboardingState extends ConsumerState<OnboardingScreen> {
-  final ctrl = TextEditingController();
+  final ctrl = TextEditingController(text: kDefaultBaseUrl);
   bool loading=false;
   String? error;
   @override
@@ -19,9 +20,14 @@ class _OnboardingState extends ConsumerState<OnboardingScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final s = ref.read(storageProvider);
       final saved = await s.getBaseUrl();
+      if (!mounted) return;
       if (saved!=null) {
+        // A previously saved server always wins over the default.
         ctrl.text = saved;
         ref.read(baseUrlProvider.notifier).state = saved;
+      } else {
+        ctrl.text = kDefaultBaseUrl;
+        ref.read(baseUrlProvider.notifier).state = kDefaultBaseUrl;
       }
     });
   }
@@ -51,7 +57,7 @@ class _OnboardingState extends ConsumerState<OnboardingScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Welcome to Sandwitches')),
       body: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children:[
-        const Text('Enter your self-hosted server URL'),
+        const Text('Use the default instance below, or enter another self-hosted Sandwitches server.'),
         const SizedBox(height:12),
         TextField(controller: ctrl, decoration: InputDecoration(labelText: 'Server URL', hintText: 'https://example.com', errorText: error, border: const OutlineInputBorder()), keyboardType: TextInputType.url, onSubmitted: (_)=> validateAndSave()),
         const SizedBox(height:12),
