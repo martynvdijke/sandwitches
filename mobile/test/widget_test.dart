@@ -26,8 +26,11 @@ void main() {
 
   testWidgets('onboarding shows validation', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: MaterialApp(home: OnboardingScreen())));
+    await tester.pumpAndSettle();
     expect(find.text('Welcome to Sandwitches'), findsOneWidget);
     expect(find.text('Continue'), findsOneWidget);
+    // The screen pre-fills the default server, so clear it to exercise validation.
+    await tester.enterText(find.byType(TextField), '');
     await tester.tap(find.text('Continue'));
     await tester.pump();
     expect(find.text('Please enter server URL'), findsOneWidget);
