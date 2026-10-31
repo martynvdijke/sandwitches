@@ -1,3 +1,18 @@
+# [3.17.0](https://github.com/martynvdijke/sandwitches/compare/v3.16.0...v3.17.0) (2026-10-31)
+
+
+### Bug Fixes
+
+* **ci:** pin test-ui to ubuntu-24.04 for playwright ([b02c66b](https://github.com/martynvdijke/sandwitches/commit/b02c66bec832e21a7809c4e993da62477e9c341c))
+* **ci:** point flutter setup at root fvmrc ([4b5ea78](https://github.com/martynvdijke/sandwitches/commit/4b5ea78f80566a54c52c4a65b46b88232adaa6f6))
+* **deps:** update dependency flutter_riverpod to v3 ([1c9d4b5](https://github.com/martynvdijke/sandwitches/commit/1c9d4b5d7a01d1c2ab97478b4595486dbc919d22))
+* **mobile:** import Riverpod 3 legacy provider APIs ([36fbc88](https://github.com/martynvdijke/sandwitches/commit/36fbc882d433218552a74f312a11348505021c07))
+
+
+### Features
+
+* **mobile:** default to sandwitches.vandijke.xyz and offer self-hosted option ([b955a25](https://github.com/martynvdijke/sandwitches/commit/b955a25626847d574cc8b9fafcd26db623d6f42c))
+
 # [3.16.0](https://github.com/martynvdijke/sandwitches/compare/v3.15.3...v3.16.0) (2026-10-26)
 
 
