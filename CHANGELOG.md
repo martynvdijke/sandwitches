@@ -1,3 +1,10 @@
+## [3.17.1](https://github.com/martynvdijke/sandwitches/compare/v3.17.0...v3.17.1) (2026-11-01)
+
+
+### Bug Fixes
+
+* **ci:** skip Play Store publish when credentials are missing ([3d3781f](https://github.com/martynvdijke/sandwitches/commit/3d3781f83595aa40d0080c2652692e3864357989))
+
 # [3.17.0](https://github.com/martynvdijke/sandwitches/compare/v3.16.0...v3.17.0) (2026-10-31)
 
 
