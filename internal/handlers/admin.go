@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/martynvdijke/sandwitches-go/internal/account"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
 	"github.com/martynvdijke/sandwitches-go/internal/tasks"
@@ -462,43 +463,18 @@ func AdminUserDelete(c *gin.Context) {
 			return
 		}
 
-		tx := database.DB.Begin()
-		if tx.Error != nil {
+		// Shared with self-service deletion so both paths detach content and
+		// revoke credentials identically. The last-superuser guard still
+		// applies, including when an administrator tries to delete themselves
+		// through another superuser account.
+		switch err := account.New(database.DB).Delete(uint(id)); err {
+		case nil:
+			utils.AddFlash(c, "success", "User deleted")
+		case account.ErrLastSuperuser:
+			utils.AddFlash(c, "error", "The last superuser cannot be deleted.")
+		default:
 			utils.AddFlash(c, "error", "Could not delete user")
-			c.Redirect(http.StatusFound, "/dashboard/users")
-			return
 		}
-
-		// Keep authored recipes and order history, but remove references owned by the account.
-		cleanup := []string{
-			"UPDATE recipes SET uploaded_by_id = NULL WHERE uploaded_by_id = ?",
-			"UPDATE orders SET user_id = NULL WHERE user_id = ?",
-			"UPDATE recipe_histories SET changed_by_id = NULL WHERE changed_by_id = ?",
-			"DELETE FROM user_groups WHERE user_id = ?",
-			"DELETE FROM user_favorites WHERE user_id = ?",
-			"DELETE FROM ratings WHERE user_id = ?",
-			"DELETE FROM cart_items WHERE user_id = ?",
-		}
-		for _, query := range cleanup {
-			if err := tx.Exec(query, id).Error; err != nil {
-				tx.Rollback()
-				utils.AddFlash(c, "error", "Could not delete user")
-				c.Redirect(http.StatusFound, "/dashboard/users")
-				return
-			}
-		}
-		if err := tx.Delete(&database.User{}, id).Error; err != nil {
-			tx.Rollback()
-			utils.AddFlash(c, "error", "Could not delete user")
-			c.Redirect(http.StatusFound, "/dashboard/users")
-			return
-		}
-		if err := tx.Commit().Error; err != nil {
-			utils.AddFlash(c, "error", "Could not delete user")
-			c.Redirect(http.StatusFound, "/dashboard/users")
-			return
-		}
-		utils.AddFlash(c, "success", "User deleted")
 		c.Redirect(http.StatusFound, "/dashboard/users")
 		return
 	}

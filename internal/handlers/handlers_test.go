@@ -153,6 +153,11 @@ func setupTestServer(t *testing.T) (*httptest.Server, func()) {
 
 	loadTestTemplates(r)
 
+	r.GET("/privacy", PrivacyPage)
+	r.GET("/terms", TermsPage)
+	r.GET("/account/delete", AccountDeletePage)
+	r.POST("/settings/account/delete", middleware.AuthRequired(), middleware.CSRFMiddleware(), DeleteAccount)
+
 	r.GET("/", middleware.CSRFMiddleware(), Index)
 	r.GET("/feeds/latest", LatestRecipesFeed)
 	r.GET("/recipes/:slug", RecipeDetail)
@@ -175,6 +180,8 @@ func setupTestServer(t *testing.T) (*httptest.Server, func()) {
 		csrf.GET("/favorites", middleware.AuthRequired(), Favorites)
 		csrf.GET("/profile", middleware.AuthRequired(), UserProfile)
 		csrf.POST("/profile", middleware.AuthRequired(), UserProfile)
+		csrf.GET("/settings", middleware.AuthRequired(), UserSettings)
+		csrf.POST("/settings", middleware.AuthRequired(), UserSettings)
 		csrf.GET("/cart", middleware.AuthRequired(), ViewCart)
 		csrf.POST("/cart/add/:id", middleware.AuthRequired(), AddToCart)
 		csrf.POST("/cart/remove/:id", middleware.AuthRequired(), RemoveFromCart)

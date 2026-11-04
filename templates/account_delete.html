@@ -1,0 +1,49 @@
+{{ template "head" . }}{{ template "navbar" . }}
+<article class="round padding legal">
+<h4>Delete your account</h4>
+{{ if .deleted }}
+<div class="snackbar active primary"><i>check_circle</i><span>Your account has been deleted. Any sessions you had on other devices are no longer valid.</span></div>
+{{ end }}
+<p class="small-text">Deletion is immediate. Nothing is held for a waiting period.</p>
+
+<h5>Delete it yourself</h5>
+{{ if .user }}
+<p>You are signed in as <strong>{{ .user.Username }}</strong>. Go to <a href="/settings">Settings</a>, open <strong>Delete account</strong>, and type your username to confirm.</p>
+{{ else }}
+<p>Sign in, then go to <a href="/settings">Settings</a> → <strong>Delete account</strong> and type your username to confirm. <a href="/login">Sign in</a> if you have not already.</p>
+{{ end }}
+<p>In the Android app the same action lives under Settings → Delete account, calls the same endpoint, and uses the same typed confirmation.</p>
+<p>The endpoint is <code>DELETE /api/v1/me</code> (session cookie plus <code>{"confirm":"your-username"}</code>). The web form posts to <code>/settings/account/delete</code> with a CSRF token.</p>
+
+<h5>If you cannot sign in</h5>
+{{ if .legal.ContactEmail }}
+<p>Write to <a href="mailto:{{ .legal.ContactEmail }}">{{ .legal.ContactEmail }}</a> from the address on the account and ask for it to be deleted. Requests are handled within one month, usually much sooner. You may be asked to prove control of the address.</p>
+{{ else }}
+<p>Ask the administrator of this instance to delete the account for you. They can do it from the admin tools; there is no self-service route that works without signing in.</p>
+{{ end }}
+
+<h5>What is removed</h5>
+<ul>
+  <li>Your account row: username, email address, first and last name, bio, avatar reference, language and theme, and password hash.</li>
+  <li>The link to your external login provider (the stored OIDC subject).</li>
+  <li>Every way into the account: all browser/app sessions, password-reset tokens and mobile one-time sign-in codes.</li>
+  <li>Group memberships, favorites, cart rows, ratings and the comments attached to them.</li>
+</ul>
+
+<h5>What stays</h5>
+<ul>
+  <li>Recipes you authored remain published, with the author removed. They can still be viewed, ordered and rated by others.</li>
+  <li>Recipe edit-history entries you made remain as anonymous history.</li>
+  <li>Orders remain as transaction records with the link to your account removed. Their tracking tokens stay valid, so an order link you already shared keeps working. Item names, quantities and prices are retained.</li>
+</ul>
+<p>Backups taken before the deletion may still contain the old data until they rotate out. Backups are not used to restore an individual deleted account. Files that were uploaded (recipe images, avatars) may remain on disk after the account row is removed; the operator can remove them on request.</p>
+
+<h5>External login</h5>
+<p>If you signed in through OIDC/Authelia, deleting the Sandwitches account does not delete your account at that identity provider. Delete or disable it with that provider as well if you want the identity gone.</p>
+
+<h5>Last superuser</h5>
+<p>An account that is the only remaining superuser cannot be deleted through this route, because doing so would leave the instance with no administrator. Promote another account first; the deletion is then allowed.</p>
+
+<p class="small-text">The full detail is in the <a href="/privacy">privacy policy</a>.</p>
+</article>
+{{ template "tail" . }}

@@ -30,6 +30,15 @@ type Config struct {
 	APICORSOrigins     string
 	APIRateLimitRate   float64
 	APIRateLimitBurst  float64
+
+	// Legal identity published on /privacy, /terms and /account/delete. Empty
+	// values fall back to neutral wording so a self-hosted instance can publish
+	// the pages before its operator fills them in.
+	LegalControllerName string
+	LegalContactEmail   string
+	LegalContactAddress string
+	LegalHostingRegion  string
+	LegalBaseURL        string
 }
 
 func Load() *Config {
@@ -39,28 +48,33 @@ func Load() *Config {
 	}
 
 	cfg := &Config{
-		Debug:              os.Getenv("DEBUG") == "true",
-		SecretKey:          os.Getenv("SECRET_KEY"),
-		AllowedHosts:       os.Getenv("ALLOWED_HOSTS"),
-		CSRFTrustedOrigins: os.Getenv("CSRF_TRUSTED_ORIGINS"),
-		DatabaseFile:       os.Getenv("DATABASE_FILE"),
-		MediaRoot:          os.Getenv("MEDIA_ROOT"),
-		LogFile:            os.Getenv("LOG_FILE"),
-		SendEmail:          os.Getenv("SEND_EMAIL") == "true",
-		SMTPHost:           os.Getenv("SMTP_HOST"),
-		SMTPPort:           os.Getenv("SMTP_PORT"),
-		SMTPUser:           os.Getenv("SMTP_USER"),
-		SMTPPassword:       os.Getenv("SMTP_PASSWORD"),
-		SMTPFromEmail:      envOr("SMTP_FROM_EMAIL", "noreply@sandwitches.local"),
-		GotifyURL:          os.Getenv("GOTIFY_URL"),
-		GotifyToken:        os.Getenv("GOTIFY_TOKEN"),
-		UmamiHost:          os.Getenv("UMAMI_HOST"),
-		UmamiWebsiteID:     os.Getenv("UMAMI_WEBSITE_ID"),
-		LanguageCode:       envOr("LANGUAGE_CODE", "en"),
-		BaseDir:            baseDir,
-		APICORSOrigins:     os.Getenv("API_CORS_ORIGINS"),
-		APIRateLimitRate:   envFloat("API_RATE_LIMIT_RATE", 10),
-		APIRateLimitBurst:  envFloat("API_RATE_LIMIT_BURST", 100),
+		Debug:               os.Getenv("DEBUG") == "true",
+		SecretKey:           os.Getenv("SECRET_KEY"),
+		AllowedHosts:        os.Getenv("ALLOWED_HOSTS"),
+		CSRFTrustedOrigins:  os.Getenv("CSRF_TRUSTED_ORIGINS"),
+		DatabaseFile:        os.Getenv("DATABASE_FILE"),
+		MediaRoot:           os.Getenv("MEDIA_ROOT"),
+		LogFile:             os.Getenv("LOG_FILE"),
+		SendEmail:           os.Getenv("SEND_EMAIL") == "true",
+		SMTPHost:            os.Getenv("SMTP_HOST"),
+		SMTPPort:            os.Getenv("SMTP_PORT"),
+		SMTPUser:            os.Getenv("SMTP_USER"),
+		SMTPPassword:        os.Getenv("SMTP_PASSWORD"),
+		SMTPFromEmail:       envOr("SMTP_FROM_EMAIL", "noreply@sandwitches.local"),
+		GotifyURL:           os.Getenv("GOTIFY_URL"),
+		GotifyToken:         os.Getenv("GOTIFY_TOKEN"),
+		UmamiHost:           os.Getenv("UMAMI_HOST"),
+		UmamiWebsiteID:      os.Getenv("UMAMI_WEBSITE_ID"),
+		LanguageCode:        envOr("LANGUAGE_CODE", "en"),
+		BaseDir:             baseDir,
+		APICORSOrigins:      os.Getenv("API_CORS_ORIGINS"),
+		APIRateLimitRate:    envFloat("API_RATE_LIMIT_RATE", 10),
+		APIRateLimitBurst:   envFloat("API_RATE_LIMIT_BURST", 100),
+		LegalControllerName: os.Getenv("LEGAL_CONTROLLER_NAME"),
+		LegalContactEmail:   os.Getenv("LEGAL_CONTACT_EMAIL"),
+		LegalContactAddress: os.Getenv("LEGAL_CONTACT_ADDRESS"),
+		LegalHostingRegion:  os.Getenv("LEGAL_HOSTING_REGION"),
+		LegalBaseURL:        os.Getenv("LEGAL_BASE_URL"),
 	}
 
 	if cfg.DatabaseFile == "" {

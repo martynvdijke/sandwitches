@@ -53,13 +53,18 @@ type User struct {
 	IsActive    bool   `gorm:"default:true"`
 	IsSuperuser bool   `gorm:"default:false"`
 	OIDCSub     string `gorm:"column:oidc_sub;size:255;uniqueIndex:idx_users_oidc_sub,where:oidc_sub <> ''"`
-	DateJoined  time.Time
-	LastLogin   *time.Time
-	Favorites   []Recipe   `gorm:"many2many:user_favorites;"`
-	Recipes     []Recipe   `gorm:"foreignKey:UploadedByID"`
-	Orders      []Order    `gorm:"foreignKey:UserID"`
-	Ratings     []Rating   `gorm:"foreignKey:UserID"`
-	CartItems   []CartItem `gorm:"foreignKey:UserID"`
+	// SessionVersion is copied into the signed session cookie at sign-in and
+	// compared on every authenticated request. Because the browser holds all
+	// session state, bumping it is the only way to invalidate cookies already
+	// issued for this account (password change, account deletion).
+	SessionVersion int `gorm:"default:1"`
+	DateJoined     time.Time
+	LastLogin      *time.Time
+	Favorites      []Recipe   `gorm:"many2many:user_favorites;"`
+	Recipes        []Recipe   `gorm:"foreignKey:UploadedByID"`
+	Orders         []Order    `gorm:"foreignKey:UserID"`
+	Ratings        []Rating   `gorm:"foreignKey:UserID"`
+	CartItems      []CartItem `gorm:"foreignKey:UserID"`
 }
 
 type Group struct {

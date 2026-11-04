@@ -129,6 +129,39 @@ func buildOpenAPISpec() map[string]interface{} {
 						"401": errorResponses["401"],
 					},
 				},
+				"delete": map[string]interface{}{
+					"summary":     "Delete the current account",
+					"description": "Deletes the account immediately after the caller echoes its username in confirm. Removes the user row and owned rows, detaches authored recipes and orders, and invalidates every existing session cookie.",
+					"operationId": "deleteMe",
+					"tags":        []string{"Users"},
+					"security":    auth,
+					"requestBody": jsonBody(map[string]interface{}{
+						"type":     "object",
+						"required": []string{"confirm"},
+						"properties": map[string]interface{}{
+							"confirm": map[string]interface{}{"type": "string", "description": "The current account username"},
+						},
+					}),
+					"responses": map[string]interface{}{
+						"204": map[string]interface{}{"description": "Account deleted"},
+						"401": errorResponses["401"],
+						"409": map[string]interface{}{"description": "The last superuser cannot be deleted", "content": map[string]interface{}{"application/json": map[string]interface{}{"schema": messageSchema()}}},
+						"422": errorResponses["422"],
+					},
+				},
+			},
+			"/me/export": map[string]interface{}{
+				"get": map[string]interface{}{
+					"summary":     "Export the current account as JSON",
+					"description": "Returns the caller's profile, group names, authored recipes, ratings, favorites, cart, orders (including their own tracking tokens) and recipe edit history. Never returns password hashes, reset-token hashes or settings secrets.",
+					"operationId": "exportMe",
+					"tags":        []string{"Users"},
+					"security":    auth,
+					"responses": map[string]interface{}{
+						"200": responses("Account export", map[string]interface{}{"type": "object"})["200"],
+						"401": errorResponses["401"],
+					},
+				},
 			},
 			"/users": map[string]interface{}{
 				"get": map[string]interface{}{
@@ -136,7 +169,7 @@ func buildOpenAPISpec() map[string]interface{} {
 					"operationId": "users",
 					"tags":        []string{"Users"},
 					"parameters":  paginationParams,
-					"responses":   responses("Users", map[string]interface{}{"type": "array", "items": ref("User")}),
+					"responses":   responses("Public profiles", map[string]interface{}{"type": "array", "items": ref("PublicProfile")}),
 				},
 			},
 			"/recipes": map[string]interface{}{
@@ -540,6 +573,17 @@ func buildOpenAPISpec() map[string]interface{} {
 						"first_name": sch("string"),
 						"last_name":  sch("string"),
 						"avatar":     sch("string"),
+					},
+				},
+				"PublicProfile": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"id":         sch("integer"),
+						"username":   sch("string"),
+						"first_name": sch("string"),
+						"last_name":  sch("string"),
+						"avatar":     sch("string"),
+						"bio":        sch("string"),
 					},
 				},
 				"Tag": map[string]interface{}{

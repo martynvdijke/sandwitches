@@ -16,6 +16,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
+	"github.com/martynvdijke/sandwitches-go/internal/middleware"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
 )
@@ -302,7 +303,7 @@ func OIDCCallback(c *gin.Context) {
 	// Regenerate session to prevent fixation (clear pre-existing session)
 	session := sessions.Default(c)
 	session.Clear()
-	session.Set("user_id", u.ID)
+	middleware.SetSessionUser(session, u)
 	session.Set("auth_method", "oidc")
 	_ = session.Save()
 	c.Redirect(http.StatusFound, "/")

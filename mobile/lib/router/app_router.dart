@@ -11,6 +11,7 @@ import '../features/cart/cart_screen.dart';
 import '../features/orders/order_tracker_screen.dart';
 import '../features/orders/orders_screen.dart';
 import '../features/admin/admin_queue_screen.dart';
+import '../features/settings/settings_screen.dart';
 import '../features/shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -19,6 +20,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/onboarding', builder: (c, s) => const OnboardingScreen()),
       GoRoute(path: '/login', builder: (c, s) => const LoginScreen()),
+      GoRoute(path: '/settings', builder: (c, s) => const SettingsScreen()),
       GoRoute(
         path: '/admin/recipes/new',
         builder: (c, s) => const RecipeCreateScreen(),

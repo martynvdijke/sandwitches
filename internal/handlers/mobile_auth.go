@@ -11,6 +11,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
+	"github.com/martynvdijke/sandwitches-go/internal/middleware"
 )
 
 const (
@@ -117,7 +118,7 @@ func MobileAuthExchange(c *gin.Context) {
 	}
 	session := sessions.Default(c)
 	session.Clear()
-	session.Set("user_id", user.ID)
+	middleware.SetSessionUser(session, user)
 	session.Set("auth_method", "oidc")
 	if err := session.Save(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "session_error"})

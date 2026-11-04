@@ -293,6 +293,16 @@ class ApiRepository {
       return null;
     }
   }
+
+  Future<void> deleteAccount(String confirm) async {
+    final r = await dio.delete('$apiBase/me', data: {'confirm': confirm});
+    if (r.statusCode == 204 || r.statusCode == 200) return;
+    final data = r.data;
+    final message = data is Map && data['message'] != null
+        ? data['message'].toString()
+        : 'Could not delete the account (${r.statusCode})';
+    throw ApiException(message);
+  }
 }
 
 final repositoryProvider = Provider<ApiRepository>((ref) {

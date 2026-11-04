@@ -303,6 +303,13 @@ func setupRouter(cfg *config.Config, tel *telemetry.Telemetry) *gin.Engine {
 
 	router.Use(middleware.OptionalAuth())
 
+	// Legal pages must stay readable without an account. They are registered
+	// before the CSRF group so anonymous store reviewers do not get a session
+	// cookie just by reading the policy.
+	router.GET("/privacy", handlers.PrivacyPage)
+	router.GET("/terms", handlers.TermsPage)
+	router.GET("/account/delete", handlers.AccountDeletePage)
+
 	router.GET("/feeds/latest", handlers.LatestRecipesFeed)
 
 	router.GET("/setup", handlers.SetupPage)
@@ -342,6 +349,7 @@ func setupRouter(cfg *config.Config, tel *telemetry.Telemetry) *gin.Engine {
 
 		web.GET("/settings", middleware.AuthRequired(), handlers.UserSettings)
 		web.POST("/settings", middleware.AuthRequired(), handlers.UserSettings)
+		// registered outside the CSRF group below so AuthRequired runs first
 
 		web.GET("/orders/:id", middleware.AuthRequired(), handlers.UserOrderDetail)
 
@@ -402,6 +410,10 @@ func setupRouter(cfg *config.Config, tel *telemetry.Telemetry) *gin.Engine {
 			admin.GET("/tasks", handlers.AdminTasks)
 		}
 	}
+
+	// Account deletion: authenticate before CSRF so signed-out users are
+	// redirected to login instead of getting a bare 403.
+	router.POST("/settings/account/delete", middleware.AuthRequired(), middleware.CSRFMiddleware(), handlers.DeleteAccount)
 
 	apiGroup := router.Group("/api")
 	apiGroup.Use(middleware.CORS(cfg.APICORSOrigins))

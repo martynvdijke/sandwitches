@@ -22,6 +22,7 @@ import (
 	"github.com/martynvdijke/sandwitches-go/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/pbkdf2"
+	"gorm.io/gorm"
 )
 
 // verifyPassword checks a stored password hash against the supplied password.
@@ -116,7 +117,7 @@ func Signup(c *gin.Context) {
 	}
 
 	session := sessions.Default(c)
-	session.Set("user_id", user.ID)
+	middleware.SetSessionUser(session, &user)
 	if err := session.Save(); err != nil {
 		c.HTML(http.StatusOK, "signup.html", td.With("error", "Session error").ToGinH())
 		return
@@ -208,7 +209,7 @@ func Login(c *gin.Context) {
 	database.DB.Save(&user)
 
 	session := sessions.Default(c)
-	session.Set("user_id", user.ID)
+	middleware.SetSessionUser(session, &user)
 	if err := session.Save(); err != nil {
 		c.HTML(http.StatusOK, "login.html", td.With("error", "Session error").With("next", safeNext(form.Next)).ToGinH())
 		return
@@ -367,10 +368,20 @@ func ResetPassword(c *gin.Context) {
 	}
 
 	now := time.Now()
-	if err := database.DB.Model(&database.User{}).Where("id = ?", rt.UserID).Update("password", string(hashed)).Error; err != nil {
+	// Bump the session version in the same write as the new password so every
+	// cookie handed out before the reset stops working.
+	if err := database.DB.Model(&database.User{}).Where("id = ?", rt.UserID).
+		Updates(map[string]interface{}{
+			"password":        string(hashed),
+			"session_version": gorm.Expr("CASE WHEN session_version < 1 THEN 2 ELSE session_version + 1 END"),
+		}).Error; err != nil {
 		c.HTML(http.StatusOK, "reset_password.html", td.With("error", "Server error").With("token", form.Token).ToGinH())
 		return
 	}
+	// Any other outstanding reset link for this account is now void.
+	database.DB.Model(&database.PasswordResetToken{}).
+		Where("user_id = ? AND used_at IS NULL AND id <> ?", rt.UserID, rt.ID).
+		Update("used_at", now)
 	database.DB.Model(&database.PasswordResetToken{}).Where("id = ?", rt.ID).Update("used_at", now)
 
 	utils.AddFlash(c, "success", "Password reset. You can log in now.")
@@ -422,7 +433,7 @@ func Setup(c *gin.Context) {
 	database.DB.Exec("INSERT INTO user_groups (user_id, group_id) VALUES (?, ?)", user.ID, adminGroup.ID)
 
 	session := sessions.Default(c)
-	session.Set("user_id", user.ID)
+	middleware.SetSessionUser(session, &user)
 	_ = session.Save()
 
 	utils.AddFlash(c, "success", "Admin account created")

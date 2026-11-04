@@ -1,0 +1,41 @@
+{{ template "head" . }}{{ template "navbar" . }}
+<article class="round padding legal">
+<h4>Terms of use</h4>
+<p class="small-text">The short version: share sandwiches honestly, be decent to other people, and keep your account secure. Last updated {{ now.Year }}.</p>
+
+<h5>Your account</h5>
+<p>You need an account to order, rate, favorite or create recipes. Keep one account per person, use an email address you can actually receive mail at, and keep your password to yourself. You are responsible for what happens under your account. If you think someone else has access, reset your password and sign out; a password reset invalidates other sessions.</p>
+<p>You can delete your account at any time from <a href="/settings">Settings</a> or <a href="/account/delete">Delete your account</a>. Administrators may suspend or remove accounts that break these terms.</p>
+
+<h5>What you post</h5>
+<p>You keep ownership of the recipes, images, ratings and comments you create. By posting them you give this instance permission to store and display them, including publicly on recipe pages and through the public API, and to include them in features such as search, the community page and order handling. That permission ends when the content is deleted, except for copies already in other people's conversations, shared order records, or backups that have not yet rotated out.</p>
+<p>Ratings and comments are opinions. Do not post content that is illegal, hateful, harassing, misleading, or that contains someone else's private information without permission. Do not upload images you do not have the right to use.</p>
+
+<h5>Orders</h5>
+<p>Recipes and prices are set by their authors. Placing an order creates a record the operator uses to prepare and track it; it does not create a consumer contract with the platform beyond that order. Order tracking links are secrets: anyone with the link can see that order's status, so do not post them publicly.</p>
+
+<h5>What is not allowed</h5>
+<ul>
+  <li>Scraping, bulk-downloading or reselling other people's data.</li>
+  <li>Automated account creation, ordering, rating or commenting, or otherwise evading rate limits.</li>
+  <li>Uploading malware, probing the service for vulnerabilities without asking first, or disrupting other users.</li>
+  <li>Impersonating another person or a brand you do not represent.</li>
+  <li>Using the instance to break the law or to infringe copyright, trademark or privacy rights.</li>
+</ul>
+
+<h5>Content from other sources</h5>
+<p>Recipe and ingredient data may include material supplied by users or other sources. It is shown as it was provided and may be incomplete or wrong. Always check ingredients yourself if you have allergies or dietary restrictions.</p>
+
+<h5>Availability and liability</h5>
+<p>This is a self-hosted community instance, offered as it is. It can go down for maintenance, lose data if a backup fails, or shut down entirely. Do not rely on it as the only copy of anything you care about; use the JSON export to keep your own copy.</p>
+<p>To the extent the law allows, the operator is not liable for indirect or consequential loss arising from use of the instance. Nothing here limits liability that cannot be limited by law, including for death, personal injury or fraud, or your statutory consumer rights.</p>
+
+<h5>Governing law</h5>
+<p>These terms are governed by the law of the country in which the operator of this instance is established, without affecting consumer protections you have where you live.</p>
+
+<h5>Changes</h5>
+<p>Material changes are announced on this page before they take effect. Continuing to use the instance after that means you accept the updated terms.</p>
+
+<p class="small-text">See also the <a href="/privacy">privacy policy</a>, which explains what data is stored and how to remove it.</p>
+</article>
+{{ template "tail" . }}

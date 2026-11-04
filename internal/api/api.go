@@ -34,6 +34,8 @@ func RegisterRoutes(r *gin.RouterGroup) {
 		api.POST("/settings", middleware.AuthRequired(), updateSettings)
 
 		api.GET("/me", middleware.AuthRequired(), me)
+		api.DELETE("/me", middleware.AuthRequired(), deleteMe)
+		api.GET("/me/export", middleware.AuthRequired(), exportMe)
 
 		api.GET("/users", users)
 
@@ -119,7 +121,7 @@ func users(c *gin.Context) {
 	var users []database.User
 	query.Limit(pg.limit).Offset(pg.offset).Find(&users)
 
-	items := usersToDTOs(users)
+	items := usersToPublicDTOs(users)
 	if paginated {
 		c.JSON(http.StatusOK, gin.H{"items": items, "total": total})
 		return

@@ -8,4 +8,26 @@
 <div class="space"></div>
 <button type="submit" class="button primary round">Save Settings</button>
 </form>
+
+<div class="space"></div>
+<h5>Your data</h5>
+<p class="small-text">Download a JSON copy of your profile, recipes, ratings, favorites, cart and orders. The download does not include your password hash or reset-token hashes.</p>
+<a class="button transparent border round" href="/api/v1/me/export"><i>download</i> Download my data</a>
+
+<div class="space"></div>
+<h5>Privacy and legal</h5>
+<nav class="wrap">
+  <a href="/privacy" class="button transparent border round">Privacy policy</a>
+  <a href="/terms" class="button transparent border round">Terms of use</a>
+  <a href="/account/delete" class="button transparent border round">Delete account</a>
+</nav>
+
+<div class="space"></div>
+<h5>Delete account</h5>
+<p class="small-text">This removes your account and profile immediately. Recipes you authored stay published without an author; orders stay as anonymous transaction records. Type <strong>{{ .user.Username }}</strong> to confirm.</p>
+<form method="post" action="/settings/account/delete">
+{{ .csrf_token }}
+<div class="field label border round"><input type="text" name="confirm" autocomplete="off" required><label>Type your username</label></div>
+<button type="submit" class="button error round"><i>delete_forever</i> Delete my account</button>
+</form>
 {{ template "tail" . }}

@@ -1,0 +1,89 @@
+{{ template "head" . }}{{ template "navbar" . }}
+<article class="round padding legal">
+<h4>Privacy policy</h4>
+<p class="small-text">What this Sandwitches instance stores about you, why it stores it, who else sees it, and how to get it back or remove it. Last updated {{ now.Year }}.</p>
+
+<h5>Who is responsible</h5>
+<p><strong>{{ .legal.Controller }}</strong> runs this instance and decides what is done with the data described here. The instance is hosted in {{ .legal.HostingRegion }}.</p>
+{{ if .legal.ContactEmail }}
+<p>For any privacy question, or to exercise a right below, write to <a href="mailto:{{ .legal.ContactEmail }}">{{ .legal.ContactEmail }}</a>.{{ if .legal.ContactAddress }} Postal address: {{ .legal.ContactAddress }}.{{ end }}</p>
+{{ else }}
+<p>This instance has not published a dedicated privacy address. Requests can be made from the account itself (see <a href="/account/delete">Delete your account</a>), or through the administrator who runs this server.</p>
+{{ end }}
+
+<h5>What is stored, and why (GDPR Article 13)</h5>
+<ul>
+  <li><strong>Account and profile.</strong> Username, email address, first and last name, optional bio and avatar, language and theme preference, the date you joined and the time you last signed in. If you sign in with a password we store a bcrypt hash of it, never the password itself. Legal basis: performance of a contract with you.</li>
+  <li><strong>External login identity.</strong> When you sign in through the configured OpenID Connect provider, we store the provider's subject identifier (the <code>oidc_sub</code> value) and any name, email and group information the provider returns at sign-in. We do not receive your provider password. Legal basis: performance of a contract and our legitimate interest in offering single sign-on.</li>
+  <li><strong>Recipes and contributions.</strong> Recipes you create (title, description, ingredients, instructions, servings, price, images), ratings and comments you post, and the history of edits made to recipes. Legal basis: performance of a contract and our legitimate interest in running the community.</li>
+  <li><strong>Orders.</strong> Orders you place, their items, status, total and an order tracking token, plus the delivery/contact information the instance asks for at checkout. Legal basis: performance of a contract; order records are also kept for accounting and dispute handling where the law requires it.</li>
+  <li><strong>Cart and favorites.</strong> Which recipes you put in your cart or marked as a favorite. Legal basis: performance of a contract.</li>
+  <li><strong>Security and sign-in data.</strong> The signed session cookie described below, password-reset tokens (stored only as SHA-256 hashes, valid for 24 hours), mobile one-time sign-in codes (hashed, valid for two minutes), IP addresses used for rate limiting and abuse prevention, and request logs containing the request path, status, timing, a request ID and possibly a trace ID. Legal basis: legitimate interest in keeping the service secure and working.</li>
+  {{ if .legal.Mail }}<li><strong>Email delivery.</strong> If email is enabled, your address and the content of order/reset/notification messages are passed to the configured SMTP provider so it can deliver them. Legal basis: performance of a contract and legitimate interest in notifying you.</li>{{ end }}
+  {{ if .legal.Gotify }}<li><strong>Push notifications.</strong> This instance sends order and recipe notifications to a Gotify server configured by its operator. Those messages include the order or recipe details and the username involved. Legal basis: legitimate interest in operating the instance.</li>{{ end }}
+  {{ if .legal.Analytics }}<li><strong>Analytics.</strong> This instance uses a self-hosted Umami instance at <code>{{ .legal.AnalyticsURL }}</code>. It records page views without advertising cookies or cross-site profiles. Legal basis: legitimate interest in understanding which pages are used.</li>{{ end }}
+  {{ if .legal.Traces }}<li><strong>Server traces.</strong> OpenTelemetry export is enabled. Traces contain request timings and technical metadata on the server; they are used for debugging and performance, not to build a profile of you. Legal basis: legitimate interest in a reliable service.</li>{{ end }}
+  {{ if .legal.AI }}<li><strong>AI endpoint.</strong> An administrator has configured an external AI endpoint. When you use an AI-assisted feature, the recipe text you submit for that feature is sent to that endpoint. Legal basis: performance of a contract for the feature you requested.</li>{{ end }}
+</ul>
+
+<h5>What other people can see</h5>
+<p>Recipes are public: anyone can read a recipe page, including its title, description, ingredients, instructions, images and the username, display name and avatar of the account that created it. Ratings and comments are public together with the username and avatar of the person who posted them. Favorites are not listed publicly, but a recipe page shows how many people favorited it.</p>
+<p>The public JSON endpoint <code>GET /api/v1/users</code> lists the public profile of accounts: id, username, first and last name, avatar and bio. It does not return email addresses, password hashes, sign-in identities, language/theme preferences, staff flags or any order data. Profiles and recipes you create are therefore visible without signing in; the rest of your account data is only visible to you and to instance administrators.</p>
+
+<h5>Who else receives data</h5>
+<p>Data is not sold and is not shared for advertising. It reaches the following recipients only when the corresponding feature is enabled:</p>
+<ul>
+  {{ if .legal.Mail }}<li><strong>The SMTP provider</strong> configured by the operator, which delivers email and therefore sees the recipient address and message content.</li>{{ end }}
+  {{ if .legal.Gotify }}<li><strong>The Gotify server</strong> configured by the operator, which receives notification text and delivers it to the operator's devices.</li>{{ end }}
+  {{ if .legal.Analytics }}<li><strong>The self-hosted Umami server</strong>, which records page views.</li>{{ end }}
+  {{ if .legal.Traces }}<li><strong>The OTLP collector</strong> configured by the operator, which receives traces, metrics and logs.</li>{{ end }}
+  {{ if .legal.AI }}<li><strong>The configured AI provider</strong>, which receives the text you submit to an AI-assisted feature.</li>{{ end }}
+  {{ if .legal.OIDC }}<li><strong>Your OpenID Connect identity provider</strong>, which authenticates you and returns your identity to us.</li>{{ end }}
+  <li><strong>The hosting provider</strong> that runs this server and its backups.</li>
+</ul>
+<p>Some providers may process data outside the European Economic Area. Where that happens, transfers rely on an adequacy decision or the provider's standard contractual clauses.</p>
+
+<h5 id="cookies">Cookies, sessions and tracking</h5>
+<p>This site uses one cookie, <code>{{ .legal.SessionCookie }}</code>. It is <code>HttpOnly</code>, signed by the server, valid for up to 30 days, and sent only with requests to this site. It contains a CSRF token and, once you sign in, your user id and a session version. There is no separate server-side session database: the cookie itself is the session, and the server checks on every request that the account still exists, is active and still has the version recorded in the cookie.</p>
+<p>Signing out deletes the cookie. Changing your password or deleting your account bumps the account's session version or removes the account, which makes every previously issued cookie stop working, including cookies on other devices.</p>
+<p>There are no advertising cookies, no third-party tracking pixels and no cross-site profiling. {{ if .legal.Analytics }}The Umami analytics above is self-hosted and cookieless; it does not receive the session cookie.{{ else }}No analytics service is enabled on this instance.{{ end }}</p>
+
+<h5>How long it is kept</h5>
+<ul>
+  <li>Account and profile data: while your account exists, then deleted as described below.</li>
+  <li>Password-reset tokens: 24 hours, or until used. Mobile sign-in codes: two minutes, or until used.</li>
+  <li>Session cookies: up to 30 days, or until you sign out, change your password or delete your account.</li>
+  <li>Recipes: while the recipe exists. If you delete your account, recipes you authored stay published with no author attached, unless an administrator removes them.</li>
+  <li>Ratings, comments, favorites, cart rows, group memberships and reset/mobile tokens: deleted immediately when the account is deleted.</li>
+  <li>Orders: retained as the instance's transaction record after the account is deleted, with the link to your account removed. The order's tracking token remains valid. Accounting retention periods may require this.</li>
+  <li>Logs and backups: kept for the operator's normal log and backup rotation window and then overwritten. Backups are not used to restore an individual deleted account.</li>
+</ul>
+
+<h5>Deleting your account</h5>
+<p>You can delete your account at any time from <a href="/settings">Settings</a> (in the web app) or Settings → Delete account (in the Android app). The deletion is immediate and there is no waiting period.</p>
+<p><strong>Removed:</strong> your account row, username, email address, first and last name, bio, avatar reference, language and theme, password hash, OIDC subject, active sessions, group memberships, favorites, ratings and comments, cart, password-reset tokens and mobile sign-in codes.</p>
+<p><strong>Retained, detached from you:</strong> recipes you authored (with the author field cleared), recipe edit-history entries you made (author cleared), and orders (account link cleared, tracking token and item/price record retained).</p>
+<p>If you cannot sign in, use the fallback described on <a href="/account/delete">Delete your account</a>. If you signed in through an external identity provider, deleting the Sandwitches account does not delete your account at that provider; delete or disable it there as well if you want the identity removed.</p>
+
+<h5>Your rights</h5>
+<ul>
+  <li><strong>Access and portability.</strong> Download your data as JSON from the app (<code>GET /api/v1/me/export</code>) or from the signed-in settings page.</li>
+  <li><strong>Rectification.</strong> Most profile fields can be changed under <a href="/settings">Settings</a> and <a href="/profile">Profile</a>.</li>
+  <li><strong>Erasure.</strong> Use <a href="/account/delete">Delete your account</a>; it takes effect immediately.</li>
+  <li><strong>Restriction and objection.</strong> Ask the contact above to restrict processing, or object to processing based on legitimate interest.</li>
+  <li><strong>Complaint.</strong> You may lodge a complaint with the data protection authority (DPA) in the country where you live, work, or where the alleged infringement took place. In the Netherlands this is the Autoriteit Persoonsgegevens.</li>
+</ul>
+<p>Requests that are not covered by the self-service pages are answered within one month, as Article 12 GDPR requires. You can also ask for the data described here to be corrected or for an explanation of how it was processed.</p>
+
+<h5>Children</h5>
+<p>This instance is not intended for anyone under 16. Accounts for younger users are not knowingly created; if you believe a child under 16 has an account, contact the operator so it can be removed.</p>
+
+<h5>Automated decisions</h5>
+<p>No automated decision-making with legal or similarly significant effects is performed. Recipes may be reviewed by an administrator before publication.</p>
+
+<h5>Changes</h5>
+<p>If this policy changes in a way that affects you, the change is announced on this page before it takes effect. The date at the top shows the current version.</p>
+
+<p class="small-text">See also the <a href="/terms">terms of use</a> and <a href="/account/delete">account deletion</a> page.</p>
+</article>
+{{ template "tail" . }}

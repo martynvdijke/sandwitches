@@ -49,6 +49,11 @@ class _HomeState extends ConsumerState<HomeScreen> {
             ),
           ),
           IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: () => context.push('/settings'),
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await ref.read(storageProvider).clearAuth();

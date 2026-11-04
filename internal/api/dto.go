@@ -131,10 +131,34 @@ func userToDTO(u *database.User) UserDTO {
 	}
 }
 
-func usersToDTOs(users []database.User) []UserDTO {
-	out := make([]UserDTO, len(users))
+// PublicProfileDTO is what GET /api/v1/users may expose without a session. It
+// is deliberately smaller than UserDTO: email, language/theme preferences and
+// staff flags are account data, not public profile data, and must not be
+// enumerable by anonymous callers.
+type PublicProfileDTO struct {
+	ID        uint   `json:"id"`
+	Username  string `json:"username"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Avatar    string `json:"avatar"`
+	Bio       string `json:"bio"`
+	Language  string `json:"language"`
+	Theme     string `json:"theme"`
+}
+
+func usersToPublicDTOs(users []database.User) []PublicProfileDTO {
+	out := make([]PublicProfileDTO, len(users))
 	for i, u := range users {
-		out[i] = userToDTO(&u)
+		out[i] = PublicProfileDTO{
+			ID:        u.ID,
+			Username:  u.Username,
+			FirstName: u.FirstName,
+			LastName:  u.LastName,
+			Avatar:    u.Avatar,
+			Bio:       u.Bio,
+			Language:  u.Language,
+			Theme:     u.Theme,
+		}
 	}
 	return out
 }
