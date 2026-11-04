@@ -282,7 +282,7 @@ def test_admin_tag_management(page: Page, go_server, device_name):
     page.wait_for_url(f"{GO_URL}/dashboard/tags", wait_until="commit", timeout=5000)
     expect(page.locator("td").first).to_have_text("Extra Spicy")
 
-    page.locator("a[href*='/delete']:has-text('Delete')").click()
+    page.locator("a[href^='/dashboard/tags/'][href$='/delete']:has-text('Delete')").click()
     page.locator("button:has-text('Yes, delete')").click()
     expect(page.get_by_text("Extra Spicy")).not_to_be_visible()
 
