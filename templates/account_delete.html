@@ -17,10 +17,11 @@
 
 <h5>If you cannot sign in</h5>
 {{ if .legal.ContactEmail }}
-<p>Write to <a href="mailto:{{ .legal.ContactEmail }}">{{ .legal.ContactEmail }}</a> from the address on the account and ask for it to be deleted. Requests are handled within one month, usually much sooner. You may be asked to prove control of the address.</p>
+<p>Write to <a href="mailto:{{ .legal.ContactEmail }}?subject=Account%20deletion%20request&body=Please%20delete%20the%20Sandwitches%20account%20with%20this%20username%3A%20">email us a deletion request</a> ({{ .legal.ContactEmail }}) from the address on the account and ask for it to be deleted. Include your username in the message. We respond within 30 days, usually much sooner. You may be asked to prove control of the address.</p>
 {{ else }}
-<p>Ask the administrator of this instance to delete the account for you. They can do it from the admin tools; there is no self-service route that works without signing in.</p>
+<p>Ask the administrator of this instance to delete the account for you. They can do it from the admin tools; there is no self-service route that works without signing in. We respond within 30 days.</p>
 {{ end }}
+<p>The canonical public address of this page is <a href="{{ .legal.BaseURL }}/account/delete">{{ .legal.BaseURL }}/account/delete</a>.</p>
 
 <h5>What is removed</h5>
 <ul>
@@ -43,6 +44,9 @@
 
 <h5>Last superuser</h5>
 <p>An account that is the only remaining superuser cannot be deleted through this route, because doing so would leave the instance with no administrator. Promote another account first; the deletion is then allowed.</p>
+
+<h5>Demo account</h5>
+<p>The shared public demo account exists so reviewers and visitors can try the app. It is a single shared login and cannot be deleted; deleting it would remove access for everyone using it. All other accounts can be deleted.</p>
 
 <p class="small-text">The full detail is in the <a href="/privacy">privacy policy</a>.</p>
 </article>

@@ -10,13 +10,14 @@
 {{ else }}
 <p>This instance has not published a dedicated privacy address. Requests can be made from the account itself (see <a href="/account/delete">Delete your account</a>), or through the administrator who runs this server.</p>
 {{ end }}
+{{ if .legal.DPOEmail }}<p>Data protection officer: <a href="mailto:{{ .legal.DPOEmail }}">{{ .legal.DPOEmail }}</a>.</p>{{ end }}
 
 <h5>What is stored, and why (GDPR Article 13)</h5>
 <ul>
   <li><strong>Account and profile.</strong> Username, email address, first and last name, optional bio and avatar, language and theme preference, the date you joined and the time you last signed in. If you sign in with a password we store a bcrypt hash of it, never the password itself. Legal basis: performance of a contract with you.</li>
   <li><strong>External login identity.</strong> When you sign in through the configured OpenID Connect provider, we store the provider's subject identifier (the <code>oidc_sub</code> value) and any name, email and group information the provider returns at sign-in. We do not receive your provider password. Legal basis: performance of a contract and our legitimate interest in offering single sign-on.</li>
   <li><strong>Recipes and contributions.</strong> Recipes you create (title, description, ingredients, instructions, servings, price, images), ratings and comments you post, and the history of edits made to recipes. Legal basis: performance of a contract and our legitimate interest in running the community.</li>
-  <li><strong>Orders.</strong> Orders you place, their items, status, total and an order tracking token, plus the delivery/contact information the instance asks for at checkout. Legal basis: performance of a contract; order records are also kept for accounting and dispute handling where the law requires it.</li>
+  <li><strong>Orders.</strong> Orders you place, their items, status, total and an order tracking token. This instance does not store a delivery address or contact details in the order. Legal basis: performance of a contract; order records are also kept for accounting and dispute handling where the law requires it.</li>
   <li><strong>Cart and favorites.</strong> Which recipes you put in your cart or marked as a favorite. Legal basis: performance of a contract.</li>
   <li><strong>Security and sign-in data.</strong> The signed session cookie described below, password-reset tokens (stored only as SHA-256 hashes, valid for 24 hours), mobile one-time sign-in codes (hashed, valid for two minutes), IP addresses used for rate limiting and abuse prevention, and request logs containing the request path, status, timing, a request ID and possibly a trace ID. Legal basis: legitimate interest in keeping the service secure and working.</li>
   {{ if .legal.Mail }}<li><strong>Email delivery.</strong> If email is enabled, your address and the content of order/reset/notification messages are passed to the configured SMTP provider so it can deliver them. Legal basis: performance of a contract and legitimate interest in notifying you.</li>{{ end }}
@@ -25,6 +26,9 @@
   {{ if .legal.Traces }}<li><strong>Server traces.</strong> OpenTelemetry export is enabled. Traces contain request timings and technical metadata on the server; they are used for debugging and performance, not to build a profile of you. Legal basis: legitimate interest in a reliable service.</li>{{ end }}
   {{ if .legal.AI }}<li><strong>AI endpoint.</strong> An administrator has configured an external AI endpoint. When you use an AI-assisted feature, the recipe text you submit for that feature is sent to that endpoint. Legal basis: performance of a contract for the feature you requested.</li>{{ end }}
 </ul>
+
+<h5>Legal bases</h5>
+<p>We rely on the following legal bases under Article 6 GDPR: <strong>performance of a contract</strong> for your account, recipes, orders, cart and other features you ask for; <strong>legitimate interests</strong> for security, abuse prevention, request logs, the community, self-hosted analytics and optional notifications; <strong>consent</strong> only where we separately ask you to agree to optional processing (for example enabling an optional third-party feature), which you can withdraw at any time; and <strong>legal obligation</strong> where we must keep order or accounting records or respond to lawful requests. Accepting these terms is an acknowledgement of the contract and this notice, not consent to optional processing.</p>
 
 <h5>What other people can see</h5>
 <p>Recipes are public: anyone can read a recipe page, including its title, description, ingredients, instructions, images and the username, display name and avatar of the account that created it. Ratings and comments are public together with the username and avatar of the person who posted them. Favorites are not listed publicly, but a recipe page shows how many people favorited it.</p>
@@ -44,9 +48,11 @@
 <p>Some providers may process data outside the European Economic Area. Where that happens, transfers rely on an adequacy decision or the provider's standard contractual clauses.</p>
 
 <h5 id="cookies">Cookies, sessions and tracking</h5>
-<p>This site uses one cookie, <code>{{ .legal.SessionCookie }}</code>. It is <code>HttpOnly</code>, signed by the server, valid for up to 30 days, and sent only with requests to this site. It contains a CSRF token and, once you sign in, your user id and a session version. There is no separate server-side session database: the cookie itself is the session, and the server checks on every request that the account still exists, is active and still has the version recorded in the cookie.</p>
-<p>Signing out deletes the cookie. Changing your password or deleting your account bumps the account's session version or removes the account, which makes every previously issued cookie stop working, including cookies on other devices.</p>
-<p>There are no advertising cookies, no third-party tracking pixels and no cross-site profiling. {{ if .legal.Analytics }}The Umami analytics above is self-hosted and cookieless; it does not receive the session cookie.{{ else }}No analytics service is enabled on this instance.{{ end }}</p>
+<p>This site uses a small number of first-party cookies. The sign-in cookie, <code>{{ .legal.SessionCookie }}</code>, is <code>HttpOnly</code>, signed by the server, valid for up to 30 days, and sent only with requests to this site. It contains a CSRF token and, once you sign in, your user id and a session version. There is no separate server-side session database: the cookie itself is the session, and the server checks on every request that the account still exists, is active and still has the version recorded in the cookie.</p>
+<p>If you sign in through OpenID Connect, the login flow sets four short-lived <code>HttpOnly</code> cookies — <code>oidc_state</code>, <code>oidc_nonce</code>, <code>oidc_verifier</code> and, for the mobile flow, <code>oidc_mobile</code> — to protect the redirect and bind the callback to your browser. They expire after 15 minutes and are cleared when the flow finishes.</p>
+<p>If you turn on the e-ink reading mode, the site stores a first-party <code>eink_mode</code> preference cookie for up to 30 days so your choice survives page loads. It contains only the value <code>1</code> and is not used for tracking. Turn e-ink mode off or clear site data to remove it.</p>
+<p>Signing out deletes the session cookie. Changing your password or deleting your account bumps the account's session version or removes the account, which makes every previously issued cookie stop working, including cookies on other devices.</p>
+<p>There are no advertising cookies, no third-party tracking pixels and no cross-site profiling. {{ if .legal.Analytics }}The Umami analytics above is self-hosted and cookieless; it does not receive the session cookie and it honours the browser's Do Not Track setting. Signed-in users can also object at any time under <a href="/settings">Settings → Privacy choices</a>, after which the analytics script is not loaded for their account.{{ else }}No analytics service is enabled on this instance.{{ end }}</p>
 
 <h5>How long it is kept</h5>
 <ul>
@@ -67,13 +73,18 @@
 
 <h5>Your rights</h5>
 <ul>
-  <li><strong>Access and portability.</strong> Download your data as JSON from the app (<code>GET /api/v1/me/export</code>) or from the signed-in settings page.</li>
+  <li><strong>Access and portability.</strong> Download your data as JSON from the app (<code>GET /api/v1/me/export</code>) or from the signed-in settings page under “Your data”.</li>
   <li><strong>Rectification.</strong> Most profile fields can be changed under <a href="/settings">Settings</a> and <a href="/profile">Profile</a>.</li>
-  <li><strong>Erasure.</strong> Use <a href="/account/delete">Delete your account</a>; it takes effect immediately.</li>
-  <li><strong>Restriction and objection.</strong> Ask the contact above to restrict processing, or object to processing based on legitimate interest.</li>
-  <li><strong>Complaint.</strong> You may lodge a complaint with the data protection authority (DPA) in the country where you live, work, or where the alleged infringement took place. In the Netherlands this is the Autoriteit Persoonsgegevens.</li>
+  <li><strong>Erasure.</strong> Use <a href="/account/delete">Delete your account</a>; it takes effect immediately. The shared demo account is the only account that cannot be deleted.</li>
+  <li><strong>Restriction.</strong> Ask the contact above to restrict processing while a request is being assessed.</li>
+  <li><strong>Objection.</strong> Object to processing based on legitimate interest at any time. Analytics can be switched off directly under <a href="/settings">Settings → Privacy choices</a>; we then stop loading the analytics script for your account.</li>
+  <li><strong>Withdraw consent.</strong> Where processing relies on your consent (for example accepting these terms or using an optional feature), you can withdraw it at any time without affecting processing that already happened.</li>
+  <li><strong>Complaint.</strong> You may lodge a complaint with the data protection authority in the country where you live, work, or where the alleged infringement took place. The supervisory authority named for this instance is {{ .legal.SupervisoryAuthority }}.</li>
 </ul>
 <p>Requests that are not covered by the self-service pages are answered within one month, as Article 12 GDPR requires. You can also ask for the data described here to be corrected or for an explanation of how it was processed.</p>
+
+<h5>How it is protected</h5>
+<p>Passwords are stored as bcrypt hashes, never in plain text. Reset tokens and mobile sign-in codes are stored only as SHA-256 hashes and expire quickly. The session cookie is signed, <code>HttpOnly</code> and sent only over HTTPS in production. Access to the server, database and backups is limited to the operator; the instance applies rate limiting and request logging to detect abuse. No system is perfectly secure, so keep your password private and contact the operator if you suspect unauthorised access.</p>
 
 <h5>Children</h5>
 <p>This instance is not intended for anyone under 16. Accounts for younger users are not knowingly created; if you believe a child under 16 has an account, contact the operator so it can be removed.</p>

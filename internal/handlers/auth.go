@@ -57,13 +57,14 @@ func verifyDjangoPBKDF2(stored, password string) bool {
 }
 
 type SignupForm struct {
-	Username  string `form:"username" binding:"required,min=3,max=150"`
-	Password1 string `form:"password1" binding:"required,min=8"`
-	Password2 string `form:"password2" binding:"required,eqfield=Password1"`
-	FirstName string `form:"first_name"`
-	LastName  string `form:"last_name"`
-	Email     string `form:"email" binding:"required,email"`
-	Bio       string `form:"bio"`
+	Username    string `form:"username" binding:"required,min=3,max=150"`
+	Password1   string `form:"password1" binding:"required,min=8"`
+	Password2   string `form:"password2" binding:"required,eqfield=Password1"`
+	FirstName   string `form:"first_name"`
+	LastName    string `form:"last_name"`
+	Email       string `form:"email" binding:"required,email"`
+	Bio         string `form:"bio"`
+	AcceptTerms bool   `form:"accept_terms"`
 }
 
 func SignupPage(c *gin.Context) {
@@ -76,6 +77,10 @@ func Signup(c *gin.Context) {
 	var form SignupForm
 	if err := c.ShouldBind(&form); err != nil {
 		c.HTML(http.StatusOK, "signup.html", td.With("error", err.Error()).With("form", form).ToGinH())
+		return
+	}
+	if !form.AcceptTerms {
+		c.HTML(http.StatusOK, "signup.html", td.With("error", "You must accept the Terms of use and Privacy policy.").With("form", form).ToGinH())
 		return
 	}
 
@@ -93,16 +98,17 @@ func Signup(c *gin.Context) {
 	}
 
 	user := database.User{
-		Username:   form.Username,
-		Password:   string(hashed),
-		FirstName:  form.FirstName,
-		LastName:   form.LastName,
-		Email:      form.Email,
-		Bio:        form.Bio,
-		Language:   "en",
-		Theme:      "light",
-		IsActive:   true,
-		DateJoined: time.Now(),
+		Username:        form.Username,
+		Password:        string(hashed),
+		FirstName:       form.FirstName,
+		LastName:        form.LastName,
+		Email:           form.Email,
+		Bio:             form.Bio,
+		Language:        "en",
+		Theme:           "light",
+		IsActive:        true,
+		AcceptedTermsAt: ptrTime(time.Now()),
+		DateJoined:      time.Now(),
 	}
 
 	if err := database.DB.Create(&user).Error; err != nil {
@@ -131,6 +137,33 @@ type LoginForm struct {
 	Username string `form:"username" binding:"required"`
 	Password string `form:"password" binding:"required"`
 	Next     string `form:"next"`
+}
+
+// demoCredentials is the shared public login advertised on the login page.
+// main sets it from config before routing starts; zero value means disabled.
+var demoCredentials struct {
+	enabled  bool
+	username string
+	password string
+}
+
+// SetDemoCredentials publishes the shared demo login to the web login page.
+func SetDemoCredentials(enabled bool, username, password string) {
+	demoCredentials.enabled = enabled
+	demoCredentials.username = username
+	demoCredentials.password = password
+}
+
+func ptrTime(t time.Time) *time.Time { return &t }
+
+// demoLoginData adds the demo-login keys every login render needs.
+func demoLoginData(h gin.H) gin.H {
+	h["demo_enabled"] = demoCredentials.enabled
+	if demoCredentials.enabled {
+		h["demo_username"] = demoCredentials.username
+		h["demo_password"] = demoCredentials.password
+	}
+	return h
 }
 
 // loginLimiter throttles credential stuffing and password guessing per client
@@ -165,14 +198,14 @@ func safeNext(next string) string {
 func LoginPage(c *gin.Context) {
 	next := safeNext(c.Query("next"))
 	errMsg := c.Query("error")
-	c.HTML(http.StatusOK, "login.html", gin.H{"next": next, "error": errMsg, "oidc_enabled": loadOIDCConfig().valid()})
+	c.HTML(http.StatusOK, "login.html", demoLoginData(gin.H{"next": next, "error": errMsg, "oidc_enabled": loadOIDCConfig().valid()}))
 }
 
 func Login(c *gin.Context) {
 	td := utils.NewTemplateData(c)
 	var form LoginForm
 	if err := c.ShouldBind(&form); err != nil {
-		c.HTML(http.StatusOK, "login.html", td.With("error", "Invalid form").With("next", safeNext(form.Next)).ToGinH())
+		c.HTML(http.StatusOK, "login.html", demoLoginData(td.With("error", "Invalid form").With("next", safeNext(form.Next)).ToGinH()))
 		return
 	}
 
@@ -182,23 +215,23 @@ func Login(c *gin.Context) {
 			seconds = 1
 		}
 		c.Header("Retry-After", strconv.Itoa(seconds))
-		c.HTML(http.StatusTooManyRequests, "login.html", td.
+		c.HTML(http.StatusTooManyRequests, "login.html", demoLoginData(td.
 			With("error", "Too many failed login attempts. Please try again later.").
 			With("next", safeNext(form.Next)).
-			With("form", form).ToGinH())
+			With("form", form).ToGinH()))
 		return
 	}
 
 	var user database.User
 	if err := database.DB.Where("username = ?", form.Username).First(&user).Error; err != nil {
 		loginLimiter.Failure(c.ClientIP(), form.Username)
-		c.HTML(http.StatusOK, "login.html", td.With("error", "Invalid username or password").With("next", safeNext(form.Next)).With("form", form).ToGinH())
+		c.HTML(http.StatusOK, "login.html", demoLoginData(td.With("error", "Invalid username or password").With("next", safeNext(form.Next)).With("form", form).ToGinH()))
 		return
 	}
 
 	if !verifyPassword(user.Password, form.Password) {
 		loginLimiter.Failure(c.ClientIP(), form.Username)
-		c.HTML(http.StatusOK, "login.html", td.With("error", "Invalid username or password").With("next", safeNext(form.Next)).With("form", form).ToGinH())
+		c.HTML(http.StatusOK, "login.html", demoLoginData(td.With("error", "Invalid username or password").With("next", safeNext(form.Next)).With("form", form).ToGinH()))
 		return
 	}
 
@@ -211,7 +244,7 @@ func Login(c *gin.Context) {
 	session := sessions.Default(c)
 	middleware.SetSessionUser(session, &user)
 	if err := session.Save(); err != nil {
-		c.HTML(http.StatusOK, "login.html", td.With("error", "Session error").With("next", safeNext(form.Next)).ToGinH())
+		c.HTML(http.StatusOK, "login.html", demoLoginData(td.With("error", "Session error").With("next", safeNext(form.Next)).ToGinH()))
 		return
 	}
 
@@ -410,21 +443,26 @@ func Setup(c *gin.Context) {
 
 	var form SignupForm
 	if err := c.ShouldBind(&form); err != nil {
-		c.HTML(http.StatusOK, "setup.html", td.With("error", err.Error()).ToGinH())
+		c.HTML(http.StatusOK, "setup.html", td.With("error", err.Error()).With("form", form).ToGinH())
+		return
+	}
+	if !form.AcceptTerms {
+		c.HTML(http.StatusOK, "setup.html", td.With("error", "You must accept the Terms of use and Privacy policy.").With("form", form).ToGinH())
 		return
 	}
 
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(form.Password1), bcrypt.DefaultCost)
 	user := database.User{
-		Username:    form.Username,
-		Password:    string(hashed),
-		Email:       form.Email,
-		IsSuperuser: true,
-		IsStaff:     true,
-		IsActive:    true,
-		Language:    "en",
-		Theme:       "light",
-		DateJoined:  time.Now(),
+		Username:        form.Username,
+		Password:        string(hashed),
+		Email:           form.Email,
+		IsSuperuser:     true,
+		IsStaff:         true,
+		IsActive:        true,
+		Language:        "en",
+		Theme:           "light",
+		AcceptedTermsAt: ptrTime(time.Now()),
+		DateJoined:      time.Now(),
 	}
 	database.DB.Create(&user)
 

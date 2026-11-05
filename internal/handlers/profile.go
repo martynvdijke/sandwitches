@@ -75,6 +75,7 @@ func UserSettings(c *gin.Context) {
 	if c.Request.Method == "POST" {
 		user.Language = c.PostForm("language")
 		user.Theme = c.PostForm("theme")
+		user.AnalyticsOptOut = c.PostForm("analytics_opt_out") == "on"
 		database.DB.Save(user)
 		utils.AddFlash(c, "success", "Settings saved")
 		c.Redirect(http.StatusFound, "/settings")

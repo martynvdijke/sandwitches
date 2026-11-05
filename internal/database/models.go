@@ -52,7 +52,17 @@ type User struct {
 	IsStaff     bool   `gorm:"default:false"`
 	IsActive    bool   `gorm:"default:true"`
 	IsSuperuser bool   `gorm:"default:false"`
-	OIDCSub     string `gorm:"column:oidc_sub;size:255;uniqueIndex:idx_users_oidc_sub,where:oidc_sub <> ''"`
+	// IsDemo marks the shared public demo account. It can never be deleted and
+	// is never given admin rights.
+	IsDemo bool `gorm:"default:false"`
+	// AcceptedTermsAt records when the user accepted the terms and privacy
+	// policy. Nil means the account predates the consent requirement.
+	AcceptedTermsAt *time.Time
+	// AnalyticsOptOut suppresses the optional Umami page-view script for this
+	// user. Analytics is cookieless and self-hosted, but objection is still a
+	// GDPR right.
+	AnalyticsOptOut bool   `gorm:"default:false"`
+	OIDCSub         string `gorm:"column:oidc_sub;size:255;uniqueIndex:idx_users_oidc_sub,where:oidc_sub <> ''"`
 	// SessionVersion is copied into the signed session cookie at sign-in and
 	// compared on every authenticated request. Because the browser holds all
 	// session state, bumping it is the only way to invalidate cookies already

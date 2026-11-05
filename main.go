@@ -22,6 +22,7 @@ import (
 	"github.com/martynvdijke/sandwitches-go/internal/api"
 	"github.com/martynvdijke/sandwitches-go/internal/config"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
+	"github.com/martynvdijke/sandwitches-go/internal/demo"
 	"github.com/martynvdijke/sandwitches-go/internal/handlers"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
 	"github.com/martynvdijke/sandwitches-go/internal/render"
@@ -73,8 +74,22 @@ func main() {
 	// verified backup, once, so the database no longer contains dead tables.
 	database.CleanupLegacy(cfg)
 
+	// The shared demo login is public by design. Failure to provision it is
+	// logged but never prevents the instance from starting. Advertise the
+	// credentials only after provisioning succeeded, otherwise the login page
+	// and API would offer a demo login that cannot work.
+	demoAvailable := false
+	if err := demo.Ensure(context.Background(), database.DB, cfg); err != nil {
+		log.Printf("Demo account not available: %v", err)
+	} else {
+		demoAvailable = cfg.DemoUserEnabled
+	}
+
 	handlers.SetMediaRoot(cfg.MediaRoot)
 	api.SetMediaRoot(cfg.MediaRoot)
+	handlers.SetLegalConfig(cfg)
+	handlers.SetDemoCredentials(demoAvailable, cfg.DemoUserUsername, cfg.DemoUserPassword)
+	api.SetDemoCredentials(demoAvailable, cfg.DemoUserUsername, cfg.DemoUserPassword)
 
 	router := setupRouter(cfg, tel)
 
@@ -259,8 +274,10 @@ func setupRouter(cfg *config.Config, tel *telemetry.Telemetry) *gin.Engine {
 			if !strings.Contains(host, "://") {
 				host = "https://" + strings.TrimPrefix(host, "/")
 			}
-			// ponytail: host/id from env (admin-controlled), escape id only
-			return template.HTML(`<script defer src="` + host + `/script.js" data-website-id="` + template.HTMLEscapeString(id) + `"></script>`)
+			// ponytail: host/id from env (admin-controlled), escape id only.
+			// data-do-not-track makes Umami honour the browser DNT signal for
+			// signed-out visitors, who have no account-level opt-out.
+			return template.HTML(`<script defer src="` + host + `/script.js" data-website-id="` + template.HTMLEscapeString(id) + `" data-do-not-track="true"></script>`)
 		},
 		"thumb": func(path string, width int) string {
 			if path == "" || strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") || strings.HasPrefix(path, "data:") {

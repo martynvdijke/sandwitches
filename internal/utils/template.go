@@ -2,6 +2,8 @@ package utils
 
 import (
 	"html/template"
+	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
@@ -15,7 +17,18 @@ type TemplateData struct {
 	CSRFHidden template.HTML
 	Error      string
 	EinkMode   bool
-	Data       gin.H
+	// Analytics is true only when Umami is configured and this visitor has not
+	// opted out. Templates use it to decide whether to emit the Umami script.
+	Analytics bool
+	Data      gin.H
+}
+
+// AnalyticsEnabled reports whether the optional Umami analytics script is
+// configured for this deployment. It is self-hosted and cookieless; consent is
+// not required, but users can still object in Settings.
+func AnalyticsEnabled() bool {
+	return strings.TrimSpace(os.Getenv("UMAMI_HOST")) != "" &&
+		strings.TrimSpace(os.Getenv("UMAMI_WEBSITE_ID")) != ""
 }
 
 // IsEinkMode detects e-ink mode: URL param ?eink=1 > cookie eink_mode=1 > user theme.
@@ -38,6 +51,7 @@ func NewTemplateData(c *gin.Context) *TemplateData {
 		Data:       make(gin.H),
 	}
 	td.EinkMode = IsEinkMode(c, td.User)
+	td.Analytics = AnalyticsEnabled() && (td.User == nil || !td.User.AnalyticsOptOut)
 	if tok, exists := c.Get("csrf_token"); exists {
 		td.CSRFToken = tok.(string)
 		td.CSRFHidden = template.HTML(`<input type="hidden" name="csrf_token" value="` + tok.(string) + `">`)
@@ -63,6 +77,7 @@ func (td *TemplateData) ToGinH() gin.H {
 		h["error"] = td.Error
 	}
 	h["eink_mode"] = td.EinkMode
+	h["analytics"] = td.Analytics
 	for k, v := range td.Data {
 		h[k] = v
 	}

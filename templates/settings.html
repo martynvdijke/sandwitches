@@ -5,6 +5,12 @@
 {{ .csrf_token }}
 <div class="field label border round"><select name="language"><option value="en" {{ if eq .user.Language "en" }}selected{{ end }}>English</option><option value="nl" {{ if eq .user.Language "nl" }}selected{{ end }}>Dutch</option></select><label>Language</label></div>
 <div class="field label border round"><select name="theme"><option value="light" {{ if eq .user.Theme "light" }}selected{{ end }}>Light</option><option value="dark" {{ if eq .user.Theme "dark" }}selected{{ end }}>Dark</option><option value="eink" {{ if eq .user.Theme "eink" }}selected{{ end }}>E-Ink</option></select><label>Theme</label></div>
+<h5>Privacy choices</h5>
+<p class="small-text">This instance may use self-hosted, cookieless Umami analytics to count page views. It sets no advertising cookies and builds no cross-site profile. You can object to this analytics processing at any time; the page-view script is then not loaded for your account.</p>
+<label class="checkbox">
+<input type="checkbox" name="analytics_opt_out" {{ if .user.AnalyticsOptOut }}checked{{ end }}>
+<span>Do not load analytics for my account (object to analytics processing).</span>
+</label>
 <div class="space"></div>
 <button type="submit" class="button primary round">Save Settings</button>
 </form>

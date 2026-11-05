@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:dio/dio.dart';
@@ -45,6 +48,34 @@ final apiBaseProvider = Provider<String>((ref) {
 });
 
 // Repository
+class DemoLoginConfig {
+  const DemoLoginConfig({
+    required this.enabled,
+    required this.username,
+    required this.password,
+  });
+
+  const DemoLoginConfig.disabled()
+    : enabled = false,
+      username = '',
+      password = '';
+
+  final bool enabled;
+  final String username;
+  final String password;
+
+  factory DemoLoginConfig.fromJson(Map<String, dynamic> json) {
+    final demo = json['demo'];
+    if (demo is! Map) return const DemoLoginConfig.disabled();
+    final enabled = demo['enabled'];
+    return DemoLoginConfig(
+      enabled: enabled is bool && enabled,
+      username: demo['username'] is String ? demo['username'] as String : '',
+      password: demo['password'] is String ? demo['password'] as String : '',
+    );
+  }
+}
+
 class ApiException implements Exception {
   final String message;
   ApiException(this.message);
@@ -294,6 +325,76 @@ class ApiRepository {
     }
   }
 
+  /// Returns true when the persisted session is accepted by the server,
+  /// false when the server rejects it (401/403), and null when the server
+  /// could not be reached or returned an unexpected status.
+  Future<bool?> checkSession() async {
+    try {
+      final r = await dio.get('$apiBase/me');
+      if (r.statusCode == 200) return true;
+      if (r.statusCode == 401 || r.statusCode == 403) return false;
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Fetches the public demo-login configuration. Any failure yields a
+  /// disabled config so the login screen never breaks because of it.
+  Future<DemoLoginConfig> fetchAuthConfig() async {
+    try {
+      final r = await dio.get('$apiBase/auth/config');
+      if (r.statusCode == 200 && r.data is Map) {
+        return DemoLoginConfig.fromJson(
+          Map<String, dynamic>.from(r.data as Map),
+        );
+      }
+      return const DemoLoginConfig.disabled();
+    } catch (_) {
+      return const DemoLoginConfig.disabled();
+    }
+  }
+
+  /// Downloads the authenticated account export as raw JSON bytes.
+  Future<Uint8List> exportAccount() async {
+    try {
+      final r = await dio.get(
+        '$apiBase/me/export',
+        options: Options(responseType: ResponseType.bytes),
+      );
+      if (r.statusCode == 200) {
+        final data = r.data;
+        if (data is Uint8List) return data;
+        if (data is List<int>) return Uint8List.fromList(data);
+        return Uint8List(0);
+      }
+      throw ApiException(_exportErrorMessage(r.statusCode, r.data));
+    } on ApiException {
+      rethrow;
+    } on DioException catch (e) {
+      throw ApiException(
+        _exportErrorMessage(e.response?.statusCode, e.response?.data),
+      );
+    } catch (_) {
+      throw ApiException('Could not download your data');
+    }
+  }
+
+  String _exportErrorMessage(int? statusCode, dynamic data) {
+    if (data is Map && data['message'] != null) {
+      return data['message'].toString();
+    }
+    if (data is List<int>) {
+      try {
+        final decoded = jsonDecode(utf8.decode(data));
+        if (decoded is Map && decoded['message'] != null) {
+          return decoded['message'].toString();
+        }
+      } catch (_) {}
+    }
+    return 'Could not download your data (${statusCode ?? 'network error'})';
+  }
+
   Future<void> deleteAccount(String confirm) async {
     final r = await dio.delete('$apiBase/me', data: {'confirm': confirm});
     if (r.statusCode == 204 || r.statusCode == 200) return;
@@ -310,6 +411,10 @@ final repositoryProvider = Provider<ApiRepository>((ref) {
   final base = ref.watch(baseUrlProvider) ?? kDefaultBaseUrl;
   return ApiRepository(dio, base);
 });
+
+final authConfigProvider = FutureProvider<DemoLoginConfig>(
+  (ref) => ref.watch(repositoryProvider).fetchAuthConfig(),
+);
 
 // Future providers
 final tagsProvider = FutureProvider<List<Tag>>(

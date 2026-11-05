@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config.dart';
@@ -9,21 +13,24 @@ import '../../core/providers.dart';
 /// Settings and legal actions. The privacy policy and terms are served by the
 /// configured Sandwitches instance, so a self-hosted deployment publishes its
 /// own controller details rather than the default instance's.
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
-  Future<void> _openLegal(
-    BuildContext context,
-    WidgetRef ref,
-    String path,
-  ) async {
+  @override
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  bool _exporting = false;
+
+  Future<void> _openLegal(String path) async {
     final saved = await ref.read(storageProvider).getBaseUrl();
     final raw = ref.read(baseUrlProvider) ?? saved ?? kDefaultBaseUrl;
     final base = raw.endsWith('/') ? raw.substring(0, raw.length - 1) : raw;
     final uri = Uri.tryParse('$base$path');
     if (uri == null ||
         !await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Could not open the page in a browser')),
         );
@@ -31,8 +38,41 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _exportData() async {
+    if (_exporting) return;
+    setState(() => _exporting = true);
+    try {
+      final bytes = await ref.read(repositoryProvider).exportAccount();
+      final dir = await getApplicationDocumentsDirectory();
+      final stamp = DateTime.now().toUtc().toIso8601String().replaceAll(
+        RegExp(r'[:.]'),
+        '-',
+      );
+      final file = File('${dir.path}/sandwitches-export-$stamp.json');
+      await file.writeAsBytes(bytes, flush: true);
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'application/json')],
+          subject: 'Sandwitches data export',
+        ),
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Data export ready')));
+    } catch (e) {
+      if (!mounted) return;
+      final message = e is ApiException
+          ? e.message
+          : 'Could not export your data';
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final meAsync = ref.watch(meProvider);
     final username = meAsync.maybeWhen(
       data: (me) => me?['username']?.toString(),
@@ -50,19 +90,19 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.privacy_tip_outlined),
             title: const Text('Privacy policy'),
             subtitle: const Text('What is stored, why, and who receives it'),
-            onTap: () => _openLegal(context, ref, '/privacy'),
+            onTap: () => _openLegal('/privacy'),
           ),
           ListTile(
             leading: const Icon(Icons.description_outlined),
             title: const Text('Terms of use'),
             subtitle: const Text('Rules for using this instance'),
-            onTap: () => _openLegal(context, ref, '/terms'),
+            onTap: () => _openLegal('/terms'),
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text('Delete account information'),
             subtitle: const Text('What is removed and what is retained'),
-            onTap: () => _openLegal(context, ref, '/account/delete'),
+            onTap: () => _openLegal('/account/delete'),
           ),
           const Divider(),
           const Padding(
@@ -70,10 +110,17 @@ class SettingsScreen extends ConsumerWidget {
             child: Text('Account'),
           ),
           ListTile(
-            leading: const Icon(Icons.download_outlined),
+            leading: _exporting
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.download_outlined),
             title: const Text('Download my data'),
             subtitle: const Text('JSON export of your account and activity'),
-            onTap: () => _openLegal(context, ref, '/api/v1/me/export'),
+            enabled: !_exporting,
+            onTap: _exporting ? null : _exportData,
           ),
           ListTile(
             leading: Icon(
@@ -200,7 +247,9 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
                       _error!,
-                      style: TextStyle(color: Theme.of(context).colorScheme.error),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                     ),
                   ),
               ],

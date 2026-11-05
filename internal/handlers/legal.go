@@ -8,22 +8,33 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/martynvdijke/sandwitches-go/internal/account"
+	"github.com/martynvdijke/sandwitches-go/internal/config"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
 	"github.com/martynvdijke/sandwitches-go/internal/utils"
 )
 
+// legalCfg is the deployment configuration published on the legal pages. It is
+// set once in main. When nil (unit tests, unusual embedders) legalData falls
+// back to environment variables and neutral defaults.
+var legalCfg *config.Config
+
+// SetLegalConfig publishes the instance configuration used by the legal pages.
+func SetLegalConfig(cfg *config.Config) { legalCfg = cfg }
+
 // LegalData is the identity of the instance operator plus the deployment facts
-// the published policy is allowed to assert. Each field is either an env value
-// or read from the live settings row, so the text cannot claim a processor the
-// running server does not use.
+// the published policy is allowed to assert. Each field is either a config
+// value or read from the live settings row, so the text cannot claim a
+// processor the running server does not use.
 type LegalData struct {
-	Controller     string
-	ContactEmail   string
-	ContactAddress string
-	HostingRegion  string
-	BaseURL        string
-	SessionCookie  string
+	Controller           string
+	ContactEmail         string
+	ContactAddress       string
+	DPOEmail             string
+	SupervisoryAuthority string
+	HostingRegion        string
+	BaseURL              string
+	SessionCookie        string
 
 	Analytics    bool
 	AnalyticsURL string
@@ -41,6 +52,24 @@ func legalEnv(key, fallback string) string {
 	return fallback
 }
 
+// legalValue prefers the configured value, then the environment, then the
+// fallback, so tests keep working without calling SetLegalConfig.
+func legalValue(configured, key, fallback string) string {
+	if v := strings.TrimSpace(configured); v != "" {
+		return v
+	}
+	return legalEnv(key, fallback)
+}
+
+func legalProcessorEnv(configured, key string) string {
+	if legalCfg != nil {
+		if v := strings.TrimSpace(configured); v != "" {
+			return v
+		}
+	}
+	return strings.TrimSpace(os.Getenv(key))
+}
+
 // legalData collects the policy facts once per request.
 func legalData() LegalData {
 	name := "Sandwitches"
@@ -50,34 +79,54 @@ func legalData() LegalData {
 	}
 
 	d := LegalData{
-		Controller:    "the operator of this " + name + " instance",
-		HostingRegion: "the European Union",
-		BaseURL:       "https://sandwitches.vandijke.xyz",
-		SessionCookie: middleware.SessionCookieName,
+		Controller:           "the operator of this " + name + " instance",
+		HostingRegion:        "the European Union",
+		BaseURL:              "https://sandwitches.vandijke.xyz",
+		SessionCookie:        middleware.SessionCookieName,
+		SupervisoryAuthority: "your local data protection authority",
 	}
 
-	if v := legalEnv("LEGAL_CONTROLLER_NAME", ""); v != "" {
+	var (
+		cfgController, cfgContact, cfgAddress, cfgDPO, cfgAuthority string
+		cfgHosting, cfgBase                                         string
+		cfgUmamiHost, cfgUmamiID                                    string
+	)
+	if legalCfg != nil {
+		cfgController = legalCfg.LegalControllerName
+		cfgContact = legalCfg.LegalContactEmail
+		cfgAddress = legalCfg.LegalContactAddress
+		cfgDPO = legalCfg.LegalDPOEmail
+		cfgAuthority = legalCfg.LegalSupervisoryAuthority
+		cfgHosting = legalCfg.LegalHostingRegion
+		cfgBase = legalCfg.LegalBaseURL
+		cfgUmamiHost = legalCfg.UmamiHost
+		cfgUmamiID = legalCfg.UmamiWebsiteID
+	}
+
+	if v := legalValue(cfgController, "LEGAL_CONTROLLER_NAME", ""); v != "" {
 		d.Controller = v
 	}
-	d.ContactEmail = legalEnv("LEGAL_CONTACT_EMAIL", strings.TrimSpace(setting.Email))
-	d.ContactAddress = legalEnv("LEGAL_CONTACT_ADDRESS", "")
-	d.HostingRegion = legalEnv("LEGAL_HOSTING_REGION", d.HostingRegion)
-	d.BaseURL = strings.TrimRight(legalEnv("LEGAL_BASE_URL", d.BaseURL), "/")
+	d.ContactEmail = legalValue(cfgContact, "LEGAL_CONTACT_EMAIL", strings.TrimSpace(setting.Email))
+	d.ContactAddress = legalValue(cfgAddress, "LEGAL_CONTACT_ADDRESS", "")
+	d.DPOEmail = legalValue(cfgDPO, "LEGAL_DPO_EMAIL", "")
+	d.SupervisoryAuthority = legalValue(cfgAuthority, "LEGAL_SUPERVISORY_AUTHORITY", d.SupervisoryAuthority)
+	d.HostingRegion = legalValue(cfgHosting, "LEGAL_HOSTING_REGION", d.HostingRegion)
+	d.BaseURL = strings.TrimRight(legalValue(cfgBase, "LEGAL_BASE_URL", d.BaseURL), "/")
 
-	d.AnalyticsURL = strings.TrimSpace(os.Getenv("UMAMI_HOST"))
-	d.Analytics = d.AnalyticsURL != "" && strings.TrimSpace(os.Getenv("UMAMI_WEBSITE_ID")) != ""
+	d.AnalyticsURL = legalProcessorEnv(cfgUmamiHost, "UMAMI_HOST")
+	d.Analytics = d.AnalyticsURL != "" && legalProcessorEnv(cfgUmamiID, "UMAMI_WEBSITE_ID") != ""
 
-	d.Traces = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT") != "" ||
-		os.Getenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT") != "" ||
-		os.Getenv("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT") != "" ||
-		os.Getenv("OTEL_EXPORTER_OTLP_LOGS_ENDPOINT") != "" ||
+	d.Traces = legalProcessorEnv("", "OTEL_EXPORTER_OTLP_ENDPOINT") != "" ||
+		legalProcessorEnv("", "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT") != "" ||
+		legalProcessorEnv("", "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT") != "" ||
+		legalProcessorEnv("", "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT") != "" ||
 		setting.OTelEnabled || strings.TrimSpace(setting.OTelEndpoint) != ""
 
-	d.Mail = os.Getenv("SEND_EMAIL") == "true" ||
-		strings.TrimSpace(os.Getenv("SMTP_HOST")) != "" ||
+	d.Mail = legalProcessorEnv("", "SEND_EMAIL") == "true" ||
+		legalProcessorEnv("", "SMTP_HOST") != "" ||
 		(setting.SMTPEnabled && strings.TrimSpace(setting.SMTPHost) != "")
 
-	d.Gotify = strings.TrimSpace(os.Getenv("GOTIFY_URL")) != "" ||
+	d.Gotify = legalProcessorEnv("", "GOTIFY_URL") != "" ||
 		strings.TrimSpace(setting.GotifyURL) != ""
 	d.AI = strings.TrimSpace(setting.AIConnectionPoint) != ""
 	d.OIDC = loadOIDCConfig().valid()
@@ -96,6 +145,7 @@ func legalTemplateData(c *gin.Context) *utils.TemplateData {
 		Data:       make(gin.H),
 	}
 	td.EinkMode = utils.IsEinkMode(c, td.User)
+	td.Analytics = utils.AnalyticsEnabled() && (td.User == nil || !td.User.AnalyticsOptOut)
 	return td
 }
 
@@ -150,6 +200,9 @@ func DeleteAccount(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/account/delete?deleted=1")
 	case account.ErrLastSuperuser:
 		utils.AddFlash(c, "error", "This is the last superuser account. Promote another account before deleting it.")
+		c.Redirect(http.StatusFound, "/settings")
+	case account.ErrDemoAccount:
+		utils.AddFlash(c, "error", "The demo account cannot be deleted.")
 		c.Redirect(http.StatusFound, "/settings")
 	case account.ErrNotFound:
 		session := sessions.Default(c)

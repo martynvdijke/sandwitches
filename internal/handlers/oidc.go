@@ -373,11 +373,12 @@ func linkOrProvisionOIDCUser(sub string, claims oidcClaims, groups []string, gro
 	pw, _ := oidcRandHex(16)
 	hashed, _ := bcrypt.GenerateFromPassword([]byte("oidc$"+pw), bcrypt.DefaultCost)
 	user = database.User{
-		Username: username,
-		Password: string(hashed),
-		Email:    emailLower,
-		OIDCSub:  sub,
-		IsActive: true,
+		Username:        username,
+		Password:        string(hashed),
+		Email:           emailLower,
+		OIDCSub:         sub,
+		IsActive:        true,
+		AcceptedTermsAt: ptrTime(time.Now()),
 	}
 	if claims.Name != "" {
 		user.FirstName = claims.Name

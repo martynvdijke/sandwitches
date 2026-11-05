@@ -43,6 +43,8 @@ func deleteMe(c *gin.Context) {
 		c.Status(http.StatusNoContent)
 	case account.ErrLastSuperuser:
 		apiError(c, http.StatusConflict, "The last superuser cannot be deleted")
+	case account.ErrDemoAccount:
+		apiError(c, http.StatusConflict, "The demo account cannot be deleted")
 	case account.ErrNotFound:
 		apiError(c, http.StatusNotFound, "Account not found")
 	default:

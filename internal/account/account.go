@@ -18,6 +18,9 @@ var (
 	// ErrLastSuperuser means deleting the account would leave the instance
 	// without any superuser able to administer it.
 	ErrLastSuperuser = errors.New("the last superuser cannot be deleted")
+	// ErrDemoAccount means the account is the shared public demo login. It is
+	// deliberately not deletable, or the app-store reviewer login would vanish.
+	ErrDemoAccount = errors.New("the demo account cannot be deleted")
 )
 
 // Service performs whole-account operations against a database handle.
@@ -50,6 +53,11 @@ func (s *Service) Delete(userID uint) error {
 			return ErrNotFound
 		}
 		return err
+	}
+
+	// The shared demo login must survive so reviewers can always sign in.
+	if user.IsDemo {
+		return ErrDemoAccount
 	}
 
 	tx := s.DB.Begin()
@@ -137,6 +145,10 @@ type ExportProfile struct {
 	OIDCSubject string     `json:"oidc_subject,omitempty"`
 	DateJoined  time.Time  `json:"date_joined"`
 	LastLogin   *time.Time `json:"last_login"`
+	// Consent and privacy choices, so an export is a complete record of the
+	// account's GDPR-relevant state.
+	AcceptedTermsAt *time.Time `json:"accepted_terms_at"`
+	AnalyticsOptOut bool       `json:"analytics_opt_out"`
 }
 
 type ExportRecipe struct {
@@ -359,19 +371,21 @@ func (s *Service) Export(userID uint) (*Export, error) {
 
 func profileFromUser(u *database.User) ExportProfile {
 	return ExportProfile{
-		ID:          u.ID,
-		Username:    u.Username,
-		Email:       u.Email,
-		FirstName:   u.FirstName,
-		LastName:    u.LastName,
-		Bio:         u.Bio,
-		Avatar:      u.Avatar,
-		Language:    u.Language,
-		Theme:       u.Theme,
-		IsStaff:     u.IsStaff,
-		IsSuperuser: u.IsSuperuser,
-		OIDCSubject: u.OIDCSub,
-		DateJoined:  u.DateJoined,
-		LastLogin:   u.LastLogin,
+		ID:              u.ID,
+		Username:        u.Username,
+		Email:           u.Email,
+		FirstName:       u.FirstName,
+		LastName:        u.LastName,
+		Bio:             u.Bio,
+		Avatar:          u.Avatar,
+		Language:        u.Language,
+		Theme:           u.Theme,
+		IsStaff:         u.IsStaff,
+		IsSuperuser:     u.IsSuperuser,
+		OIDCSubject:     u.OIDCSub,
+		DateJoined:      u.DateJoined,
+		LastLogin:       u.LastLogin,
+		AcceptedTermsAt: u.AcceptedTermsAt,
+		AnalyticsOptOut: u.AnalyticsOptOut,
 	}
 }

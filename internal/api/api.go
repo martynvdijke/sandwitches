@@ -22,6 +22,32 @@ var mediaRoot string
 
 func SetMediaRoot(root string) { mediaRoot = root }
 
+// demoAuth is the shared public login advertised to API clients. main sets it
+// from config; the zero value means disabled.
+var demoAuth struct {
+	enabled  bool
+	username string
+	password string
+}
+
+// SetDemoCredentials publishes the shared demo login to GET /api/v1/auth/config.
+func SetDemoCredentials(enabled bool, username, password string) {
+	demoAuth.enabled = enabled
+	demoAuth.username = username
+	demoAuth.password = password
+}
+
+// authConfig is a public capability probe used by the mobile app and other
+// clients to decide whether to offer the shared demo sign-in.
+func authConfig(c *gin.Context) {
+	demo := gin.H{"enabled": demoAuth.enabled}
+	if demoAuth.enabled {
+		demo["username"] = demoAuth.username
+		demo["password"] = demoAuth.password
+	}
+	c.JSON(http.StatusOK, gin.H{"demo": demo})
+}
+
 func RegisterRoutes(r *gin.RouterGroup) {
 	r.GET("/openapi.json", openapiJSON)
 	r.GET("/docs", swaggerUI)
@@ -30,6 +56,7 @@ func RegisterRoutes(r *gin.RouterGroup) {
 	api := r.Group("/v1")
 	{
 		api.GET("/ping", ping)
+		api.GET("/auth/config", authConfig)
 		api.GET("/settings", getSettings)
 		api.POST("/settings", middleware.AuthRequired(), updateSettings)
 

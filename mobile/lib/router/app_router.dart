@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../features/auth/startup_screen.dart';
 import '../features/auth/onboarding_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/home/home_screen.dart';
@@ -16,8 +17,9 @@ import '../features/shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/onboarding',
+    initialLocation: '/startup',
     routes: [
+      GoRoute(path: '/startup', builder: (c, s) => const StartupScreen()),
       GoRoute(path: '/onboarding', builder: (c, s) => const OnboardingScreen()),
       GoRoute(path: '/login', builder: (c, s) => const LoginScreen()),
       GoRoute(path: '/settings', builder: (c, s) => const SettingsScreen()),

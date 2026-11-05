@@ -5,68 +5,118 @@ import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
+
 import '../../core/config.dart';
 import '../../core/providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
   @override
-  ConsumerState<LoginScreen> createState()=> _LoginState();
+  ConsumerState<LoginScreen> createState() => _LoginState();
 }
+
 class _LoginState extends ConsumerState<LoginScreen> {
   final userCtrl = TextEditingController();
   final passCtrl = TextEditingController();
-  bool loading=false;
+  bool loading = false;
   String? error;
-  bool oidcLoading=false;
+  bool oidcLoading = false;
+  DemoLoginConfig? _demo;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadDemoConfig());
+  }
+
+  Future<void> _loadDemoConfig() async {
+    try {
+      final cfg = await ref.read(repositoryProvider).fetchAuthConfig();
+      if (!mounted) return;
+      setState(() => _demo = cfg);
+    } catch (_) {
+      // Demo login is optional; ignore failures.
+    }
+  }
+
+  Future<void> _useDemo(DemoLoginConfig demo) async {
+    userCtrl.text = demo.username;
+    passCtrl.text = demo.password;
+    await doLogin();
+  }
 
   Future<void> doLogin() async {
-    final base = ref.read(baseUrlProvider) ?? await ref.read(storageProvider).getBaseUrl() ?? kDefaultBaseUrl;
-    if (base.isEmpty) { setState(()=> error='No server URL configured'); return; }
-    setState(()=> loading=true);
+    final base =
+        ref.read(baseUrlProvider) ??
+        await ref.read(storageProvider).getBaseUrl() ??
+        kDefaultBaseUrl;
+    if (base.isEmpty) {
+      setState(() => error = 'No server URL configured');
+      return;
+    }
+    setState(() => loading = true);
     try {
-      final dio = Dio(BaseOptions(
-        baseUrl: base.endsWith('/') ? base.substring(0,base.length-1) : base,
-        followRedirects: false,
-        validateStatus: (s)=> s!=null && s<500,
-        connectTimeout: const Duration(seconds:10),
-        receiveTimeout: const Duration(seconds:10),
-      ));
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: base.endsWith('/')
+              ? base.substring(0, base.length - 1)
+              : base,
+          followRedirects: false,
+          validateStatus: (s) => s != null && s < 500,
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        ),
+      );
       final jar = ref.read(persistCookieJarProvider);
       dio.interceptors.add(CookieManager(jar));
-      final r = await dio.post('$base/login',
+      final r = await dio.post(
+        '$base/login',
         data: {'username': userCtrl.text.trim(), 'password': passCtrl.text},
-        options: Options(contentType: Headers.formUrlEncodedContentType, followRedirects: false, validateStatus: (s)=> s!=null && s<500),
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          followRedirects: false,
+          validateStatus: (s) => s != null && s < 500,
+        ),
       );
       // success if 302 redirect or 200 with cookie?
-      if (r.statusCode!=null && r.statusCode! >=300 && r.statusCode! <400) {
+      if (r.statusCode != null && r.statusCode! >= 300 && r.statusCode! < 400) {
         if (mounted) context.go('/');
-      } else if (r.statusCode==200) {
+      } else if (r.statusCode == 200) {
         // check if login failed: server re-renders login HTML -> likely no session
         // Try fetching /api/v1/me
         try {
           final me = await dio.get('$base/api/v1/me');
-          if (me.statusCode==200) {
+          if (me.statusCode == 200) {
             if (mounted) context.go('/');
           } else {
-            setState(()=> error='Invalid credentials');
+            setState(() => error = 'Invalid credentials');
           }
-        } catch(_){
-          setState(()=> error='Invalid credentials');
+        } catch (_) {
+          setState(() => error = 'Invalid credentials');
         }
       } else {
-        setState(()=> error='Login failed (${r.statusCode})');
+        setState(() => error = 'Login failed (${r.statusCode})');
       }
-    } catch(e){
-      setState(()=> error='Login error: $e');
-    } finally { if(mounted) setState(()=> loading=false); }
+    } catch (e) {
+      setState(() => error = 'Login error: $e');
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
   }
 
   Future<void> doOidc() async {
-    final baseRaw = ref.read(baseUrlProvider) ?? await ref.read(storageProvider).getBaseUrl() ?? kDefaultBaseUrl;
-    final base = baseRaw.endsWith('/') ? baseRaw.substring(0,baseRaw.length-1) : baseRaw;
-    if (base.isEmpty) { setState(()=> error='No server URL'); return; }
-    setState(()=> oidcLoading=true);
+    final baseRaw =
+        ref.read(baseUrlProvider) ??
+        await ref.read(storageProvider).getBaseUrl() ??
+        kDefaultBaseUrl;
+    final base = baseRaw.endsWith('/')
+        ? baseRaw.substring(0, baseRaw.length - 1)
+        : baseRaw;
+    if (base.isEmpty) {
+      setState(() => error = 'No server URL');
+      return;
+    }
+    setState(() => oidcLoading = true);
     try {
       const callbackScheme = 'sandwitches';
       final result = await FlutterWebAuth2.authenticate(
@@ -75,41 +125,47 @@ class _LoginState extends ConsumerState<LoginScreen> {
       );
       final callback = Uri.parse(result);
       if (callback.scheme != callbackScheme || callback.host != 'auth') {
-        setState(()=> error='OIDC login returned an unexpected response');
+        setState(() => error = 'OIDC login returned an unexpected response');
         return;
       }
       final oidcError = callback.queryParameters['error'];
       if (oidcError != null && oidcError.isNotEmpty) {
-        setState(()=> error=_oidcErrorMessage(oidcError));
+        setState(() => error = _oidcErrorMessage(oidcError));
         return;
       }
       final code = callback.queryParameters['code'];
       if (code == null || code.isEmpty) {
-        setState(()=> error='OIDC login did not return a code');
+        setState(() => error = 'OIDC login did not return a code');
         return;
       }
       final dio = ref.read(dioProvider);
-      final exchange = await dio.post('$base/api/auth/mobile/exchange',
+      final exchange = await dio.post(
+        '$base/api/auth/mobile/exchange',
         data: {'code': code},
-        options: Options(contentType: Headers.jsonContentType, followRedirects: false),
+        options: Options(
+          contentType: Headers.jsonContentType,
+          followRedirects: false,
+        ),
       );
       if (exchange.statusCode != 200) {
-        setState(()=> error='OIDC login could not be completed');
+        setState(() => error = 'OIDC login could not be completed');
         return;
       }
       final me = await dio.get('$base/api/v1/me');
-      if (me.statusCode==200) {
+      if (me.statusCode == 200) {
         if (mounted) context.go('/');
       } else {
-        setState(()=> error='OIDC login failed');
+        setState(() => error = 'OIDC login failed');
       }
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       if (e.code != 'CANCELED') {
-        setState(()=> error='OIDC login failed. Please try again.');
+        setState(() => error = 'OIDC login failed. Please try again.');
       }
-    } catch(_) {
-      setState(()=> error='OIDC login failed. Please try again.');
-    } finally { if(mounted) setState(()=> oidcLoading=false); }
+    } catch (_) {
+      setState(() => error = 'OIDC login failed. Please try again.');
+    } finally {
+      if (mounted) setState(() => oidcLoading = false);
+    }
   }
 
   String _oidcErrorMessage(String code) {
@@ -135,25 +191,95 @@ class _LoginState extends ConsumerState<LoginScreen> {
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     final base = ref.watch(baseUrlProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
-      body: Padding(padding: const EdgeInsets.all(16), child: ListView(children:[
-        if (base!=null) Text('Server: $base', style: Theme.of(context).textTheme.bodySmall),
-        TextButton(onPressed: ()=> context.go('/onboarding'), child: const Text('Change server URL')),
-        const SizedBox(height:12),
-        TextField(controller: userCtrl, decoration: const InputDecoration(labelText: 'Username', border: OutlineInputBorder())),
-        const SizedBox(height:12),
-        TextField(controller: passCtrl, obscureText: true, decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder())),
-        if (error!=null) Padding(padding: const EdgeInsets.only(top:8), child: Text(error!, style: const TextStyle(color: Colors.red))),
-        const SizedBox(height:12),
-        ElevatedButton(onPressed: loading? null: doLogin, child: loading? const SizedBox(height:20,width:20,child:CircularProgressIndicator(strokeWidth:2)) : const Text('Login')),
-        const SizedBox(height:12),
-        OutlinedButton(onPressed: oidcLoading? null: doOidc, child: oidcLoading? const SizedBox(height:20,width:20,child:CircularProgressIndicator(strokeWidth:2)) : const Text('Login with OIDC')),
-        const SizedBox(height:12),
-        TextButton(onPressed: logout, child: const Text('Clear session (logout)')),
-      ])),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
+          children: [
+            if (base != null)
+              Text(
+                'Server: $base',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            TextButton(
+              onPressed: () => context.go('/onboarding'),
+              child: const Text('Change server URL'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: userCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Username',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: passCtrl,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            if (error != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(error!, style: const TextStyle(color: Colors.red)),
+              ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: loading ? null : doLogin,
+              child: loading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Login'),
+            ),
+            if (_demo != null &&
+                _demo!.enabled &&
+                _demo!.username.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: (loading || oidcLoading)
+                    ? null
+                    : () => _useDemo(_demo!),
+                icon: const Icon(Icons.person_outline, size: 18),
+                label: const Text('Try the demo account'),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'Shared account @${_demo!.username} with password ${_demo!.password}. Anyone can use it.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: oidcLoading ? null : doOidc,
+              child: oidcLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Login with OIDC'),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: logout,
+              child: const Text('Clear session (logout)'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

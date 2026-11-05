@@ -544,6 +544,7 @@ func TestSetupCreateSuperuser(t *testing.T) {
 	body.Set("password1", "adminpass123")
 	body.Set("password2", "adminpass123")
 	body.Set("email", "admin@test.com")
+	body.Set("accept_terms", "true")
 
 	resp, err := client.PostForm(srv.URL+"/setup", body)
 	if err != nil {
@@ -593,6 +594,7 @@ func TestSignup(t *testing.T) {
 	body.Set("email", "new@test.com")
 	body.Set("first_name", "New")
 	body.Set("last_name", "User")
+	body.Set("accept_terms", "true")
 
 	resp, err := client.PostForm(srv.URL+"/signup", body)
 	if err != nil {
@@ -633,6 +635,7 @@ func TestSignupDuplicateUsername(t *testing.T) {
 	body.Set("password1", "password123")
 	body.Set("password2", "password123")
 	body.Set("email", "dupe@test.com")
+	body.Set("accept_terms", "true")
 
 	resp, err := client.PostForm(srv.URL+"/signup", body)
 	if err != nil {

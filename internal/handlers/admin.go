@@ -472,6 +472,8 @@ func AdminUserDelete(c *gin.Context) {
 			utils.AddFlash(c, "success", "User deleted")
 		case account.ErrLastSuperuser:
 			utils.AddFlash(c, "error", "The last superuser cannot be deleted.")
+		case account.ErrDemoAccount:
+			utils.AddFlash(c, "error", "The demo account cannot be deleted.")
 		default:
 			utils.AddFlash(c, "error", "Could not delete user")
 		}

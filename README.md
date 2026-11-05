@@ -177,6 +177,24 @@ The server listens on port 6270 and the first visit to `/setup` bootstraps the a
 
 - [Go App Reference](docs/GO_APP.md) — project structure, configuration, API endpoints
 - [Django → Go Port Guide](docs/PORTING.md) — how the app was ported and how to extend it
+- [Play Store review guide](docs/play-store.md) — privacy/deletion URLs, App access demo credentials, data safety answers
+- [Legal and GDPR operations](docs/legal.md) — legal page mapping, `.legal` configuration, deletion/export behaviour and EU launch checklist
+
+## Privacy, deletion and demo review
+
+The public legal pages are `GET /privacy`, `GET /terms` and
+`GET /account/delete`; all three load without an account. The deletion page is
+the URL to publish in Google Play's App content → Data deletion form. In-app,
+the Android client exposes the same action under Settings → Delete account,
+which calls `DELETE /api/v1/me` with the typed username as confirmation.
+
+The hosted instance can provide a shared, non-admin demo login for store
+reviewers (`demo` / `demo` by default). It is public by design, cannot be
+deleted, and is enabled automatically only for the hosted
+`sandwitches.vandijke.xyz` host unless `DEMO_USER_ENABLED` overrides it. See
+[Play Store review guide](docs/play-store.md) for the Console setup and
+[Legal and GDPR operations](docs/legal.md) for the exact deletion, export and
+retention guarantees operators must support.
 
 ---
 
