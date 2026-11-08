@@ -131,7 +131,7 @@ Below is a list of all supported environment variables.
 | OIDC_SCOPES          | No           | OIDC scopes (default `openid email profile groups`).                                  |
 | OIDC_LOGOUT_URL      | No           | OIDC logout URL (default `{issuer}/logout`).                                          |
 
-All other standard OpenTelemetry SDK environment variables (sampler, resource attributes, per-signal protocol/headers/timeouts) are honored as-is. Traces are exported for HTTP requests and GORM/SQLite queries, metrics for HTTP requests, and application logs are bridged to OTLP.
+All other standard OpenTelemetry SDK environment variables (sampler, resource attributes, per-signal protocol/headers/timeouts) are honored as-is. Traces are exported for HTTP requests and GORM/SQLite queries, metrics for HTTP requests and Go runtime statistics, and application logs are bridged to OTLP.
 
 ## Development setup
 

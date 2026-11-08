@@ -147,7 +147,7 @@ Open **[http://localhost:6270](http://localhost:6270)** in your browser.
 | `OTEL_EXPORTER_OTLP_HEADERS` | — | Comma-separated `key=value` headers (e.g. collector auth token) |
 | `OTEL_SDK_DISABLED` | `false` | Set `true` to force-disable all telemetry |
 
-All other standard OpenTelemetry SDK environment variables are honored as-is. Traces cover HTTP requests and GORM/SQLite queries, metrics cover HTTP requests, and application logs are bridged to OTLP.
+All other standard OpenTelemetry SDK environment variables are honored as-is. Traces cover HTTP requests and GORM/SQLite queries, metrics cover HTTP requests and Go runtime statistics, and application logs are bridged to OTLP.
 
 ## Project Structure
 

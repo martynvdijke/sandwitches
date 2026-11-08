@@ -131,6 +131,9 @@ func setupRouter(cfg *config.Config, tel *telemetry.Telemetry) *gin.Engine {
 	if h := tel.GinMiddleware(); h != nil {
 		router.Use(h)
 	}
+	if h := tel.MetricsMiddleware(); h != nil {
+		router.Use(h)
+	}
 	router.Use(middleware.RequestID())
 	router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		rid, _ := param.Keys["request_id"].(string)

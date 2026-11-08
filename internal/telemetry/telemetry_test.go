@@ -62,7 +62,30 @@ func TestSetupEnabledByEndpoint(t *testing.T) {
 	if tel.GinMiddleware() == nil {
 		t.Fatal("gin middleware should be set when enabled")
 	}
+	if tel.metrics == nil {
+		t.Fatal("HTTP metrics should be configured when metrics are enabled")
+	}
+	if tel.MetricsMiddleware() == nil {
+		t.Fatal("metrics middleware should be set when metrics are enabled")
+	}
 	// The collector is unreachable, so export errors on shutdown are expected.
+	_ = shutdownWithTimeout(t, tel)
+}
+
+func TestSetupMetricsOnly(t *testing.T) {
+	clearOTELEnv(t)
+	t.Setenv("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", "http://127.0.0.1:4318")
+
+	tel := Setup(context.Background(), "test")
+	if !tel.Enabled {
+		t.Fatal("telemetry should be enabled with a metrics endpoint")
+	}
+	if tel.GinMiddleware() == nil {
+		t.Fatal("request middleware should be set when any signal is enabled")
+	}
+	if tel.metrics == nil || tel.MetricsMiddleware() == nil {
+		t.Fatal("metrics should be configured with only the metrics endpoint set")
+	}
 	_ = shutdownWithTimeout(t, tel)
 }
 

@@ -16,6 +16,7 @@ import (
 	"github.com/google/uuid"
 	"go.opentelemetry.io/contrib/bridges/otelslog"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	goruntime "go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
@@ -40,7 +41,9 @@ type Telemetry struct {
 	// when the logs signal is disabled.
 	LogWriter io.Writer
 
-	shutdown func(context.Context) error
+	serviceName string
+	metrics     *httpMetrics
+	shutdown    func(context.Context) error
 }
 
 // Shutdown flushes and stops every configured provider. It is safe to call on
@@ -58,7 +61,7 @@ func (t *Telemetry) GinMiddleware() gin.HandlerFunc {
 	if t == nil || !t.Enabled {
 		return nil
 	}
-	return otelgin.Middleware(DefaultServiceName,
+	return otelgin.Middleware(t.serviceName,
 		otelgin.WithPropagators(otel.GetTextMapPropagator()))
 }
 
@@ -67,7 +70,14 @@ func (t *Telemetry) GinMiddleware() gin.HandlerFunc {
 // (no-op) unless a generic or per-signal OTLP endpoint is set, or when
 // OTEL_SDK_DISABLED=true. Per-signal endpoints enable only that signal.
 func Setup(ctx context.Context, version string) *Telemetry {
-	t := &Telemetry{shutdown: func(context.Context) error { return nil }}
+	serviceName := os.Getenv("OTEL_SERVICE_NAME")
+	if serviceName == "" {
+		serviceName = DefaultServiceName
+	}
+	t := &Telemetry{
+		serviceName: serviceName,
+		shutdown:    func(context.Context) error { return nil },
+	}
 
 	if os.Getenv("OTEL_SDK_DISABLED") == "true" {
 		return t
@@ -118,6 +128,17 @@ func Setup(ctx context.Context, version string) *Telemetry {
 				sdkmetric.WithReader(sdkmetric.NewPeriodicReader(exp)),
 			)
 			otel.SetMeterProvider(mp)
+
+			hm, err := newHTTPMetrics(mp.Meter(instrumentationName))
+			if err != nil {
+				log.Printf("telemetry: HTTP metrics disabled: %v", err)
+			} else {
+				t.metrics = hm
+			}
+			if err := goruntime.Start(goruntime.WithMeterProvider(mp)); err != nil {
+				log.Printf("telemetry: runtime metrics disabled: %v", err)
+			}
+
 			shutdowns = append(shutdowns, mp.Shutdown)
 		}
 	}
@@ -133,7 +154,7 @@ func Setup(ctx context.Context, version string) *Telemetry {
 			)
 			otellog.SetLoggerProvider(lp)
 
-			handler := otelslog.NewHandler(DefaultServiceName,
+			handler := otelslog.NewHandler(t.serviceName,
 				otelslog.WithLoggerProvider(lp),
 				otelslog.WithVersion(version),
 			)
