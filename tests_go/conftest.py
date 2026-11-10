@@ -144,7 +144,7 @@ def login_session(page, go_server, username, password):
     page.wait_for_selector("input[name='password']", timeout=10000)
     page.fill("input[name='username']", username)
     page.fill("input[name='password']", password)
-    page.locator("button[type='submit']").click(no_wait_after=True, timeout=5000)
+    page.locator("form[action='/login'] button[type='submit']").first.click(no_wait_after=True, timeout=5000)
     page.wait_for_url(go_server.url + "/", wait_until="commit", timeout=10000)
 
 
