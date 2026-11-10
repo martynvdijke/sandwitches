@@ -1,3 +1,19 @@
+# [3.19.0](https://github.com/martynvdijke/sandwitches/compare/v3.18.0...v3.19.0) (2026-11-10)
+
+
+### Bug Fixes
+
+* **ci:** resolve debug manifest merger conflict and ambiguous login submit button ([c15df64](https://github.com/martynvdijke/sandwitches/commit/c15df6482f51e459c2096c9537df202538e43c57))
+* **deps:** update all non-major dependencies ([#217](https://github.com/martynvdijke/sandwitches/issues/217)) ([6f7c049](https://github.com/martynvdijke/sandwitches/commit/6f7c0499c90c5e968daf187abe751de1ffb50ed9))
+* **renovate:** disable platform automerge so Renovate merges green PRs itself ([4998d27](https://github.com/martynvdijke/sandwitches/commit/4998d27fc5d17864ac47353e0bb7a78ef8409b70))
+
+
+### Features
+
+* **legal:** Play Store demo login and EU privacy controls ([27c1f06](https://github.com/martynvdijke/sandwitches/commit/27c1f06533059c1ea94aee4de7124f719df94d54))
+* **mobile:** add OpenTelemetry tracing with runtime endpoint from API ([df4afc7](https://github.com/martynvdijke/sandwitches/commit/df4afc73feee25f7e04d71b3da87c37bdce928e8))
+* **telemetry:** add HTTP and runtime metrics ([b34b455](https://github.com/martynvdijke/sandwitches/commit/b34b45519deb835cce650dd71f7c0f0d0a450284))
+
 # [3.18.0](https://github.com/martynvdijke/sandwitches/compare/v3.17.4...v3.18.0) (2026-11-04)
 
 
