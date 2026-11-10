@@ -64,8 +64,8 @@ def test_login_flow(page: Page, go_server, device_name):
     page.goto(f"{GO_URL}/logout", **NAV)
     page.goto(f"{GO_URL}/login", **NAV)
     page.fill("input[name='username']", "testuser")
-    page.fill("input[name='password']", "password123")
-    page.locator("input[name='password']").press("Enter")
+    page.fill("input[name='password'][type='password']", "password123")
+    page.locator("input[name='password'][type='password']").press("Enter")
     expect(page).to_have_url(f"{GO_URL}/")
     expect(page.locator("a[href='/profile']")).to_be_visible()
 
@@ -286,7 +286,7 @@ def test_admin_tag_management(page: Page, go_server, device_name):
     page.wait_for_url(f"{GO_URL}/dashboard/tags", wait_until="commit", timeout=5000)
     expect(page.locator("td").first).to_have_text("Spicy")
 
-    page.locator("a[href*='/edit']:has-text('Edit')").click()
+    page.locator("a[href*='/edit']:has-text('Edit')").first.click()
     page.wait_for_selector("input[name='name']", timeout=5000)
     page.fill("input[name='name']", "Extra Spicy")
     page.locator("button[type='submit']").click()
@@ -445,8 +445,8 @@ def test_community_recipe_submission_and_approval(page: Page, go_server, device_
 
     page.goto(f"{GO_URL}/login", **NAV)
     page.fill("input[name='username']", "admin")
-    page.fill("input[name='password']", "adminpass123")
-    page.locator("input[name='password']").press("Enter")
+    page.fill("input[name='password'][type='password']", "adminpass123")
+    page.locator("input[name='password'][type='password']").press("Enter")
     page.wait_for_url(f"{GO_URL}/", wait_until="commit", timeout=5000)
 
     page.goto(f"{GO_URL}/dashboard/approvals", **NAV)
