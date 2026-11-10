@@ -14,6 +14,20 @@ GO_BINARY = os.path.join(
 )
 
 
+def accept_terms(page):
+    """Tick the terms checkbox.
+
+    The Material 3 checkbox hides the native input behind a styled span, so
+    Playwright's ``check()`` can never reach it. Set the state directly and
+    fire the event a real click would fire.
+    """
+    page.locator("input[name='accept_terms']").evaluate(
+        "el => { el.checked = true;"
+        " el.dispatchEvent(new Event('input', {bubbles: true}));"
+        " el.dispatchEvent(new Event('change', {bubbles: true})); }"
+    )
+
+
 def _drain(stream):
     while True:
         chunk = stream.read(4096)
