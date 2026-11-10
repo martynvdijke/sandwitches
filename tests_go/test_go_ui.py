@@ -4,6 +4,7 @@ import pytest
 from playwright.sync_api import Page, expect
 
 from conftest import (
+    accept_terms,
     create_admin,
     create_recipe_via_ui,
     get_slug_from_admin_list,
@@ -41,7 +42,7 @@ def test_setup_creates_admin(page: Page, go_server, device_name):
     page.fill("input[name='email']", "admin@test.com")
     page.fill("input[name='password1']", "adminpass123")
     page.fill("input[name='password2']", "adminpass123")
-    page.check("input[name='accept_terms']")
+    accept_terms(page)
     page.get_by_role("button", name="Create Admin").click()
     expect(page).to_have_url(re.compile(r".*/dashboard$"))
     page.goto(f"{GO_URL}/setup", **NAV)
@@ -57,7 +58,7 @@ def test_login_flow(page: Page, go_server, device_name):
     page.fill("input[name='email']", "test@example.com")
     page.fill("input[name='password1']", "password123")
     page.fill("input[name='password2']", "password123")
-    page.check("input[name='accept_terms']")
+    accept_terms(page)
     page.locator("input[name='password2']").press("Enter")
     expect(page).to_have_url(f"{GO_URL}/")
     page.goto(f"{GO_URL}/logout", **NAV)
@@ -80,7 +81,7 @@ def test_signup_flow(page: Page, go_server, device_name):
     page.fill("input[name='email']", "new@example.com")
     page.fill("input[name='password1']", "SecurePass123!")
     page.fill("input[name='password2']", "SecurePass123!")
-    page.check("input[name='accept_terms']")
+    accept_terms(page)
     page.locator("input[name='password2']").press("Enter")
     expect(page).to_have_url(f"{GO_URL}/")
     expect(page.locator("a[href='/profile']")).to_be_visible()
@@ -101,7 +102,7 @@ def test_update_profile_ui(page: Page, go_server, device_name):
     page.fill("input[name='last_name']", "OriginalLast")
     page.fill("input[name='password1']", "password123")
     page.fill("input[name='password2']", "password123")
-    page.check("input[name='accept_terms']")
+    accept_terms(page)
     page.locator("input[name='password2']").press("Enter")
     expect(page).to_have_url(f"{GO_URL}/")
     page.goto(f"{GO_URL}/profile", **NAV)
@@ -124,7 +125,7 @@ def test_user_settings_ui(page: Page, go_server, device_name):
     page.fill("input[name='email']", "set@test.com")
     page.fill("input[name='password1']", "password123")
     page.fill("input[name='password2']", "password123")
-    page.check("input[name='accept_terms']")
+    accept_terms(page)
     page.locator("input[name='password2']").press("Enter")
     expect(page).to_have_url(f"{GO_URL}/")
     page.goto(f"{GO_URL}/settings", **NAV)
@@ -156,7 +157,7 @@ def test_recipe_favoriting(page: Page, go_server, device_name):
     page.fill("input[name='last_name']", "User")
     page.fill("input[name='password1']", "password123")
     page.fill("input[name='password2']", "password123")
-    page.check("input[name='accept_terms']")
+    accept_terms(page)
     page.locator("input[name='password2']").press("Enter")
     expect(page).to_have_url(f"{GO_URL}/")
     page.goto(f"{GO_URL}/recipes/{slug}", **NAV)
@@ -180,7 +181,7 @@ def test_recipe_rating(page: Page, go_server, device_name):
     page.fill("input[name='email']", "rater@test.com")
     page.fill("input[name='password1']", "password123")
     page.fill("input[name='password2']", "password123")
-    page.check("input[name='accept_terms']")
+    accept_terms(page)
     page.locator("input[name='password2']").press("Enter")
     expect(page).to_have_url(f"{GO_URL}/")
     page.goto(f"{GO_URL}/recipes/{slug}", **NAV)
@@ -206,7 +207,7 @@ def test_order_sandwich_ui(page: Page, go_server, device_name):
     page.fill("input[name='email']", "cust@test.com")
     page.fill("input[name='password1']", "password123")
     page.fill("input[name='password2']", "password123")
-    page.check("input[name='accept_terms']")
+    accept_terms(page)
     page.locator("input[name='password2']").press("Enter")
     expect(page).to_have_url(f"{GO_URL}/")
     page.goto(f"{GO_URL}/recipes/{slug}", **NAV)
@@ -231,7 +232,7 @@ def test_cart_checkout_ui(page: Page, go_server, device_name):
     page.fill("input[name='email']", "check@test.com")
     page.fill("input[name='password1']", "password123")
     page.fill("input[name='password2']", "password123")
-    page.check("input[name='accept_terms']")
+    accept_terms(page)
     page.locator("input[name='password2']").press("Enter")
     expect(page).to_have_url(f"{GO_URL}/")
     page.goto(f"{GO_URL}/recipes/{slug}", **NAV)
@@ -257,7 +258,7 @@ def test_order_tracking_ui(page: Page, go_server, device_name):
     page.fill("input[name='email']", "track@test.com")
     page.fill("input[name='password1']", "password123")
     page.fill("input[name='password2']", "password123")
-    page.check("input[name='accept_terms']")
+    accept_terms(page)
     page.locator("input[name='password2']").press("Enter")
     expect(page).to_have_url(f"{GO_URL}/")
     page.goto(f"{GO_URL}/recipes/{slug}", **NAV)
@@ -313,7 +314,7 @@ def test_admin_user_management(page: Page, go_server, device_name):
     page.fill("input[name='email']", "edit@test.com")
     page.fill("input[name='password1']", "password123")
     page.fill("input[name='password2']", "password123")
-    page.check("input[name='accept_terms']")
+    accept_terms(page)
     page.locator("input[name='password2']").press("Enter")
     expect(page).to_have_url(f"{GO_URL}/")
 
@@ -425,7 +426,7 @@ def test_community_recipe_submission_and_approval(page: Page, go_server, device_
     page.fill("input[name='last_name']", "User")
     page.fill("input[name='password1']", "password123")
     page.fill("input[name='password2']", "password123")
-    page.check("input[name='accept_terms']")
+    accept_terms(page)
     page.locator("input[name='password2']").press("Enter")
     expect(page).to_have_url(f"{GO_URL}/")
 
@@ -497,7 +498,7 @@ def test_order_tracker_anonymous(page: Page, go_server, device_name):
     page.fill("input[name='email']", "t@test.com")
     page.fill("input[name='password1']", "password123")
     page.fill("input[name='password2']", "password123")
-    page.check("input[name='accept_terms']")
+    accept_terms(page)
     page.locator("input[name='password2']").press("Enter")
     expect(page).to_have_url(f"{GO_URL}/")
 
@@ -541,7 +542,7 @@ def test_community_recipe_hidden(page: Page, go_server):
     page.fill("input[name='last_name']", "User")
     page.fill("input[name='password1']", "password123")
     page.fill("input[name='password2']", "password123")
-    page.check("input[name='accept_terms']")
+    accept_terms(page)
     page.locator("input[name='password2']").press("Enter")
     expect(page).to_have_url(f"{GO_URL}/")
 
