@@ -132,6 +132,7 @@ def create_admin(go_server, username="admin", password="adminpass123"):
         "email": f"{username}@test.com",
         "password1": password,
         "password2": password,
+        "accept_terms": "true",
     })
     conn.request("POST", "/setup", body=data, headers={"Content-Type": "application/x-www-form-urlencoded"})
     resp = conn.getresponse()
