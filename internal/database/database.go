@@ -78,6 +78,7 @@ func Init(cfg *config.Config) {
 		&OrderItem{},
 		&CartItem{},
 		&RecipeHistory{},
+		&DeviceToken{},
 	}
 	for _, m := range models {
 		if err := DB.AutoMigrate(m); err != nil {
@@ -88,7 +89,16 @@ func Init(cfg *config.Config) {
 	var count int64
 	DB.Model(&Setting{}).Count(&count)
 	if count == 0 {
-		DB.Create(&Setting{SiteName: "Sandwitches", LogLevel: "INFO"})
+		// New databases get the notification defaults explicitly: SQLite applies
+		// column defaults on ADD COLUMN, but the very first INSERT should not
+		// depend on them.
+		DB.Create(&Setting{
+			SiteName:             "Sandwitches",
+			LogLevel:             "INFO",
+			NotificationsEnabled: true,
+			NotifyNewRecipes:     true,
+			NotifyNewOrders:      true,
+		})
 	}
 	DB.Model(&Group{}).Where("name = ?", "admin").FirstOrCreate(&Group{Name: "admin"})
 	DB.Model(&Group{}).Where("name = ?", "community").FirstOrCreate(&Group{Name: "community"})

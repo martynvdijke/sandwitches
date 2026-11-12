@@ -76,6 +76,10 @@ func UserSettings(c *gin.Context) {
 		user.Language = c.PostForm("language")
 		user.Theme = c.PostForm("theme")
 		user.AnalyticsOptOut = c.PostForm("analytics_opt_out") == "on"
+		user.NotifyNewRecipes = c.PostForm("notify_new_recipes") != ""
+		user.NotifyNewOrders = c.PostForm("notify_new_orders") != ""
+		user.NotifyWeb = c.PostForm("notify_web") != ""
+		user.NotifyPush = c.PostForm("notify_push") != ""
 		database.DB.Save(user)
 		utils.AddFlash(c, "success", "Settings saved")
 		c.Redirect(http.StatusFound, "/settings")

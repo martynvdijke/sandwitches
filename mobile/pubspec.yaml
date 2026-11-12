@@ -21,6 +21,9 @@ dependencies:
   image_picker: ^1.1.2
   url_launcher: ^6.3.2
   share_plus: ^13.3.1
+  firebase_core: ^5.1.0
+  firebase_messaging: ^17.0.1
+  flutter_local_notifications: ^23.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

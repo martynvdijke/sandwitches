@@ -639,6 +639,14 @@ func AdminSettings(c *gin.Context) {
 		}
 		setting.SMTPFromEmail = c.PostForm("smtp_from_email")
 		setting.SMTPTLS = c.PostForm("smtp_tls") == "on"
+		setting.NotificationsEnabled = c.PostForm("notifications_enabled") == "on"
+		setting.NotifyNewRecipes = c.PostForm("notify_new_recipes") == "on"
+		setting.NotifyNewOrders = c.PostForm("notify_new_orders") == "on"
+		setting.FCMEnabled = c.PostForm("fcm_enabled") == "on"
+		setting.FCMProjectID = c.PostForm("fcm_project_id")
+		if sa := c.PostForm("fcm_service_account_json"); sa != "" {
+			setting.FCMServiceAccountJSON = sa
+		}
 		database.DB.Save(&setting)
 		utils.AddFlash(c, "success", "Settings saved")
 		c.Redirect(http.StatusFound, "/dashboard/settings")

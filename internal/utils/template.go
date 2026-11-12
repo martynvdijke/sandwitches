@@ -4,10 +4,18 @@ import (
 	"html/template"
 	"os"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
+)
+
+var (
+	notifMu     sync.Mutex
+	notifValue  bool
+	notifLoaded time.Time
 )
 
 type TemplateData struct {
@@ -20,7 +28,10 @@ type TemplateData struct {
 	// Analytics is true only when Umami is configured and this visitor has not
 	// opted out. Templates use it to decide whether to emit the Umami script.
 	Analytics bool
-	Data      gin.H
+	// NotificationsEnabled mirrors the site-level master switch so the base
+	// layout can gate the browser notification client.
+	NotificationsEnabled bool
+	Data                 gin.H
 }
 
 // AnalyticsEnabled reports whether the optional Umami analytics script is
@@ -42,6 +53,27 @@ func IsEinkMode(c *gin.Context, user *database.User) bool {
 	return user != nil && user.Theme == "eink"
 }
 
+// NotificationsEnabled reports whether the site-level notification master
+// switch is on. The value is cached briefly because it is read on every page
+// render; a nil or uninitialised database reads as disabled.
+func NotificationsEnabled() bool {
+	notifMu.Lock()
+	defer notifMu.Unlock()
+	if !notifLoaded.IsZero() && time.Since(notifLoaded) < 30*time.Second {
+		return notifValue
+	}
+	if database.DB == nil {
+		return notifValue
+	}
+	var s database.Setting
+	if err := database.DB.Select("notifications_enabled").First(&s).Error; err != nil {
+		return notifValue
+	}
+	notifValue = s.NotificationsEnabled
+	notifLoaded = time.Now()
+	return notifValue
+}
+
 func NewTemplateData(c *gin.Context) *TemplateData {
 	td := &TemplateData{
 		User:       middleware.GetUser(c),
@@ -52,6 +84,7 @@ func NewTemplateData(c *gin.Context) *TemplateData {
 	}
 	td.EinkMode = IsEinkMode(c, td.User)
 	td.Analytics = AnalyticsEnabled() && (td.User == nil || !td.User.AnalyticsOptOut)
+	td.NotificationsEnabled = NotificationsEnabled()
 	if tok, exists := c.Get("csrf_token"); exists {
 		td.CSRFToken = tok.(string)
 		td.CSRFHidden = template.HTML(`<input type="hidden" name="csrf_token" value="` + tok.(string) + `">`)
@@ -78,6 +111,7 @@ func (td *TemplateData) ToGinH() gin.H {
 	}
 	h["eink_mode"] = td.EinkMode
 	h["analytics"] = td.Analytics
+	h["notifications_enabled"] = td.NotificationsEnabled
 	for k, v := range td.Data {
 		h[k] = v
 	}

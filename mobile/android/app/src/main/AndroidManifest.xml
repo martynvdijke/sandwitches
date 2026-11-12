@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Required for the app to talk to the Sandwitches API in release builds. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Android 13+ runtime permission for showing notifications. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:label="Sandwitches"
         android:name="${applicationName}"
@@ -10,6 +12,10 @@
         android:fullBackupContent="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:usesCleartextTraffic="false">
+        <!-- FCM displays background notifications on this channel. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="sandwitches_default"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

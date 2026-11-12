@@ -10,6 +10,7 @@
     <link href="/static/css/eink.css" rel="stylesheet">
     <script src="/static/js/eink.js" defer></script>
     <link rel="icon" type="image/svg+xml" href="/static/icons/favicon.svg">
+    {{ if .user }}{{ if and .notifications_enabled .user.NotifyWeb }}<meta name="notifications" content="1">{{ else }}<meta name="notifications" content="0">{{ end }}{{ else }}<meta name="notifications" content="0">{{ end }}
     {{ if .analytics }}{{ umami }}{{ end }}
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
@@ -18,6 +19,11 @@
         .snackbar { margin-bottom: 0.5rem; }
         .flash-messages { position: fixed; top: 16px; right: 16px; z-index: 10000; max-width: 400px; }
         .flash-messages .snackbar { margin-bottom: 8px; animation: slideIn 0.3s ease-out; }
+        .notification-toasts { top: 80px; }
+        .notification-toasts .snackbar { cursor: pointer; max-width: 360px; }
+        .notification-toasts .snackbar .notification-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .notification-toasts .snackbar .notification-text strong { font-weight: 600; }
+        .notification-toasts .snackbar .notification-text span { overflow-wrap: anywhere; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .pagination { display: flex; justify-content: center; gap: 4px; padding: 1rem 0; flex-wrap: wrap; }
         .pagination a, .pagination span { padding: 6px 12px; border-radius: 8px; text-decoration: none; }

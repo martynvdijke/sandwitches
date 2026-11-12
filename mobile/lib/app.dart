@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_provider.dart';
+import 'core/notifications.dart';
 import 'core/providers.dart';
 
 class SandwitchesApp extends ConsumerStatefulWidget {
@@ -14,6 +17,12 @@ class _AppState extends ConsumerState<SandwitchesApp> {
   @override
   void initState(){
     super.initState();
+    // Push setup is optional and never blocks the first frame. The repository
+    // is resolved lazily so a changed server URL is honoured.
+    unawaited(NotificationService.instance.initialize(
+      repository: () => ref.read(repositoryProvider),
+      router: ref.read(appRouterProvider),
+    ));
     Future.microtask(() async {
       final s = ref.read(storageProvider);
       final base = await s.getBaseUrl();

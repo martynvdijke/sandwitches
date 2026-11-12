@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
@@ -12,6 +13,14 @@ import 'src/telemetry/telemetry.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase is optional. Builds without google-services.json have no Firebase
+  // options and this throws; push notifications stay off and the app boots.
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint('Firebase is not configured; push notifications are off: $e');
+  }
 
   // PersistCookieJar defaults to a relative `.cookies` directory, which is
   // read-only on Android and makes every request fail while loading cookies.

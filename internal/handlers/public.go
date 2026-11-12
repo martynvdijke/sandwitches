@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
+	"github.com/martynvdijke/sandwitches-go/internal/notifications"
 	"github.com/martynvdijke/sandwitches-go/internal/tasks"
 	"github.com/martynvdijke/sandwitches-go/internal/utils"
 	"gorm.io/gorm"
@@ -408,6 +409,12 @@ func Community(c *gin.Context) {
 
 		database.DB.Create(&recipe)
 
+		// Community submissions are announced (they are pending approval, so
+		// users land on the recipe page and see the pending notice).
+		if user != nil {
+			notifications.Default().NotifyNewRecipe(user.ID, recipe.ID, recipe.Title, "/recipes/"+recipe.Slug)
+		}
+
 		tagStr := c.PostForm("tags_string")
 		if tagStr != "" {
 			for _, name := range strings.Split(tagStr, ",") {
@@ -593,6 +600,8 @@ func OrderRecipe(c *gin.Context) {
 	tx.Commit()
 
 	tasks.EnqueueNotifyOrder(order.ID)
+	notifications.Default().NotifyNewOrder(order.ID,
+		user.Username+" placed order #"+strconv.Itoa(int(order.ID)), "/dashboard/orders")
 	utils.AddFlash(c, "success", "Order placed successfully!")
 	c.Redirect(http.StatusFound, "/profile")
 }
@@ -653,6 +662,8 @@ func Checkout(c *gin.Context) {
 	tx.Commit()
 
 	tasks.EnqueueNotifyOrder(order.ID)
+	notifications.Default().NotifyNewOrder(order.ID,
+		user.Username+" placed order #"+strconv.Itoa(int(order.ID)), "/dashboard/orders")
 	utils.AddFlash(c, "success", "Order placed successfully!")
 	c.Redirect(http.StatusFound, "/profile")
 }

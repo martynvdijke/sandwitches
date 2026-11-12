@@ -12,3 +12,7 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Firebase credentials are build-local and must never be committed.
+google-services.json
+**/google-services.json

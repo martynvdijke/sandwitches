@@ -34,6 +34,14 @@ type Setting struct {
 	SMTPPassword      string `gorm:"size:255"`
 	SMTPFromEmail     string `gorm:"size:255"`
 	SMTPTLS           bool   `gorm:"default:false"`
+	// Notification delivery switches. NotificationsEnabled is the master switch;
+	// the two category flags decide which events are delivered.
+	NotificationsEnabled  bool   `gorm:"not null;default:true"`
+	NotifyNewRecipes      bool   `gorm:"not null;default:true"`
+	NotifyNewOrders       bool   `gorm:"not null;default:true"`
+	FCMEnabled            bool   `gorm:"not null;default:false"`
+	FCMProjectID          string `gorm:"size:255"`
+	FCMServiceAccountJSON string `gorm:"type:text"`
 }
 
 func (Setting) TableName() string { return "settings" }
@@ -68,13 +76,32 @@ type User struct {
 	// session state, bumping it is the only way to invalidate cookies already
 	// issued for this account (password change, account deletion).
 	SessionVersion int `gorm:"default:1"`
-	DateJoined     time.Time
-	LastLogin      *time.Time
-	Favorites      []Recipe   `gorm:"many2many:user_favorites;"`
-	Recipes        []Recipe   `gorm:"foreignKey:UploadedByID"`
-	Orders         []Order    `gorm:"foreignKey:UserID"`
-	Ratings        []Rating   `gorm:"foreignKey:UserID"`
-	CartItems      []CartItem `gorm:"foreignKey:UserID"`
+	// Per-user notification preferences. New recipes are on by default; order
+	// notifications are opt-in because they are only meaningful to buyers.
+	NotifyNewRecipes bool `gorm:"not null;default:true"`
+	NotifyNewOrders  bool `gorm:"not null;default:false"`
+	NotifyWeb        bool `gorm:"not null;default:true"`
+	NotifyPush       bool `gorm:"not null;default:true"`
+	DateJoined       time.Time
+	LastLogin        *time.Time
+	Favorites        []Recipe   `gorm:"many2many:user_favorites;"`
+	Recipes          []Recipe   `gorm:"foreignKey:UploadedByID"`
+	Orders           []Order    `gorm:"foreignKey:UserID"`
+	Ratings          []Rating   `gorm:"foreignKey:UserID"`
+	CartItems        []CartItem `gorm:"foreignKey:UserID"`
+}
+
+// DeviceToken is an FCM registration token belonging to a user. A token is
+// globally unique: the same physical install can only map to one account, so
+// re-registering reassigns the row instead of creating a duplicate.
+type DeviceToken struct {
+	ID         uint   `gorm:"primaryKey"`
+	UserID     uint   `gorm:"index;not null"`
+	Token      string `gorm:"uniqueIndex;not null"`
+	Platform   string `gorm:"size:20;not null;default:android"`
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	LastSeenAt time.Time
 }
 
 type Group struct {

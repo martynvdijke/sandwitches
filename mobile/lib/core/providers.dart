@@ -404,6 +404,70 @@ class ApiRepository {
         : 'Could not delete the account (${r.statusCode})';
     throw ApiException(message);
   }
+
+  Future<void> registerDeviceToken(String token) async {
+    await dio.post(
+      '$apiBase/notifications/devices',
+      data: {'token': token, 'platform': 'android'},
+    );
+  }
+
+  Future<void> unregisterDeviceToken(String token) async {
+    await dio.delete(
+      '$apiBase/notifications/devices',
+      data: {'token': token},
+    );
+  }
+
+  Future<NotificationPreferences> fetchNotificationPreferences() async {
+    final r = await dio.get('$apiBase/notifications/preferences');
+    final data = r.data;
+    if (data is Map) {
+      return NotificationPreferences.fromJson(
+        Map<String, dynamic>.from(data),
+      );
+    }
+    throw ApiException(
+      _notificationErrorMessage(
+        r.statusCode,
+        data,
+        'Could not load notification settings',
+      ),
+    );
+  }
+
+  Future<NotificationPreferences> updateNotificationPreferences(
+    Map<String, bool> changes,
+  ) async {
+    final r = await dio.put(
+      '$apiBase/notifications/preferences',
+      data: changes,
+    );
+    final data = r.data;
+    if (data is Map) {
+      return NotificationPreferences.fromJson(
+        Map<String, dynamic>.from(data),
+      );
+    }
+    throw ApiException(
+      _notificationErrorMessage(
+        r.statusCode,
+        data,
+        'Could not save notification settings',
+      ),
+    );
+  }
+
+  String _notificationErrorMessage(
+    int? statusCode,
+    dynamic data,
+    String fallback,
+  ) {
+    if (data is Map && data['message'] != null) {
+      return data['message'].toString();
+    }
+    return '$fallback (${statusCode ?? 'network error'})';
+  }
 }
 
 final repositoryProvider = Provider<ApiRepository>((ref) {

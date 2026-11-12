@@ -12,6 +12,27 @@
 <span>Do not load analytics for my account (object to analytics processing).</span>
 </label>
 <div class="space"></div>
+<h5>Notifications</h5>
+<label class="checkbox">
+<input type="checkbox" name="notify_new_recipes" {{ if .user.NotifyNewRecipes }}checked{{ end }}>
+<span>New recipes</span>
+</label>
+<label class="checkbox">
+<input type="checkbox" name="notify_new_orders" {{ if .user.NotifyNewOrders }}checked{{ end }}>
+<span>New orders (staff only)</span>
+</label>
+<label class="checkbox">
+<input type="checkbox" name="notify_web" {{ if .user.NotifyWeb }}checked{{ end }}>
+<span>Show notifications in this browser</span>
+</label>
+<label class="checkbox">
+<input type="checkbox" name="notify_push" {{ if .user.NotifyPush }}checked{{ end }}>
+<span>Send push notifications to my devices</span>
+</label>
+<div class="space"></div>
+<button type="button" class="button border round" id="enable-browser-notifications"><i>notifications</i> <span>Enable browser notifications</span></button>
+<p class="small-text" id="browser-notification-status"></p>
+<div class="space"></div>
 <button type="submit" class="button primary round">Save Settings</button>
 </form>
 

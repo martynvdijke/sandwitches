@@ -25,6 +25,7 @@ import (
 	"github.com/martynvdijke/sandwitches-go/internal/demo"
 	"github.com/martynvdijke/sandwitches-go/internal/handlers"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
+	"github.com/martynvdijke/sandwitches-go/internal/notifications"
 	"github.com/martynvdijke/sandwitches-go/internal/render"
 	"github.com/martynvdijke/sandwitches-go/internal/tasks"
 	"github.com/martynvdijke/sandwitches-go/internal/telemetry"
@@ -52,6 +53,7 @@ func main() {
 	log.Printf("Telemetry enabled: %t", tel.Enabled)
 
 	database.Init(cfg)
+	notifications.Init(database.DB)
 	tasks.Init(cfg)
 
 	djangoDB := os.Getenv("Django_DB_PATH")

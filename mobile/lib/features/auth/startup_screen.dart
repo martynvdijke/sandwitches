@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/notifications.dart';
 import '../../core/providers.dart';
 import '../../core/startup.dart';
 
@@ -38,6 +39,8 @@ class _StartupState extends ConsumerState<StartupScreen> {
       case StartupDestination.login:
         context.go('/login');
       case StartupDestination.home:
+        // Session restored: register this device for push. Best effort.
+        NotificationService.instance.syncToken();
         context.go('/');
     }
   }

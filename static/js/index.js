@@ -12,6 +12,7 @@ import '../css/zoom.css';
 import '../css/editor.css';
 import { initPhotoZoom } from './zoom.js';
 import { initPhotoEditor } from './editor.js';
+import { initNotifications } from './notifications.js';
 // This makes Chart available to your HTML/scripts
 window.Chart = Chart;
 window.Cropper = Cropper;
@@ -20,4 +21,5 @@ window.htmx = htmx;
 // You can add your own custom JS here
 initPhotoZoom();
 initPhotoEditor();
+initNotifications();
 console.log('Webpack bundle loaded!');

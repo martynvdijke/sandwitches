@@ -7,6 +7,7 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 import '../../core/config.dart';
+import '../../core/notifications.dart';
 import '../../core/providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -45,6 +46,15 @@ class _LoginState extends ConsumerState<LoginScreen> {
     await doLogin();
   }
 
+  /// Called once the server accepted the session: remember the server the
+  /// session belongs to and register this device for push (best effort).
+  void _onLoggedIn(String base) {
+    ref.read(baseUrlProvider.notifier).state = base;
+    // Fire and forget: push registration must never delay navigation.
+    NotificationService.instance.syncToken();
+    if (mounted) context.go('/');
+  }
+
   Future<void> doLogin() async {
     final base =
         ref.read(baseUrlProvider) ??
@@ -80,14 +90,14 @@ class _LoginState extends ConsumerState<LoginScreen> {
       );
       // success if 302 redirect or 200 with cookie?
       if (r.statusCode != null && r.statusCode! >= 300 && r.statusCode! < 400) {
-        if (mounted) context.go('/');
+        _onLoggedIn(base);
       } else if (r.statusCode == 200) {
         // check if login failed: server re-renders login HTML -> likely no session
         // Try fetching /api/v1/me
         try {
           final me = await dio.get('$base/api/v1/me');
           if (me.statusCode == 200) {
-            if (mounted) context.go('/');
+            _onLoggedIn(base);
           } else {
             setState(() => error = 'Invalid credentials');
           }
@@ -153,7 +163,7 @@ class _LoginState extends ConsumerState<LoginScreen> {
       }
       final me = await dio.get('$base/api/v1/me');
       if (me.statusCode == 200) {
-        if (mounted) context.go('/');
+        _onLoggedIn(base);
       } else {
         setState(() => error = 'OIDC login failed');
       }
@@ -185,6 +195,7 @@ class _LoginState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> logout() async {
+    await NotificationService.instance.unregisterToken();
     await ref.read(storageProvider).clearAuth();
     await ref.read(persistCookieJarProvider).deleteAll();
     if (mounted) context.go('/login');

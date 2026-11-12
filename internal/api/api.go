@@ -14,6 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/martynvdijke/sandwitches-go/internal/database"
 	"github.com/martynvdijke/sandwitches-go/internal/middleware"
+	"github.com/martynvdijke/sandwitches-go/internal/notifications"
 	"github.com/martynvdijke/sandwitches-go/internal/utils"
 	"gorm.io/gorm"
 )
@@ -94,6 +95,12 @@ func RegisterRoutes(r *gin.RouterGroup) {
 		api.POST("/cart", middleware.AuthRequired(), addToCartAPI)
 		api.PATCH("/cart/:id", middleware.AuthRequired(), updateCartAPI)
 		api.DELETE("/cart/:id", middleware.AuthRequired(), deleteCartAPI)
+
+		api.GET("/notifications/stream", middleware.AuthRequired(), notificationsStream)
+		api.POST("/notifications/devices", middleware.AuthRequired(), registerDeviceToken)
+		api.DELETE("/notifications/devices", middleware.AuthRequired(), unregisterDeviceToken)
+		api.GET("/notifications/preferences", middleware.AuthRequired(), getNotificationPreferences)
+		api.PUT("/notifications/preferences", middleware.AuthRequired(), updateNotificationPreferences)
 	}
 }
 
@@ -323,6 +330,10 @@ func createRecipe(c *gin.Context) {
 	}
 
 	attachRecipeTags(r.ID, input.Tags)
+
+	// Announce the recipe to users who opted in. Admin-created recipes are
+	// announced too: this endpoint is the API equivalent of publishing.
+	notifications.Default().NotifyNewRecipe(user.ID, r.ID, r.Title, "/recipes/"+r.Slug)
 
 	database.DB.Preload("Tags").Preload("FavoritedBy").First(&r, r.ID)
 	c.JSON(http.StatusCreated, recipeToJSON(&r))
@@ -862,6 +873,9 @@ func createOrder(c *gin.Context) {
 		apiError(c, http.StatusInternalServerError, "Failed to create order")
 		return
 	}
+
+	notifications.Default().NotifyNewOrder(order.ID,
+		user.Username+" placed order #"+strconv.Itoa(int(order.ID)), "/dashboard/orders")
 
 	c.JSON(http.StatusCreated, orderToDTO(&order))
 }

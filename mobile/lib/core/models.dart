@@ -114,6 +114,45 @@ class OrderItem {
   );
 }
 
+/// Per-user notification toggles from `/api/v1/notifications/preferences`.
+class NotificationPreferences {
+  final bool notifyNewRecipes;
+  final bool notifyNewOrders;
+  final bool notifyWeb;
+  final bool notifyPush;
+
+  const NotificationPreferences({
+    this.notifyNewRecipes = true,
+    this.notifyNewOrders = true,
+    this.notifyWeb = true,
+    this.notifyPush = true,
+  });
+
+  factory NotificationPreferences.fromJson(Map<String, dynamic> j) {
+    final source = j['data'] is Map
+        ? Map<String, dynamic>.from(j['data'] as Map)
+        : j;
+    return NotificationPreferences(
+      notifyNewRecipes: source['notify_new_recipes'] as bool? ?? true,
+      notifyNewOrders: source['notify_new_orders'] as bool? ?? true,
+      notifyWeb: source['notify_web'] as bool? ?? true,
+      notifyPush: source['notify_push'] as bool? ?? true,
+    );
+  }
+
+  NotificationPreferences copyWith({
+    bool? notifyNewRecipes,
+    bool? notifyNewOrders,
+    bool? notifyWeb,
+    bool? notifyPush,
+  }) => NotificationPreferences(
+    notifyNewRecipes: notifyNewRecipes ?? this.notifyNewRecipes,
+    notifyNewOrders: notifyNewOrders ?? this.notifyNewOrders,
+    notifyWeb: notifyWeb ?? this.notifyWeb,
+    notifyPush: notifyPush ?? this.notifyPush,
+  );
+}
+
 String buildThumbUrl(String baseUrl, String imagePath, {int w = 800}) {
   if (imagePath.isEmpty) {
     return '';

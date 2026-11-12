@@ -2,6 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 
+import 'models.dart';
+import 'providers.dart' show ApiException;
+
 class ApiClient {
   final Dio dio;
   final PersistCookieJar cookieJar;
@@ -38,5 +41,40 @@ class ApiClient {
       if (r.statusCode == 200 && r.data is Map) return r.data as Map<String,dynamic>;
       return null;
     } catch (_) { return null; }
+  }
+
+  /// Registers this device's FCM token with the backend. Safe to repeat; the
+  /// backend is expected to upsert by token.
+  Future<void> registerDeviceToken(String token) async {
+    await dio.post('$apiBase/notifications/devices', data: {
+      'token': token,
+      'platform': 'android',
+    });
+  }
+
+  Future<void> unregisterDeviceToken(String token) async {
+    await dio.delete('$apiBase/notifications/devices', data: {'token': token});
+  }
+
+  Future<NotificationPreferences> fetchNotificationPreferences() async {
+    final r = await dio.get('$apiBase/notifications/preferences');
+    if (r.data is Map) {
+      return NotificationPreferences.fromJson(
+        Map<String, dynamic>.from(r.data as Map),
+      );
+    }
+    throw ApiException('Could not load notification settings');
+  }
+
+  Future<NotificationPreferences> updateNotificationPreferences(
+    Map<String, bool> changes,
+  ) async {
+    final r = await dio.put('$apiBase/notifications/preferences', data: changes);
+    if (r.data is Map) {
+      return NotificationPreferences.fromJson(
+        Map<String, dynamic>.from(r.data as Map),
+      );
+    }
+    throw ApiException('Could not save notification settings');
   }
 }

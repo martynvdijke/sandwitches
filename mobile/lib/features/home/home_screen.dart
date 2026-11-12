@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../../core/notifications.dart';
 import '../../core/providers.dart';
 import '../../core/models.dart';
 import '../../core/roles.dart';
@@ -56,6 +57,7 @@ class _HomeState extends ConsumerState<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
+              await NotificationService.instance.unregisterToken();
               await ref.read(storageProvider).clearAuth();
               await ref.read(persistCookieJarProvider).deleteAll();
               if (context.mounted) context.go('/login');
