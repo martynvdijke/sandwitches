@@ -1,3 +1,10 @@
+# [3.20.0](https://github.com/martynvdijke/sandwitches/compare/v3.19.0...v3.20.0) (2026-11-12)
+
+
+### Features
+
+* **notifications:** add realtime web and Android push notifications ([3fbcf21](https://github.com/martynvdijke/sandwitches/commit/3fbcf218d03d99b0c9d97c55562fed035b44b829))
+
 # [3.19.0](https://github.com/martynvdijke/sandwitches/compare/v3.18.0...v3.19.0) (2026-11-10)
 
 
