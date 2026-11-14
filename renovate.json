@@ -9,7 +9,9 @@
     "helpers:pinGitHubActionDigestsToSemver"
   ],
   "automergeType": "pr",
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true
+  },
   "ignorePaths": [
     "**/node_modules/**",
     "**/__fixtures__/**",
