@@ -23,7 +23,7 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.4.21" apply false
     // Applied conditionally by app/build.gradle.kts only when
     // google-services.json exists.
-    id("com.google.gms.google-services") version "4.4.3" apply false
+    id("com.google.gms.google-services") version "4.6.0" apply false
 }
 
 include(":app")
