@@ -1,3 +1,5 @@
+## [3.20.2](https://github.com/martynvdijke/sandwitches/compare/v3.20.1...v3.20.2) (2026-11-16)
+
 ## [3.20.1](https://github.com/martynvdijke/sandwitches/compare/v3.20.0...v3.20.1) (2026-11-15)
 
 
