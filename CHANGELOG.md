@@ -1,3 +1,10 @@
+## [3.20.6](https://github.com/martynvdijke/sandwitches/compare/v3.20.5...v3.20.6) (2026-11-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency flutter_web_auth_2 to v6 ([#225](https://github.com/martynvdijke/sandwitches/issues/225)) ([fbb664e](https://github.com/martynvdijke/sandwitches/commit/fbb664e84e3818ba97f936d0f5007e5c6347c279))
+
 ## [3.20.5](https://github.com/martynvdijke/sandwitches/compare/v3.20.4...v3.20.5) (2026-11-19)
 
 ## [3.20.4](https://github.com/martynvdijke/sandwitches/compare/v3.20.3...v3.20.4) (2026-11-18)
