@@ -1,7 +1,7 @@
 name: sandwitches
 description: "Sandwitches native Android client"
 publish_to: 'none'
-version: 3.20.8+3020008
+version: 3.20.9+3020009
 environment:
   sdk: ^3.13.2
 dependencies:
